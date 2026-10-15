@@ -1,8 +1,9 @@
 name: HACS
 
+# Runs after a release exists (HACS reads the release assets), weekly, and on demand.
 on:
-  push:
-  pull_request:
+  release:
+    types: [published]
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:

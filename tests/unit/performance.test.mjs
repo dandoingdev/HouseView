@@ -81,7 +81,8 @@ test('auto: either signal is enough, a missing one counts for nothing', () => {
   assert.equal(resolvePerformance('auto', {hardwareConcurrency: 4}), 'lite');
   assert.equal(resolvePerformance('auto', {deviceMemory: 8}), 'full');
   assert.equal(resolvePerformance('auto', {}), 'full');
-  assert.equal(resolvePerformance('auto', undefined), 'full', 'no navigator at all');
+  // null, not undefined: undefined would fall back to the real navigator of whatever machine runs the test
+  assert.equal(resolvePerformance('auto', null), 'full', 'no navigator at all');
 });
 
 test('auto: nonsense values do not make a device low-end', () => {

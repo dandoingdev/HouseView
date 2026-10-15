@@ -50,7 +50,9 @@ const NOW = Date.UTC(2026, 9, 15, 9, 10, 0);
 const SHOTS = [
   {name: 'hero', example: 'kitchen.yaml', kind: 'carousel', page: 0, size: [1280, 800]},
   {name: 'kitchen', example: 'kitchen.yaml', kind: 'carousel', page: 0, size: [800, 1280]},
+  {name: 'music', example: 'kitchen.yaml', kind: 'carousel', page: 1, size: [1280, 800]},
   {name: 'controls', example: 'kitchen.yaml', kind: 'carousel', page: 2, size: [1280, 800]},
+  {name: 'bedtime', example: 'bedtime.yaml', kind: 'carousel', page: 0, size: [1280, 800]},
   {name: 'widgets', example: 'single-cards.yaml', kind: 'grid', size: [1280, 900], columns: 3},
   // Full-screen overviews, shown the way a screensaver shows them (`preview: true` starts it at once).
   {
@@ -490,6 +492,9 @@ async function shoot(browser, base, shot) {
     await page.evaluate((c, s2) => window.mountOverview(c, s2), config, states);
   } else if (shot.kind === 'carousel') {
     const card = findAll(doc, (n) => n.type === 'custom:houseview-card')[0];
+    // A running timer or a playing speaker would cover the page with its full-screen display: these pictures show the
+    // dashboard itself.
+    Object.assign(card, {timer_display: false, music_screensaver: false});
     await page.evaluate((c, s, p) => window.mountCarousel(c, s, p), card, states, shot.page);
   } else {
     const cards = findAll(

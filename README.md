@@ -12,11 +12,17 @@ HouseView packs your lights, thermostat, camera, timer, music and more into scre
 targets, and can show a full-screen weather scene, a photo frame, the month calendar, the album cover or a countdown when
 nobody has touched the display for a while.
 
-![HouseView carousel on a kitchen page](docs/images/hero.png)
+![HouseView kitchen dashboard: clock, date, front door camera and a kitchen timer](docs/images/hero.png)
 
-| Kitchen page (portrait) | Controls page | The widgets |
-| --- | --- | --- |
-| ![Kitchen page](docs/images/kitchen.png) | ![Controls page](docs/images/controls.png) | ![Widgets](docs/images/widgets.png) |
+A real dashboard, one swipeable page at a time (the three pages of [`examples/kitchen.yaml`](examples/kitchen.yaml)):
+
+| Music page | Home controls page |
+| --- | --- |
+| ![Music page](docs/images/music.png) | ![Home controls page](docs/images/controls.png) |
+
+| Bedtime dashboard | Kitchen page on a portrait tablet |
+| --- | --- |
+| ![Bedtime dashboard](docs/images/bedtime.png) | ![Kitchen page, portrait](docs/images/kitchen.png) |
 
 The pictures are rendered from the dashboards in [`examples/`](examples/) with placeholder data and a stand-in for Home
 Assistant's icons.
@@ -142,6 +148,8 @@ dashboards are in [`examples/`](examples/): [minimal](examples/minimal.yaml), [k
 [timer and music displays](examples/timer-and-music.yaml) and the [`widgets:` alias](examples/widgets-key.yaml).
 
 ## Widgets
+
+![Some of the widgets: lights, thermostat, weather, music player, sensor, lock and the weather overview as a widget](docs/images/widgets.png)
 
 In the carousel write `type: custom:houseview-<type>-card`. On a dashboard of its own the same string is a card; it appears
 in the picker as **HouseView · Light** and so on. Every widget accepts `size` (`normal`, `wide`, `tall`, `large`), `name` and
