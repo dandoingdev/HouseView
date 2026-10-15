@@ -9,6 +9,10 @@ import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 import {getWidget} from '../core/registry.js';
 
+/** A page that holds the home overview alone: the whole page takes the overview's colour (no wallpaper around it). */
+export const isHomePage = (screen) =>
+  screen?.placements?.length === 1 && screen.placements[0].widget?.type === 'home_overview';
+
 const SURFACES_WITH_WALLPAPER = ['teal', 'silver', 'champagne'];
 
 export const renderMixin = {
@@ -53,7 +57,7 @@ export const renderMixin = {
 
     const shell = this._ensureShell();
     const extra = this._extensionShellClasses().join(' ');
-    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}`;
+    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}`;
 
     this._fillFace(shell.querySelector('.face'), screen);
     this._writeNav();

@@ -270,7 +270,7 @@ test('interactive: a boolean, default false; an interactive card has no tap over
     /interactive must be true or false/
   );
   assert.equal(home.interactive, true);
-  assert.equal(home.selectable, false);
+  assert.equal(home.selectable, true, 'the home screen can also be a screensaver');
   assert.equal(home.widget.defaultSize, 'large');
 });
 

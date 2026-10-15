@@ -37,9 +37,12 @@ carousel's dark appearance.
 | title | text | Home | The large heading |
 | show_time | boolean | true | Show the time at the top right (in your time format) |
 
-The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It is a page of the dashboard, so it is
-not offered in the editor's screensaver list; as a screensaver written in YAML it shows the same screen without
-buttons (a screensaver press only wakes the dashboard).
+The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It can be a page of the dashboard (the
+chips, cameras and scenes are buttons) or a **screensaver**: choose **Home overview** in the editor's screensaver list
+(or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
+screensaver it is read-only: a press only wakes the dashboard. The screensaver shows the carousel's lights, climate,
+locks, cameras and scenes, so it follows what you add. A page that holds only this overview also takes the overview's
+colour for the whole page background, and the page dots change colour to match.
 
 ```yaml
 type: custom:houseview-card

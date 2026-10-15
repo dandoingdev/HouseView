@@ -1,6 +1,7 @@
 // The screen model (which widgets go on which carousel page, at which size) and the layout pass that
 // positions the current page. Ported from the original; the maths is unchanged.
 import {buildScreens} from '../layout/index.js';
+import {isHomePage} from './render.js';
 
 /** Height used for the carousel when nothing else is known, and the smallest height it is ever given. */
 const MIN_HEIGHT = 250;
@@ -206,6 +207,7 @@ export const screenModelMixin = {
     // add/remove (not toggle): remove rewrites the class attribute even when the token is absent
     if (screen.surface === 'soft') shell.classList.add('surface-soft');
     else shell.classList.remove('surface-soft');
+    shell.classList.toggle('surface-home', isHomePage(screen));
   },
 
   /** Replace the page navigation and remember its markup, so `_layout` can tell when it has changed. */

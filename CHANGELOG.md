@@ -14,6 +14,10 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* The home overview can be a screensaver (choose it in the editor's screensaver list), read-only, instead of the weather.
+* A page that holds only the home overview now takes the overview's colour across the whole page, and the page dots change
+  colour to stay visible.
+
 * `home_overview: true` (a switch in the card editor) adds the home overview as the first page of the carousel without placing a
   card; `home_title` sets its title. Off by default.
 

@@ -217,8 +217,7 @@ export default defineOverview({
   entity: 'none',
   domains: [],
   strings,
-  // A page of the dashboard, not a screensaver: it is not offered in the editor's screensaver list.
-  selectable: false,
+  // Also offered as a screensaver (the summary instead of, say, the weather): there it is read-only and a press wakes.
   // Its chips, headings, cameras and scenes are buttons (card mode only).
   interactive: true,
   tap: {card: 'none'},
