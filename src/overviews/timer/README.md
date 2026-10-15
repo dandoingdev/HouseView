@@ -32,8 +32,8 @@ screensaver:
   entity: timer.kitchen_timer
 ```
 
-It can share the `screensaver` list with idle overviews (a weather scene that starts after 2 minutes, this display when
-a timer starts). If another screensaver is on screen when the timer starts, the timer display replaces it.
+It is an automatic display: it is not offered in the editor's screensaver list. (A `screensaver` entry of type `timer` written in
+YAML still works and can share the list with idle overviews, for example a weather scene that starts after 2 minutes.) If another screensaver is on screen when the timer starts, the timer display replaces it.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -130,3 +130,19 @@ test('a form round trip does not mutate its input', () => {
   assert.doesNotThrow(() => applyScreensaver(config, {type: 'demo', entity: 'sensor.y'}));
   assert.equal(config.screensaver.entity, 'sensor.x');
 });
+
+test('automatic displays are not offered in the screensaver list, but one written in YAML stays visible', async () => {
+  // load the real overviews into the registry (this file may run in a process that only registered the demo)
+  await import('../../src/overviews/index.js');
+  const values = (data) =>
+    screensaverSchema({}, data)[0].selector.select.options.map((option) => option.value);
+  const offered = values({});
+  for (const type of ['weather', 'photo_frame', 'calendar_month'])
+    assert.ok(offered.includes(type), type);
+  for (const type of ['timer', 'cover_art'])
+    assert.ok(!offered.includes(type), `${type} is automatic`);
+  assert.ok(
+    values({type: 'timer'}).includes('timer'),
+    'a configured automatic display is still shown'
+  );
+});

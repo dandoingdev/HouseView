@@ -95,20 +95,22 @@
   color: #fff;
 }
 
-/* Today's number, huge, translucent, over the lower right of the grid. */
+/* Today's number, huge, translucent, centred in the middle of the face. The offsets --cm-dx and --cm-dy are set by the
+   tick hook from the real ink of the digits (a font's side bearings and ascent would otherwise leave "1" off centre). */
 .ov-cm-big {
   position: absolute;
-  right: 13cqmin;
-  bottom: -7cqmin;
-  font-size: 80cqmin;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 72cqmin;
   font-weight: 800;
-  line-height: 0.82;
-  letter-spacing: -0.04em;
+  line-height: 1;
+  letter-spacing: 0;
   color: var(--ov-cm-red);
   opacity: 0.84;
+  transform: translate(var(--cm-dx, 0), var(--cm-dy, 0));
   pointer-events: none;
 }
 .ov-cm-big[data-len='2'] {
-  right: 10cqmin;
   font-size: 54cqmin;
 }

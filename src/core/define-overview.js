@@ -38,7 +38,7 @@ import {esc} from './html.js';
  *                                         async subscriptions, keyed by the name render reads from `ctx.data[name]`
  *
  * -- behaviour (optional) --
- * @property {(ctx: OverviewHookContext) => void} [afterRender]   after a card-mode tile is created or patched; idempotent
+ * @property {(ctx: OverviewHookContext) => void} [afterRender]   after a card is created or patched, and when a screensaver layer is shown or patched; idempotent
  * @property {{every: number, align?: 'minute', run: (ctx: OverviewHookContext) => void}} [tick]   shared ticker, throttled to `every` ms; runs while the overview is on screen. `align: 'minute'` runs it when the wall-clock minute changes instead (a clock that shows minutes)
  * @property {(ctx: OverviewContext) => string} [tile]   optional compact summary: the card gets a `display: tile` option and renders this small face instead of the scene; tapping it opens the full overview as a one-off page-sized layer
  * @property {{card?: 'info'|'open'|'none'}} [tap]   card mode only: tap opens more-info of the entity (default), opens the full-screen view ('open', for overviews without an entity) or does nothing. A screensaver tap ALWAYS dismisses.
@@ -46,6 +46,7 @@ import {esc} from './html.js';
  * @property {(ctx: OverviewContext) => boolean} [autoWake]   called on every hass update while the screensaver is up; true dismisses it (no tap swallow)
  *
  * -- precedence among idle overviews (optional, `activation: 'idle'` only) --
+ * @property {boolean} [selectable]   default true. false = an automatic display: it works from its widget, is not offered in the editor's screensaver list, but can still be written in YAML
  * @property {number} [priority]   integer, default 0 (weather 0, cover art 10). When idle time starts a screensaver, the highest
  *                                         priority among the ELIGIBLE enabled idle entries wins; equal priorities take turns (round robin).
  *                                         An event overlay (a running timer) is above every idle entry whatever its priority
@@ -190,6 +191,11 @@ export function defineOverview(def) {
     throw new Error(`Overview ${o.type}: priority and eligible need activation: 'idle'.`);
   }
   o.priority = def.priority ?? 0;
+  // Automatic displays (the timer display, cover art) are not offered in the editor's screensaver list.
+  if (def.selectable !== undefined && typeof def.selectable !== 'boolean') {
+    throw new Error(`Overview ${o.type}: selectable must be true or false.`);
+  }
+  o.selectable = def.selectable ?? true;
   checkOptionSpecs(o.type, o.options);
 
   const overview = deepFreeze({

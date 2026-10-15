@@ -570,6 +570,7 @@ export const screensaverMixin = {
       covered: false,
       store: new Map()
     };
+    this._screensaverAfterRender(); // an overview that fixes up its DOM does it before the first second is over
     ss.idle.configure({timeout: this._screensaverTimeoutNow()});
   },
 
@@ -675,6 +676,24 @@ export const screensaverMixin = {
     const next = current.cloneNode(false);
     next.innerHTML = scene;
     this._patchNode(current, next, true); // the controller's own DOM patcher: keeps focus, no flicker
+    this._screensaverAfterRender();
+  },
+
+  /** The overview's `afterRender` hook for the layer that is up (the same one a card runs after each render). */
+  _screensaverAfterRender() {
+    const active = this._screensaver?.active;
+    const hook = active?.entry.overview.afterRender;
+    if (!hook) return;
+    try {
+      hook({
+        ...this._screensaverContext(active.entry),
+        el: active.layer.querySelector('.ov'),
+        requestRender: () => this._screensaverRender(true),
+        store: active.store
+      });
+    } catch (error) {
+      console.error('[houseview] overview afterRender failed', error);
+    }
   },
 
   /**

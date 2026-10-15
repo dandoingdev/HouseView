@@ -50,6 +50,38 @@ function sceneHTML(ctx, mode) {
   );
 }
 
+/**
+ * Centre the ink of the big day number in the face. The box of a text is not its ink: "1" has a wide left bearing and
+ * every font puts digits a little high or low in the line. Measure the real glyph extents once per day and size and
+ * move the element by the difference. Cheap (one canvas measure), idempotent, and silent when canvas is not available.
+ */
+function centreBig(ctx) {
+  const big = ctx.el?.querySelector('.ov-cm-big');
+  if (!big || !big.isConnected) return;
+  const style = getComputedStyle(big);
+  const key = `${big.textContent}|${style.fontSize}|${style.fontFamily}|${style.fontWeight}`;
+  if (ctx.store.get('big') === key) return;
+  const size = parseFloat(style.fontSize);
+  if (!(size > 0)) return;
+  try {
+    const canvas = ctx.store.get('canvas') ?? document.createElement('canvas').getContext('2d');
+    ctx.store.set('canvas', canvas);
+    canvas.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const m = canvas.measureText(big.textContent);
+    const inkCentreX = (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2;
+    const dx = m.width / 2 - inkCentreX;
+    const inkCentreUp = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+    const boxCentreUp = (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2;
+    const dy = inkCentreUp - boxCentreUp;
+    if (![dx, dy].every(Number.isFinite)) return;
+    big.style.setProperty('--cm-dx', `${(dx / size).toFixed(4)}em`);
+    big.style.setProperty('--cm-dy', `${(dy / size).toFixed(4)}em`);
+    ctx.store.set('big', key);
+  } catch {
+    // no canvas: the number stays where the font puts it
+  }
+}
+
 export default defineOverview({
   type: 'calendar_month',
   label: 'Month calendar',
@@ -70,11 +102,14 @@ export default defineOverview({
 
   render: (ctx) => sceneHTML(ctx, ctx.mode),
 
+  afterRender: (ctx) => centreBig(ctx),
+
   // The time changes with the minute; a new day redraws the whole month.
   tick: {
     every: 60000,
     align: 'minute',
     run(ctx) {
+      centreBig(ctx);
       const day = ctx.localParts(ctx.now()).day;
       if (ctx.store.get('day') !== undefined && ctx.store.get('day') !== day) {
         ctx.store.set('day', day);

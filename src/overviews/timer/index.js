@@ -78,6 +78,8 @@ export default defineOverview({
   label: 'Timer display',
   order: 20,
   entity: 'required',
+  // An automatic display: shown by its widget, not picked from the screensaver list.
+  selectable: false,
   domains: ['timer'],
   strings,
 

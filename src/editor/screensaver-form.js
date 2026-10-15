@@ -45,9 +45,11 @@ export const extraEntries = (config) =>
   Array.isArray(config.screensaver) ? config.screensaver.length - 1 : 0;
 
 export function screensaverSchema(hass, data) {
+  // Automatic displays (timer display, cover art) are not offered; one already written in YAML stays visible.
+  const offered = overviewList().filter((o) => o.selectable !== false || o.type === data.type);
   const typeOptions = [
     {value: '', label: t(hass, 'screensaver.none')},
-    ...overviewList().map((o) => ({value: o.type, label: t(hass, `${o.type}_overview.label`)}))
+    ...offered.map((o) => ({value: o.type, label: t(hass, `${o.type}_overview.label`)}))
   ];
   const schema = [{name: 'type', selector: {select: {mode: 'dropdown', options: typeOptions}}}];
   const overview = getOverview(data.type);
