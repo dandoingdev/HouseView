@@ -8,6 +8,13 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* **Home overview** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the
+  widgets on the carousel: a large title with the time, chips for climate (the temperature range), lights (how many are on),
+  locks (how many are locked, amber when one is open) and media, up to three rounded camera snapshots with a "2m ago" label,
+  and a tile for every scene. Chips and headings jump to the page of the first widget of their kind, a camera opens the camera
+  gallery (or more-info) and a scene runs. See `examples/home-overview.yaml`.
+* Framework: an overview can be `interactive` (buttons in card mode, from an allow-list of actions), `watch(options, config)`
+  receives the card config, and the new core action `goto-widget` (`widget:<index>`) jumps to the page that holds a widget.
 * The live preview in Home Assistant's card editor now shows the dashboard as a wall tablet (landscape by default) scaled to fit
   the preview box, instead of a narrow phone-shaped column. `editor_preview: portrait` or `auto` changes that.
 

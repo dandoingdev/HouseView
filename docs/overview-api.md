@@ -11,7 +11,8 @@ The contract of an overview module. An overview is a full-screen view that House
 
 One module serves all of them: `render(ctx, mode)` is called with `mode` `'screensaver'` or `'card'`. The framework adds
 the layer, the idle timing, the dismissal, the card element, the picker entry, the editor form and the documentation
-index. An overview only reads Home Assistant: its context has no `call`, no `card` and no confirm seam.
+index. An overview only reads Home Assistant: its context has no `call`, no `card` and no confirm seam. An `interactive` overview
+(section 2) may put buttons in its card mode that ask the card to run an existing action; the overview never calls anything.
 
 Read the [widget API](widget-api.md) and [architecture](architecture.md) first; overviews reuse the widget registry for
 their card mode. Users find the configuration in [overviews and screensavers](screensavers.md). To scaffold one run
@@ -70,7 +71,9 @@ export default defineOverview({
 | `strings` | required | The default export of `strings.js`. `en` must define `<type>_overview.label` and `<type>_overview.description` |
 | `options` | `{}` | Flat option keys, identical in a `screensaver` block and on an overview card (section 3) |
 | `validate(options)` | none | Cross-field rules; throw `Error('<exact message>')` |
-| `watch(options)` | none | Extra entity ids whose change re-renders (weather: the sun entity). The primary entity is always watched |
+| `watch(options, config)` | none | Extra entity ids whose change re-renders (weather: the sun entity). The primary entity is always watched. `config` is the card config as the controller holds it: the derived widget's `watch`, the screensaver change signature and the carousel's `hass-signature` all pass it, so an overview built from the dashboard's own widgets (home) can watch every entity of the configured `config.widgets` |
+| `interactive` | `false` | `true` allows `<button data-action data-entity>` in **card** mode (see "Interactive overviews" below). The derived card then has no full-card `ov-tap` overlay |
+| `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list (the timer display, cover art and the home overview). It can still be written in YAML |
 | `data({hass, options, entityId})` | none | Subscriptions, keyed by the name `render` reads from `ctx.data[name]` (section 6) |
 | `afterRender(hctx)` | none | After a card-mode root is created or patched; idempotent |
 | `tick` | none | `{every, run, align?}` on the shared ticker while the overview is on screen. `align: 'minute'` runs when the minute changes |
@@ -86,6 +89,26 @@ export default defineOverview({
 `defineOverview` validates the shape (the messages start with `Overview <type>:`), freezes the result and derives the
 card-mode widget (type `<type>_overview`, tag `houseview-<type-with-hyphens>-overview-card`, default size `large`,
 entity policy `custom`, availability `always`) that it registers with the widget registry.
+
+### Interactive overviews
+
+Most overviews are pictures: no buttons, a press on a screensaver only wakes the dashboard. An overview that is a page of
+the dashboard in its own right (the home overview) sets `interactive: true` and may render `<button data-action="..."
+data-entity="...">` in **card** mode. The rules (checked by `tests/overviews/overview-contract.test.mjs`):
+
+* Only these actions: `goto-widget`, `camera-grid`, `run-action`, `info` (`INTERACTIVE_ACTIONS` in `src/core/define-overview.js`).
+  Each is an existing action; the card's controller runs it through the ordinary dispatcher (`src/core/dispatch.js`) with its
+  own guards. `run-action` still needs an `action` widget for that entity on the carousel, so an overview cannot run anything
+  the dashboard does not already offer.
+* Every button is a real `<button>` with a `data-entity`. For `goto-widget` the entity is `widget:<index>`, the index of the
+  widget in the card's normalised `config.widgets` list (the number of its `data-widget` attribute).
+* In **screensaver** mode an interactive overview renders without buttons (a screensaver press dismisses it).
+* Markup stays free of inline handlers and service calls; the rest of the scene contract (one `ov-scene` root, no ids, no
+  `<svg>`, own `ov-*` pictures only) is unchanged.
+
+`goto-widget` is a core feature action (`src/core/core-actions.js`): it finds the carousel page whose placements contain the
+widget and calls the controller's `_setPage`. An unknown or malformed id is a no-op; it works only on a page that exists at the
+current size and is ignored while the camera gallery owns the screen.
 
 Reserved option names: `type`, `widget_type`, `entity`, `name`, `enabled`, `idle_timeout`, `start_in_edit_mode`,
 `preview`, `page`, `size`.

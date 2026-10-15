@@ -10,7 +10,12 @@ import {ROOT} from '../fixtures/registry.mjs';
 import {createMockHass} from '../fixtures/mock-hass.js';
 import {createHost} from '../fixtures/card-host.mjs';
 import {scanHtml, tagHistogram, dangerousAttributes} from '../fixtures/html-scan.mjs';
-import {checkOptions, contextFor, resolveOptions} from '../../src/core/define-overview.js';
+import {
+  INTERACTIVE_ACTIONS,
+  checkOptions,
+  contextFor,
+  resolveOptions
+} from '../../src/core/define-overview.js';
 import {validateScreensaver, getOverview} from '../../src/core/overview-registry.js';
 import {createRenderContext} from '../../src/core/context.js';
 import * as registry from '../../src/core/registry.js';
@@ -61,8 +66,12 @@ const hassFor = (variant, extra = {}) =>
 const contextOf = (overview, variant, mode, hass = hassFor(variant)) =>
   contextFor(overview, {hass, config: variant.config || {}, raw: variant.options || {}, mode});
 
-/** exactly one root element, whose first class is ov-scene, with nothing a scene may not carry */
-function sceneProblems(html) {
+/**
+ * exactly one root element, whose first class is ov-scene, with nothing a scene may not carry.
+ * Buttons: only an `interactive` overview in card mode may have them, only <button>s whose action is on the allow-list
+ * (INTERACTIVE_ACTIONS) and that name an entity. Everything else has no data-action.
+ */
+function sceneProblems(html, {interactive = false} = {}) {
   const problems = [];
   const {elements, roots, problems: scanProblems} = scanHtml(html);
   problems.push(...scanProblems);
@@ -81,7 +90,13 @@ function sceneProblems(html) {
     ) {
       problems.push(`<${element.tag}> is not allowed in a scene`);
     }
-    if ('data-action' in element.attrs) problems.push('a scene has no data-action');
+    if ('data-action' in element.attrs) {
+      if (!interactive) problems.push('a scene has no data-action');
+      else if (element.tag !== 'button') problems.push('data-action only on a <button>');
+      else if (!INTERACTIVE_ACTIONS.includes(element.attrs['data-action'])) {
+        problems.push(`action ${element.attrs['data-action']} is not allowed in an overview`);
+      } else if (!element.attrs['data-entity']) problems.push('a button names its entity');
+    }
     if (/url\(|javascript:/i.test(element.attrs.style ?? '')) problems.push('url() in style');
   }
   problems.push(...dangerousAttributes(html));
@@ -155,6 +170,15 @@ if (!folders.length) {
           'registry.widgetByTag(tag) resolves the derived widget (integration patch P1)'
         );
         assert.equal(widget.tag, `houseview-${kind.replaceAll('_', '-')}-overview-card`);
+      });
+
+      it('declares whether it is interactive (buttons in card mode) and keeps the card free of the tap overlay', () => {
+        assert.equal(typeof overview.interactive, 'boolean');
+        if (!overview.interactive) return;
+        assert.ok(
+          INTERACTIVE_ACTIONS.every((name) => /^[a-z][a-z0-9-]*$/.test(name)),
+          'the allow-list holds action names'
+        );
       });
 
       it('declares how it starts: idle (default) or event with an autoShow predicate', () => {
@@ -251,7 +275,19 @@ if (!folders.length) {
             it(`${name}: renders one ov-scene root in ${mode} mode`, () => {
               const html = overview.render(contextOf(overview, variant, mode), mode);
               assert.equal(typeof html, 'string');
-              assert.deepEqual(sceneProblems(html), []);
+              assert.deepEqual(
+                sceneProblems(html, {interactive: overview.interactive && mode === 'card'}),
+                []
+              );
+              if (mode === 'screensaver' || !overview.interactive) {
+                assert.equal(
+                  scanHtml(html).elements.filter(
+                    (e) => e.tag === 'button' || 'data-action' in e.attrs
+                  ).length,
+                  0,
+                  'no buttons outside card mode of an interactive overview'
+                );
+              }
               assert.equal(
                 html,
                 overview.render(contextOf(overview, variant, mode), mode),
@@ -304,6 +340,13 @@ if (!folders.length) {
               return;
             }
             assert.ok(elements.some((e) => e.classes[0] === 'ov-scene'));
+            if (overview.interactive) {
+              assert.equal(
+                elements.filter((e) => e.classes.includes('ov-tap')).length,
+                0,
+                'an interactive card has no full-card tap overlay over its own buttons'
+              );
+            }
             if (overview.tap.card === 'info' && entity) {
               assert.equal(
                 elements.filter((e) => e.attrs['data-action'] === 'info').length,

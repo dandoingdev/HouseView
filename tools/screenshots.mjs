@@ -53,6 +53,21 @@ const SHOTS = [
   {name: 'music', example: 'kitchen.yaml', kind: 'carousel', page: 1, size: [1280, 800]},
   {name: 'controls', example: 'kitchen.yaml', kind: 'carousel', page: 2, size: [1280, 800]},
   {name: 'bedtime', example: 'bedtime.yaml', kind: 'carousel', page: 0, size: [1280, 800]},
+  // The home overview, built from the widgets of examples/home-overview.yaml (page 0 holds it)
+  {
+    name: 'overview-home',
+    example: 'home-overview.yaml',
+    kind: 'carousel',
+    page: 0,
+    size: [1280, 800]
+  },
+  {
+    name: 'overview-home-portrait',
+    example: 'home-overview.yaml',
+    kind: 'carousel',
+    page: 0,
+    size: [800, 1280]
+  },
   {name: 'widgets', example: 'single-cards.yaml', kind: 'grid', size: [1280, 900], columns: 3},
   // Full-screen overviews, shown the way a screensaver shows them (`preview: true` starts it at once).
   {
@@ -166,7 +181,9 @@ function stateFor(id) {
   const domain = id.split('.')[0];
   const [state, attributes] = KNOWN[id] || DEFAULT_BY_DOMAIN[domain] || ['unknown', {}];
   const extra = domain === 'camera' ? {entity_picture: `/camera_proxy/${id}?token=demo`} : {};
-  return {state, attributes: {friendly_name: titleCase(id), ...attributes, ...extra}};
+  // a camera's picture is two minutes old ("2m ago" on the home overview)
+  const updated = domain === 'camera' ? {last_updated: new Date(NOW - 120000).toISOString()} : {};
+  return {state, ...updated, attributes: {friendly_name: titleCase(id), ...attributes, ...extra}};
 }
 const DEFAULT_BY_DOMAIN = {
   light: ['off', {}],

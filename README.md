@@ -39,6 +39,12 @@ Full-screen views, shown here as a screensaver would show them (mock data, froze
 | --- | --- | --- |
 | ![Photo frame](docs/images/overview-photo-frame.png) | ![Month calendar](docs/images/overview-calendar.png) | ![Weather widget tile](docs/images/widget-weather-tile.png) |
 
+The [home overview](docs/overviews/home.md) is a page of the dashboard that builds itself from the widgets on the carousel (chips, cameras, scenes), here on a landscape and a portrait tablet:
+
+| Home overview (1280 x 800) | Home overview (800 x 1280) |
+| --- | --- |
+| ![Home overview](docs/images/overview-home.png) | ![Home overview, portrait](docs/images/overview-home-portrait.png) |
+
 `npm run screenshots` regenerates every picture from placeholder data; nothing contacts a Home Assistant.
 
 ## Features
@@ -48,7 +54,7 @@ Full-screen views, shown here as a screensaver would show them (mock data, froze
   scrolling column.
 * **16 widgets**: clock, date, calendar, camera, thermostat, light, switch, fan, blinds, lock, sensor, weather, music
   player, timer, alarm panel and an action widget for scenes, scripts and buttons. Each is also a card of its own.
-* **5 overviews**: weather scene, photo frame, month calendar, timer display and cover art. Use them as screensavers, as
+* **6 overviews**: weather scene, photo frame, month calendar, timer display, cover art and a home screen that builds itself from your widgets. Use them as screensavers, as
   automatic displays, open them by pressing a widget, or place them as cards.
 * **One page layout and several looks**: widgets flow onto bounded pages, sized with `size` and `columns`; `glass`,
   `soft`, `teal`, `silver` and `champagne` surfaces; light, dark and automatic appearance; a high-contrast option and a bedtime mode with a Dim button.
@@ -145,7 +151,7 @@ dashboards are in [`examples/`](examples/): [minimal](examples/minimal.yaml), [k
 [camera grid](examples/camera-gallery.yaml), [native cards](examples/native-cards.yaml),
 [weather screensavers](examples/screensaver-weather.yaml), [weather overview](examples/weather-overview-card.yaml),
 [photo frame](examples/photo-frame.yaml), [month calendar](examples/month-calendar.yaml),
-[timer and music displays](examples/timer-and-music.yaml) and the [`widgets:` alias](examples/widgets-key.yaml).
+[timer and music displays](examples/timer-and-music.yaml), [home overview](examples/home-overview.yaml) and the [`widgets:` alias](examples/widgets-key.yaml).
 
 ## Widgets
 
@@ -187,6 +193,7 @@ them and how to combine them.
 | [Cover art](docs/overviews/cover_art.md) | `cover_art` | Idle, wins over weather while a speaker plays (automatic) | `media_player.*` | none | `custom:houseview-cover-art-overview-card` |
 | [Photo frame](docs/overviews/photo_frame.md) | `photo_frame` | Idle screensaver; opened by pressing the card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | `custom:houseview-photo-frame-overview-card` |
 | [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a clock, date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
+| [Home overview](docs/overviews/home.md) | `home` | A page of the dashboard (card); not a screensaver choice | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
 
 ```yaml
 type: custom:houseview-card

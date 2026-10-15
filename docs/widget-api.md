@@ -169,7 +169,7 @@ undefined) and `fail(message)`.
 * A `guard` does not apply to an `immediate` action.
 * Service payloads are `ctx.call(domain, service, {entity_id: id, ...})`.
 * Card-level `immediate` actions that belong to no widget (`dim`, `page-prev`, `page-next`, `page-select`,
-  `calendar-view`, `overview-open`) are core features registered with `registerFeature`, not widget code.
+  `calendar-view`, `overview-open`, `goto-widget`) are core features registered with `registerFeature`, not widget code.
 
 A press on a widget's primary button can be replaced by the user's `tap_action`, `hold_action` and `double_tap_action`
 (see [actions](actions.md)); inner buttons of panel widgets always run their own action.

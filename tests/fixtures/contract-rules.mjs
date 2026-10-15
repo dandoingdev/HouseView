@@ -27,6 +27,7 @@ export const FEATURE_ACTIONS = [
   'dim',
   'overview-open',
   'calendar-view',
+  'goto-widget',
   'page-prev',
   'page-next',
   'page-select'

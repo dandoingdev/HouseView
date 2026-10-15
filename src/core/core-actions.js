@@ -59,7 +59,23 @@ function openCalendar(ctx) {
   return ctx.card._screensaverOpenType?.('calendar_month');
 }
 
+/**
+ * Jump to the carousel page that holds a widget (the home overview's chips and headers). The id is `widget:<index>`,
+ * the index of the widget in the card's normalised `widgets` list (its `data-widget` number). An unknown index, or a
+ * widget that is on no page, does nothing. Nothing is called on Home Assistant.
+ */
+function gotoWidget(ctx, id) {
+  const match = /^widget:(\d+)$/.exec(String(id ?? ''));
+  if (!match) return undefined;
+  const index = Number(match[1]);
+  const page = ctx.card._screens?.findIndex((screen) =>
+    screen.placements?.some((placement) => placement.index === index)
+  );
+  return page >= 0 ? setPage(ctx, page) : undefined;
+}
+
 export const featureActions = freeze({
+  'goto-widget': freeze({immediate: true, run: gotoWidget}),
   'calendar-view': freeze({immediate: true, run: openCalendar}),
   'overview-open': freeze({immediate: true, run: openOverview}),
   dim: freeze({immediate: true, run: toggleDim}),

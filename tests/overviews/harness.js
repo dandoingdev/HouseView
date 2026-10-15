@@ -85,6 +85,8 @@ export function createHandle({type, env, stage, check, variants}) {
    * @param {number} [opts.idle]  screensaver mode: idle_timeout seconds and NO preview, so the test drives activation with advance
    * @param {boolean} [opts.event]  screensaver mode, for an `activation: 'event'` overview: NO preview and NO idle_timeout, so the
    *   overview's autoShow decides: drive it with `setState` (hass updates) and `advance` (the shared tick)
+   * @param {boolean} [opts.bare]  screensaver and carousel modes: NO default light widgets, the carousel holds exactly `opts.cards`
+   *   (an overview that is built from the dashboard's own widgets, the home overview, is tested this way)
    * @param {Object[]} [opts.cards]  screensaver and carousel modes: more cards after the two light widgets (a `custom:houseview-timer-card`
    *   or a media player card: the widgets that switch the automatic displays on, docs/overview-api.md)
    * @param {Object|Object[]} [opts.screensaver]  extra keys merged into the block (a list replaces it)
@@ -105,7 +107,8 @@ export function createHandle({type, env, stage, check, variants}) {
     if (shared) mock.hass.connection = shared.raw;
     mock.wrapper = connection;
     for (const [id, state] of Object.entries(lights)) {
-      if (mode !== 'card' && !mock.hass.states[id]) mock.hass.states[id] = structuredClone(state);
+      if (mode !== 'card' && !opts.bare && !mock.hass.states[id])
+        mock.hass.states[id] = structuredClone(state);
     }
 
     const full = mode !== 'card' && !opts.as;
@@ -147,7 +150,7 @@ export function createHandle({type, env, stage, check, variants}) {
                 };
         el.setConfig({
           ...config,
-          cards: [...lightCards, ...(opts.cards ?? [])],
+          cards: [...(opts.bare ? [] : lightCards), ...(opts.cards ?? [])],
           ...(screensaver === undefined ? {} : {screensaver})
         });
       }

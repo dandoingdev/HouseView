@@ -3,6 +3,7 @@
 import {registerOverview} from '../core/overview-registry.js';
 import calendarMonthOverview from './calendar_month/index.js';
 import coverArtOverview from './cover_art/index.js';
+import homeOverview from './home/index.js';
 import photoFrameOverview from './photo_frame/index.js';
 import timerOverview from './timer/index.js';
 import weatherOverview from './weather/index.js';
@@ -10,6 +11,7 @@ import weatherOverview from './weather/index.js';
 export const overviews = [
   calendarMonthOverview,
   coverArtOverview,
+  homeOverview,
   photoFrameOverview,
   timerOverview,
   weatherOverview

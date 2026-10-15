@@ -61,10 +61,11 @@ export function isEditMode(host) {
 }
 
 /** Cheap "did anything this overview reads change?" key. Real HA: object references; mock hass: JSON. */
-function signatureOf(hass, entry) {
-  const ids = [entry.options.entity, ...(entry.overview.watch?.(entry.options) ?? [])].filter(
-    Boolean
-  );
+function signatureOf(hass, entry, config) {
+  const ids = [
+    entry.options.entity,
+    ...(entry.overview.watch?.(entry.options, config) ?? [])
+  ].filter(Boolean);
   const read = (id) => (hass.connection ? hass.states?.[id] : JSON.stringify(hass.states?.[id]));
   return [
     ...ids.map(read),
@@ -445,7 +446,7 @@ export const screensaverMixin = {
       if (fromTick && shown?.event && this._screensaverAutoWake(shown)) ss.idle.wake('auto');
       let first = null;
       for (const [entry, state] of ss.events) {
-        const sig = signatureOf(this._hass, entry);
+        const sig = signatureOf(this._hass, entry, this._config);
         if (fromTick || !sameSignature(state.sig, sig)) {
           state.sig = sig;
           this._screensaverEdge(entry, state, now);
@@ -564,7 +565,7 @@ export const screensaverMixin = {
       entry,
       layer,
       focusReturn,
-      sig: signatureOf(this._hass, entry),
+      sig: signatureOf(this._hass, entry, this._config),
       lastTick: 0,
       shownAt: Date.now(),
       covered: false,
@@ -665,7 +666,7 @@ export const screensaverMixin = {
   _screensaverRender(force, entry) {
     const active = this._screensaver?.active;
     if (!active || (entry && entry !== active.entry)) return;
-    const sig = signatureOf(this._hass, active.entry);
+    const sig = signatureOf(this._hass, active.entry, this._config);
     if (!force && sameSignature(active.sig, sig)) return;
     active.sig = sig;
     const scene = active.entry.overview.render(

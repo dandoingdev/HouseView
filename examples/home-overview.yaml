@@ -1,0 +1,28 @@
+# The home overview (docs/overviews/home.md): a scrollable home screen that builds itself from the widgets on the carousel.
+# Entity ids are placeholders: use your own.
+#
+# The "Home" page holds the overview alone, so it fills the page. Everything else is on pages of its own. The chips jump to
+# the page of the first light, climate, lock or media player widget; the camera card opens the camera gallery (set below); a
+# scene tile runs the scene. Add or remove a widget and the home screen follows.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: glass}
+  - {name: Rooms, surface: teal}
+  - {name: Music, surface: teal}
+camera_gallery:
+  - {entity: camera.front_door}
+cards:
+  - {type: custom:houseview-home-overview-card, page: Home, title: My Home}
+  # Rooms
+  - {type: custom:houseview-light-card, entity: light.living_room, page: Rooms}
+  - {type: custom:houseview-light-card, entity: light.kitchen, page: Rooms}
+  - {type: custom:houseview-light-card, entity: light.hallway, page: Rooms}
+  - {type: custom:houseview-climate-card, entity: climate.living_room, page: Rooms}
+  - {type: custom:houseview-lock-card, entity: lock.front_door, page: Rooms}
+  - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Rooms, size: large}
+  - {type: custom:houseview-action-card, entity: scene.morning, name: Good morning, icon: mdi:white-balance-sunny, page: Rooms}
+  - {type: custom:houseview-action-card, entity: scene.evening, name: Evening, icon: mdi:weather-night, page: Rooms}
+  - {type: custom:houseview-action-card, entity: scene.movie, name: Movie time, icon: mdi:movie-open, page: Rooms}
+  - {type: custom:houseview-action-card, entity: scene.dinner, name: Dinner, icon: mdi:silverware-fork-knife, page: Rooms}
+  # Music
+  - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}

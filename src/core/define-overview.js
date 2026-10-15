@@ -31,7 +31,9 @@ import {esc} from './html.js';
  *                                         and `en` must define `<type>_overview.label` and `<type>_overview.description`
  * @property {Record<string, OverviewOptionSpec>} [options]   flat keys beside `entity`, identical in a screensaver block and an overview card
  * @property {(options: Object) => void} [validate]   cross-field rules; throw Error('<exact message>'); `options` is fully resolved
- * @property {(options: Object) => string[]} [watch]  extra entity ids whose changes re-render (sun.sun); the primary entity is always watched
+ * @property {(options: Object, config?: Object) => string[]} [watch]  extra entity ids whose changes re-render (sun.sun); the primary entity is always watched. `config` is the card config
+ *                                         (the carousel's normalised `widgets` list), so an overview built from the dashboard's widgets (home) can watch their entities
+ * @property {boolean} [interactive]   default false. true allows `<button data-action data-entity>` in CARD mode, only with the actions of INTERACTIVE_ACTIONS; in screensaver mode the overview renders no buttons
  *
  * -- data (optional) --
  * @property {(args: {hass: any, options: Object, entityId?: string}) => Record<string, DataSpec>} [data]
@@ -81,6 +83,13 @@ export const OVERVIEW_MODES = ['screensaver', 'card'];
 const ENTITY_RULES = ['required', 'optional', 'none'];
 export const ACTIVATIONS = ['idle', 'event'];
 const DISPLAYS = ['scene', 'tile'];
+/** The only actions an interactive overview's buttons may carry (docs/overview-api.md); the contract suite holds it to this. */
+export const INTERACTIVE_ACTIONS = Object.freeze([
+  'goto-widget',
+  'camera-grid',
+  'run-action',
+  'info'
+]);
 
 const isStringList = (value) => Array.isArray(value) && value.every((v) => typeof v === 'string');
 
@@ -196,6 +205,10 @@ export function defineOverview(def) {
     throw new Error(`Overview ${o.type}: selectable must be true or false.`);
   }
   o.selectable = def.selectable ?? true;
+  if (def.interactive !== undefined && typeof def.interactive !== 'boolean') {
+    throw new Error(`Overview ${o.type}: interactive must be true or false.`);
+  }
+  o.interactive = def.interactive ?? false;
   checkOptionSpecs(o.type, o.options);
 
   const overview = deepFreeze({
@@ -352,8 +365,8 @@ function toWidget(overview) {
         throw new Error(`${overview.label} display must be one of: ${DISPLAYS.join(', ')}.`);
       }
     },
-    watch: (widget) =>
-      [widget.entity, ...(overview.watch?.(resolveOptions(overview, widget)) ?? [])].filter(
+    watch: (widget, config) =>
+      [widget.entity, ...(overview.watch?.(resolveOptions(overview, widget), config) ?? [])].filter(
         Boolean
       ),
 
@@ -384,7 +397,9 @@ function toWidget(overview) {
       const label = ctx.esc(ctx.t('screensaver.more_info', {name: ctx.rawName}));
       const open = ctx.esc(ctx.t('screensaver.open', {name: ctx.rawName}));
       let tap = '';
-      if (overview.tap.card === 'info' && ctx.entityId) {
+      if (overview.interactive) {
+        tap = ''; // its own buttons are the controls: a full-card overlay would cover them
+      } else if (overview.tap.card === 'info' && ctx.entityId) {
         tap = ctx.btn('info', '', 'ov-tap', !!ctx.state, {attrs: `aria-label="${label}" `});
       } else if (overview.tap.card === 'open') {
         // No entity to name: the action finds its card by position (see _screensaverOpen).

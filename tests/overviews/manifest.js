@@ -4,6 +4,7 @@
 export const manifest = [
   {type: 'calendar_month', load: () => import('../../src/overviews/calendar_month/test.js')},
   {type: 'cover_art', load: () => import('../../src/overviews/cover_art/test.js')},
+  {type: 'home', load: () => import('../../src/overviews/home/test.js')},
   {type: 'photo_frame', load: () => import('../../src/overviews/photo_frame/test.js')},
   {type: 'timer', load: () => import('../../src/overviews/timer/test.js')},
   {type: 'weather', load: () => import('../../src/overviews/weather/test.js')}
