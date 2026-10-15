@@ -15,10 +15,19 @@ const PREVIEW_STAGES = {
   portrait: {width: 800, height: 1280}
 };
 
-/** True inside the card editor's live preview (Home Assistant wraps it in `hui-card-preview`). */
+/**
+ * True inside the card editor's live preview. Home Assistant renders it as `<hui-card preview>` (older versions wrapped it
+ * in `hui-card-preview`) inside the edit dialog; the walk goes up through shadow roots.
+ */
 export function inCardPreview(host) {
   for (let node = host; node; node = node.parentElement || node.getRootNode?.()?.host) {
     if (node.localName === 'hui-card-preview') return true;
+    if (
+      node.localName === 'hui-card' &&
+      (node.preview === true || node.hasAttribute?.('preview'))
+    ) {
+      return true;
+    }
   }
   return false;
 }
