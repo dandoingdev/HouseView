@@ -1,4 +1,4 @@
-/* global navigator */
+#!/usr/bin/env node
 // Render the example dashboards with a mock Home Assistant and write the pictures used by the README.
 //
 //   node tools/screenshots.mjs                 all pictures into docs/images
