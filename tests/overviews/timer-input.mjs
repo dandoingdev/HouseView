@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, window, getComputedStyle, card, mount */
+/* global document, window, getComputedStyle, card, mount, navigator */
 // Real-input behaviour of the timer display (an event overview, docs/overview-api.md): the dist
 // bundle in a real browser, a mock hass that records service calls, a fake clock for the shared 1 s ticker and a
 // real mouse and keyboard through puppeteer. Run it with:
@@ -36,6 +36,11 @@ const check = (name, condition, detail = '') => {
 
 try {
   const page = await browser.newPage();
+  // Report a capable device (CI runners have 4 cores, which makes `performance: auto` pick the light mode).
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+    Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+  });
   await page.setViewport({width: 800, height: 600});
   page.on('console', (m) => {
     if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) {

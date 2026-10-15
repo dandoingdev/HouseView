@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, Image */
+/* global document, Image, navigator */
 // Screenshots the weather overview (as a screensaver over a houseview-card) for 5 conditions x day/night x 3 viewports
 // into .tmp/overview-shots/. Needs the dev bundle: npm run build:dev. Never contacts Home Assistant (mock hass in the page).
 //
@@ -139,6 +139,11 @@ try {
         const file = `weather-${name}-${tod}-${w}x${h}${MODE === 'card' ? '-card' : ''}.png`;
         if (args.only && !new RegExp(args.only).test(file)) continue;
         const page = await browser.newPage();
+        // Report a capable device (CI runners have 4 cores, which makes `performance: auto` pick the light mode).
+        await page.evaluateOnNewDocument(() => {
+          Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+          Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+        });
         await page.setViewport({width: w, height: h, deviceScaleFactor: 1});
         await page.emulateTimezone('Europe/London');
         // static, deterministic frames

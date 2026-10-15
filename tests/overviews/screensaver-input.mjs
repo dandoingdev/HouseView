@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, window, Event, card, mount */
+/* global document, window, Event, card, mount, navigator */
 // Real-input behaviour of the screensaver (docs/overview-api.md): a real mouse and keyboard through
 // puppeteer, the dist bundle, and a fake clock for the idle timer. Run it with:
 //
@@ -36,6 +36,11 @@ const check = (name, condition) => {
 
 try {
   const page = await browser.newPage();
+  // Report a capable device (CI runners have 4 cores, which makes `performance: auto` pick the light mode).
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+    Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+  });
   await page.setViewport({width: 800, height: 600});
   page.on('console', (m) => {
     if (m.type() === 'error' && !/^Failed to load resource/.test(m.text())) {

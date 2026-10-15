@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, window, location, card, mount */
+/* global document, window, location, card, mount, navigator */
 // End to end behaviour of the automatic displays and the priority model (docs/overview-api.md): the dist bundle
 // in a real browser with a mock hass that records service calls, Home Assistant's update semantics (a NEW state object,
 // a NEW hass object that keeps the connection), a fake clock for the shared 1 s ticker and a real mouse. Run it with:
@@ -37,6 +37,11 @@ const check = (name, condition, detail = '') => {
 
 try {
   const page = await browser.newPage();
+  // Report a capable device (CI runners have 4 cores, which makes `performance: auto` pick the light mode).
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+    Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+  });
   await page.setViewport({width: 800, height: 600});
   page.on('console', (m) => {
     // the mock media proxy has no pictures: the <img> request 404s, which is not under test

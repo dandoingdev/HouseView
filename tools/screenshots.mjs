@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+/* global navigator */
 // Render the example dashboards with a mock Home Assistant and write the pictures used by the README.
 //
 //   node tools/screenshots.mjs                 all pictures into docs/images
@@ -449,6 +449,11 @@ async function shoot(browser, base, shot) {
   const states = Object.fromEntries(ids.map((id) => [id, stateFor(id)]));
   const [width, height] = shot.size || [1280, 800];
   const page = await browser.newPage();
+  // Report a capable device (CI runners have 4 cores, which makes `performance: auto` pick the light mode).
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+    Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+  });
   const problems = [];
   page.on('pageerror', (e) => problems.push(`uncaught: ${e.message}`));
   page.on('console', (m) => m.type() === 'error' && problems.push(`console.error: ${m.text()}`));

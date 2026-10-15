@@ -83,6 +83,12 @@ async function main() {
     const page = await browser.newPage();
     // The suites test the page-turn animation: do not let the runner's own accessibility settings switch it off.
     await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'no-preference'}]);
+    // `performance: auto` picks the light mode on a device with 4 cores or less, and CI runners have 4: the suites
+    // describe a capable device, so report one (the low-end decision has its own unit tests).
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'hardwareConcurrency', {get: () => 8});
+      Object.defineProperty(navigator, 'deviceMemory', {get: () => 8});
+    });
     let errors = 0;
     page.on('console', (m) => {
       if (m.type() !== 'error') return;
