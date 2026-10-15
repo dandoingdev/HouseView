@@ -130,6 +130,11 @@ const previewShell=()=>previewCard.shadowRoot.querySelector('.shell');
 check('Editor preview is laid out as a landscape tablet and scaled to the preview box',previewShell().style.width==='1280px'&&previewShell().style.transform.startsWith('scale(0.3125')&&previewCard.style.height==='250px'&&previewCard._screens[0].columns>=3);
 previewCard.setConfig({widgets:[{type:'clock'}],editor_preview:'auto'});await new Promise(r=>setTimeout(r,200));
 check('editor_preview: auto leaves the preview box as it is',!previewShell().style.transform&&previewCard.style.height==='');
+previewCard.setConfig({home_overview:true,widgets:[{type:'clock'}]});previewCard.hass=hass;
+window.__houseviewHomePreview=true;window.dispatchEvent(new CustomEvent('houseview-home-preview'));
+check('The editor preview shows the home overview while the Home section is open',!!previewCard.shadowRoot.querySelector('.hv-screensaver'));
+window.__houseviewHomePreview=false;window.dispatchEvent(new CustomEvent('houseview-home-preview'));await new Promise(r=>setTimeout(r,500));
+check('and goes back to the dashboard when it closes',!previewCard.shadowRoot.querySelector('.hv-screensaver')||previewCard.shadowRoot.querySelector('.hv-screensaver').dataset.state==='leaving');
 previewBox.remove();
 // home_overview: true adds a home button at the bottom left (no page); pressing it opens the home overview full screen.
 card.setConfig({home_overview:true,widgets:[{type:'clock'},{type:'light',entity:'light.second'}]});card.hass=hass;

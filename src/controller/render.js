@@ -65,6 +65,7 @@ export const renderMixin = {
     this._syncOverlays(shell, true);
     this._syncDimButton(shell);
     this._syncHomeButton(shell);
+    this._syncHomePreview();
     this._layout(model);
     this._runAfterRender();
     if (this._focus) {

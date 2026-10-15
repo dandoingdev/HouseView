@@ -110,10 +110,9 @@ const structureKey = (config) =>
     showHome(config)
   ]);
 
-const panel = (parent, header, expanded = false) => {
+const panel = (parent, header) => {
   const el = document.createElement('ha-expansion-panel');
   el.header = header;
-  if (expanded) el.expanded = true;
   const section = document.createElement('section');
   el.append(section);
   parent.append(el);
@@ -168,6 +167,7 @@ export class HouseViewEditor extends HTMLElement {
 
   _render() {
     if (!this._config) return;
+    if (window.__houseviewHomePreview) this._setHomePreview(false); // a rebuilt editor starts collapsed
     this._view = null;
     this.shadowRoot.innerHTML =
       STYLES + '<div class="editor"><ha-alert class="status" alert-type="error"></ha-alert></div>';
@@ -238,11 +238,7 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderScreensaver(parent, view) {
-    const {section} = panel(
-      parent,
-      text(this._hass, 'screensaver.section'),
-      this._config.screensaver !== undefined
-    );
+    const {section} = panel(parent, text(this._hass, 'screensaver.section'));
     const note = document.createElement('p');
     const data = screensaverData(this._config);
     const form = createForm(section, {
@@ -262,11 +258,7 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderAutomatic(parent, view) {
-    const {section} = panel(
-      parent,
-      text(this._hass, 'editor.automatic_displays'),
-      this._config.timer_display !== undefined || this._config.music_screensaver !== undefined
-    );
+    const {section} = panel(parent, text(this._hass, 'editor.automatic_displays'));
     view.automatic = this._form(section, {
       data: automaticData(this._config),
       schema: automaticSchema(),
@@ -279,13 +271,12 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderHome(parent, view) {
-    const {section} = panel(
-      parent,
-      text(this._hass, 'editor.home_section'),
-      ['home_overview', 'home_bins', 'home_transport', 'home_title'].some(
-        (key) => this._config[key] !== undefined
-      )
-    );
+    const {el, section} = panel(parent, text(this._hass, 'editor.home_section'));
+    // While this section is open the preview shows the home overview, so its changes can be seen.
+    el.addEventListener('expanded-changed', (event) => {
+      if (event.target !== el) return;
+      this._setHomePreview(el.expanded === true);
+    });
     view.home = this._form(section, {
       data: homeData(this._config),
       schema: homeSchema(),
@@ -295,6 +286,15 @@ export class HouseViewEditor extends HTMLElement {
         this._emit();
       }
     });
+  }
+
+  _setHomePreview(on) {
+    window.__houseviewHomePreview = on;
+    window.dispatchEvent(new CustomEvent('houseview-home-preview'));
+  }
+
+  disconnectedCallback() {
+    if (window.__houseviewHomePreview) this._setHomePreview(false);
   }
 
   _showScreensaverNote() {
@@ -326,7 +326,7 @@ export class HouseViewEditor extends HTMLElement {
 
   _renderPage(parent, view, index) {
     const page = this._config.pages[index];
-    const {el, section} = panel(parent, page.name, index === 0);
+    const {el, section} = panel(parent, page.name);
     const form = this._form(section, {
       data: pageData(page),
       schema: pageSchema(this._hass),

@@ -11,7 +11,7 @@ import {resolvePerformance} from '../core/performance.js';
 import {onRegistryChange} from '../core/registry.js';
 import {subscribe, unsubscribe} from '../core/ticker.js';
 import {ensureNativeEditors} from '../editor/native-stack.js';
-import {dimMixin} from './dim.js';
+import {HOME_PREVIEW_EVENT, dimMixin} from './dim.js';
 import {bindEvents} from './events.js';
 import {extensionsMixin, syncCompat} from './extensions.js';
 import {hooksMixin} from './hooks.js';
@@ -31,6 +31,7 @@ export class HouseViewCard extends HTMLElement {
   constructor() {
     super();
     this._onResize = () => this._scheduleLayout();
+    this._onHomePreview = () => this._syncHomePreview();
     this._observer = new ResizeObserver(() => this._scheduleLayout());
     this.attachShadow({mode: 'open'});
     this._pending = new Set();
@@ -73,11 +74,13 @@ export class HouseViewCard extends HTMLElement {
     window.visualViewport?.addEventListener('resize', this._onResize);
     // Coming back to the page (Home Assistant detaches cards when views change): refill what disconnect released.
     if (this._renderedCards?.size) this._runAfterRender();
+    window.addEventListener(HOME_PREVIEW_EVENT, this._onHomePreview);
     this._screensaverConnect();
   }
 
   disconnectedCallback() {
     this._screensaverDisconnect();
+    window.removeEventListener(HOME_PREVIEW_EVENT, this._onHomePreview);
     this._clearPageTransition();
     this._disposeGestures();
     this._disposeExtensions('disconnect');
