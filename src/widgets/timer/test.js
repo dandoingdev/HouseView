@@ -58,10 +58,6 @@ export default async function (h) {
       t.q('[data-action="timer-cancel"]').disabled &&
       !t.q('[data-action="info"]').disabled
   );
-  check(
-    'hint text wording',
-    t.text('.timer-panel > small') === 'Choose minutes · custom duration via timer settings'
-  );
 
   // ---- start / confirm ----------------------------------------------------------------------------------------
   await t.click('timer-start-10');
@@ -159,7 +155,6 @@ export default async function (h) {
   check(
     'unavailable timer says so and disables every control',
     t.text('.timer-remaining') === 'Unavailable' &&
-      t.text('.timer-panel > small') === 'Timer unavailable' &&
       t.qa('.timer-panel button:not(:disabled)').length === 0
   );
   await t.act('timer-start-5', 'timer.test');
@@ -178,7 +173,7 @@ export default async function (h) {
   t = await mount(variants.named);
   check(
     'name is escaped and the size class is applied',
-    t.text('.timer-panel > strong') === 'Oven & grill' && !!t.q('.timer-panel.size-wide')
+    t.text('.timer-panel .ts-name') === 'Oven & grill' && !!t.q('.timer-panel.size-wide')
   );
 
   // ---- finish detection and the alarm ------------------------------------------------------------------------

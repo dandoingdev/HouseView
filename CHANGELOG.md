@@ -18,8 +18,11 @@ The release workflow publishes the section of the tagged version as the release 
 * A page that holds only the home overview now takes the overview's colour across the whole page, and the page dots change
   colour to stay visible.
 
-* `home_overview: true` (a switch in the card editor) adds the home overview as the first page of the carousel without placing a
-  card; `home_title` sets its title. Off by default.
+* `home_overview: true` (a switch in the card editor) adds a small home button at the bottom left, opposite the Dim button;
+  it opens the home overview full screen. `home_title` sets its title. Off by default.
+* The weather widget opens the full-screen weather overview when pressed (`weather_view: false` keeps more-info). The month
+  calendar overview covers the whole screen.
+* The timer widget now follows the quiet style of the blinds and thermostat widgets.
 
 * **Home overview** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the
   widgets on the carousel: a large title with the time, chips for climate (the temperature range), lights (how many are on),

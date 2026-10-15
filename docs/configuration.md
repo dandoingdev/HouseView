@@ -40,13 +40,14 @@ screensaver:
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
-| `home_overview` | `false` | `true` adds the [home overview](overviews/home.md) (a scrollable home screen built from this dashboard's widgets) as the first page of the carousel. Nothing else moves. Also a switch in the card editor |
+| `home_overview` | `false` | `true` adds the [home overview](overviews/home.md) (a scrollable home screen built from this dashboard's widgets) behind a small home button at the bottom left of the screen (opposite the Dim button). The button opens the overview full screen; a tap closes it. It adds no page. Also a switch in the card editor |
 | `home_title` | `Home` | The title shown on the home overview when `home_overview` is on |
 | `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |
 | `timer_display` | `true` | The timer display appears while a timer runs: `true` (every `timer` widget), `false`, or a list of `timer.*` entities. See [automatic displays](screensavers.md#automatic-displays) |
 | `music_screensaver` | `true` | The cover art appears at screensaver time while a speaker plays: `true` (every `media_player` widget), `false`, or a list of `media_player.*` entities |
+| `weather_view` | `true` | `false` makes a press on the weather widget open more-info instead of the full-screen weather |
 | `calendar_view` | `true` | `false` stops the clock, date and calendar widgets from opening the month calendar (the calendar widget opens its dialog instead) |
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
 | `localized_states` | `false` | Show entity states in your Home Assistant language instead of the raw state value |

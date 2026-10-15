@@ -213,6 +213,7 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 | `timer_display` | `true` | Every `timer` widget shows the timer display while its timer runs. A tap puts the dashboard back; it returns for the next timer |
 | `music_screensaver` | `true` | When the screensaver would start and a speaker is playing, the album cover is shown instead of the usual screensaver |
 | `calendar_view` | `true` | `false` stops the clock, date and calendar widgets from opening the month calendar |
+| `weather_view` | `true` | `false` makes the weather widget open more-info instead of the full-screen weather |
 
 Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Overviews only read data: they
 cannot call a service.
@@ -246,7 +247,7 @@ More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel
 | `palette` | `stone`, `forest` |
 | `high_contrast`, `bedtime` | `true` / `false`; bedtime adds night styling and a Dim button |
 | `performance` | `auto`, `full`, `lite`: `lite` uses opaque glass and no decorative animation. `auto` picks it on a device with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView |
-| `home_overview` | `true` adds a scrollable home screen (chips, cameras, scenes) built from your widgets as the first page; `home_title` sets its title |
+| `home_overview` | `true` adds a scrollable home screen (chips, cameras, scenes) built from your widgets behind a home button at the bottom left; `home_title` sets its title |
 | `editor_preview` | `landscape` (default), `portrait` or `auto`: how the preview in the card editor is drawn. The card is laid out as a wall tablet and scaled to fit the preview, so it shows the real arrangement |
 
 See [theming](docs/theming.md) and [performance](docs/performance.md).
@@ -270,7 +271,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |
 | `screensaver` | An overview or a list of them: `type`, `entity`, `idle_timeout`, `enabled`, `preview`, `start_in_edit_mode`, plus the overview's own options |
-| `timer_display`, `music_screensaver`, `calendar_view` | The automatic displays |
+| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view` | The automatic displays |
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |

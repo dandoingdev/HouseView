@@ -1,4 +1,4 @@
-/* @owns shell face page-nav manage dim-screen feedback page-indicators */
+/* @owns shell face page-nav manage dim-screen home-button feedback page-indicators */
 /*
  * Core tablet host rules (?tablet=1 / tablet-mode): the canvas belongs to the viewport.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
@@ -46,11 +46,14 @@
   backface-visibility: hidden;
 }
 
-:host([tablet-mode]) .dim-screen {
+:host([tablet-mode]) .dim-screen,
+:host([tablet-mode]) .home-button {
   position: fixed;
-  right: 10px;
   bottom: 8px;
   transform: translateZ(0);
+}
+:host([tablet-mode]) .dim-screen {
+  right: 10px;
 }
 
 :host([tablet-mode]) .feedback {

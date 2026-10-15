@@ -64,6 +64,7 @@ export const renderMixin = {
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, true);
     this._syncDimButton(shell);
+    this._syncHomeButton(shell);
     this._layout(model);
     this._runAfterRender();
     if (this._focus) {

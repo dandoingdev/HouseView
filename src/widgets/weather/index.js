@@ -15,8 +15,8 @@ const ICONS = {
 };
 const FALLBACK_ICON = 'weather-partly-cloudy';
 
-// Weather tile: condition icon, temperature with unit, name and the condition text. Display only: a tap opens
-// more-info. (The full-page weather overview is a separate module, src/overviews/weather.)
+// Weather tile: condition icon, temperature with unit, name and the condition text. A tap opens the full-screen
+// weather overview (src/overviews/weather), or more-info when the card says `weather_view: false`.
 export default defineWidget({
   type: 'weather',
   label: 'Weather',
@@ -31,8 +31,9 @@ export default defineWidget({
     // State names use '-' as separator (`lightning-rainy`), shown with spaces. Not ctx.stateText, which
     // replaces '_' only.
     const condition = ok ? state.state.replaceAll('-', ' ') : ctx.t('state.unavailable');
+    // A press opens the full-screen weather view (`weather_view: false` keeps the more-info dialog).
     return ctx.tile(
-      'info',
+      ctx.config?.weather_view === false ? 'info' : 'weather-view',
       `${ctx.icon(ICONS[state?.state] || FALLBACK_ICON)}<span class="widget-value">${temperature}<sup>${unit}</sup></span><span>${ctx.name}</span><small>${ctx.esc(condition)}</small>`,
       'control'
     );

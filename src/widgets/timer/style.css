@@ -1,45 +1,148 @@
-/* @owns timer timer-panel timer-remaining timer-presets timer-preset preset-number preset-unit timer-alarm */
+/* @owns timer timer-panel timer-simple timer-remaining timer-presets timer-preset preset-number preset-unit ts-main ts-name ts-time ts-presets ts-preset ts-keys ts-key ts-glyph is-running is-idle timer-alarm */
 /*
- * timer widget styles.
- * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
- * sections inside one phase.
+ * timer widget styles. The tile is a size container, like the blinds and thermostat widgets: the name and a big countdown
+ * in the middle, one row of plain keys underneath (presets while idle, pause and cancel while running). Nothing is boxed,
+ * filled or shadowed; every size comes from the tile's own width and height (cqw / cqh).
  */
 
-/* @phase carousel @pin 1 */
-/* Screen-sized faces and kitchen controls — v3. */
-.timer-remaining {
-  font-size: clamp(32px,15cqi,70px);
-  font-variant-numeric: tabular-nums;
-  font-weight: 300;
+/* @phase lifted */
+.carousel .tile.widget.timer-simple.timer-simple {
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
 }
 
-.timer-preset {
-  min-width: 56px;
-  min-height: 54px;
-  border: 0;
-  border-radius: 16px;
-  background: #ffffff40;
-  color: inherit;
-  font-size: 22px;
+.carousel .timer-simple .ts-main {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.1em;
+  margin: 0;
+  padding: 0 5cqw;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  text-align: center;
 }
 
-/* @important overrides an earlier !important rule */
-.timer-preset small {
-  font-size: 11px !important;
+.carousel .timer-simple .ts-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(13px, min(9cqh, 6.5cqw), 24px);
+  font-weight: 600;
+  line-height: 1.2;
+  opacity: 0.85;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (max-width:519px) {
-  .timer-presets {
-    gap: 4px;
-    flex-wrap: wrap;
-  }
+.carousel .timer-simple .ts-time {
+  display: block;
+  max-width: 100%;
+  font-size: clamp(24px, min(34cqh, 24cqw), 120px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
 
-  .timer-preset {
-    min-width: 44px;
+/* the row of keys: presets while idle, pause and cancel while running */
+.carousel .timer-simple .ts-presets,
+.carousel .timer-simple .ts-keys {
+  flex: none;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding: 0 3cqw clamp(8px, 5cqh, 28px);
+}
+.carousel .timer-simple .ts-presets {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.carousel .timer-simple .ts-keys {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.carousel .timer-simple.is-running .ts-presets,
+.carousel .timer-simple.is-idle .ts-keys {
+  display: none;
+}
+
+.carousel .timer-simple .ts-preset {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25em;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  line-height: 1;
+}
+.carousel .timer-simple .preset-number {
+  font-size: clamp(16px, min(11cqh, 8cqw), 32px);
+  font-weight: 500;
+}
+.carousel .timer-simple .preset-unit {
+  font-size: clamp(10px, min(5.5cqh, 4cqw), 15px);
+  opacity: 0.7;
+}
+
+.carousel .timer-simple .ts-key {
+  display: grid;
+  place-items: center;
+  width: clamp(48px, 14cqmin, 88px);
+  height: clamp(48px, 14cqmin, 88px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  line-height: 0;
+}
+.carousel .timer-simple .ts-glyph {
+  width: clamp(26px, 9cqmin, 56px);
+  height: clamp(26px, 9cqmin, 56px);
+  fill: currentColor;
+}
+
+.carousel .timer-simple .ts-preset:disabled,
+.carousel .timer-simple .ts-key:disabled {
+  opacity: 0.35;
+}
+.carousel .timer-simple .ts-preset:not(:disabled):active,
+.carousel .timer-simple .ts-key:not(:disabled):active,
+.carousel .timer-simple .ts-main:not(:disabled):active {
+  filter: none;
+  opacity: 0.6;
+}
+.carousel .timer-simple button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -4px;
+}
+
+/* a short tile keeps the countdown and the keys; the name goes */
+@container (max-height: 150px) {
+  .carousel .timer-simple .ts-name {
+    display: none;
   }
 }
 
@@ -54,260 +157,4 @@
   padding: 30px;
   font-size: 28px;
   box-shadow: 0 20px 80px #0006;
-}
-
-.timer-panel {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,2fr);
-  grid-template-rows: auto 1fr 1fr;
-  gap: 6px 14px;
-  padding: 16px;
-}
-
-.timer-panel>strong {
-  grid-column: 1/-1;
-  font-size: 18px;
-}
-
-.timer-remaining {
-  grid-column: 1;
-  grid-row: 2/4;
-  font-size: clamp(36px,9cqi,64px);
-  align-self: center;
-}
-
-.timer-presets {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.timer-panel>.transport {
-  grid-column: 2;
-  grid-row: 3;
-}
-
-.timer-panel>small {
-  display: none;
-}
-
-.timer-panel .transport button {
-  width: 44px;
-  height: 44px;
-}
-
-.timer-panel .timer-preset {
-  min-width: 52px;
-  min-height: 48px;
-  font-size: 20px;
-}
-
-@media (max-width:519px) {
-  .timer-panel {
-    display: flex;
-    gap: 6px;
-  }
-
-  .timer-remaining {
-    font-size: 32px;
-  }
-
-  .timer-panel .timer-preset {
-    min-width: 44px;
-  }
-
-  .timer-panel .transport button {
-    width: 44px;
-    height: 44px;
-  }
-}
-
-/* @phase surface-teal */
-/* Teal folded-glass face, inspired by the supplied HomeView reference. */
-.surface-teal .timer-panel>strong {
-  font-weight: 500;
-  letter-spacing: .01em;
-}
-
-.surface-teal .timer-remaining {
-  font-weight: 300;
-}
-
-/* @phase carousel-widgets */
-/* Generous timer presets: four equal glass keys, readable at arm's length. */
-.carousel .timer-panel {
-  grid-template-columns: minmax(0,.95fr) minmax(0,1.5fr);
-  grid-template-rows: auto minmax(0,1fr) auto;
-  gap: 8px 24px;
-  padding: 20px 24px;
-  text-align: left;
-}
-
-.carousel .timer-panel>strong {
-  grid-column: 1;
-  grid-row: 1;
-  text-align: left;
-  font-size: 16px;
-  font-weight: 500;
-  opacity: .85;
-}
-
-.carousel .timer-remaining {
-  grid-column: 1;
-  grid-row: 2;
-  justify-self: start;
-  align-self: center;
-  font-size: clamp(38px,9cqi,64px);
-  letter-spacing: -.045em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.carousel .timer-presets {
-  grid-column: 2;
-  grid-row: 1/4;
-  display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  grid-template-rows: repeat(2,minmax(64px,1fr));
-  gap: 12px;
-  width: 100%;
-  height: 100%;
-  max-height: 244px;
-  align-self: center;
-}
-
-.carousel .timer-panel .timer-preset {
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 64px;
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-  justify-content: center;
-  gap: 6px;
-  padding: 14px 8px;
-  border-radius: 24px;
-  border: 1px solid #e5fff51c;
-  background: linear-gradient(150deg,#d3fff32b,#a9eddd12);
-  box-shadow: inset 0 1px 0 #f2fff632,0 3px 8px #003b3820;
-  color: inherit;
-  line-height: 1;
-}
-
-.carousel .timer-preset .preset-number {
-  font-size: clamp(30px,5cqi,40px);
-  font-weight: 400;
-  letter-spacing: -.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.carousel .timer-preset .preset-unit {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0;
-  opacity: .75;
-}
-
-.carousel .timer-panel>.transport {
-  grid-column: 1;
-  grid-row: 3;
-  justify-content: flex-start;
-  gap: 10px;
-}
-
-.carousel .timer-panel .transport button {
-  width: 48px;
-  height: 48px;
-  border: 0;
-  background: #b7f4e223;
-  box-shadow: inset 0 1px 0 #e9fff529;
-  flex-shrink: 0;
-}
-
-.carousel .timer-panel .transport button[disabled] {
-  display: none;
-}
-
-.carousel .timer-panel .transport button[data-action="info"] {
-  width: auto;
-  min-width: 88px;
-  padding: 0 18px;
-  border-radius: 24px;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.carousel .timer-preset:not(:disabled):active {
-  background: #d9fff345;
-  transform: scale(.97);
-  filter: none;
-}
-
-@media (prefers-reduced-motion:no-preference) {
-  .carousel .timer-preset {
-    transition: transform .15s ease,background .15s ease,box-shadow .15s ease;
-  }
-}
-
-@media (min-width:520px) and (max-width:999px) {
-  .carousel .timer-panel {
-    padding: 28px;
-    gap: 16px 28px;
-  }
-
-  .carousel .timer-preset .preset-number {
-    font-size: 40px;
-  }
-
-  .carousel .timer-panel .transport button {
-    width: 52px;
-    height: 52px;
-  }
-}
-
-@media (max-width:519px) {
-  .carousel .timer-panel {
-    display: grid;
-    padding: 16px;
-    grid-template-columns: minmax(0,.8fr) minmax(0,1.4fr);
-    gap: 8px 12px;
-  }
-
-  .carousel .timer-panel>strong {
-    font-size: 13px;
-  }
-
-  .carousel .timer-remaining {
-    font-size: 32px;
-  }
-
-  .carousel .timer-presets {
-    gap: 8px;
-    grid-template-rows: repeat(2,minmax(52px,1fr));
-  }
-
-  .carousel .timer-panel .timer-preset {
-    min-height: 52px;
-    border-radius: 18px;
-    padding: 10px 4px;
-    gap: 3px;
-  }
-
-  .carousel .timer-preset .preset-number {
-    font-size: 26px;
-  }
-
-  .carousel .timer-preset .preset-unit {
-    font-size: 11px;
-  }
-
-  .carousel .timer-panel .transport button {
-    width: 44px;
-    height: 44px;
-  }
-
-  .carousel .timer-panel .transport button[data-action="info"] {
-    min-width: 70px;
-    padding: 0 12px;
-  }
 }

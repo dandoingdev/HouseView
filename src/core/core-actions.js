@@ -78,6 +78,14 @@ export const featureActions = freeze({
   'goto-widget': freeze({immediate: true, run: gotoWidget}),
   'calendar-view': freeze({immediate: true, run: openCalendar}),
   'overview-open': freeze({immediate: true, run: openOverview}),
+  'home-view': freeze({
+    immediate: true,
+    run: (ctx) =>
+      ctx.card._screensaverOpenType?.(
+        'home',
+        ctx.card._config?.home_title ? {title: ctx.card._config.home_title} : {}
+      )
+  }),
   dim: freeze({immediate: true, run: toggleDim}),
   'page-next': freeze({
     immediate: true,

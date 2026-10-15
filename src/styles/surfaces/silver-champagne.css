@@ -1,4 +1,4 @@
-/* @owns carousel surface-silver surface-champagne face tile widget control active page-nav manage dim-screen night-mode camera-gallery calendar-month */
+/* @owns carousel surface-silver surface-champagne face tile widget control active page-nav manage dim-screen home-button night-mode camera-gallery calendar-month */
 /*
  * Silver and champagne surface rules, wallpaper url()s and every user of --hv-wallpaper.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
@@ -51,7 +51,8 @@
   color: inherit;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .dim-screen {
+.carousel:is(.surface-silver,.surface-champagne) .dim-screen,
+.carousel:is(.surface-silver,.surface-champagne) .home-button {
   background: #39404b45;
   color: inherit;
   border-color: #fff5;

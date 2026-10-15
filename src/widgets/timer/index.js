@@ -1,6 +1,6 @@
-// Kitchen timer: a panel with the countdown, four preset buttons (5, 10, 15, 30 minutes), pause/resume, cancel and
-// a "Custom" button that opens more-info. Ported from renderWidget (timer branch), _act (timer-* branches) and
-// _countdowns/the finish detection of the original; markup and behaviour are byte-compatible.
+// Kitchen timer, in the same quiet language as the blinds and thermostat widgets: the name and a big countdown in the
+// middle (a press opens more-info, where Home Assistant lets you pick any duration) and one row of plain keys underneath:
+// the presets (5, 10, 15, 30 minutes) while the timer is idle, pause or resume and cancel while it runs.
 //
 // The countdown text is DOM work, not markup: render always writes the idle label and `refreshCountdown`
 // (afterRender + a 1 s tick) fills in the time. The alarm banner, chime and finish detection live in alarm.js and
@@ -14,11 +14,21 @@ const PRESET_MINUTES = [5, 10, 15, 30];
 /** States in which pause/resume and cancel make sense. */
 const RUNNING_STATES = ['paused', 'active'];
 
+/** Plain line glyphs, drawn inline so they look the same with and without Home Assistant's icon set. */
+const GLYPHS = {
+  pause:
+    '<rect x="7" y="6" width="3.4" height="12" rx="1.2"/><rect x="13.6" y="6" width="3.4" height="12" rx="1.2"/>',
+  play: '<path d="M8 5.5v13l10.5-6.5z"/>',
+  stop: '<rect x="6.5" y="6.5" width="11" height="11" rx="2.2"/>'
+};
+const glyph = (name) =>
+  `<svg class="ts-glyph" viewBox="0 0 24 24" aria-hidden="true">${GLYPHS[name]}</svg>`;
+
 const presetButton = (ctx, minutes) =>
   ctx.btn(
     `timer-start-${minutes}`,
     `<span class="preset-number">${minutes}</span><span class="preset-unit">${ctx.esc(ctx.t('timer.unit_min'))}</span>`,
-    'timer-preset'
+    'timer-preset ts-preset'
   );
 
 /** Pause, or Resume when the timer is paused. Both are disabled unless the timer is running or paused. */
@@ -27,8 +37,8 @@ function pauseResumeButton(ctx, running) {
   const label = paused ? ctx.t('timer.resume') : ctx.t('timer.pause');
   return ctx.btn(
     paused ? 'timer-resume' : 'timer-pause',
-    `${ctx.icon(paused ? 'play' : 'pause')}<span class="sr">${ctx.esc(label)}</span>`,
-    '',
+    `${glyph(paused ? 'play' : 'pause')}<span class="sr">${ctx.esc(label)}</span>`,
+    'ts-key',
     running
   );
 }
@@ -36,17 +46,9 @@ function pauseResumeButton(ctx, running) {
 const cancelButton = (ctx, running) =>
   ctx.btn(
     'timer-cancel',
-    `${ctx.icon('stop')}<span class="sr">${ctx.esc(ctx.t('timer.cancel'))}</span>`,
-    '',
+    `${glyph('stop')}<span class="sr">${ctx.esc(ctx.t('timer.cancel'))}</span>`,
+    'ts-key',
     running
-  );
-
-/** "Custom" opens more-info, where Home Assistant lets the user pick any duration. */
-const customButton = (ctx) =>
-  ctx.btn(
-    'info',
-    `<span>${ctx.esc(ctx.t('timer.custom'))}</span><span class="sr"> ${ctx.esc(ctx.t('timer.custom_suffix'))}</span>`,
-    ''
   );
 
 /** "m:ss" for the seconds left until `finishesAt`, never below 0:00. */
@@ -82,17 +84,20 @@ export default defineWidget({
   render(ctx) {
     const running = ctx.ok && RUNNING_STATES.includes(ctx.state?.state);
     const presets = PRESET_MINUTES.map((minutes) => presetButton(ctx, minutes)).join('');
-    const transport =
-      pauseResumeButton(ctx, running) + cancelButton(ctx, running) + customButton(ctx);
-    const hint = ctx.ok ? ctx.t('timer.hint') : ctx.t('timer.unavailable_hint');
+    const keys = pauseResumeButton(ctx, running) + cancelButton(ctx, running);
+    // The middle is one big key: it opens more-info (custom durations live there).
+    const main = ctx.btn(
+      'info',
+      `<strong class="ts-name">${ctx.name}</strong>` +
+        `<span class="timer-remaining ts-time" data-timer="${ctx.esc(ctx.entityId)}">${ctx.esc(ctx.ok ? ctx.t('timer.ready') : ctx.t('state.unavailable'))}</span>` +
+        `<span class="sr">${ctx.esc(ctx.t('timer.custom_suffix'))}</span>`,
+      'ts-main',
+      ctx.ok
+    );
     return ctx.root(
       'section',
-      'timer-panel',
-      `<strong>${ctx.name}</strong>` +
-        `<span class="timer-remaining" data-timer="${ctx.esc(ctx.entityId)}">${ctx.esc(ctx.t('timer.ready'))}</span>` +
-        `<div class="timer-presets">${presets}</div>` +
-        `<div class="transport">${transport}</div>` +
-        `<small>${ctx.esc(hint)}</small>`
+      `timer-panel timer-simple ${running ? 'is-running' : 'is-idle'}`,
+      `${main}<div class="timer-presets ts-presets">${presets}</div><div class="transport ts-keys">${keys}</div>`
     );
   },
 

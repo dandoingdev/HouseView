@@ -27,6 +27,8 @@ export const FEATURE_ACTIONS = [
   'dim',
   'overview-open',
   'calendar-view',
+  'home-view',
+  'weather-view',
   'goto-widget',
   'page-prev',
   'page-next',

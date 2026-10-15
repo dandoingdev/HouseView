@@ -248,19 +248,33 @@ export const screensaverMixin = {
   },
 
   /**
-   * Open an overview by type (a clock, date or calendar widget asking for the month calendar). The options of an
+   * Open an overview by type (a clock, date or calendar widget asking for the month calendar, a weather widget asking for the weather scene). The options of an
    * explicit screensaver entry of that type apply; otherwise the defaults.
    */
-  _screensaverOpenType(type) {
-    if (!this._hass || !getOverview(type) || this._config?.calendar_view === false) return;
+  _screensaverOpenType(type, extra = {}) {
+    const optOut = {calendar_month: 'calendar_view', weather: 'weather_view'}[type];
+    if (!this._hass || !getOverview(type) || (optOut && this._config?.[optOut] === false)) return;
     const [entry] = normalizeScreensaver({
-      screensaver: {type, enabled: true, idle_timeout: 0, start_in_edit_mode: true, preview: false}
+      screensaver: {
+        ...extra,
+        type,
+        enabled: true,
+        idle_timeout: 0,
+        start_in_edit_mode: true,
+        preview: false
+      }
     });
     if (!entry) return;
+    // an explicit screensaver of the same type (and entity) lends its options (sun entity, details, ...)
     const configured = this._screensaver?.entries.find(
-      (e) => e.type === type && !e.implicit && !e.manual
+      (e) =>
+        e.type === type &&
+        !e.implicit &&
+        !e.manual &&
+        (!extra.entity || e.options.entity === extra.entity || !e.options.entity)
     );
-    if (configured) entry.options = {...configured.options};
+    if (configured)
+      entry.options = {...configured.options, ...(extra.entity ? {entity: extra.entity} : {})};
     this._screensaverShowManual(entry);
   },
 

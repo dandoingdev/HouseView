@@ -29,6 +29,23 @@ export const dimMixin = {
     this._paintDimButton(button);
   },
 
+  /** The home button (`home_overview: true`), bottom left: opens the home overview full screen. */
+  _syncHomeButton(shell) {
+    let button = shell.querySelector('.home-button');
+    if (this._config.home_overview !== true || this._config.single_widget) {
+      button?.remove();
+      return;
+    }
+    if (!button) {
+      button = document.createElement('button');
+      button.className = 'home-button';
+      button.dataset.action = 'home-view';
+      shell.append(button);
+    }
+    button.setAttribute('aria-label', t(this._hass, 'home.open'));
+    button.innerHTML = this._icon('home-variant');
+  },
+
   /** Toggle the dim state in place: no re-render, so nothing under the finger is rebuilt. */
   _toggleDim() {
     this._dim = !this._dim;
