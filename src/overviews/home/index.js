@@ -270,7 +270,7 @@ const watched = (config) => {
 
 export default defineOverview({
   type: 'home',
-  label: 'Home overview',
+  label: 'Home summary',
   order: 60,
   entity: 'none',
   domains: [],

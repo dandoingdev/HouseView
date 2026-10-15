@@ -60,7 +60,7 @@ function openCalendar(ctx) {
 }
 
 /**
- * Jump to the carousel page that holds a widget (the home overview's chips and headers). The id is `widget:<index>`,
+ * Jump to the carousel page that holds a widget (the home summary's chips and headers). The id is `widget:<index>`,
  * the index of the widget in the card's normalised `widgets` list (its `data-widget` number). An unknown index, or a
  * widget that is on no page, does nothing. Nothing is called on Home Assistant.
  */

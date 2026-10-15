@@ -1,11 +1,11 @@
-// The "Home overview" section of the carousel editor: the switch that adds the home button, its title, the bins sensor and
+// The "Home summary" section of the carousel editor: the switch that adds the home button, its title, the bins sensor and
 // the transport chips (docs/overviews/home.md). Pure functions, no DOM: carousel-editor.js renders the <ha-form> and calls these.
 import {getOverview} from '../core/overview-registry.js';
 import {field} from './form.js';
 
 export const HOME_KEYS = ['home_overview', 'home_title', 'home_bins', 'home_transport'];
 
-/** The section means something when the home overview is in the bundle, or the config already has one of its keys. */
+/** The section means something when the home summary is in the bundle, or the config already has one of its keys. */
 export const showHome = (config) =>
   !!getOverview('home') || HOME_KEYS.some((key) => config[key] !== undefined);
 

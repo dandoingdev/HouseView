@@ -1,6 +1,6 @@
 /* @owns surface-home */
 /*
- * The page that holds the home overview alone takes the overview's own colour (light, or dark under `.dark`) all the way
+ * The page that holds the home summary alone takes the overview's own colour (light, or dark under `.dark`) all the way
  * out, instead of showing the wallpaper around it, and the page controls (dots and arrows) change colour to stay visible.
  * The colours are the ones in src/overviews/home/style.css.
  */

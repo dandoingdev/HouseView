@@ -1,4 +1,4 @@
-# The home overview (docs/overviews/home.md): a scrollable home screen that builds itself from the widgets on the carousel.
+# The home summary (docs/overviews/home.md): a scrollable home screen that builds itself from the widgets on the carousel.
 # Entity ids are placeholders: use your own.
 #
 # The "Home" page holds the overview alone, so it fills the page. Everything else is on pages of its own. The chips jump to

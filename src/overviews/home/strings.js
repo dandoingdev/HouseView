@@ -1,7 +1,7 @@
 // English is the source text and the last fallback.
 export default {
   en: {
-    'home_overview.label': 'Home overview',
+    'home_overview.label': 'Home summary',
     'home_overview.description':
       'A scrollable home screen made from the dashboard: climate, lights, locks and media chips, cameras and scenes.',
     'home_overview.title': 'Home',

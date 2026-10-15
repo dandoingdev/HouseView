@@ -8,7 +8,7 @@ be used four ways:
 | **Screensaver** | After a while without a touch, from the carousel's `screensaver` option |
 | **Automatic display** | By itself: the [timer display](overviews/timer.md) while a timer runs, the [cover art](overviews/cover_art.md) while music plays |
 | **Opened by pressing a widget** | The month calendar opens from a clock, date or calendar widget; the full weather scene opens from the weather overview's small widget; the photo frame card opens full screen |
-| **Card** | Placed on a page or on a dashboard like any widget. The [home overview](overviews/home.md) is only a card: a page that builds itself from the carousel's widgets |
+| **Card** | Placed on a page or on a dashboard like any widget. The [home summary](overviews/home.md) is only a card: a page that builds itself from the carousel's widgets |
 
 ## The overviews
 
@@ -19,7 +19,7 @@ be used four ways:
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |
 | [Photo frame](overviews/photo_frame.md) | `photo_frame` | idle (screensaver), card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | Card: opens it full screen |
 | [Month calendar](overviews/calendar_month.md) | `calendar_month` | idle (screensaver), opened by pressing a clock, date or calendar widget, card | none | `week_start`, `show_time` | Card: nothing |
-| [Home overview](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
+| [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
 
 Card types are `custom:houseview-<name>-overview-card` with the name in the table's `type` column, underscores written as
 hyphens: `custom:houseview-weather-overview-card`, `custom:houseview-timer-overview-card`,
@@ -28,7 +28,7 @@ hyphens: `custom:houseview-weather-overview-card`, `custom:houseview-timer-overv
 They appear in the card picker as **HouseView · Weather overview**, **HouseView · Photo frame** and so on.
 
 Overviews only **read** Home Assistant: they have no way to call a service, so a screensaver or an overview card cannot
-switch anything. The one exception in spirit is the [home overview](overviews/home.md): its buttons ask the card to run an action
+switch anything. The one exception in spirit is the [home summary](overviews/home.md): its buttons ask the card to run an action
 that already exists (jump to a page, open the camera gallery, run a scene that has a widget on the dashboard), and the card runs it
 under its usual guards. The overview itself never calls a service.
 

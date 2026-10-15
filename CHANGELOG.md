@@ -14,21 +14,21 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
-* The home overview can be a screensaver (choose it in the editor's screensaver list), read-only, instead of the weather.
-* A page that holds only the home overview now takes the overview's colour across the whole page, and the page dots change
+* The home summary can be a screensaver (choose it in the editor's screensaver list), read-only, instead of the weather.
+* A page that holds only the home summary now takes the overview's colour across the whole page, and the page dots change
   colour to stay visible.
 
 * `home_overview: true` (a switch in the card editor) adds a small home button at the bottom left, opposite the Dim button;
-  it opens the home overview full screen. `home_title` sets its title. Off by default.
-* Card editor: every section starts collapsed, and opening the Home overview section shows the home overview in the preview.
-* Card editor: a **Home overview** section holds the home switch, the title, the bins sensor and the transport chips (entity, label, icon), moved out of "Automatic displays".
-* Home overview: optional bins chip (`home_bins`, icons for the bins going out this week) and transport chips (`home_transport`,
+  it opens the home summary full screen. `home_title` sets its title. Off by default.
+* Card editor: every section starts collapsed, and opening the Home summary section shows the home summary in the preview.
+* Card editor: a **Home summary** section holds the home switch, the title, the bins sensor and the transport chips (entity, label, icon), moved out of "Automatic displays".
+* Home summary: optional bins chip (`home_bins`, icons for the bins going out this week) and transport chips (`home_transport`,
   a custom label, a selectable icon and the next departure time, amber when a line is not running).
 * The weather widget opens the full-screen weather overview when pressed (`weather_view: false` keeps more-info). The month
   calendar overview covers the whole screen.
 * The timer widget now follows the quiet style of the blinds and thermostat widgets.
 
-* **Home overview** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the
+* **Home summary** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the
   widgets on the carousel: a large title with the time, chips for climate (the temperature range), lights (how many are on),
   locks (how many are locked, amber when one is open) and media, up to three rounded camera snapshots with a "2m ago" label,
   and a tile for every scene. Chips and headings jump to the page of the first widget of their kind, a camera opens the camera

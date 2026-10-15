@@ -1,4 +1,4 @@
-// Pure data mapping for the home overview: the carousel's widgets plus Home Assistant states -> chips, cameras and
+// Pure data mapping for the home summary: the carousel's widgets plus Home Assistant states -> chips, cameras and
 // scenes. No DOM, no Date.now, no Intl, no strings: `now` and the number formatter are passed in, words and markup
 // are made in index.js.
 

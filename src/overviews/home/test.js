@@ -1,6 +1,6 @@
 // Browser behaviour tests (tests/overviews/harness.js, against dist/houseview.js with a recording mock hass).
-// The home overview is built from the carousel's own widgets, so these tests mount a real carousel with `bare: true`:
-// the home overview on a page of its own and every other widget on a page of its own (page index = position).
+// The home summary is built from the carousel's own widgets, so these tests mount a real carousel with `bare: true`:
+// the home summary on a page of its own and every other widget on a page of its own (page index = position).
 const HOME = {type: 'custom:houseview-home-overview-card', page: 'Home'};
 const card = (kind, entity, extra = {}) => ({
   type: `custom:houseview-${kind}-card`,

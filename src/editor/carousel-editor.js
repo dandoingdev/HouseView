@@ -176,10 +176,10 @@ export class HouseViewEditor extends HTMLElement {
     const view = {key: structureKey(this._config), cameras: [], pages: []};
     this._view = view;
     view.appearance = this._renderAppearance(parent);
+    if (showHome(this._config)) this._renderHome(parent, view);
     this._renderCameras(parent, view);
     if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
     if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
-    if (showHome(this._config)) this._renderHome(parent, view);
     this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
     this._renderAddPage(parent);
     if (!hasStackEditor()) this._upgradeWhenReady();
@@ -272,7 +272,7 @@ export class HouseViewEditor extends HTMLElement {
 
   _renderHome(parent, view) {
     const {el, section} = panel(parent, text(this._hass, 'editor.home_section'));
-    // While this section is open the preview shows the home overview, so its changes can be seen.
+    // While this section is open the preview shows the home summary, so its changes can be seen.
     el.addEventListener('expanded-changed', (event) => {
       if (event.target !== el) return;
       this._setHomePreview(el.expanded === true);

@@ -19,13 +19,13 @@ export default {
     'editor.automatic_displays': 'Automatic displays',
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
-    'editor.home_section': 'Home overview',
-    'editor.home_overview': 'Add a home button that opens the home overview',
+    'editor.home_section': 'Home summary',
+    'editor.home_overview': 'Add a home button that opens the home summary',
     'editor.home_title': 'Title',
-    'editor.helper.home_title': 'The large heading on the home overview. Empty uses "Home".',
+    'editor.helper.home_title': 'The large heading on the home summary. Empty uses "Home".',
     'editor.home_bins': 'Bins sensor',
     'editor.helper.home_bins':
-      'A waste_collection_schedule sensor. The home overview shows an icon for each bin going out in the next 7 days.',
+      'A waste_collection_schedule sensor. The home summary shows an icon for each bin going out in the next 7 days.',
     'editor.home_transport': 'Transport chips',
     'editor.helper.home_transport':
       'Departure sensors (for example from the London TfL integration). Each shows your label, the icon and the next time, and turns amber when nothing is running.',

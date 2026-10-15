@@ -9,7 +9,7 @@ import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 import {getWidget} from '../core/registry.js';
 
-/** A page that holds the home overview alone: the whole page takes the overview's colour (no wallpaper around it). */
+/** A page that holds the home summary alone: the whole page takes the overview's colour (no wallpaper around it). */
 export const isHomePage = (screen) =>
   screen?.placements?.length === 1 && screen.placements[0].widget?.type === 'home_overview';
 

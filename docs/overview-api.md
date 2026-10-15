@@ -73,7 +73,7 @@ export default defineOverview({
 | `validate(options)` | none | Cross-field rules; throw `Error('<exact message>')` |
 | `watch(options, config)` | none | Extra entity ids whose change re-renders (weather: the sun entity). The primary entity is always watched. `config` is the card config as the controller holds it: the derived widget's `watch`, the screensaver change signature and the carousel's `hass-signature` all pass it, so an overview built from the dashboard's own widgets (home) can watch every entity of the configured `config.widgets` |
 | `interactive` | `false` | `true` allows `<button data-action data-entity>` in **card** mode (see "Interactive overviews" below). The derived card then has no full-card `ov-tap` overlay |
-| `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list (the timer display, cover art and the home overview). It can still be written in YAML |
+| `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list (the timer display, cover art and the home summary). It can still be written in YAML |
 | `data({hass, options, entityId})` | none | Subscriptions, keyed by the name `render` reads from `ctx.data[name]` (section 6) |
 | `afterRender(hctx)` | none | After a card-mode root is created or patched; idempotent |
 | `tick` | none | `{every, run, align?}` on the shared ticker while the overview is on screen. `align: 'minute'` runs when the minute changes |
@@ -93,7 +93,7 @@ entity policy `custom`, availability `always`) that it registers with the widget
 ### Interactive overviews
 
 Most overviews are pictures: no buttons, a press on a screensaver only wakes the dashboard. An overview that is a page of
-the dashboard in its own right (the home overview) sets `interactive: true` and may render `<button data-action="..."
+the dashboard in its own right (the home summary) sets `interactive: true` and may render `<button data-action="..."
 data-entity="...">` in **card** mode. The rules (checked by `tests/overviews/overview-contract.test.mjs`):
 
 * Only these actions: `goto-widget`, `camera-grid`, `run-action`, `info` (`INTERACTIVE_ACTIONS` in `src/core/define-overview.js`).

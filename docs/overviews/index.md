@@ -11,4 +11,4 @@ An overview fills a whole page. Use it as a [screensaver](../screensavers.md) ov
 | [Cover art](cover_art.md) | `cover_art` | `custom:houseview-cover-art-overview-card` | required, a `media_player` entity | 1.0 |
 | [Photo frame](photo_frame.md) | `photo_frame` | `custom:houseview-photo-frame-overview-card` | none | 1.0 |
 | [Month calendar](calendar_month.md) | `calendar_month` | `custom:houseview-calendar-month-overview-card` | none | 1.0 |
-| [Home overview](home.md) | `home` | `custom:houseview-home-overview-card` | none | 1.1 |
+| [Home summary](home.md) | `home` | `custom:houseview-home-overview-card` | none | 1.1 |

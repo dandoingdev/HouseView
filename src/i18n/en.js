@@ -25,7 +25,7 @@ export default {
   'native.loading': 'Loading card…',
   'dim.dim': 'Dim',
   'dim.dim_screen': 'Dim screen',
-  'home.open': 'Home overview',
+  'home.open': 'Home summary',
   'dim.brighter': 'Brighter',
   'dim.restore': 'Restore brightness',
 

@@ -592,7 +592,7 @@ export const screensaverMixin = {
   /** The layer swallows every gesture: the first tap only wakes. Nothing reaches the controller's listeners. */
   _screensaverBind(layer) {
     const wake = (reason) => this._screensaver?.idle?.wake(reason);
-    // A scrollable overview (the home overview) is dragged, not just tapped: a drag scrolls it (a mouse drag too) and
+    // A scrollable overview (the home summary) is dragged, not just tapped: a drag scrolls it (a mouse drag too) and
     // only a press that stayed put wakes.
     const scroller = layer.querySelector('.ov-home-scroll');
     let down = null;

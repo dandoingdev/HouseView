@@ -1,19 +1,19 @@
 ---
 type: home
-label: Home overview
+label: Home summary
 entity: none
 domains: []
 since: 1.1
 ---
 
-# Home overview
+# Home summary
 
 A scrollable home screen that **builds itself from the widgets on the carousel**. Put it on a page of its own
 (`custom:houseview-home-overview-card`) and it shows a large title with the time, a row of chips, the cameras and the
 scenes of the dashboard. Nothing is configured: add or remove a light, a lock or a camera widget and the screen follows.
 Everything reads from the card's widget list and Home Assistant; the overview never calls a service itself.
 
-![The home overview on a 1280 x 800 tablet](../images/overview-home.png)
+![The home summary on a 1280 x 800 tablet](../images/overview-home.png)
 
 ## What is shown
 
@@ -28,7 +28,7 @@ Everything reads from the card's widget list and Home Assistant; the overview ne
 
 ### Bins and transport chips (optional)
 
-Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown). The card editor's **Home overview** section edits them, with the switch and the title:
+Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown). The card editor's **Home summary** section edits them, with the switch and the title:
 
 ```yaml
 home_bins: sensor.bins          # a waste_collection_schedule sensor with details_format: upcoming
@@ -55,7 +55,7 @@ carousel's dark appearance.
 | show_time | boolean | true | Show the time at the top right (in your time format) |
 
 The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It can be a page of the dashboard (the
-chips, cameras and scenes are buttons) or a **screensaver**: choose **Home overview** in the editor's screensaver list
+chips, cameras and scenes are buttons) or a **screensaver**: choose **Home summary** in the editor's screensaver list
 (or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
 screensaver it is read-only: a press only wakes the dashboard. The screensaver shows the carousel's lights, climate,
 locks, cameras and scenes, so it follows what you add. A page that holds only this overview also takes the overview's

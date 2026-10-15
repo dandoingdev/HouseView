@@ -40,10 +40,10 @@ screensaver:
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
-| `home_overview` | `false` | `true` adds the [home overview](overviews/home.md) (a scrollable home screen built from this dashboard's widgets) behind a small home button at the bottom left of the screen (opposite the Dim button). The button opens the overview full screen; a tap closes it. It adds no page. Also a switch in the card editor's Home overview section |
-| `home_bins` | none | A [waste_collection_schedule](overviews/home.md) sensor (`sensor.bins`): the home overview shows an icon chip for the bins going out in the next 7 days |
-| `home_transport` | none | A list of departure sensors (`sensor.id` or `{entity, label, icon}`): the home overview shows a chip per entry with the next departure time, amber when nothing is running |
-| `home_title` | `Home` | The title shown on the home overview when `home_overview` is on |
+| `home_overview` | `false` | `true` adds the [home summary](overviews/home.md) (a scrollable home screen built from this dashboard's widgets) behind a small home button at the bottom left of the screen (opposite the Dim button). The button opens the overview full screen; a tap closes it. It adds no page. Also a switch in the card editor's Home summary section |
+| `home_bins` | none | A [waste_collection_schedule](overviews/home.md) sensor (`sensor.bins`): the home summary shows an icon chip for the bins going out in the next 7 days |
+| `home_transport` | none | A list of departure sensors (`sensor.id` or `{entity, label, icon}`): the home summary shows a chip per entry with the next departure time, amber when nothing is running |
+| `home_title` | `Home` | The title shown on the home summary when `home_overview` is on |
 | `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |

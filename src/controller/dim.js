@@ -4,7 +4,7 @@ import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 import {inCardPreview} from './screen-model.js';
 
-/** The card editor's Home overview section tells the preview to show the home overview while it is open. */
+/** The card editor's Home summary section tells the preview to show the home summary while it is open. */
 export const HOME_PREVIEW_EVENT = 'houseview-home-preview';
 
 export const dimMixin = {
@@ -33,7 +33,7 @@ export const dimMixin = {
     this._paintDimButton(button);
   },
 
-  /** The home button (`home_overview: true`), bottom left: opens the home overview full screen. */
+  /** The home button (`home_overview: true`), bottom left: opens the home summary full screen. */
   _syncHomeButton(shell) {
     let button = shell.querySelector('.home-button');
     if (this._config.home_overview !== true || this._config.single_widget) {
@@ -50,7 +50,7 @@ export const dimMixin = {
     button.innerHTML = this._icon('home-variant');
   },
 
-  /** In the card editor's preview only: show the home overview while the editor's Home section is open. */
+  /** In the card editor's preview only: show the home summary while the editor's Home section is open. */
   _syncHomePreview() {
     if (!this._config || !inCardPreview(this)) return;
     const want = window.__houseviewHomePreview === true && this._config.home_overview === true;

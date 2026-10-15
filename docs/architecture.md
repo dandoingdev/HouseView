@@ -125,7 +125,7 @@ one-off manual layers and the per-instance data leases (`core/overview-session.j
 controller makes exactly five calls into it (set config, connect, disconnect, hass, end of render). With no `screensaver`
 block and no timer or music widget it allocates nothing. See the [overview API](overview-api.md).
 
-An `interactive` overview (the home overview) is the one kind that has buttons in card mode. They go through the normal click
+An `interactive` overview (the home summary) is the one kind that has buttons in card mode. They go through the normal click
 path: `goto-widget` (a core feature action that looks the widget up in the controller's `_screens` and calls `_setPage`),
 `camera-grid` and `run-action` run through `core/dispatch.js` with their usual guards. Its `watch(options, config)` receives the
 card config, so the change detection in `core/hass-signature.js` watches the entities of every widget it is built from.
