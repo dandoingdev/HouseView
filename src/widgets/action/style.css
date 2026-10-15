@@ -10,6 +10,6 @@
 
 /* @phase night */
 /* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
-.carousel.layout-controls .script small {
+.carousel.layout-page .script small {
   text-transform: none;
 }

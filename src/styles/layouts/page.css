@@ -1,17 +1,18 @@
 /* @owns face control active control-note */
 /*
- * layout-controls rules that no single widget owns (the generic .control tile, teal x controls).
+ * layout-page rules that no single widget owns (the generic .control tile, teal x page). Every page carries
+ * the layout-page class: there is one layout.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
  * sections inside one phase.
  */
 
-/* @phase layout-controls */
-/* Home controls: broad glass tiles, generous iconography and clear state labels. */
-.carousel.layout-controls .face {
+/* @phase layout-page */
+/* Broad glass tiles, generous iconography and clear state labels. */
+.carousel.layout-page .face {
   gap: 18px;
 }
 
-.carousel.layout-controls .control {
+.carousel.layout-page .control {
   align-items: flex-start;
   justify-content: center;
   text-align: left;
@@ -20,20 +21,20 @@
   border-radius: 32px;
 }
 
-.carousel.layout-controls .control ha-icon {
+.carousel.layout-page .control ha-icon {
   --mdc-icon-size: 60px;
   margin: 0 0 24px;
   opacity: .95;
 }
 
-.carousel.layout-controls .control>span:not(.widget-value) {
+.carousel.layout-page .control>span:not(.widget-value) {
   font-size: clamp(22px,8cqi,30px);
   font-weight: 500;
   letter-spacing: -.025em;
   line-height: 1.15;
 }
 
-.carousel.layout-controls .control small {
+.carousel.layout-page .control small {
   font-size: 17px;
   line-height: 1.4;
   margin-top: 10px;
@@ -41,76 +42,76 @@
   text-transform: capitalize;
 }
 
-.surface-teal.layout-controls .control {
+.surface-teal.layout-page .control {
   background: linear-gradient(145deg,#89d7c71c,#0c605515);
   border-color: #d0fff432;
   box-shadow: inset 0 1px 0 #effff433,0 3px 10px #002e291a;
 }
 
-.surface-teal.layout-controls .control.active {
+.surface-teal.layout-page .control.active {
   background: linear-gradient(145deg,#cefff447,#9ce9ce24);
   border-color: #e9fff666;
   box-shadow: inset 0 1px 1px #fff6,0 3px 12px #003e3022;
 }
 
-.surface-teal.layout-controls .control.active ha-icon {
+.surface-teal.layout-page .control.active ha-icon {
   color: #f2fff2;
   filter: drop-shadow(0 0 12px #d3ffdf50);
 }
 
-.surface-teal.layout-controls .control.active small {
+.surface-teal.layout-page .control.active small {
   opacity: 1;
   color: #e5fff0;
 }
 
-/* @phase layout-controls @pin 1 */
+/* @phase layout-page @pin 1 */
 /* Home controls: broad glass tiles, generous iconography and clear state labels. */
-.carousel.layout-controls .control:not(:disabled):active {
+.carousel.layout-page .control:not(:disabled):active {
   filter: none;
   background: #cefff43b;
   transform: scale(.985);
 }
 
 @media (prefers-reduced-motion:no-preference) {
-  .carousel.layout-controls .control {
+  .carousel.layout-page .control {
     transition: transform .15s ease,background .15s ease;
   }
 }
 
 @media (max-width:999px) {
-  .carousel.layout-controls .control {
+  .carousel.layout-page .control {
     padding: 28px;
   }
 
-  .carousel.layout-controls .control ha-icon {
+  .carousel.layout-page .control ha-icon {
     --mdc-icon-size: 64px;
   }
 
-  .carousel.layout-controls .control>span:not(.widget-value) {
+  .carousel.layout-page .control>span:not(.widget-value) {
     font-size: 28px;
   }
 }
 
 @media (max-width:519px) {
-  .carousel.layout-controls .face {
+  .carousel.layout-page .face {
     gap: 10px;
   }
 
-  .carousel.layout-controls .control {
+  .carousel.layout-page .control {
     padding: 18px;
     border-radius: 24px;
   }
 
-  .carousel.layout-controls .control ha-icon {
+  .carousel.layout-page .control ha-icon {
     --mdc-icon-size: 42px;
     margin-bottom: 16px;
   }
 
-  .carousel.layout-controls .control>span:not(.widget-value) {
+  .carousel.layout-page .control>span:not(.widget-value) {
     font-size: 21px;
   }
 
-  .carousel.layout-controls .control small {
+  .carousel.layout-page .control small {
     font-size: 14px;
     margin-top: 6px;
   }
@@ -119,7 +120,7 @@
 /* @phase night */
 /* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
 /* shared: action, alarm_control_panel */
-.carousel.layout-controls .control>.control-note {
+.carousel.layout-page .control>.control-note {
   font-size: 13px;
   line-height: 1.45;
   letter-spacing: 0;
@@ -130,7 +131,7 @@
 
 /* @important overrides an earlier !important rule */
 /* shared: action, alarm_control_panel */
-.carousel.layout-controls .control>span.control-note {
+.carousel.layout-page .control>span.control-note {
   font-size: 13px !important;
   line-height: 1.45;
   font-weight: 400;
@@ -142,73 +143,73 @@
 /* @phase tablet */
 /* Tablet canvas belongs to the viewport, independent of HA panel sizing. */
 @media (orientation:landscape) and (max-height:699px) {
-  .carousel.layout-controls .control {
+  .carousel.layout-page .control {
     padding: 20px;
   }
 
-  .carousel.layout-controls .control ha-icon {
+  .carousel.layout-page .control ha-icon {
     --mdc-icon-size: 42px;
     margin-bottom: 14px;
   }
 
-  .carousel.layout-controls .control>span:not(.widget-value) {
+  .carousel.layout-page .control>span:not(.widget-value) {
     font-size: 22px;
   }
 
-  .carousel.layout-controls .control small {
+  .carousel.layout-page .control small {
     font-size: 14px;
     margin-top: 7px;
   }
 
   /* @important overrides an earlier !important rule */
   /* shared: action, alarm_control_panel */
-  .carousel.layout-controls .control>.control-note {
+  .carousel.layout-page .control>.control-note {
     font-size: 12px !important;
   }
 }
 
 /* @phase lifted */
 /* Lifted glass: softer geometry, a luminous rim and deeper separation. */
-.carousel.layout-controls .control {
+.carousel.layout-page .control {
   align-items: center;
   text-align: center;
   padding: 24px 18px;
   justify-content: center;
 }
 
-.carousel.layout-controls .control ha-icon {
+.carousel.layout-page .control ha-icon {
   --mdc-icon-size: 76px;
   margin: 0 0 16px;
   filter: drop-shadow(0 3px 3px #001c2944);
   opacity: 1;
 }
 
-.carousel.layout-controls .control>span:not(.widget-value):not(.control-note) {
+.carousel.layout-page .control>span:not(.widget-value):not(.control-note) {
   font-size: clamp(20px,7cqi,28px);
   font-weight: 600;
   letter-spacing: -.035em;
   line-height: 1.15;
 }
 
-.carousel.layout-controls .control small {
+.carousel.layout-page .control small {
   margin-top: 7px;
 }
 
 @media (orientation:landscape) and (max-height:699px) {
-  .carousel.layout-controls .control {
+  .carousel.layout-page .control {
     padding: 12px;
   }
 
-  .carousel.layout-controls .control ha-icon {
+  .carousel.layout-page .control ha-icon {
     --mdc-icon-size: 64px;
     margin-bottom: 10px;
   }
 
-  .carousel.layout-controls .control>span:not(.widget-value):not(.control-note) {
+  .carousel.layout-page .control>span:not(.widget-value):not(.control-note) {
     font-size: 20px;
   }
 
-  .carousel.layout-controls .control small {
+  .carousel.layout-page .control small {
     font-size: 13px;
     line-height: 1.25;
     margin-top: 5px;
@@ -216,15 +217,15 @@
 
   /* @important overrides an earlier !important rule */
   /* shared: action, alarm_control_panel */
-  .carousel.layout-controls .control>.control-note {
+  .carousel.layout-page .control>.control-note {
     font-size: 11px !important;
     line-height: 1.25;
     margin-top: 5px;
   }
 
   /* shared: action, alarm_control_panel */
-  .carousel.layout-controls .script ha-icon,
-  .carousel.layout-controls .alarm_control_panel ha-icon {
+  .carousel.layout-page .script ha-icon,
+  .carousel.layout-page .alarm_control_panel ha-icon {
     --mdc-icon-size: 52px;
     margin-bottom: 8px;
   }
@@ -233,12 +234,12 @@
 /* @phase lifted @pin 1 */
 /* Lifted glass: softer geometry, a luminous rim and deeper separation. */
 @media (max-width:519px) {
-  .carousel.layout-controls .control ha-icon {
+  .carousel.layout-page .control ha-icon {
     --mdc-icon-size: 56px;
     margin-bottom: 12px;
   }
 
-  .carousel.layout-controls .control>span:not(.widget-value):not(.control-note) {
+  .carousel.layout-page .control>span:not(.widget-value):not(.control-note) {
     font-size: 19px;
   }
 }

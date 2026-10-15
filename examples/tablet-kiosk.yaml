@@ -20,14 +20,14 @@ views:
         confirm_mode: inline
         performance: auto
         pages:
-          - {name: Kitchen, surface: teal, layout: kitchen}
-          - {name: Music, surface: teal, layout: auto}
-          - {name: Home, surface: glass, layout: controls, columns: 4}
+          - {name: Kitchen, surface: teal, columns: 4}
+          - {name: Music, surface: teal}
+          - {name: Home, surface: glass, columns: 4}
         cards:
+          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen, size: large}
           - {type: custom:houseview-clock-card, page: Kitchen}
-          - {type: custom:houseview-date-card, page: Kitchen}
-          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen}
-          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}
+          - {type: custom:houseview-date-card, page: Kitchen, size: tall}
+          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen, size: wide}
           - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}
           - {type: custom:houseview-light-card, entity: light.kitchen, page: Home}
           - {type: custom:houseview-light-card, entity: light.living_room, page: Home}

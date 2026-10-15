@@ -7,10 +7,10 @@
  * sensor tile, so every rule here is scoped under `.weather`.
  */
 
-/* @phase layout-controls */
-/* Home controls: broad glass tiles, generous iconography and clear state labels. */
+/* @phase layout-page */
+/* Broad glass tiles, generous iconography and clear state labels. */
 /* @important overrides an earlier !important rule */
-.carousel.layout-controls .weather .widget-value {
+.carousel.layout-page .weather .widget-value {
   font-size: 64px !important;
   font-weight: 300;
   letter-spacing: -.045em;
@@ -18,14 +18,14 @@
   line-height: 1.05;
 }
 
-.carousel.layout-controls .weather ha-icon {
+.carousel.layout-page .weather ha-icon {
   --mdc-icon-size: 46px;
   margin-bottom: 16px;
 }
 
 @media (max-width:519px) {
   /* @important overrides an earlier !important rule */
-  .carousel.layout-controls .weather .widget-value {
+  .carousel.layout-page .weather .widget-value {
     font-size: 44px !important;
   }
 }
@@ -34,11 +34,11 @@
 /* Lifted glass: softer geometry, a luminous rim and deeper separation. */
 @media (orientation:landscape) and (max-height:699px) {
   /* @important overrides an earlier !important rule */
-  .carousel.layout-controls .weather .widget-value {
+  .carousel.layout-page .weather .widget-value {
     font-size: 44px !important;
   }
 
-  .carousel.layout-controls .weather ha-icon {
+  .carousel.layout-page .weather ha-icon {
     --mdc-icon-size: 52px;
     margin-bottom: 8px;
   }

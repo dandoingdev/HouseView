@@ -97,6 +97,19 @@ describe('widgets shape', () => {
     assert.equal(messageOf({pages: [{name: 'A'}, {name: 'B'}], widgets: w}), null);
   });
 
+  it('page columns are a whole number from 2 to 5; a leftover `layout` is ignored', () => {
+    const w = [{type: 'clock'}];
+    const page = (extra) => messageOf({pages: [{name: 'A', ...extra}], widgets: w});
+    for (const columns of [2, 3, 4, 5, undefined, null]) assert.equal(page({columns}), null);
+    for (const columns of [1, 6, 0, -3, 2.5, '3', true, NaN]) {
+      assert.equal(page({columns}), 'Page columns must be a whole number from 2 to 5.');
+    }
+    for (const layout of ['auto', 'grid', 'controls', 'modular', 'kitchen', 'anything', 7]) {
+      assert.equal(page({layout}), null);
+      assert.equal(page({layout, columns: 4}), null);
+    }
+  });
+
   it('an unsupported type', () => {
     assert.equal(
       messageOf(widgets({type: 'vacuum', entity: 'vacuum.a'})),

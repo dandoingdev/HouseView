@@ -104,7 +104,6 @@ export default defineWidget({
   order: 50,
   defaultSize: 'large',
   standaloneHeight: 280,
-  layoutRoles: ['climate'],
 
   // `room` names the room in the line under the name ("Living Room • 20°"); a removed config shape
   // uses it as its caption too.

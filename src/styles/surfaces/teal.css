@@ -1,7 +1,7 @@
 /* @owns carousel surface-teal face widget calendar-month calendar-day timer-preset page-nav manage night-mode camera-gallery tile control active */
 /*
  * Teal surface rules that no single widget owns, and the teal wallpaper url().
- * Teal x layout-controls generic rules live in layouts/controls.css.
+ * Teal x page generic rules live in layouts/page.css.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
  * sections inside one phase.
  */

@@ -3,7 +3,7 @@
 //
 // In `full` mode a tile is a translucent fill over a blurred wallpaper; `lite` has no blur, so the fill is made opaque.
 // The tint is right when the MEAN colour of the tiles equals what the blurred glass shows. This tool renders the same
-// ten widgets for every surface x appearance x palette x layout, once in `full` and once in `lite`, hides the text, and
+// ten widgets for every surface x appearance x palette, once in `full` and once in `lite`, hides the text, and
 // compares the mean colour inside the tiles.
 //
 //   node tools/lite-glass.mjs                  print the table
@@ -123,17 +123,15 @@ for (const surface of ['glass', 'teal', 'silver', 'champagne', 'soft']) {
       )
         continue;
       if (surface === 'soft' && (appearance !== 'light' || palette !== 'stone')) continue;
-      for (const layout of ['auto', 'controls']) {
-        const name = `${surface}-${appearance}-${palette}-${layout}`;
-        const config = {appearance, palette, pages: [{name: 'P', surface, layout}]};
-        const full = await measure(config, name, 'full');
-        const lite = await measure(config, name, 'lite');
-        const delta = lite.map((v, i) => v - full[i]);
-        worst = Math.max(worst, ...delta.map(Math.abs));
-        console.log(
-          `${name.padEnd(34)} ${full.join(',').padEnd(15)} ${lite.join(',').padEnd(15)} ${delta.join(',')}`
-        );
-      }
+      const name = `${surface}-${appearance}-${palette}`;
+      const config = {appearance, palette, pages: [{name: 'P', surface}]};
+      const full = await measure(config, name, 'full');
+      const lite = await measure(config, name, 'lite');
+      const delta = lite.map((v, i) => v - full[i]);
+      worst = Math.max(worst, ...delta.map(Math.abs));
+      console.log(
+        `${name.padEnd(34)} ${full.join(',').padEnd(15)} ${lite.join(',').padEnd(15)} ${delta.join(',')}`
+      );
     }
   }
 }

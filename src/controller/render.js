@@ -53,7 +53,7 @@ export const renderMixin = {
 
     const shell = this._ensureShell();
     const extra = this._extensionShellClasses().join(' ');
-    shell.className = `shell adaptive carousel surface-${surface} layout-${screen.layout || 'auto'} ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}`;
+    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}`;
 
     this._fillFace(shell.querySelector('.face'), screen);
     this._writeNav();

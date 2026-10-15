@@ -50,8 +50,8 @@ Full-screen views, shown here as a screensaver would show them (mock data, froze
   player, timer, alarm panel and an action widget for scenes, scripts and buttons. Each is also a card of its own.
 * **5 overviews**: weather scene, photo frame, month calendar, timer display and cover art. Use them as screensavers, as
   automatic displays, open them by pressing a widget, or place them as cards.
-* **Page layouts and looks**: `auto`, `controls`, `modular` and `kitchen` layouts; `glass`, `soft`, `teal`, `silver` and
-  `champagne` surfaces; light, dark and automatic appearance; a high-contrast option and a bedtime mode with a Dim button.
+* **One page layout and several looks**: widgets flow onto bounded pages, sized with `size` and `columns`; `glass`,
+  `soft`, `teal`, `silver` and `champagne` surfaces; light, dark and automatic appearance; a high-contrast option and a bedtime mode with a Dim button.
 * **Home Assistant conventions**: native card picker and visual editor with entity selectors, `tap_action`, `hold_action`
   and `double_tap_action`, in-card confirmations, optional localised states.
 * **A camera grid** for up to four cameras, a **timer** with presets and a completion alert, and a **tablet mode** that hides
@@ -122,8 +122,8 @@ views:
     cards:
       - type: custom:houseview-card
         pages:
-          - {name: Kitchen, surface: teal, layout: kitchen}
-          - {name: Home, surface: glass, layout: controls}
+          - {name: Kitchen, surface: teal}
+          - {name: Home, surface: glass}
         cards:
           - {type: custom:houseview-clock-card, page: Kitchen}
           - {type: custom:houseview-date-card, page: Kitchen}
@@ -239,6 +239,7 @@ More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel
 | `palette` | `stone`, `forest` |
 | `high_contrast`, `bedtime` | `true` / `false`; bedtime adds night styling and a Dim button |
 | `performance` | `auto`, `full`, `lite`: `lite` uses opaque glass and no decorative animation. `auto` picks it on a device with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView |
+| `editor_preview` | `landscape` (default), `portrait` or `auto`: how the preview in the card editor is drawn. The card is laid out as a wall tablet and scaled to fit the preview, so it shows the real arrangement |
 
 See [theming](docs/theming.md) and [performance](docs/performance.md).
 
@@ -256,7 +257,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | Option | What it does |
 | --- | --- |
 | `cards` (alias `widgets`) | The widgets, in order |
-| `pages` | `name`, `surface`, `layout` (`auto`, `grid`, `controls`, `modular`, `kitchen`) and `columns` per page |
+| `pages` | `name`, `surface` and `columns` (landscape, 2 to 5) per page |
 | `appearance`, `palette`, `wallpaper`, `high_contrast`, `bedtime` | Look |
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |

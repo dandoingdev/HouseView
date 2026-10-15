@@ -17,7 +17,6 @@ export default defineWidget({
   order: 30,
   entity: 'none',
   availability: 'always',
-  layoutRoles: ['date'],
   // The tile shows no name, so the editor does not offer the field.
   editor: {name: false},
 

@@ -28,8 +28,8 @@ cards:
 # 3. As a card on a page of its own.
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal, layout: auto}
-  - {name: Calendar, surface: glass, layout: auto}
+  - {name: Home, surface: teal}
+  - {name: Calendar, surface: glass}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - {type: custom:houseview-calendar-month-overview-card, week_start: sunday, page: Calendar}

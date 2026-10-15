@@ -1,7 +1,7 @@
 # A wall-tablet dashboard in three pages: Kitchen (clock, date, camera, timer), Music and Home controls.
 #
-# The `kitchen` layout looks for one clock, one date (or calendar), one camera and one timer on the page
-# and arranges them as a single screen. Swipe left and right between pages, or tap the page dots.
+# The Kitchen page gives each widget a `size` (the camera is large, the date tall, the timer wide) and asks for
+# up to 4 columns on a wide landscape screen. Swipe left and right between pages, or tap the page dots.
 # Add ?tablet=1 to the dashboard address on the tablet to hide Home Assistant's sidebar and header
 # (see docs/tablet.md).
 title: Kitchen tablet
@@ -13,15 +13,15 @@ views:
       - type: custom:houseview-card
         # performance: lite # auto (the default) already picks lite on a weak tablet; see docs/performance.md
         pages:
-          - {name: Kitchen, surface: teal, layout: kitchen}
-          - {name: Music, surface: teal, layout: auto}
-          - {name: Home, surface: glass, layout: controls}
+          - {name: Kitchen, surface: teal, columns: 4}
+          - {name: Music, surface: teal}
+          - {name: Home, surface: glass}
         cards:
           # Kitchen
+          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen, size: large}
           - {type: custom:houseview-clock-card, page: Kitchen}
-          - {type: custom:houseview-date-card, page: Kitchen}
-          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen}
-          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}
+          - {type: custom:houseview-date-card, page: Kitchen, size: tall}
+          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen, size: wide}
           # Music
           - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}
           # Home controls

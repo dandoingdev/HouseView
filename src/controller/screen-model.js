@@ -9,6 +9,20 @@ const FALLBACK_NAV_HEIGHT = 52;
 const cssNumber = (element, property) =>
   parseFloat(getComputedStyle(element).getPropertyValue(property));
 
+/** The picture sizes of the card editor's preview: the card is laid out at this size and scaled to fit the box. */
+const PREVIEW_STAGES = {
+  landscape: {width: 1280, height: 800},
+  portrait: {width: 800, height: 1280}
+};
+
+/** True inside the card editor's live preview (Home Assistant wraps it in `hui-card-preview`). */
+export function inCardPreview(host) {
+  for (let node = host; node; node = node.parentElement || node.getRootNode?.()?.host) {
+    if (node.localName === 'hui-card-preview') return true;
+  }
+  return false;
+}
+
 export const screenModelMixin = {
   /**
    * Work out the pages for the current size and remember them in `_screens`. The page the user is on
@@ -18,14 +32,17 @@ export const screenModelMixin = {
   _screenModel() {
     if (this._config.single_widget) return this._singleWidgetModel();
 
-    const width = this.getBoundingClientRect().width || window.innerWidth;
+    const stage = this._previewStage();
+    const width = stage ? stage.width : this.getBoundingClientRect().width || window.innerWidth;
     const chrome = cssNumber(this, '--hv-chrome') || 0;
-    const height = Math.max(
-      MIN_HEIGHT,
-      this.hasAttribute('tablet-mode')
-        ? this.getBoundingClientRect().height || window.innerHeight
-        : window.innerHeight - chrome
-    );
+    const height = stage
+      ? stage.height
+      : Math.max(
+          MIN_HEIGHT,
+          this.hasAttribute('tablet-mode')
+            ? this.getBoundingClientRect().height || window.innerHeight
+            : window.innerHeight - chrome
+        );
     const columns = width < 520 ? 2 : width > height * 1.15 ? 5 : 3;
     const padding = width < 520 ? 20 : width < 1000 ? 40 : 48;
     const gap = width < 520 ? 8 : 14;
@@ -58,6 +75,44 @@ export const screenModelMixin = {
     };
   },
 
+  /**
+   * In the card editor the preview box is a narrow column, which would lay the dashboard out like a phone. Lay it out as
+   * a wall tablet instead (`editor_preview`: landscape by default, portrait, or auto = the box as it is) and scale the
+   * picture to fit the box. Null everywhere else.
+   */
+  _previewStage() {
+    if (this._config?.single_widget) return null;
+    const mode = this._config?.editor_preview ?? 'landscape';
+    return mode !== 'auto' && inCardPreview(this) ? PREVIEW_STAGES[mode] : null;
+  },
+
+  /** Scale the laid-out stage to the width of the preview box (and give the host the matching height). */
+  _applyPreviewScale(model) {
+    const shell = this.shadowRoot.querySelector('.shell');
+    if (!shell) return;
+    const stage = this._previewStage();
+    if (!stage) {
+      if (this._previewScaled) {
+        this._previewScaled = false;
+        this.style.removeProperty('height');
+        this.style.removeProperty('overflow');
+        shell.style.removeProperty('width');
+        shell.style.removeProperty('transform');
+        shell.style.removeProperty('transform-origin');
+      }
+      return;
+    }
+    const boxWidth = this.getBoundingClientRect().width || stage.width;
+    const scale = boxWidth / stage.width;
+    this._previewScaled = true;
+    this.style.height = `${Math.round(stage.height * scale)}px`;
+    this.style.overflow = 'hidden';
+    shell.style.width = `${stage.width}px`;
+    shell.style.transformOrigin = '0 0';
+    shell.style.transform = `scale(${scale.toFixed(4)})`;
+    void model;
+  },
+
   /** A standalone card shows exactly one widget, sized by its host (or its configured / default height). */
   _singleWidgetModel() {
     const config = this._config;
@@ -69,7 +124,6 @@ export const screenModelMixin = {
     const screen = {
       key: 'Widget:0',
       label: 'Widget',
-      layout: 'controls',
       surface: 'teal',
       columns: 1,
       rows: 1,
@@ -104,6 +158,7 @@ export const screenModelMixin = {
     const face = this.shadowRoot.querySelector('.face');
     if (!face) return;
     model ||= this._screenModel();
+    this._applyPreviewScale(model);
     const screen = model.screen;
     const indices = screen.placements.map((p) => p.index).join(',');
     if (indices !== this._renderedIndices) {

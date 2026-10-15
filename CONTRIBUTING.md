@@ -46,11 +46,11 @@ servers listen on `127.0.0.1` only.
 | --- | --- |
 | `src/core/` | The engine: widget and overview registries, render context, action dispatcher, ticker, idle manager, confirm seam. Knows no widget kind |
 | `src/controller/` | The `HouseViewCard` class and its mixins (events, rendering, navigation, tablet mode, overview host, ...) |
-| `src/config/`, `src/layout/` | `setConfig` validation and conversion; page packing and the layouts |
+| `src/config/`, `src/layout/` | `setConfig` validation and conversion; page packing and the page layout |
 | `src/widgets/<type>/` | One folder per widget. This is where most contributions go |
 | `src/overviews/<type>/` | One folder per overview |
 | `src/editor/` | The visual editors |
-| `src/styles/` | CSS for the base, layouts, surfaces and the cascade phases |
+| `src/styles/` | CSS for the base, the page layout, surfaces and the cascade phases |
 | `tests/` | Unit, contract, browser, widget and overview suites (see [tests/README.md](tests/README.md)) |
 | `tools/` | Build, generators, linters and test runners (see [tools/README.md](tools/README.md)) |
 | `docs/`, `examples/` | Public documentation and example dashboards |

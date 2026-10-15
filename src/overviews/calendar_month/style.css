@@ -95,7 +95,7 @@
   color: #fff;
 }
 
-/* Today's number, huge, translucent, centred in the middle of the face. The offsets --cm-dx and --cm-dy are set by the
+/* Today's number: huge, translucent, centred in the middle of the face and BEHIND the header, weekdays and days. The offsets --cm-dx and --cm-dy are set by the
    tick hook from the real ink of the digits (a font's side bearings and ascent would otherwise leave "1" off centre). */
 .ov-cm-big {
   position: absolute;
@@ -107,10 +107,19 @@
   line-height: 1;
   letter-spacing: 0;
   color: var(--ov-cm-red);
-  opacity: 0.84;
+  opacity: 0.5;
+  z-index: 0;
   transform: translate(var(--cm-dx, 0), var(--cm-dy, 0));
   pointer-events: none;
 }
 .ov-cm-big[data-len='2'] {
   font-size: 54cqmin;
+}
+
+/* The face's own text sits above the big number. */
+.ov-cm-head,
+.ov-cm-days,
+.ov-cm-grid {
+  position: relative;
+  z-index: 1;
 }

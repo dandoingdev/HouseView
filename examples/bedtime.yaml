@@ -14,7 +14,7 @@ views:
         appearance: dark
         palette: forest
         pages:
-          - {name: Bedtime, surface: glass, layout: controls}
+          - {name: Bedtime, surface: glass}
         cards:
           - type: custom:houseview-action-card
             entity: script.good_night

@@ -90,16 +90,16 @@ function dashboardConfig({screensaver = false, performance = params.get('perform
     type: 'custom:houseview-card',
     ...(performance ? {performance} : {}),
     pages: [
-      {name: 'Kitchen', surface: 'teal', layout: 'kitchen'},
-      {name: 'Music', surface: 'teal', layout: 'auto'},
-      {name: 'Home', surface: 'glass', layout: 'controls'}
+      {name: 'Kitchen', surface: 'teal', columns: 4},
+      {name: 'Music', surface: 'teal'},
+      {name: 'Home', surface: 'glass'}
     ],
     camera_gallery: [{entity: 'camera.front', name: 'Front door'}, {entity: 'camera.garden', name: 'Garden'}],
     cards: [
+      {type: 'custom:houseview-camera-card', entity: 'camera.front', name: 'Front door', page: 'Kitchen', size: 'large'},
       {type: 'custom:houseview-clock-card', page: 'Kitchen'},
-      {type: 'custom:houseview-date-card', page: 'Kitchen'},
-      {type: 'custom:houseview-camera-card', entity: 'camera.front', name: 'Front door', page: 'Kitchen'},
-      {type: 'custom:houseview-timer-card', entity: 'timer.kitchen', page: 'Kitchen'},
+      {type: 'custom:houseview-date-card', page: 'Kitchen', size: 'tall'},
+      {type: 'custom:houseview-timer-card', entity: 'timer.kitchen', page: 'Kitchen', size: 'wide'},
       {type: 'custom:houseview-media_player-card', entity: 'media_player.kitchen', page: 'Music', size: 'large'},
       {type: 'custom:houseview-weather-card', entity: 'weather.home', page: 'Music'},
       {type: 'custom:houseview-sensor-card', entity: 'sensor.hall_temperature', page: 'Music'},

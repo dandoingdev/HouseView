@@ -28,7 +28,7 @@ src/
                       overview registry, subscriptions, action config, gestures, performance
   elements/           <houseview-widget-card> (the generic card) and the per-widget card tags
   editor/             <houseview-editor> and <houseview-widget-editor>, the forms
-  layout/             pack.js (grid packing) and presets.js (controls, modular, kitchen)
+  layout/             pack.js (balanced rows, first-fit packing) and index.js (pages, columns)
   widgets/<type>/     one folder per widget (+ _shared/)
   overviews/<type>/   one folder per overview (+ _shared/)
   i18n/en.js          core English strings
@@ -128,7 +128,7 @@ block and no timer or music widget it allocates nothing. See the [overview API](
 ## CSS phases
 
 All CSS is assembled into one stylesheet with a fixed cascade order. `src/styles/phases.json` lists the phases in order
-(`base`, `adaptive`, `carousel`, `surface-teal`, `carousel-widgets`, `canvas`, `layout-controls`, `night`, `tablet`,
+(`base`, `adaptive`, `carousel`, `surface-teal`, `carousel-widgets`, `canvas`, `layout-page`, `night`, `tablet`,
 `widgets-late`, `gallery`, `lifted`, `reuse`, `nav-compact`, `overviews`). Each CSS file is a sequence of sections that
 start with `/* @phase <name> */`. `tools/assemble-css.mjs` concatenates, phase by phase, the sections sorted by group
 (core, layouts, surfaces, control family, widgets, overviews), then file path. `@family(icon-tile)` expands to the list of

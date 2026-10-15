@@ -100,7 +100,7 @@ describe('private member names', () => {
   it('keeps the statics Home Assistant calls', () => {
     assert.equal(typeof HouseViewCard.getConfigElement, 'function');
     assert.deepEqual(HouseViewCard.getStubConfig(), {
-      pages: [{name: 'Home', surface: 'teal', layout: 'auto'}],
+      pages: [{name: 'Home', surface: 'teal'}],
       cards: [{type: 'custom:houseview-clock-card', page: 'Home'}]
     });
   });

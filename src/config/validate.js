@@ -16,6 +16,8 @@ import {extensions, getWidget, knownTypes} from '../core/registry.js';
 import {fromCard} from './convert.js';
 import {validateScreensaver} from '../core/overview-registry.js';
 
+const EDITOR_PREVIEWS = ['landscape', 'portrait', 'auto'];
+
 const isObject = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
 
 /** "off or toggle", "a, b or c" */
@@ -46,6 +48,9 @@ function validateOptionalSettings(config) {
   }
   if (config.performance !== undefined && !PERFORMANCE_MODES.includes(config.performance)) {
     throw new Error(`performance must be ${sentenceList(PERFORMANCE_MODES)}.`);
+  }
+  if (config.editor_preview !== undefined && !EDITOR_PREVIEWS.includes(config.editor_preview)) {
+    throw new Error(`editor_preview must be ${sentenceList(EDITOR_PREVIEWS)}.`);
   }
 }
 
@@ -102,6 +107,13 @@ function validatePages(pages) {
     new Set(names).size !== names.length
   ) {
     throw new Error('Pages need unique names.');
+  }
+  // `layout` was a page option once; older configs may still carry it and it is ignored
+  for (const page of pages) {
+    const {columns} = page;
+    if (columns != null && !(Number.isInteger(columns) && columns >= 2 && columns <= 5)) {
+      throw new Error('Page columns must be a whole number from 2 to 5.');
+    }
   }
 }
 

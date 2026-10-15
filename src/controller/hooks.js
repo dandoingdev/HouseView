@@ -3,7 +3,8 @@
 // once and never stops the other widgets, the render, or Home Assistant's hass propagation.
 //
 // This file names no widget kind. The per-kind refresh methods (_clock, _camera, _countdowns) are
-// kept as thin delegates that run the afterRender hooks of the widgets that declare the matching layout role.
+// kept as thin delegates that run the afterRender hooks of the widgets that declare the matching role
+// (`layoutRoles`: clock, camera or timer).
 import {createHookContext} from '../core/context.js';
 import {getWidget} from '../core/registry.js';
 

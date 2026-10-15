@@ -33,12 +33,12 @@ const APPEARANCE_DEFAULTS = {
   appearance: 'auto',
   wallpaper: 'page',
   palette: 'stone',
-  performance: 'auto'
+  performance: 'auto',
+  editor_preview: 'landscape'
 };
 const SURFACES = ['glass', 'soft', 'teal', 'silver', 'champagne'];
-const LAYOUTS = ['auto', 'grid', 'modular', 'kitchen', 'controls'];
 
-const newPage = (name, surface = 'glass') => ({name, surface, layout: 'auto'});
+const newPage = (name, surface = 'glass') => ({name, surface});
 
 /**
  * The config the editor works on: cards instead of widgets, no top-level keys of the removed single-climate shape, and a page for the
@@ -63,10 +63,15 @@ export const cardsOfPage = (config, page) =>
 
 export const appearanceData = (config) =>
   Object.fromEntries(
-    ['appearance', 'wallpaper', 'palette', 'bedtime', 'high_contrast', 'performance'].map((key) => [
-      key,
-      config[key] ?? APPEARANCE_DEFAULTS[key]
-    ])
+    [
+      'appearance',
+      'wallpaper',
+      'palette',
+      'bedtime',
+      'high_contrast',
+      'performance',
+      'editor_preview'
+    ].map((key) => [key, config[key] ?? APPEARANCE_DEFAULTS[key]])
   );
 
 export const appearanceSchema = (hass) => [
@@ -75,7 +80,8 @@ export const appearanceSchema = (hass) => [
   field('palette', select(hass, ['stone', 'forest'])),
   field('bedtime', {boolean: {}}),
   field('high_contrast', {boolean: {}}),
-  field('performance', select(hass, PERFORMANCE_MODES))
+  field('performance', select(hass, PERFORMANCE_MODES)),
+  field('editor_preview', select(hass, ['landscape', 'portrait', 'auto']))
 ];
 
 /** Helper text under a field of the appearance form: only the fields that have one (`editor.helper.<name>`). */
@@ -83,13 +89,11 @@ export const appearanceHelper = (hass) => (item) => textOrNone(hass, `editor.hel
 
 export const pageData = (page) => ({
   surface: page.surface || 'glass',
-  layout: page.layout || 'auto',
   columns: page.columns
 });
 
-const pageSchema = (hass) => [
+export const pageSchema = (hass) => [
   field('surface', select(hass, SURFACES)),
-  field('layout', select(hass, LAYOUTS)),
   field('columns', {number: {min: 2, max: 5, step: 1, mode: 'box'}})
 ];
 
@@ -304,6 +308,7 @@ export class HouseViewEditor extends HTMLElement {
     const form = this._form(section, {
       data: pageData(page),
       schema: pageSchema(this._hass),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
       changed: (value) => this._pageChanged(index, value)
     });
     const pageView = {panel: el, form};
@@ -332,7 +337,8 @@ export class HouseViewEditor extends HTMLElement {
 
   _pageChanged(index, value) {
     const page = this._config.pages[index];
-    Object.assign(page, {surface: value.surface || 'glass', layout: value.layout || 'auto'});
+    page.surface = value.surface || 'glass';
+    delete page.layout;
     if (value.columns) page.columns = value.columns;
     else delete page.columns;
     this._emit();

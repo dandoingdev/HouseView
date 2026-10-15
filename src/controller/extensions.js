@@ -255,7 +255,7 @@ export const extensionsMixin = {
   /** Ring the timer chime. Nothing to do unless an extension provides `_ring` through compat. */
   _ring() {},
 
-  /** Release the camera gallery's image connections (the extension of the widget with layout role `camera`). */
+  /** Release the camera gallery's image connections (the extension of the widget with role `camera`). */
   _stopGallery() {
     this._ensureExtensionState();
     for (const {type, extension} of extensions()) {

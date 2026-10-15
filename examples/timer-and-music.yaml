@@ -10,8 +10,8 @@
 # 1. The defaults: the timer widget and the music widget switch their displays on by themselves.
 type: custom:houseview-card
 pages:
-  - {name: Kitchen, surface: teal, layout: auto}
-  - {name: Music, surface: teal, layout: auto}
+  - {name: Kitchen, surface: teal}
+  - {name: Music, surface: teal}
 cards:
   - {type: custom:houseview-clock-card, page: Kitchen}
   - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}

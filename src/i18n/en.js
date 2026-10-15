@@ -42,7 +42,6 @@ export default {
   'editor.name': 'Label',
   'editor.page_name': 'Page name',
   'editor.surface': 'Page background',
-  'editor.layout': 'Layout',
   'editor.columns': 'Landscape columns (optional)',
   'editor.widget_type': 'Widget type',
   'editor.entity': 'Entity',

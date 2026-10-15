@@ -20,8 +20,8 @@ type: custom:houseview-card
 appearance: auto
 palette: stone
 pages:
-  - {name: Home, surface: teal, layout: auto}
-  - {name: Music, surface: glass, layout: auto}
+  - {name: Home, surface: teal}
+  - {name: Music, surface: glass}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music}
@@ -40,6 +40,7 @@ screensaver:
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
+| `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |
 | `timer_display` | `true` | The timer display appears while a timer runs: `true` (every `timer` widget), `false`, or a list of `timer.*` entities. See [automatic displays](screensavers.md#automatic-displays) |
@@ -62,19 +63,28 @@ move between pages. There is no automatic rotation.
 | --- | --- | --- |
 | `name` | required | A unique, non-empty name. Widgets refer to it with `page: <name>` |
 | `surface` | `glass` | The background style: `glass`, `soft` (pale panels, dark text), `teal`, `silver` or `champagne` |
-| `layout` | `auto` | How widgets are arranged, see below |
-| `columns` | automatic | `controls` layout only, landscape only: 2 to 5 columns (default 3) |
+| `columns` | 3 | Landscape only: the most columns a wide landscape screen may use, a whole number from 2 to 5. Phones and portrait tablets always use 2 |
 
-The number of grid columns follows the shape of the screen: 2 on a narrow screen, 3 on a typical portrait tablet and 5
-on a landscape one. Widgets that do not fit a page flow on to a numbered continuation page (`Home`, `Home · 2`, ...).
-Pages that have no widgets are not shown.
+Older configurations may still contain a `layout:` key on a page. It is ignored: there is one layout.
 
-| Layout | Behaviour |
-| --- | --- |
-| `auto`, `grid` | Pack widgets in order into a grid, honouring their `size` |
-| `controls` | Broad, balanced widgets: three columns in landscape, two in portrait. Best for lights, switches and other icon widgets |
-| `modular` | A thermostat-led arrangement. Needs a large `climate`, a `clock`, a `camera` and at least three other normal-sized widgets; otherwise the page falls back to `auto` |
-| `kitchen` | Needs one each of `clock`, `date` (or `calendar`), `camera` and `timer`, which it arranges as one screen. Other widgets on the page flow on to following pages. Without all four it falls back to `auto` |
+### Page layout
+
+Every page is laid out the same way. Widgets flow in the order they are listed onto a page that fits the screen, so a
+page is never a long scrolling column.
+
+* **Columns.** A phone or a portrait tablet uses 2 columns. A wide landscape screen uses 3, or the page's `columns`
+  (2 to 5). The number of rows comes from the height of the screen.
+* **One cell each.** A widget takes one cell. When no widget on the page sets a `size`, the page is balanced into rows
+  and the last row is stretched across the page width, so there are no holes.
+* **Sizes.** Once a widget on the page sets a `size` (`wide`: two cells across, `tall`: two cells down, `large`: both),
+  widgets are placed in reading order into the first free spot that fits, and then grow into any free neighbouring
+  cells. A widget without a `size` then uses its default (`large` for `climate`). Put the big widget first to anchor it in
+  the top left; the order of the `cards` list is the order of placement.
+* **Overflow.** Widgets that do not fit flow on to a numbered continuation page (`Home`, `Home · 2`, ...). Pages that
+  have no widgets are not shown.
+
+For a screen of clock, date, camera and timer on a 1280 x 800 tablet, see the Kitchen page of
+[`kitchen.yaml`](../examples/kitchen.yaml): the camera is `large`, the date `tall` and the timer `wide`, with `columns: 4`.
 
 ### Widgets in `cards`
 

@@ -10,8 +10,8 @@ views:
     cards:
       - type: custom:houseview-card
         pages:
-          - {name: Home, surface: glass, layout: auto}
-          - {name: Details, surface: soft, layout: auto}
+          - {name: Home, surface: glass}
+          - {name: Details, surface: soft}
         cards:
           - {type: custom:houseview-clock-card, page: Home}
           - {type: custom:houseview-light-card, entity: light.living_room, page: Home}

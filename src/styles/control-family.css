@@ -13,13 +13,13 @@
     container-type: size;
   }
 
-  .carousel.layout-controls .control:is(@family(icon-tile))>ha-icon {
+  .carousel.layout-page .control:is(@family(icon-tile))>ha-icon {
     --mdc-icon-size: clamp(46px,40cqmin,160px);
     margin: 0 0 clamp(12px,10cqmin,44px);
     flex-shrink: 0;
   }
 
-  .carousel.layout-controls .control:is(@family(icon-tile))>span:not(.control-note):not(.widget-value) {
+  .carousel.layout-page .control:is(@family(icon-tile))>span:not(.control-note):not(.widget-value) {
     font-size: clamp(18px,11.5cqmin,44px);
     font-weight: 600;
     line-height: 1.24;
@@ -28,7 +28,7 @@
     text-wrap: balance;
   }
 
-  .carousel.layout-controls .control:is(@family(icon-tile))>small {
+  .carousel.layout-page .control:is(@family(icon-tile))>small {
     font-size: clamp(18px,11.5cqmin,44px);
     font-weight: 400;
     line-height: 1.24;
@@ -39,7 +39,7 @@
 }
 
 @media (orientation:portrait) {
-  .carousel.layout-controls .control:is(@family(icon-tile)) {
+  .carousel.layout-page .control:is(@family(icon-tile)) {
     padding: clamp(14px,3vw,24px);
   }
 }

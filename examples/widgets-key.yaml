@@ -5,7 +5,7 @@
 # `button` and `input_button` are accepted as the `action` widget.
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal, layout: modular}
+  - {name: Home, surface: teal}
 widgets:
   - {type: climate, entity: climate.living_room, size: large}
   - {type: clock}

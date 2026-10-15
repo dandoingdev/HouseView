@@ -26,8 +26,8 @@
       "note": "full-height canvas, page controls float over the wallpaper"
     },
     {
-      "name": "layout-controls",
-      "note": "kitchen controls layout: broad glass tiles"
+      "name": "layout-page",
+      "note": "the page layout: broad glass tiles on every page"
     },
     {
       "name": "night",

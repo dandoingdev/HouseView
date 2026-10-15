@@ -1,7 +1,7 @@
 // The widget registry: the one place that knows which widget kinds exist.
 //
 // Everything that used to be a hand-written list (accepted types, picker labels, element tags, domains,
-// default sizes, layout roles, "unknown is fine" domains, action owners) is derived from here, so adding a
+// default sizes, hook roles, "unknown is fine" domains, action owners) is derived from here, so adding a
 // widget folder adds the kind everywhere. Nothing in this file names a kind.
 import {coreActions, featureActions} from './core-actions.js';
 import {checkActionDef, isWidgetDefinition} from './define-widget.js';
@@ -219,11 +219,6 @@ export function knownTypes() {
 /** Domains whose state "unknown" still counts as available (the action widget's scene, button...). */
 export function unknownOkDomains() {
   return [...new Set(widgetList().flatMap((def) => def.unknownOkDomains))];
-}
-
-/** Layout roles of a widget type ([] for unknown types and native cards). */
-export function layoutRolesOf(type) {
-  return getWidget(type)?.layoutRoles ?? [];
 }
 
 /** Size a widget gets when its config has none ('normal' for unknown types and native cards). */

@@ -26,7 +26,6 @@ export default defineWidget({
   label: 'Calendar',
   order: 140,
   // Layout presets treat the calendar like the date widget.
-  layoutRoles: ['date'],
 
   // Reads the clock on purpose (date-like widgets are the one render exception, docs/widget-api.md).
   // The month stays in the browser's locale like the date widget; only the event time follows hass.locale.language.

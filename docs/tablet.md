@@ -34,9 +34,9 @@ keeps its login.
 
 ## Orientation and size
 
-The layout follows the window: 5 columns on a landscape screen, 3 on a portrait tablet and 2 on a phone-sized window. 1280 x
-800 landscape and 800 x 1280 portrait are the sizes it is tuned for. Wallpapers cover every edge. For a `controls` page you
-can set `columns: 2` to `5` for landscape.
+The layout follows the window: a landscape screen uses 3 columns (a page's `columns` option sets 2 to 5), a portrait
+tablet or phone-sized window uses 2. 1280 x 800 landscape and 800 x 1280 portrait are the sizes it is tuned for.
+Wallpapers cover every edge. See [page layout](configuration.md#page-layout).
 
 ## Navigation
 

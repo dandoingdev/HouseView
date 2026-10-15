@@ -4,6 +4,20 @@ All notable changes to HouseView are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 The release workflow publishes the section of the tagged version as the release notes.
 
+## [Unreleased]
+
+### Added
+
+* The live preview in Home Assistant's card editor now shows the dashboard as a wall tablet (landscape by default) scaled to fit
+  the preview box, instead of a narrow phone-shaped column. `editor_preview: portrait` or `auto` changes that.
+
+### Changed
+
+* The page `layout` option is gone. There is one layout, configured by each widget's `size` and the page's `columns`
+  (2 to 5, landscape only; phones and portrait tablets use 2). Old `layout:` keys are ignored, with no error. The tile
+  look that only `layout: controls` pages had now applies to every page, and the `modular` and `kitchen` arrangements are
+  replaced by sizes: see the Kitchen page of `examples/kitchen.yaml`. `columns` must now be a whole number from 2 to 5.
+
 ## [1.0.0] - 2026-10-15
 
 First public release.

@@ -6,8 +6,8 @@
 # 1. A page of its own. A lone `large` card on a page fills the whole page; tapping it opens the weather entity.
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal, layout: auto}
-  - {name: Weather, surface: glass, layout: auto}
+  - {name: Home, surface: teal}
+  - {name: Weather, surface: glass}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - type: custom:houseview-weather-overview-card

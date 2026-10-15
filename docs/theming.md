@@ -21,8 +21,8 @@ type: custom:houseview-card
 appearance: auto
 palette: stone
 pages:
-  - {name: Kitchen, surface: teal, layout: kitchen}
-  - {name: Home, surface: soft, layout: controls}
+  - {name: Kitchen, surface: teal}
+  - {name: Home, surface: soft}
 ```
 
 ## Surfaces

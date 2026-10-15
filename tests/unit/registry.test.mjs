@@ -64,7 +64,6 @@ describe('registerWidget and lookup', () => {
     assert.deepEqual(registry.unknownOkDomains(), []);
     assert.deepEqual(registry.extensions(), []);
     assert.equal(registry.defaultSizeOf('climate'), 'normal');
-    assert.deepEqual(registry.layoutRolesOf('climate'), []);
   });
 
   it('ignores null, which defineWidget returns for a skipped bad definition', () => {
@@ -80,17 +79,13 @@ describe('registerWidget and lookup', () => {
     );
   });
 
-  it('derives unknown-ok domains, layout roles and default sizes from the definitions', () => {
+  it('derives unknown-ok domains and default sizes from the definitions', () => {
     registry.registerWidget(
       widget('action', 10, {entity: 'custom', unknownOkDomains: ['scene', 'button']})
     );
-    registry.registerWidget(
-      widget('climate', 50, {defaultSize: 'large', layoutRoles: ['climate']})
-    );
-    registry.registerWidget(widget('calendar', 140, {layoutRoles: ['date']}));
+    registry.registerWidget(widget('climate', 50, {defaultSize: 'large'}));
     assert.deepEqual(registry.unknownOkDomains(), ['scene', 'button']);
     assert.equal(registry.defaultSizeOf('climate'), 'large');
-    assert.deepEqual(registry.layoutRolesOf('calendar'), ['date']);
     assert.equal(registry.defaultSizeOf('native_card'), 'normal');
   });
 

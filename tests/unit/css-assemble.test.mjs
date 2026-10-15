@@ -50,7 +50,7 @@ describe('phases.json', () => {
       'surface-teal',
       'carousel-widgets',
       'canvas',
-      'layout-controls',
+      'layout-page',
       'night',
       'tablet',
       'widgets-late',
@@ -112,7 +112,7 @@ describe('assembler: order', () => {
       src('src/widgets/a/style.css', `${phase}${rule('widget-a')}`, 'widgets'),
       src('src/styles/control-family.css', `${phase}${rule('family')}`, 'control-family'),
       src('src/styles/surfaces/teal.css', `${phase}${rule('surface')}`, 'surfaces'),
-      src('src/styles/layouts/controls.css', `${phase}${rule('layout')}`, 'layouts'),
+      src('src/styles/layouts/page.css', `${phase}${rule('layout')}`, 'layouts'),
       src('src/styles/core/z.css', `${phase}${rule('core-z')}`),
       src('src/styles/core/a.css', `${phase}${rule('core-a')}`)
     ]).css;

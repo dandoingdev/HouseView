@@ -21,8 +21,8 @@ screensaver:
 # 2. A page of its own. Pressing the card opens the photos full screen.
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal, layout: auto}
-  - {name: Photos, surface: glass, layout: auto}
+  - {name: Home, surface: teal}
+  - {name: Photos, surface: glass}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - type: custom:houseview-photo-frame-overview-card

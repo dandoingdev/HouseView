@@ -1,4 +1,5 @@
-// Page packing: put widgets on bounded pages, never one long column.
+// Page packing: put widgets on bounded pages, never one long column. Two paths, one behaviour: equal-size tiles
+// are balanced into rows (`controlPages`), anything else is first-fit packed and then expanded (`pack`, `expand`).
 // The climate-is-large rule comes from the registry.
 import {defaultSizeOf} from '../core/registry.js';
 
@@ -84,4 +85,31 @@ export function expand(placements, columns) {
     }
   }
   return {placements, rows};
+}
+
+/**
+ * Equal-size tiles (every widget normal): full rows of `columns` tiles, the last row stretched to the
+ * full width. One page per columns x maxRows tiles.
+ * @returns {{placements: Object[], rows: number, columns: number}[]}
+ */
+export function controlPages(entries, columns, maxRows) {
+  const pages = [];
+  for (let start = 0; start < entries.length; start += columns * maxRows) {
+    const batch = entries.slice(start, start + columns * maxRows);
+    const rows = Math.ceil(batch.length / columns);
+    const lastCount = batch.length - (rows - 1) * columns;
+    let lastX = 0;
+    const placements = batch.map((entry, i) => {
+      const y = Math.floor(i / columns);
+      const last = y === rows - 1;
+      const w = last
+        ? Math.floor(columns / lastCount) + (i % columns < columns % lastCount ? 1 : 0)
+        : 1;
+      const x = last ? lastX : i % columns;
+      if (last) lastX += w;
+      return {...entry, x, y, w, h: 1};
+    });
+    pages.push({placements, rows, columns});
+  }
+  return pages;
 }

@@ -75,8 +75,8 @@ As a page of its own:
 ```yaml
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal, layout: auto}
-  - {name: Weather, surface: glass, layout: auto}
+  - {name: Home, surface: teal}
+  - {name: Weather, surface: glass}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - {type: custom:houseview-weather-overview-card, entity: weather.home, page: Weather}

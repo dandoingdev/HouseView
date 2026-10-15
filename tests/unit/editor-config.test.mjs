@@ -5,8 +5,15 @@ import './editor-env.mjs';
 import './editor-widgets.mjs';
 const {registerOverview} = await import('../../src/core/overview-registry.js');
 const {registerStrings} = await import('../../src/core/i18n.js');
-const {editorConfig, cardsOfPage, appearanceData, appearanceSchema, appearanceHelper, pageData} =
-  await import('../../src/editor/carousel-editor.js');
+const {
+  editorConfig,
+  cardsOfPage,
+  appearanceData,
+  appearanceSchema,
+  appearanceHelper,
+  pageData,
+  pageSchema
+} = await import('../../src/editor/carousel-editor.js');
 const {kindFromType} = await import('../../src/editor/widget-editor.js');
 const {default: strings} = await import('../../src/editor/strings.js');
 const screensaver = await import('../../src/editor/screensaver-form.js');
@@ -24,12 +31,12 @@ test('editorConfig: widgets become cards, a default page appears, input is not m
     config.cards.map((c) => c.widget_type),
     ['clock', 'action']
   );
-  assert.deepEqual(config.pages, [{name: 'Home', surface: 'glass', layout: 'auto'}]);
+  assert.deepEqual(config.pages, [{name: 'Home', surface: 'glass'}]);
 });
 
 test('editorConfig: pages named by cards are added; existing pages keep their settings', () => {
   const config = editorConfig({
-    pages: [{name: 'Main', surface: 'teal', layout: 'grid'}],
+    pages: [{name: 'Main', surface: 'teal', columns: 4}],
     cards: [
       {type: 'custom:houseview-clock-card', page: 'Main'},
       {type: 'custom:houseview-light-card', entity: 'light.a', page: 'Upstairs'},
@@ -40,8 +47,8 @@ test('editorConfig: pages named by cards are added; existing pages keep their se
     config.pages.map((p) => p.name),
     ['Main', 'Upstairs', 'Garden']
   );
-  assert.equal(config.pages[0].layout, 'grid');
-  assert.deepEqual(config.pages[1], {name: 'Upstairs', surface: 'glass', layout: 'auto'});
+  assert.deepEqual(config.pages[0], {name: 'Main', surface: 'teal', columns: 4});
+  assert.deepEqual(config.pages[1], {name: 'Upstairs', surface: 'glass'});
 });
 
 test('editorConfig: a config without cards or widgets gets an empty list of cards', () => {
@@ -78,12 +85,31 @@ test('form data defaults', () => {
     palette: 'stone',
     bedtime: undefined,
     high_contrast: undefined,
-    performance: 'auto'
+    performance: 'auto',
+    editor_preview: 'landscape'
   });
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
   assert.equal(appearanceData({wallpaper: 'silver', bedtime: false}).wallpaper, 'silver');
   assert.equal(appearanceData({bedtime: false}).bedtime, false);
-  assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', layout: 'auto', columns: undefined});
+  assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', columns: undefined});
+});
+
+test('the page form has a surface and landscape columns, and no layout', () => {
+  const schema = pageSchema({localize: () => ''});
+  assert.deepEqual(
+    schema.map((item) => item.name),
+    ['surface', 'columns']
+  );
+  assert.deepEqual(schema[1].selector, {number: {min: 2, max: 5, step: 1, mode: 'box'}});
+  assert.equal(
+    strings.en['editor.helper.columns'],
+    'Maximum columns on a wide landscape screen, 2 to 5. Phones and portrait tablets always use 2.'
+  );
+  assert.equal(strings.en['editor.layout'], undefined);
+  assert.deepEqual(Object.keys(pageData({name: 'x', layout: 'kitchen', surface: 'teal'})), [
+    'surface',
+    'columns'
+  ]);
 });
 
 test('widget kind from the card type: registered tag, per-kind tag, generic card', () => {

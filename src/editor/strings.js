@@ -13,6 +13,9 @@ export default {
     'editor.performance': 'Performance',
     'editor.helper.performance':
       'Automatic uses the lite look on tablets with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView. Lite switches off the glass blur and decorative animation; full keeps them.',
+    'editor.editor_preview': 'Preview shape',
+    'editor.helper.editor_preview':
+      'How this preview is drawn while you edit: as a landscape tablet (default), a portrait tablet, or auto (the box as it is). Only affects the editor.',
     'editor.automatic_displays': 'Automatic displays',
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
@@ -22,8 +25,9 @@ export default {
       'Every media player widget on the dashboard can show its album cover when the screensaver would start and it is playing. Your screensaver stays the default when nothing plays. A list of media players in YAML replaces the widgets.',
     'editor.page_name': 'Page name',
     'editor.surface': 'Page background',
-    'editor.layout': 'Layout',
     'editor.columns': 'Landscape columns (optional)',
+    'editor.helper.columns':
+      'Maximum columns on a wide landscape screen, 2 to 5. Phones and portrait tablets always use 2.',
     'editor.camera_grid': 'Camera grid',
     'editor.camera_slot.0': 'Top left camera',
     'editor.camera_slot.1': 'Top right camera',
