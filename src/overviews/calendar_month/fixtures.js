@@ -1,9 +1,14 @@
 // Variants for tests, previews and screenshots. Data only, imports nothing. The clock is fixed by the harness.
-const make = (options = {}, hass) => ({
+// The time zone is part of the fixture: the face shows the user's display zone, and CI machines run in UTC.
+const base = {
+  locale: {language: 'en-GB', time_format: '24', time_zone: 'server'},
+  config: {time_zone: 'Europe/London', unit_system: {temperature: '°C'}}
+};
+const make = (options = {}, hass = {}) => ({
   options,
   states: {},
   config: {preview_time: '2026-10-15T10:09:00+01:00'},
-  ...(hass ? {hass} : {})
+  hass: {locale: {...base.locale, ...hass.locale}, config: base.config}
 });
 
 export const variants = {

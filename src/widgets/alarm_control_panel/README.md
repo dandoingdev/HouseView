@@ -21,3 +21,28 @@ the arming keypad. HouseView never arms or disarms the alarm itself. An unavaila
 type: custom:houseview-alarm_control_panel-card
 entity: alarm_control_panel.home
 ```
+
+## Using it with Alarmo
+
+The widget works with any `alarm_control_panel` entity (the built-in manual alarm, a hardware panel integration, and so
+on). It is most often used with **[Alarmo](https://github.com/nielsfaber/alarmo)**, a community alarm system for Home
+Assistant. HouseView does not include or depend on Alarmo's code: Alarmo has to be installed and set up on its own, and
+HouseView only shows the entity it creates and opens Home Assistant's own arming dialog.
+
+1. Install Alarmo through HACS (search for **Alarmo**, category Integration) and restart Home Assistant.
+2. Go to **Settings > Devices & services > Add integration**, add **Alarmo**, then open the **Alarmo** panel in the
+   sidebar and configure your areas, sensors, modes (home, away, night, vacation) and the users and codes that may arm
+   and disarm. Everything about how the alarm behaves is configured there, not in HouseView.
+3. Alarmo creates an `alarm_control_panel` entity, `alarm_control_panel.alarmo` by default. Check the exact id under
+   **Settings > Devices & services > Entities**.
+4. Add the widget with that entity:
+
+```yaml
+type: custom:houseview-alarm_control_panel-card
+entity: alarm_control_panel.alarmo
+name: Alarm
+```
+
+Pressing the widget opens the more-info dialog, where you choose a mode and enter the code Alarmo asks for. The widget is
+highlighted while the alarm is armed and shows its state (`disarmed`, `armed_home`, `arming`, `pending`, `triggered`, ...)
+as Home Assistant reports it.

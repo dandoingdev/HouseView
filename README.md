@@ -172,7 +172,7 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 | [Weather](docs/widgets/weather.md) | `weather` | `weather.*` | | Opens the entity dialog |
 | [Music](docs/widgets/media_player.md) | `media_player` | `media_player.*` | | Transport, volume, shuffle and repeat keys; the dots open the dialog |
 | [Timer](docs/widgets/timer.md) | `timer` | `timer.*` | | Presets start the timer; pause, resume, cancel |
-| [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the arming dialog (never arms by itself) |
+| [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the arming dialog (never arms by itself). Works with any alarm entity, e.g. [Alarmo](#works-with-alarmo) |
 | [Action](docs/widgets/action.md) | `action` | `scene.*`, `script.*`, `button.*`, `input_button.*` | `icon`, `note` | Runs the scene, script or button |
 
 ## Overviews
@@ -209,6 +209,25 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 
 Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Overviews only read data: they
 cannot call a service.
+
+## Works with Alarmo
+
+The alarm panel widget shows any `alarm_control_panel` entity and opens Home Assistant's own arming dialog when pressed.
+It pairs naturally with **[Alarmo](https://github.com/nielsfaber/alarmo)**, a community alarm system for Home Assistant. Alarmo is a
+separate project that you install and configure yourself; HouseView does not bundle it and never arms or disarms anything on
+its own.
+
+1. Install Alarmo through HACS (category Integration) and restart Home Assistant.
+2. Add the **Alarmo** integration under **Settings > Devices & services**, then use the **Alarmo** sidebar panel to set up areas,
+   sensors, modes and the users and codes that may arm and disarm.
+3. Find the entity Alarmo created (by default `alarm_control_panel.alarmo`) under **Settings > Devices & services > Entities**.
+4. Add it to a page:
+
+```yaml
+- {type: custom:houseview-alarm_control_panel-card, entity: alarm_control_panel.alarmo, name: Alarm, page: Home}
+```
+
+More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel.md).
 
 ## Looks and performance
 
@@ -315,6 +334,17 @@ To add a widget or an overview read [CONTRIBUTING.md](CONTRIBUTING.md), the [wid
 Bug reports and ideas are welcome in the issue tracker; the templates ask for the HouseView and Home Assistant versions and the
 card YAML with entity ids anonymised. To change code or add a widget, read [CONTRIBUTING.md](CONTRIBUTING.md). Everyone taking
 part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md).
+
+## Support the project
+
+HouseView is free and MIT licensed, built and maintained in spare time. If it is useful to you, these are the ways to help
+keep it going:
+
+* **Star the repository and tell other people** who run Home Assistant on a wall tablet.
+* **Report bugs and share your setup** in the [issues](https://github.com/dandoingdev/HouseView/issues). Feedback from different
+  devices is the most valuable contribution.
+* **[Buy me a coffee](https://buymeacoffee.com/dandoingdev)** to support further development.
+* **Take a look at [AmongFolk.com](https://amongfolk.com)**, my main venture, which is where most of my time goes.
 
 ## Security and privacy
 
