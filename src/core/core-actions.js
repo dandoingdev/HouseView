@@ -77,6 +77,10 @@ function gotoWidget(ctx, id) {
 export const featureActions = freeze({
   'goto-widget': freeze({immediate: true, run: gotoWidget}),
   'calendar-view': freeze({immediate: true, run: openCalendar}),
+  'weather-view': freeze({
+    immediate: true,
+    run: (ctx, id) => ctx.card._screensaverOpenType?.('weather', id ? {entity: id} : {})
+  }),
   'overview-open': freeze({immediate: true, run: openOverview}),
   'home-view': freeze({
     immediate: true,

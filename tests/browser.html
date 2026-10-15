@@ -136,6 +136,10 @@ card.setConfig({home_overview:true,widgets:[{type:'clock'},{type:'light',entity:
 check('home_overview adds a home button and no page',card._screens.length===1&&!!card.shadowRoot.querySelector('.home-button'));
 card._act('home-view');
 check('the home button opens the home overview',card._screensaver?.forced?.type==='home'||card._screensaver?.active?.entry?.type==='home');
+hass.states['weather.test']=hass.states['weather.test']||{state:'sunny',attributes:{temperature:15,friendly_name:'Home'}};
+for(const [label,cfg] of [['plain',{widgets:[{type:'weather',entity:'weather.test'}]}],['with a weather screensaver',{screensaver:{type:'weather',entity:'weather.test',idle_timeout:30},widgets:[{type:'weather',entity:'weather.test'}]}]]){
+card.setConfig(cfg);card.hass=hass;card._act('weather-view','weather.test');await new Promise(r=>setTimeout(r,100));check('pressing the weather widget opens the weather overview ('+label+')',!!card.shadowRoot.querySelector('.hv-screensaver')&&card._screensaver?.active?.entry?.type==='weather');
+card._screensaver?.idle?.wake('api');await new Promise(r=>setTimeout(r,400));}
 card.setConfig({home_overview:false,widgets:[{type:'clock'}]});card.hass=hass;
 check('home_overview: false adds nothing',card._screens.length===1&&!card.shadowRoot.querySelector('.home-button'));
 let badHome=false;try{card.setConfig({home_overview:'yes',widgets:[{type:'clock'}]})}catch{badHome=true}check('home_overview must be true or false',badHome);

@@ -591,17 +591,38 @@ export const screensaverMixin = {
 
   /** The layer swallows every gesture: the first tap only wakes. Nothing reaches the controller's listeners. */
   _screensaverBind(layer) {
-    const stop = (e) => e.stopPropagation();
     const wake = (reason) => this._screensaver?.idle?.wake(reason);
-    layer.addEventListener('pointerdown', stop);
-    layer.addEventListener('pointercancel', stop);
+    // A scrollable overview (the home overview) is dragged, not just tapped: a drag scrolls it (a mouse drag too) and
+    // only a press that stayed put wakes.
+    const scroller = layer.querySelector('.ov-home-scroll');
+    let down = null;
+    let moved = false;
+    layer.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      moved = false;
+      down = scroller ? {x: e.clientX, y: e.clientY, top: scroller.scrollTop} : null;
+    });
+    layer.addEventListener('pointermove', (e) => {
+      if (!down || !(e.buttons & 1)) return;
+      const dy = e.clientY - down.y;
+      if (!moved && Math.abs(dy) + Math.abs(e.clientX - down.x) < 8) return;
+      moved = true;
+      if (e.pointerType === 'mouse') scroller.scrollTop = down.top - dy; // touch scrolls natively
+    });
+    layer.addEventListener('pointercancel', (e) => {
+      e.stopPropagation();
+      down = null;
+    });
     layer.addEventListener('pointerup', (e) => {
       e.stopPropagation();
+      down = null;
+      if (moved) return;
       wake('tap'); // a swipe wakes too; the layer stays for a moment so the trailing click is swallowed
     });
     layer.addEventListener('click', (e) => {
       e.stopPropagation();
       e.preventDefault();
+      if (moved) return;
       wake('tap');
     });
     layer.addEventListener('keydown', (e) => {
