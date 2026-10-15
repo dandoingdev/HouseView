@@ -81,6 +81,8 @@ async function main() {
       args: ['--no-sandbox', '--disable-gpu']
     });
     const page = await browser.newPage();
+    // The suites test the page-turn animation: do not let the runner's own accessibility settings switch it off.
+    await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'no-preference'}]);
     let errors = 0;
     page.on('console', (m) => {
       if (m.type() !== 'error') return;
