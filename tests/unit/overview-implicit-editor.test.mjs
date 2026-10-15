@@ -22,8 +22,7 @@ test('three native boolean fields, in this order', () => {
     schema.map((f) => [f.name, f.selector]),
     [
       ['timer_display', {boolean: {}}],
-      ['music_screensaver', {boolean: {}}],
-      ['home_overview', {boolean: {}}]
+      ['music_screensaver', {boolean: {}}]
     ]
   );
 });
@@ -40,35 +39,60 @@ test('labels are the owner strings', () => {
 test('data: on by default, off only for false, a list reads as on', () => {
   assert.deepEqual(form.automaticData({}), {
     timer_display: true,
-    music_screensaver: true,
-    home_overview: false
+    music_screensaver: true
   });
   assert.deepEqual(form.automaticData({timer_display: false, music_screensaver: true}), {
     timer_display: false,
-    music_screensaver: true,
-    home_overview: false
+    music_screensaver: true
   });
   assert.deepEqual(form.automaticData({timer_display: ['timer.a'], music_screensaver: []}), {
     timer_display: true,
-    music_screensaver: true,
-    home_overview: false
+    music_screensaver: true
   });
 });
 
-test('home overview is off unless the config says true; the switch writes true or removes the key', () => {
-  assert.equal(form.automaticData({home_overview: true}).home_overview, true);
-  assert.deepEqual(
-    form.applyAutomatic({}, {...form.automaticData({}), home_overview: true}).home_overview,
-    true
+test('the home overview form: switch, title, bins and transport, empty values remove their key', async () => {
+  const home = await import('../../src/editor/home-form.js');
+  assert.deepEqual(home.homeData({}), {
+    home_overview: false,
+    home_title: '',
+    home_bins: '',
+    home_transport: []
+  });
+  assert.deepEqual(home.homeData({home_transport: ['sensor.a'], home_bins: {entity: 'sensor.b'}}), {
+    home_overview: false,
+    home_title: '',
+    home_bins: 'sensor.b',
+    home_transport: [{entity: 'sensor.a'}]
+  });
+  const data = home.homeData({});
+  const on = home.applyHome(
+    {wallpaper: 'teal'},
+    {
+      ...data,
+      home_overview: true,
+      home_title: 'My Home',
+      home_bins: 'sensor.bins',
+      home_transport: [{entity: 'sensor.t', label: 'Work', icon: 'mdi:train'}, {entity: ''}]
+    }
   );
-  assert.equal(
-    'home_overview' in
-      form.applyAutomatic(
-        {home_overview: true},
-        {...form.automaticData({home_overview: true}), home_overview: false}
-      ),
-    false
-  );
+  assert.deepEqual(on, {
+    wallpaper: 'teal',
+    home_overview: true,
+    home_title: 'My Home',
+    home_bins: 'sensor.bins',
+    home_transport: [{entity: 'sensor.t', label: 'Work', icon: 'mdi:train'}]
+  });
+  const off = home.applyHome(on, {
+    home_overview: false,
+    home_title: '',
+    home_bins: '',
+    home_transport: []
+  });
+  assert.deepEqual(off, {wallpaper: 'teal'});
+  // untouched values keep the shape the user wrote
+  const raw = {home_bins: {entity: 'sensor.b'}, home_transport: ['sensor.a']};
+  assert.deepEqual(home.applyHome(raw, home.homeData(raw)), raw);
 });
 
 test('turning a switch off writes false, turning it on removes the key', () => {

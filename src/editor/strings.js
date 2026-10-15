@@ -19,9 +19,18 @@ export default {
     'editor.automatic_displays': 'Automatic displays',
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
+    'editor.home_section': 'Home overview',
     'editor.home_overview': 'Add a home button that opens the home overview',
+    'editor.home_title': 'Title',
+    'editor.helper.home_title': 'The large heading on the home overview. Empty uses "Home".',
+    'editor.home_bins': 'Bins sensor',
+    'editor.helper.home_bins':
+      'A waste_collection_schedule sensor. The home overview shows an icon for each bin going out in the next 7 days.',
+    'editor.home_transport': 'Transport chips',
+    'editor.helper.home_transport':
+      'Departure sensors (for example from the London TfL integration). Each shows your label, the icon and the next time, and turns amber when nothing is running.',
     'editor.helper.home_overview':
-      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. A small home button at the bottom left opens it full screen. Set the title with home_title in YAML.',
+      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. A small home button at the bottom left opens it full screen.',
     'editor.helper.timer_display':
       'Every timer widget on the dashboard gets a full-screen countdown while it runs. It replaces the screensaver and returns control when the timer ends. A list of timer entities in YAML replaces the widgets.',
     'editor.helper.music_screensaver':

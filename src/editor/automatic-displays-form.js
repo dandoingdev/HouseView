@@ -8,8 +8,6 @@ import {AUTOMATIC_DISPLAYS, getOverview} from '../core/overview-registry.js';
 import {field} from './form.js';
 
 export const AUTOMATIC_KEYS = AUTOMATIC_DISPLAYS.map((display) => display.key);
-/** The home overview is the one switch that is off unless the config says `true`. */
-export const HOME_KEY = 'home_overview';
 
 /** Do the section's fields mean anything? When one of the overviews is in the bundle, or the config already has a key. */
 export const showAutomatic = (config) =>
@@ -17,13 +15,10 @@ export const showAutomatic = (config) =>
   AUTOMATIC_KEYS.some((key) => config[key] !== undefined);
 
 /** The form data: on unless the config says `false`. */
-export const automaticData = (config) => ({
-  ...Object.fromEntries(AUTOMATIC_KEYS.map((key) => [key, config[key] !== false])),
-  [HOME_KEY]: config[HOME_KEY] === true
-});
+export const automaticData = (config) =>
+  Object.fromEntries(AUTOMATIC_KEYS.map((key) => [key, config[key] !== false]));
 
-export const automaticSchema = () =>
-  [...AUTOMATIC_KEYS, HOME_KEY].map((key) => field(key, {boolean: {}}));
+export const automaticSchema = () => AUTOMATIC_KEYS.map((key) => field(key, {boolean: {}}));
 
 /**
  * Form value -> new card config. An untouched switch leaves its key exactly as it was (a list stays a list); a switch
@@ -36,11 +31,6 @@ export function applyAutomatic(config, value) {
     if (value[key] === undefined || value[key] === shown[key]) continue;
     if (value[key]) delete next[key];
     else next[key] = false;
-  }
-  // the home overview: on writes `true`, off removes the key (off is the default)
-  if (value[HOME_KEY] !== undefined && value[HOME_KEY] !== shown[HOME_KEY]) {
-    if (value[HOME_KEY]) next[HOME_KEY] = true;
-    else delete next[HOME_KEY];
   }
   return next;
 }

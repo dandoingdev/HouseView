@@ -24,7 +24,7 @@ Everything reads from the card's widget list and Home Assistant; the overview ne
 
 ### Bins and transport chips (optional)
 
-Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown):
+Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown). The card editor's **Home overview** section edits them, with the switch and the title:
 
 ```yaml
 home_bins: sensor.bins          # a waste_collection_schedule sensor with details_format: upcoming

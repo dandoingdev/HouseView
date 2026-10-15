@@ -15,6 +15,7 @@ import {
   automaticSchema,
   showAutomatic
 } from './automatic-displays-form.js';
+import {applyHome, homeData, homeSchema, showHome} from './home-form.js';
 import {CAMERA_SLOTS, applySlot, slotData, slotHeadingKey, slotSchema} from './camera-forms.js';
 import {STYLES, createForm, field, select, text, textOrNone} from './form.js';
 import {createStackEditor, hasForm, hasStackEditor, whenNativeReady} from './native-stack.js';
@@ -105,7 +106,8 @@ const structureKey = (config) =>
   JSON.stringify([
     config.pages.map((page) => page.name),
     showScreensaver(config),
-    showAutomatic(config)
+    showAutomatic(config),
+    showHome(config)
   ]);
 
 const panel = (parent, header, expanded = false) => {
@@ -177,6 +179,7 @@ export class HouseViewEditor extends HTMLElement {
     this._renderCameras(parent, view);
     if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
     if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
+    if (showHome(this._config)) this._renderHome(parent, view);
     this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
     this._renderAddPage(parent);
     if (!hasStackEditor()) this._upgradeWhenReady();
@@ -262,9 +265,7 @@ export class HouseViewEditor extends HTMLElement {
     const {section} = panel(
       parent,
       text(this._hass, 'editor.automatic_displays'),
-      this._config.timer_display !== undefined ||
-        this._config.music_screensaver !== undefined ||
-        this._config.home_overview !== undefined
+      this._config.timer_display !== undefined || this._config.music_screensaver !== undefined
     );
     view.automatic = this._form(section, {
       data: automaticData(this._config),
@@ -272,6 +273,25 @@ export class HouseViewEditor extends HTMLElement {
       computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
       changed: (value) => {
         this._config = applyAutomatic(this._config, value);
+        this._emit();
+      }
+    });
+  }
+
+  _renderHome(parent, view) {
+    const {section} = panel(
+      parent,
+      text(this._hass, 'editor.home_section'),
+      ['home_overview', 'home_bins', 'home_transport', 'home_title'].some(
+        (key) => this._config[key] !== undefined
+      )
+    );
+    view.home = this._form(section, {
+      data: homeData(this._config),
+      schema: homeSchema(),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
+      changed: (value) => {
+        this._config = applyHome(this._config, value);
         this._emit();
       }
     });
@@ -394,6 +414,7 @@ export class HouseViewEditor extends HTMLElement {
       form.data = slotData(config.camera_gallery, slot);
     });
     if (view.automatic) view.automatic.data = automaticData(config);
+    if (view.home) view.home.data = homeData(config);
     if (view.screensaver) {
       const data = screensaverData(config);
       view.screensaver.form.schema = screensaverSchema(this._hass, data);
