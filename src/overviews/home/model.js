@@ -163,6 +163,85 @@ export function chips(groups, stateOf, format = String) {
   return out;
 }
 
+// ---- bins and transport chips (optional, configured on the card: `home_bins`, `home_transport`) ---------------------------
+
+const BIN_ICONS = [
+  [/non-?\s?recycl|general|refuse|residual|black/i, 'mdi:trash-can'],
+  [/recycl/i, 'mdi:recycle'],
+  [/food|caddy/i, 'mdi:food-apple'],
+  [/garden|green|organic/i, 'mdi:leaf'],
+  [/glass|bottle/i, 'mdi:bottle-wine'],
+  [/paper|card/i, 'mdi:newspaper'],
+  [/.*/, 'mdi:trash-can']
+];
+const DAY_MS = 86400000;
+
+/** The icon of a bin type ("Recycling", "Non-Recyclable Waste", "Garden waste", ...). */
+export const binIcon = (type) => BIN_ICONS.find(([pattern]) => pattern.test(type))[1];
+
+/**
+ * The bins going out in the next 7 days, from a waste_collection_schedule sensor: its attributes are dates
+ * (`2026-10-16: Recycling`), and the state reads "Recycling in 2 days". Entities that do not describe a collection give [].
+ * @param {any} state   the sensor's state object
+ * @param {number} now  milliseconds
+ * @returns {{type: string, icon: string, days: number}[]}  nearest first, one per type
+ */
+export function binsThisWeek(state, now) {
+  if (!known(state)) return [];
+  const today = Date.parse(new Date(now).toISOString().slice(0, 10));
+  const found = new Map();
+  const add = (types, days) => {
+    for (const raw of String(types).split(/,|\band\b|&/)) {
+      const type = raw.trim();
+      if (type && days >= 0 && days < 7 && !found.has(type)) found.set(type, days);
+    }
+  };
+  for (const [key, value] of Object.entries(state.attributes || {})) {
+    if (!/^\d{4}-\d{2}-\d{2}/.test(key)) continue;
+    add(value, Math.round((Date.parse(key.slice(0, 10)) - today) / DAY_MS));
+  }
+  if (!found.size) {
+    const match = /^(.*) in (\d+) days?$/i.exec(String(state.state));
+    if (match) add(match[1], Number(match[2]));
+    else if (/^(.*) (today|tomorrow)$/i.test(String(state.state)))
+      add(RegExp.$1, /today/i.test(state.state) ? 0 : 1);
+  }
+  return [...found]
+    .map(([type, days]) => ({type, icon: binIcon(type), days}))
+    .sort((a, b) => a.days - b.days);
+}
+
+/**
+ * One transport chip from a departure sensor (the London TfL integration: the state is the next departure as "HH:MM",
+ * "None" when nothing is due). A line that is not running (no departure, unavailable, an error text) is `running: false`.
+ * @param {{entity: string, label?: string, icon?: string}} item
+ * @returns {{entity: string, label: string, icon: string, time: string, running: boolean}}
+ */
+export function transportChip(item, stateOf) {
+  const state = stateOf(item.entity);
+  const text = known(state) ? String(state.state).trim() : '';
+  const time = /^\d{1,2}:\d{2}$/.test(text) ? text : '';
+  const name = state?.attributes?.friendly_name;
+  return {
+    entity: item.entity,
+    label: item.label || name || item.entity.split('.')[1].replaceAll('_', ' '),
+    icon: item.icon || 'mdi:subway-variant',
+    time,
+    running: !!time
+  };
+}
+
+/** The `home_transport` list as items: entity ids only, with an optional label and icon. */
+export function transportItems(value) {
+  return (Array.isArray(value) ? value : [])
+    .map((item) => (typeof item === 'string' ? {entity: item} : item))
+    .filter((item) => item && typeof item.entity === 'string' && item.entity.includes('.'));
+}
+
+/** The `home_bins` entity: a sensor id, or `{entity}`. */
+export const binsEntity = (value) =>
+  typeof value === 'string' ? value : typeof value?.entity === 'string' ? value.entity : '';
+
 /** The cameras that get a card (at most MAX_CAMERAS), in configured order. */
 export const visibleCameras = (groups) => groups.camera.slice(0, MAX_CAMERAS);
 

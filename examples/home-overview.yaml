@@ -9,6 +9,12 @@ pages:
   - {name: Home, surface: glass}
   - {name: Rooms, surface: teal}
   - {name: Music, surface: teal}
+# Optional chips: the bins going out this week (a waste_collection_schedule sensor) and next departures (the London TfL
+# integration). A line with no departure turns amber.
+home_bins: sensor.bins
+home_transport:
+  - {entity: sensor.london_tfl_piccadilly_940gzzlutpn_all, label: Work, icon: 'mdi:subway-variant'}
+  - {entity: sensor.london_tfl_victoria_940gzzluvic_all, label: Victoria, icon: 'mdi:train'}
 camera_gallery:
   - {entity: camera.front_door}
 cards:

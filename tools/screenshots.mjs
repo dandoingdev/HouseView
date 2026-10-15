@@ -126,6 +126,12 @@ const KNOWN = {
   'script.good_night': ['off', {}],
   'scene.morning': ['2026-10-15T06:45:00+00:00', {}],
   'sensor.hallway_temperature': ['21.4', {unit_of_measurement: '°C', device_class: 'temperature'}],
+  'sensor.bins': [
+    'Recycling in 1 days',
+    {'2026-10-16': 'Recycling', '2026-10-23': 'Non-Recyclable Waste, Food Waste'}
+  ],
+  'sensor.london_tfl_piccadilly_940gzzlutpn_all': ['10:19', {}],
+  'sensor.london_tfl_victoria_940gzzluvic_all': ['None', {}],
   'weather.home': [
     'partlycloudy',
     {
@@ -214,7 +220,7 @@ function entitiesIn(doc) {
       for (const [key, value] of Object.entries(node)) {
         if (
           typeof value === 'string' &&
-          /^(entity|sun_entity)$/.test(key) &&
+          /^(entity|sun_entity|home_bins)$/.test(key) &&
           /^[a-z_]+\.[a-z0-9_]+$/.test(value)
         )
           ids.add(value);
@@ -255,6 +261,12 @@ const ART_SVG =
 /** Glyphs for `ha-icon`: tiny line drawings keyed by (part of) the mdi name. */
 const GLYPHS = `
 const G = [
+  [/train|subway|tram|bus/, '<rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/><circle cx="9" cy="14" r="0.6"/><circle cx="15" cy="14" r="0.6"/>'],
+  [/recycle/, '<path d="M8 4l-4 7h5M16 4l4 7M20 11l-4 7H9M9 18l-2 3M4 11l4 7M12 6l2-3 3 5"/>'],
+  [/trash|delete/, '<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6"/>'],
+  [/leaf|flower|tree/, '<path d="M5 19c0-9 5-14 14-14 0 9-5 14-14 14zM5 19l8-8"/>'],
+  [/food|apple/, '<path d="M12 8c-3-2-7 0-6 5 1 4 3 7 6 6 3 1 5-2 6-6 1-5-3-7-6-5zM12 8c0-2 1-4 3-5"/>'],
+  [/bottle|wine/, '<path d="M10 3h4v5l2 3v10H8V11l2-3z"/>'],
   [/lightbulb|lamp|ceiling-light/, '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>'],
   [/^power|plug|toaster/, '<path d="M12 3v9M6.3 6.8a8 8 0 1 0 11.4 0"/>'],
   [/^fan/, '<circle cx="12" cy="12" r="1.6"/><ellipse cx="12" cy="6.4" rx="2.6" ry="3.8"/><ellipse cx="12" cy="6.4" rx="2.6" ry="3.8" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6.4" rx="2.6" ry="3.8" transform="rotate(240 12 12)"/>'],

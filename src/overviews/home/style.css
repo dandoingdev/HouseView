@@ -1,5 +1,5 @@
 /* @phase overviews */
-/* @owns ov-home-scene ov-home-scroll ov-home-head ov-home-title ov-home-time ov-home-chips ov-home-chip ov-home-chip-value ov-home-dim ov-home-playing ov-home-body ov-home-section ov-home-cameras ov-home-scenes ov-home-heading ov-home-heading-text ov-home-ico ov-home-cams ov-home-cam ov-home-cam-icon ov-home-has-picture ov-home-snap ov-home-ago ov-home-cam-name ov-home-tiles ov-home-tile ov-home-tile-icon ov-home-tile-name ov-home-empty */
+/* @owns ov-home-scene ov-home-scroll ov-home-head ov-home-title ov-home-time ov-home-chips ov-home-chip ov-home-chip-value ov-home-bins ov-home-chip-label ov-home-transport ov-home-down ov-home-dim ov-home-playing ov-home-body ov-home-section ov-home-cameras ov-home-scenes ov-home-heading ov-home-heading-text ov-home-ico ov-home-cams ov-home-cam ov-home-cam-icon ov-home-has-picture ov-home-snap ov-home-ago ov-home-cam-name ov-home-tiles ov-home-tile ov-home-tile-icon ov-home-tile-name ov-home-empty */
 
 /*
  * The home screen: a light, scrollable panel (a dark one under `.dark`). No blur, no filter, no animation and no
@@ -127,6 +127,26 @@
 }
 .ov-home-dim {
   opacity: 0.45;
+}
+
+/* bins and transport chips */
+.ov-home-bins {
+  gap: 1.2cqmin;
+}
+.ov-home-bins .ov-home-ico {
+  color: var(--tone);
+}
+.ov-home-chip-label {
+  color: #1d1d1f;
+}
+.dark .ov-home-chip-label {
+  color: #f5f5f7;
+}
+.ov-home-down {
+  background: #fff3e0;
+}
+.dark .ov-home-down {
+  background: #3d2a10;
 }
 .ov-home-chip:active,
 .ov-home-tile:active {

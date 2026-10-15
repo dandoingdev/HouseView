@@ -60,6 +60,32 @@ function validateOptionalSettings(config) {
   if (config.home_title !== undefined && typeof config.home_title !== 'string') {
     throw new Error('home_title must be text.');
   }
+  if (
+    config.home_bins !== undefined &&
+    !/^sensor\.\w+$/.test(config.home_bins?.entity ?? config.home_bins)
+  ) {
+    throw new Error('home_bins must be a sensor entity id (or {entity: sensor.bins}).');
+  }
+  if (config.home_transport !== undefined) {
+    const items = config.home_transport;
+    if (
+      !Array.isArray(items) ||
+      !items.every((item) => /^sensor\.\w+$/.test(typeof item === 'string' ? item : item?.entity))
+    ) {
+      throw new Error(
+        'home_transport must be a list of sensors: sensor.id or {entity, label, icon}.'
+      );
+    }
+    if (
+      items.some(
+        (item) =>
+          typeof item === 'object' &&
+          [item.label, item.icon].some((v) => v !== undefined && typeof v !== 'string')
+      )
+    ) {
+      throw new Error('home_transport label and icon must be text.');
+    }
+  }
   if (config.editor_preview !== undefined && !EDITOR_PREVIEWS.includes(config.editor_preview)) {
     throw new Error(`editor_preview must be ${sentenceList(EDITOR_PREVIEWS)}.`);
   }

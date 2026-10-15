@@ -20,6 +20,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 * `home_overview: true` (a switch in the card editor) adds a small home button at the bottom left, opposite the Dim button;
   it opens the home overview full screen. `home_title` sets its title. Off by default.
+* Home overview: optional bins chip (`home_bins`, icons for the bins going out this week) and transport chips (`home_transport`,
+  a custom label, a selectable icon and the next departure time, amber when a line is not running).
 * The weather widget opens the full-screen weather overview when pressed (`weather_view: false` keeps more-info). The month
   calendar overview covers the whole screen.
 * The timer widget now follows the quiet style of the blinds and thermostat widgets.

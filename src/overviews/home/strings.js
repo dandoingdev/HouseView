@@ -16,6 +16,13 @@ export default {
     'home_overview.chip.media': 'Media',
     'home_overview.chip.media_playing': 'Media, playing',
     'home_overview.camera': 'Open {name}',
+    'home_overview.bins': 'Bins out: {names}',
+    'home_overview.bin.today': 'today',
+    'home_overview.bin.tomorrow': 'tomorrow',
+    'home_overview.bin.in': 'in {n} days',
+    'home_overview.transport': '{label}: next {time}',
+    'home_overview.transport.down': '{label}: not running',
+    'home_overview.transport.none': 'Not running',
 
     'home_overview.option.title.label': 'Title',
     'home_overview.option.title.helper': 'The large heading. Empty uses "Home".',

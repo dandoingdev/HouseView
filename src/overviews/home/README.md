@@ -26,6 +26,23 @@ Everything reads from the card's widget list and Home Assistant; the overview ne
 | **Cameras** | Up to three `camera` widgets: a large rounded snapshot with a small "2m ago" label (from the entity's `last_updated`, in your language) | Opens the camera gallery when the card has `camera_gallery`, otherwise the camera's more-info dialog. The heading "Cameras" goes to the page of the first camera widget |
 | **Scenes** | Every `action` widget whose entity is a `scene.*` (scripts and buttons are not listed): a tile with the icon and name, two per row | Runs the scene. The heading goes to the page of the first scene widget |
 
+### Bins and transport chips (optional)
+
+Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown):
+
+```yaml
+home_bins: sensor.bins          # a waste_collection_schedule sensor with details_format: upcoming
+home_transport:                 # as many as you like
+  - entity: sensor.london_tfl_piccadilly_940gzzlutpn_all
+    label: Work                 # shown on the chip (default: the sensor's name)
+    icon: mdi:subway-variant    # any icon (default: mdi:subway-variant)
+```
+
+* **Bins**: one chip of icons, one per bin type going out in the next 7 days (recycling, general waste, food, garden, glass,
+  paper). It turns amber when a bin goes out today or tomorrow and is absent when none is due. A press opens the sensor.
+* **Transport**: one chip per entry with the label and the next departure time (the London TfL sensor's `HH:MM` state). When the
+  sensor has no departure (`None`, unavailable) the chip turns amber and says "Not running". A press opens the sensor.
+
 A chip, a section or a camera exists only when the carousel has widgets of that kind. With none of them the screen says
 "Add lights, climate, locks, cameras or scenes to this dashboard". Snapshots are loaded from your own Home Assistant
 only (`/camera_proxy/`), refreshed every 30 seconds on the shared ticker; the "2m ago" label and the clock change on the

@@ -345,3 +345,47 @@ test('the tick re-renders only when the minute (clock, "2m ago") or the 30 s sna
   });
   assert.equal(renders, 0);
 });
+
+test('binsThisWeek reads the dated attributes within the week, one icon per type', async () => {
+  const {binsThisWeek} = await import('../../src/overviews/home/model.js');
+  const now = Date.parse('2026-10-15T10:00:00Z');
+  const state = {
+    state: 'Recycling in 1 days',
+    attributes: {
+      '2026-10-16': 'Recycling',
+      '2026-10-23': 'Garden waste',
+      '2026-10-17': 'Non-Recyclable Waste, Food Waste'
+    }
+  };
+  assert.deepEqual(
+    binsThisWeek(state, now).map((b) => [b.type, b.days, b.icon]),
+    [
+      ['Recycling', 1, 'mdi:recycle'],
+      ['Non-Recyclable Waste', 2, 'mdi:trash-can'],
+      ['Food Waste', 2, 'mdi:food-apple']
+    ]
+  );
+  assert.deepEqual(
+    binsThisWeek({state: 'Garden waste in 3 days', attributes: {}}, now).map((b) => b.type),
+    ['Garden waste']
+  );
+  assert.deepEqual(binsThisWeek({state: 'unavailable', attributes: {}}, now), []);
+});
+
+test('transportChip shows the next time, and a line without one is not running', async () => {
+  const {transportChip} = await import('../../src/overviews/home/model.js');
+  const states = {
+    'sensor.a': {state: '10:19', attributes: {friendly_name: 'Piccadilly'}},
+    'sensor.b': {state: 'None', attributes: {}}
+  };
+  const of = (id) => states[id];
+  assert.deepEqual(transportChip({entity: 'sensor.a', label: 'Work', icon: 'mdi:train'}, of), {
+    entity: 'sensor.a',
+    label: 'Work',
+    icon: 'mdi:train',
+    time: '10:19',
+    running: true
+  });
+  assert.equal(transportChip({entity: 'sensor.b'}, of).running, false);
+  assert.equal(transportChip({entity: 'sensor.missing'}, of).running, false);
+});

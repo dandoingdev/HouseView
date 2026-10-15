@@ -7,7 +7,11 @@ import {
   cameraOk,
   chips,
   collect,
+  binsEntity,
+  binsThisWeek,
   minuteOf,
+  transportChip,
+  transportItems,
   parseTime,
   visibleCameras
 } from './model.js';
@@ -81,6 +85,54 @@ function chipHTML(ctx, chip, live) {
   });
 }
 
+/** The bins going out this week: one chip of icons (a bin icon per type), nothing when none is due. */
+function binsChipHTML(ctx, live) {
+  const id = binsEntity(ctx.config?.home_bins);
+  if (!id) return '';
+  const bins = binsThisWeek(ctx.stateOf(id), ctx.now());
+  if (!bins.length) return '';
+  const when = (days) =>
+    days === 0
+      ? ctx.t('home_overview.bin.today')
+      : days === 1
+        ? ctx.t('home_overview.bin.tomorrow')
+        : ctx.t('home_overview.bin.in', {n: days});
+  const names = bins.map((bin) => `${bin.type} (${when(bin.days)})`).join(', ');
+  const icons = bins.map((bin) => iconBox(ctx, bin.icon)).join('');
+  const soon = bins[0].days <= 1;
+  const attrs = ` data-tone="${soon ? 'amber' : 'teal'}" aria-label="${ctx.esc(ctx.t('home_overview.bins', {names}))}" title="${ctx.esc(names)}"`;
+  return control(live, 'span', {
+    action: 'info',
+    entity: ctx.esc(id),
+    cls: 'ov-home-chip ov-home-bins',
+    inner: icons,
+    attrs
+  });
+}
+
+/** A departure chip per `home_transport` item: icon, label and the next time; amber when the line is not running. */
+function transportChipsHTML(ctx, live) {
+  return transportItems(ctx.config?.home_transport)
+    .map((item) => {
+      const chip = transportChip(item, ctx.stateOf);
+      const label = ctx.esc(chip.label);
+      const aria = chip.running
+        ? ctx.t('home_overview.transport', {label: chip.label, time: chip.time})
+        : ctx.t('home_overview.transport.down', {label: chip.label});
+      const value = chip.running
+        ? `<span class="ov-home-chip-value">${ctx.esc(chip.time)}</span>`
+        : `<span class="ov-home-chip-value">${ctx.esc(ctx.t('home_overview.transport.none'))}</span>`;
+      return control(live, 'span', {
+        action: 'info',
+        entity: ctx.esc(chip.entity),
+        cls: `ov-home-chip ov-home-transport${chip.running ? '' : ' ov-home-down'}`,
+        inner: `${iconBox(ctx, chip.icon)}<span class="ov-home-chip-label">${label}</span>${value}`,
+        attrs: ` data-tone="${chip.running ? 'cyan' : 'amber'}" aria-label="${ctx.esc(aria)}"`
+      });
+    })
+    .join('');
+}
+
 function sectionHeader(ctx, live, key, firstIndex) {
   const text = ctx.esc(ctx.t(`home_overview.section.${key}`));
   const inner = `<span class="ov-home-heading-text">${text}</span>${iconBox(ctx, 'mdi:chevron-right')}`;
@@ -137,9 +189,10 @@ function sceneHTML(ctx, mode) {
   const live = mode === 'card';
   const groups = collect(ctx.config?.widgets);
   const row = chips(groups, ctx.stateOf, (n) => ctx.formatNumber(n));
+  const extras = binsChipHTML(ctx, mode === 'card') + transportChipsHTML(ctx, mode === 'card');
   const cameras = visibleCameras(groups);
   const scenes = groups.scene;
-  const empty = !row.length && !cameras.length && !scenes.length;
+  const empty = !row.length && !extras && !cameras.length && !scenes.length;
   const title = ctx.esc(ctx.options.title || ctx.t('home_overview.title'));
   const time = ctx.options.show_time
     ? `<p class="ov-home-time">${ctx.esc(ctx.timeParts(ctx.now()).text)}</p>`
@@ -148,8 +201,8 @@ function sceneHTML(ctx, mode) {
   if (empty) {
     body = `<p class="ov-home-empty">${ctx.esc(ctx.t('home_overview.empty'))}</p>`;
   } else {
-    if (row.length) {
-      body += `<div class="ov-home-chips">${row.map((chip) => chipHTML(ctx, chip, live)).join('')}</div>`;
+    if (row.length || extras) {
+      body += `<div class="ov-home-chips">${row.map((chip) => chipHTML(ctx, chip, live)).join('')}${extras}</div>`;
     }
     let main = '';
     if (cameras.length) {
@@ -179,7 +232,7 @@ function sceneHTML(ctx, mode) {
  */
 function stampOf(ctx) {
   const cameras = collect(ctx.config?.widgets).camera.length > 0;
-  if (!ctx.options.show_time && !cameras) return null;
+  if (!ctx.options.show_time && !cameras && !binsEntity(ctx.config?.home_bins)) return null;
   return `${minuteOf(ctx.now())}|${cameras ? bucketOf(ctx.now()) : 0}`;
 }
 
@@ -207,7 +260,12 @@ const watched = (config) => {
     ...groups.media,
     ...visibleCameras(groups),
     ...groups.scene
-  ].map((item) => item.entity);
+  ]
+    .map((item) => item.entity)
+    .concat(
+      binsEntity(config?.home_bins) || [],
+      transportItems(config?.home_transport).map((item) => item.entity)
+    );
 };
 
 export default defineOverview({
