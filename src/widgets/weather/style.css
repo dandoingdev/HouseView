@@ -1,45 +1,72 @@
 /* @owns weather */
 /*
- * weather widget styles.
- * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
- * sections inside one phase.
- * hand-over; rules keep their cascade position. The temperature uses `.widget-value`, a class shared with the
- * sensor tile, so every rule here is scoped under `.weather`.
+ * weather widget styles. The tile is a size container: the icon, the value and the labels are sized from the tile's own
+ * width and height (cqw / cqh), so the same markup fits a small square, a wide short strip and a tall column. When the
+ * tile is short the secondary text goes first, then the icon.
  */
 
-/* @phase layout-page */
-/* Broad glass tiles, generous iconography and clear state labels. */
-/* @important overrides an earlier !important rule */
-.carousel.layout-page .weather .widget-value {
-  font-size: 64px !important;
-  font-weight: 300;
-  letter-spacing: -.045em;
-  margin-bottom: 8px;
-  line-height: 1.05;
-}
-
-.carousel.layout-page .weather ha-icon {
-  --mdc-icon-size: 46px;
-  margin-bottom: 16px;
-}
-
-@media (max-width:519px) {
-  /* @important overrides an earlier !important rule */
-  .carousel.layout-page .weather .widget-value {
-    font-size: 44px !important;
-  }
-}
-
 /* @phase lifted */
-/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
-@media (orientation:landscape) and (max-height:699px) {
-  /* @important overrides an earlier !important rule */
-  .carousel.layout-page .weather .widget-value {
-    font-size: 44px !important;
-  }
+.carousel .tile.widget.weather.weather {
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 4cqh 5cqw;
+  overflow: hidden;
+  text-align: center;
+}
 
-  .carousel.layout-page .weather ha-icon {
-    --mdc-icon-size: 52px;
-    margin-bottom: 8px;
+.carousel .tile.widget.weather.weather ha-icon {
+  --mdc-icon-size: clamp(20px, min(30cqh, 26cqw), 90px);
+  margin: 0 0 min(3cqh, 10px);
+}
+
+/* @important the shared value size rules use !important */
+.carousel .tile.widget.weather.weather .widget-value {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(18px, min(30cqh, 22cqw), 84px) !important;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carousel .tile.widget.weather.weather > span:not(.widget-value) {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(11px, min(10cqh, 7.5cqw), 24px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carousel .tile.widget.weather.weather > small {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(10px, min(7.5cqh, 5.5cqw), 17px);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+@container (max-height: 140px) {
+  .carousel .tile.widget.weather.weather > small {
+    display: none;
+  }
+}
+
+@container (max-height: 100px) {
+  .carousel .tile.widget.weather.weather ha-icon {
+    display: none;
   }
 }

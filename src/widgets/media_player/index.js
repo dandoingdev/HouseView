@@ -200,10 +200,11 @@ export default defineWidget({
       `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>` +
       `<div class="mc-meta"><strong class="mc-title">${ctx.esc(titleText(ctx))}</strong>` +
       `<span class="mc-artist">${ctx.esc(artistText(ctx))}</span></div>${optionsButton(ctx)}</div></div>`;
+    // `.mc-body` is the grid: the root is the size container the layout reacts to (a container cannot restyle itself).
     return ctx.root(
       'section',
       'music-panel mc',
-      `${top}${stage}${progressRow(ctx)}${transportRow(ctx)}`
+      `<div class="mc-body">${top}${stage}${progressRow(ctx)}${transportRow(ctx)}</div>`
     );
   },
 

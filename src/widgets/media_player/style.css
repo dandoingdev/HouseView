@@ -1,262 +1,40 @@
-/* @owns media_player music-panel mc music-art music-details music-heading music-track music-artist music-album music-playback music-browse media-title media-room play volume mc-top mc-volume mc-volume-value mc-vbtn mc-stage mc-cover mc-meta mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-volume-value mc-vbtn mc-stage mc-cover mc-meta mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on */
 /*
- * media_player widget styles.
- * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
- * sections inside one phase.
+ * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
+ * its lower edge, a progress bar, a transport row and a volume pill.
+ *
+ * Responsive by container queries on the tile itself (`.mc` is a size container), never the screen:
+ *   - tall or square tile: one column (pill, cover, progress, controls);
+ *   - wide tile: cover on the left, pill / progress / controls on the right (aspect ratio 5:4 or wider);
+ *   - short tile (under 260 px high): a compact strip, no cover: title and artist on the left, previous / play / next
+ *     on the right;
+ *   - narrow tile (under 260 px wide): the volume pill shows only its buttons, shuffle and repeat are left out.
+ * Only transform and opacity change after paint (the progress fill).
  */
 
-/* @phase adaptive */
-/* Adaptive HomeView canvas — v2. Rotation and widget count drive placement. */
-/* @important overrides an earlier !important rule */
-
-/* @important overrides an earlier !important rule */
-
-/* @phase carousel */
-/* Screen-sized faces and kitchen controls — v3. */
-.transport .play {
-  width: 68px;
-  height: 68px;
-  background: #fff;
-  color: #36383a;
-}
-
-.music-art {
-  width: 150px;
-  height: 150px;
-  border-radius: 28px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg,#746c83,#b6b2a5);
-  box-shadow: 0 6px 20px #0002;
-}
-
-.music-art ha-icon {
-  --mdc-icon-size: 60px;
-  margin: 0;
-}
-
-.volume span {
-  font-size: 16px;
-}
-
-@media (max-width:519px) {
-  .music-art {
-    width: 100px;
-    height: 100px;
-  }
-}
-
-@media (max-height:600px) {
-  .music-art {
-    width: 80px;
-    height: 80px;
-  }
-
-  .transport .play {
-    width: 52px;
-    height: 52px;
-  }
-}
-
-.music-art {
-  width: min(32vh,240px);
-  height: min(32vh,240px);
-}
-
-.music-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-}
-
-/* @phase carousel-widgets */
-/* Dedicated Sonos face: generous artwork and familiar, tactile transport controls. */
-.carousel .music-panel {
-  display: grid;
-  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-  gap: 48px;
-  padding: 48px 56px;
-  text-align: left;
-  align-items: center;
-  justify-items: center;
-}
-
-.carousel .music-art {
-  width: min(100%,440px);
-  height: auto;
-  aspect-ratio: 1;
-  border-radius: 30px;
-  background: linear-gradient(145deg,#91cebd40,#0a514d66);
-  border: 1px solid #e0fff52b;
-  box-shadow: 0 20px 46px #002e3250,inset 0 1px 1px #e8fff63d;
-  overflow: hidden;
-}
-
-.carousel .music-art ha-icon {
-  --mdc-icon-size: 100px;
-  opacity: .65;
-  margin: 0;
-}
-
-/* @important overrides an earlier !important rule */
-
-.carousel .music-panel .volume {
-  gap: 18px;
-}
-
-.carousel .music-panel .volume button {
-  width: 60px;
-  height: 60px;
-  border: 1px solid #d8fff41f;
-  background: #b4efdb1f;
-  box-shadow: inset 0 1px 0 #eafff52b;
-}
-
-.carousel .music-panel .volume ha-icon {
-  --mdc-icon-size: 28px;
-}
-
-.carousel .music-panel .volume>span {
-  min-width: 56px;
-  font-size: 20px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  opacity: .9;
-}
-
-.carousel .music-panel .volume button:not(:disabled):active {
-  transform: scale(.95);
-  filter: none;
-  background: #dcfff34d;
-}
-
-.carousel .music-panel button:disabled {
-  opacity: .3;
-}
-
-@media (max-width:999px) {
-  .carousel .music-panel {
-    grid-template-columns: minmax(0,1fr);
-    grid-template-rows: minmax(0,auto) minmax(0,auto);
-    gap: 28px;
-    padding: 36px 40px;
-    align-content: center;
-  }
-
-  .carousel .music-art {
-    width: min(100%,40vh,420px);
-  }
-
-  
-  /* @important overrides an earlier !important rule */
-  
-  }
-
-@media (max-width:519px) {
-  .carousel .music-panel {
-    gap: 16px;
-    padding: 20px;
-  }
-
-  .carousel .music-art {
-    width: min(100%,25vh,200px);
-    border-radius: 24px;
-  }
-
-  
-  
-  /* @important overrides an earlier !important rule */
-  
-  
-  
-  
-  
-  
-  
-  
-  .carousel .music-panel .volume button {
-    width: 48px;
-    height: 48px;
-  }
-
-  .carousel .music-panel .volume>span {
-    font-size: 17px;
-  }
-
-  }
-
-@media (prefers-reduced-motion:reduce) {
-  .carousel .music-panel button {
-    transition: none;
-  }
-}
-
-/* @phase night */
-/* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
-
-/* @phase tablet */
-/* Tablet canvas belongs to the viewport, independent of HA panel sizing. */
-@media (orientation:landscape) and (min-width:700px) {
-  .carousel .music-panel {
-    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-    grid-template-rows: auto;
-    gap: 40px;
-    padding: 40px 48px;
-    align-content: normal;
-  }
-
-  .carousel .music-art {
-    width: min(100%,56vh,440px);
-  }
-
-  }
-
-@media (orientation:landscape) and (max-height:699px) {
-  
-  /* @important overrides an earlier !important rule */
-  
-  
-  
-  .carousel .music-panel .volume button {
-    width: 48px;
-    height: 48px;
-  }
-
-  .carousel .music-panel {
-    padding: 24px;
-    gap: 24px;
-  }
-}
-
 /* @phase lifted */
-/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
-
-/* @phase lifted */
-/*
- * Music card: on the tile's own glass (surface, border, blur) -- no background of its own -- a big rounded cover with the title and artist over its lower edge, a progress bar,
- * a transport row and a volume pill. The rules above are the base; this block is layered over them
- * with a doubled root class and new inner class names, so nothing above applies to the new markup except `.music-art`
- * (the cover image holder, reset below). Only transform and opacity change after paint (the progress fill).
- * Sizes use container units: the stage (the cover's cell) and the cover are size containers.
- */
 .carousel .tile.widget.music-panel.mc {
+  container-type: size;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+}
+
+.carousel .mc .mc-body {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto auto;
-  align-content: stretch;
-  align-items: stretch;
-  justify-items: stretch;
-  gap: clamp(10px, 2.2vh, 22px);
-  padding: clamp(16px, 3.2vmin, 36px);
-  text-align: left;
+  gap: clamp(8px, 2.2cqh, 22px);
+  width: 100%;
+  height: 100%;
+  padding: clamp(12px, 4cqmin, 36px);
 }
 
-@media (orientation: landscape) and (min-aspect-ratio: 5/4) {
-  .carousel .tile.widget.music-panel.mc {
+@container (min-aspect-ratio: 5/4) and (min-height: 261px) {
+  .carousel .mc .mc-body {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
-    column-gap: clamp(24px, 4vw, 56px);
+    column-gap: clamp(16px, 3cqw, 56px);
   }
   .carousel .mc .mc-stage {
     grid-column: 1;
@@ -312,19 +90,17 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
+  min-width: 0;
 }
 .carousel .mc .mc-volume {
   display: flex;
   align-items: center;
-  height: 52px;
+  gap: 2px;
+  height: clamp(36px, 8cqmin, 52px);
+  padding: 0 6px;
   background: #ffffff24;
   border: 1px solid #ffffff30;
   border-radius: 999px;
-}
-.carousel .mc .mc-volume {
-  gap: 2px;
-  padding: 0 6px;
 }
 .carousel .mc .mc-volume ha-icon {
   --mdc-icon-size: 24px;
@@ -333,20 +109,20 @@
 .carousel .mc .mc-volume-value {
   min-width: 3.2em;
   text-align: center;
-  font-size: 15px;
+  font-size: clamp(12px, 3cqmin, 15px);
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 .carousel .mc .mc-vbtn {
-  width: 44px;
-  height: 44px;
+  width: clamp(34px, 7cqmin, 44px);
+  height: clamp(34px, 7cqmin, 44px);
   border-radius: 50%;
 }
 .carousel .mc .mc-vbtn ha-icon {
   --mdc-icon-size: 22px;
 }
 
-/* the cover */
+/* the cover: the largest square that fits its cell */
 .carousel .mc .mc-stage {
   display: grid;
   place-items: center;
@@ -359,7 +135,7 @@
   width: min(100cqw, 100cqh);
   height: min(100cqw, 100cqh);
   container-type: size;
-  border-radius: clamp(22px, 8cqmin, 48px);
+  border-radius: clamp(14px, 8cqmin, 48px);
   overflow: hidden;
   background: linear-gradient(145deg, #6d8394, #33424e);
   box-shadow: 0 16px 36px #0a141a66;
@@ -371,12 +147,6 @@
   place-items: center;
   width: 100%;
   height: 100%;
-  aspect-ratio: auto;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
 }
 .carousel .mc .mc-cover .music-art img {
   width: 100%;
@@ -409,7 +179,7 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   overflow-wrap: anywhere;
-  font-size: clamp(19px, 8.4cqmin, 46px);
+  font-size: clamp(12px, 8.4cqmin, 46px);
   font-weight: 700;
   line-height: 1.06;
   letter-spacing: -0.015em;
@@ -421,7 +191,7 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: clamp(14px, 5.6cqmin, 26px);
+  font-size: clamp(10px, 5.6cqmin, 26px);
   opacity: 0.75;
 }
 .carousel .mc .mc-more {
@@ -429,8 +199,8 @@
   z-index: 2;
   right: 5cqmin;
   bottom: 7cqmin;
-  width: 44px;
-  height: 44px;
+  width: clamp(30px, 14cqmin, 44px);
+  height: clamp(30px, 14cqmin, 44px);
   border-radius: 50%;
   background: #ffffff38;
 }
@@ -440,7 +210,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   row-gap: 8px;
-  font-size: 15px;
+  font-size: clamp(10px, 3.2cqmin, 15px);
   font-variant-numeric: tabular-nums;
   color: #ffffffb3;
 }
@@ -470,26 +240,27 @@
   align-items: center;
   justify-content: space-between;
   gap: 4px;
+  min-width: 0;
 }
 .carousel .mc .mc-skip {
-  width: 72px;
-  height: 72px;
+  width: clamp(40px, 12cqmin, 72px);
+  height: clamp(40px, 12cqmin, 72px);
   border-radius: 50%;
 }
 .carousel .mc .mc-skip ha-icon {
-  --mdc-icon-size: 46px;
+  --mdc-icon-size: clamp(26px, 8cqmin, 46px);
 }
 .carousel .mc .mc-play {
-  width: 96px;
-  height: 96px;
+  width: clamp(52px, 17cqmin, 96px);
+  height: clamp(52px, 17cqmin, 96px);
   border-radius: 50%;
 }
 .carousel .mc .mc-play ha-icon {
-  --mdc-icon-size: 64px;
+  --mdc-icon-size: clamp(34px, 11cqmin, 64px);
 }
 .carousel .mc .mc-aux {
-  width: 52px;
-  height: 52px;
+  width: clamp(36px, 9cqmin, 52px);
+  height: clamp(36px, 9cqmin, 52px);
   border-radius: 50%;
   opacity: 0.7;
 }
@@ -501,35 +272,108 @@
   opacity: 0.3;
 }
 
-/* short or narrow screens: smaller controls so the cover keeps most of the height */
-@media (max-height: 699px), (max-width: 519px) {
+/* narrow tile: the pill keeps only its buttons, shuffle and repeat go */
+@container (max-width: 260px) {
+  .carousel .mc .mc-volume-value,
+  .carousel .mc .mc-volume ha-icon,
+  .carousel .mc .mc-aux {
+    display: none;
+  }
+  .carousel .mc .mc-transport {
+    justify-content: center;
+    gap: 2cqw;
+  }
+}
+
+/* short tile: a compact strip without the cover */
+@container (max-height: 260px) {
+  .carousel .mc .mc-body {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: center;
+    gap: 3cqw;
+    padding: 4cqh 4cqw;
+  }
+  .carousel .mc .mc-top,
+  .carousel .mc .mc-progress,
+  .carousel .mc .mc-more,
+  .carousel .mc .mc-aux,
+  .carousel .mc .mc-cover .music-art,
+  .carousel .mc .mc-cover::after {
+    display: none;
+  }
+  .carousel .mc .mc-stage {
+    grid-column: 1;
+    grid-row: 1;
+    display: block;
+    container-type: normal;
+  }
+  .carousel .mc .mc-cover {
+    position: static;
+    width: auto;
+    height: auto;
+    container-type: normal;
+    overflow: visible;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .carousel .mc .mc-meta {
+    position: static;
+  }
+  .carousel .mc .mc-title {
+    font-size: clamp(13px, min(22cqh, 5.5cqw), 32px);
+  }
+  .carousel .mc .mc-artist {
+    font-size: clamp(10px, min(14cqh, 4cqw), 20px);
+  }
+  .carousel .mc .mc-transport {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 2cqw;
+  }
   .carousel .mc .mc-skip {
-    width: 56px;
-    height: 56px;
+    width: clamp(36px, 38cqh, 64px);
+    height: clamp(36px, 38cqh, 64px);
   }
   .carousel .mc .mc-skip ha-icon {
-    --mdc-icon-size: 36px;
+    --mdc-icon-size: clamp(22px, 24cqh, 40px);
   }
   .carousel .mc .mc-play {
-    width: 72px;
-    height: 72px;
+    width: clamp(44px, 50cqh, 80px);
+    height: clamp(44px, 50cqh, 80px);
   }
   .carousel .mc .mc-play ha-icon {
-    --mdc-icon-size: 48px;
+    --mdc-icon-size: clamp(28px, 32cqh, 52px);
   }
-  .carousel .mc .mc-aux {
-    width: 44px;
-    height: 44px;
+}
+
+/* short AND narrow tile: title and artist on top, the three controls underneath */
+@container (max-height: 260px) and (max-width: 300px) {
+  .carousel .mc .mc-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 2cqh;
+    padding: 4cqh 5cqw;
   }
-  .carousel .mc .mc-volume {
-    height: 44px;
+  .carousel .mc .mc-transport {
+    grid-column: 1;
+    grid-row: 2;
+    justify-content: center;
   }
-  .carousel .mc .mc-vbtn {
-    width: 38px;
-    height: 38px;
+  .carousel .mc .mc-title {
+    font-size: clamp(12px, min(14cqh, 8cqw), 24px);
   }
-  .carousel .mc .mc-progress {
-    font-size: 13px;
+  .carousel .mc .mc-artist {
+    font-size: clamp(10px, min(9cqh, 6cqw), 16px);
+  }
+  .carousel .mc .mc-skip {
+    width: clamp(34px, 26cqh, 52px);
+    height: clamp(34px, 26cqh, 52px);
+  }
+  .carousel .mc .mc-play {
+    width: clamp(40px, 32cqh, 60px);
+    height: clamp(40px, 32cqh, 60px);
   }
 }
 

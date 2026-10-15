@@ -1,67 +1,38 @@
-/* @owns calendar calendar-content calendar-event date-heading date-weekday */
+/* @owns calendar calendar-content calendar-event date-heading date-weekday calendar-day calendar-month */
 /*
- * calendar widget styles.
- * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
- * sections inside one phase.
+ * calendar widget styles: the date face (weekday and month, a large day number) with the next event underneath, on the
+ * tile's own glass. The tile is a size container: every size comes from its own width and height (cqw / cqh), so it fits
+ * a small square, a wide strip or a tall column. When the tile is too short for the event, only the date face stays.
  */
 
 /* @phase carousel */
-/* Screen-sized faces and kitchen controls — v3. */
-.calendar-content {
+.carousel .tile.widget.calendar-content {
+  container-type: size;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  padding: 24px;
-  gap: 10px;
-}
-
-.calendar-event {
-  font-size: 20px;
-  line-height: 1.25;
-  font-weight: 600;
-}
-
-.calendar-content small {
-  line-height: 1.5;
-}
-
-/* @phase carousel @pin 1 */
-/* Screen-sized faces and kitchen controls — v3. */
-@media (max-height:600px) {
-  .calendar-content {
-    gap: 5px;
-    padding: 16px;
-  }
-}
-
-/* @phase lifted */
-/*
- * Restyle: the same centred "Thu Oct / 15" face as the date tile with the next event underneath, on the
- * tile's own glass. Everything is centred Doubled class beats the base rules.
- */
-.carousel .tile.widget.calendar-content.calendar-content {
   align-items: center;
   justify-content: center;
-  text-align: center;
   gap: 0;
-  padding: 3% 5%;
+  padding: 3cqh 5cqw;
+  overflow: hidden;
+  text-align: center;
 }
 
 .carousel .calendar-content .date-heading {
   display: block;
-  width: 100%;
-  font-size: clamp(18px, min(12cqi, 7vh), 60px);
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(10px, min(12cqh, 10cqw), 60px);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: 0;
   text-align: center;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .carousel .calendar-content .date-weekday {
-  font-weight: inherit;
   font-size: inherit;
+  font-weight: inherit;
   color: inherit;
 }
 
@@ -69,30 +40,32 @@
   display: inline;
   font-size: inherit;
   font-weight: inherit;
-  letter-spacing: inherit;
   color: inherit;
   opacity: 0.6;
 }
 
-/* @important the base .calendar-day rules and the short-screen media rule use !important */
 .carousel .calendar-content .calendar-day {
   display: block;
-  width: 100%;
-  font-size: clamp(56px, min(44cqi, 26vh), 220px) !important;
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: 0;
+  max-width: 100%;
+  font-size: clamp(20px, min(38cqh, 46cqw), 220px);
   font-variant-numeric: proportional-nums;
+  font-weight: 700;
+  line-height: 0.92;
   text-align: center;
   color: inherit;
 }
 
 .carousel .calendar-content .calendar-event {
-  display: block;
-  width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  max-width: 100%;
   margin-top: 0.4em;
-  font-size: clamp(14px, 6cqi, 24px);
+  overflow: hidden;
+  font-size: clamp(11px, min(8cqh, 6cqw), 24px);
   font-weight: 600;
+  line-height: 1.2;
   text-align: center;
   color: inherit;
   overflow-wrap: anywhere;
@@ -100,10 +73,22 @@
 
 .carousel .calendar-content small {
   display: block;
-  width: 100%;
+  max-width: 100%;
   margin-top: 2px;
-  font-size: clamp(12px, 4.2cqi, 17px);
+  overflow: hidden;
+  font-size: clamp(10px, min(6.5cqh, 4.2cqw), 17px);
+  line-height: 1.25;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: inherit;
   opacity: 0.65;
+}
+
+/* Too short for the event: keep the date face only. */
+@container (max-height: 120px) {
+  .carousel .calendar-content .calendar-event,
+  .carousel .calendar-content small {
+    display: none;
+  }
 }

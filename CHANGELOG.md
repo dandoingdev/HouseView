@@ -6,6 +6,12 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Fixed
+
+* The date, calendar, music, sensor and weather widgets are now sized from their own tile (container queries) instead of the
+  screen, so they fit any cell: a wide short strip no longer clips the big day number, the music widget switches to a
+  compact strip in short tiles, and sensor and weather values no longer overflow in small tiles.
+
 ### Added
 
 * **Home overview** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the

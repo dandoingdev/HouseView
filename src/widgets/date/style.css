@@ -1,80 +1,39 @@
 /* @owns date date-panel date-heading date-weekday calendar-day calendar-month tile-tap clock */
 /*
- * date widget styles.
- * The base rules come first; the flat slate face ("Wed Apr" heading above a very large day number) is layered
- * over them in the `lifted` phase with a doubled class, so it wins without touching the earlier order.
+ * date widget styles. The tile keeps the glass of every other tile and draws a bold "Thu Oct" heading above a very
+ * large day number, all centred. It is a size container, so every size comes from the tile's own width and height
+ * (cqw / cqh): the same markup fits a small square, a wide short strip and a tall narrow column. Nothing here uses the
+ * screen size.
  */
 
 /* @phase carousel */
-/* Screen-sized faces and kitchen controls — v3. */
-.date-panel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 28px;
-  gap: 12px;
-}
-
-/* @important overrides an earlier !important rule */
-.date-panel .calendar-day {
-  font-size: clamp(72px,30cqi,150px) !important;
-}
-
-.date-panel .calendar-month {
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-size: 16px;
-}
-
-.date-panel strong {
-  font-size: 24px;
-}
-
-/* @phase surface-teal */
-/* Teal folded-glass face, inspired by the supplied HomeView reference. */
-.surface-teal .date-panel {
-  align-items: center;
-  text-align: center;
-  background: rgba(58,151,143,.14);
-}
-
-.surface-teal .date-panel strong {
-  font-weight: 400;
-  color: #effffb;
-  font-size: 20px;
-}
-
-/* @phase lifted */
-/*
- * Restyle: the tile keeps the glass of every other tile (surface, border, blur) and only changes its content:
- * a bold "Thu Oct" heading above a very large day number, all centred. Text takes the tile's own colour, so it is
- * white on the glass surfaces and dark on the soft one. Doubled class so these beat the base date rules.
- */
-.carousel .tile.widget.date-panel.date-panel {
+.carousel .tile.widget.date-panel {
+  container-type: size;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  padding: 4% 6%;
   gap: 0;
+  padding: 3cqh 5cqw;
+  overflow: hidden;
+  text-align: center;
 }
 
 .carousel .date-panel .date-heading {
   display: block;
-  width: 100%;
-  font-size: clamp(22px, min(15cqi, 9vh), 84px);
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(10px, min(18cqh, 12.5cqw), 84px);
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: 0;
   text-align: center;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .carousel .date-panel .date-weekday {
-  font-weight: inherit;
   font-size: inherit;
+  font-weight: inherit;
   color: inherit;
 }
 
@@ -82,22 +41,18 @@
   display: inline;
   font-size: inherit;
   font-weight: inherit;
-  letter-spacing: inherit;
-  text-transform: none;
   color: inherit;
   opacity: 0.6;
 }
 
 /* Proportional figures and no letter-spacing: tabular digits and a negative tracking push "15" off centre. */
-/* @important the base .calendar-day rules and the short-screen media rule use !important */
 .carousel .date-panel .calendar-day {
   display: block;
-  width: 100%;
-  font-size: clamp(80px, min(64cqi, 40vh), 340px) !important;
-  font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: 0;
+  max-width: 100%;
+  font-size: clamp(20px, min(66cqh, 78cqw), 400px);
   font-variant-numeric: proportional-nums;
+  font-weight: 700;
+  line-height: 0.92;
   text-align: center;
   color: inherit;
 }

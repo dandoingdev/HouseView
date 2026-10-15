@@ -1,8 +1,59 @@
 /* @owns sensor */
 /*
- * sensor widget styles.
- * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
- * sections inside one phase.
+ * sensor widget styles. The tile is a size container: the icon, the value and the labels are sized from the tile's own
+ * width and height (cqw / cqh), so the same markup fits a small square, a wide short strip and a tall column. When the
+ * tile is short the secondary text goes first, then the icon.
  */
 
-/* No rules of its own: the widget is styled by the shared icon-tile family lists and the generic .control / .tile rules. */
+/* @phase lifted */
+.carousel .tile.widget.sensor.sensor {
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 4cqh 5cqw;
+  overflow: hidden;
+  text-align: center;
+}
+
+.carousel .tile.widget.sensor.sensor ha-icon {
+  --mdc-icon-size: clamp(20px, min(30cqh, 26cqw), 90px);
+  margin: 0 0 min(3cqh, 10px);
+}
+
+/* @important the shared value size rules use !important */
+.carousel .tile.widget.sensor.sensor .widget-value {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(18px, min(30cqh, 22cqw), 84px) !important;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carousel .tile.widget.sensor.sensor > span:not(.widget-value) {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(11px, min(10cqh, 7.5cqw), 24px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@container (max-height: 140px) {
+  .carousel .tile.widget.sensor.sensor > small {
+    display: none;
+  }
+}
+
+@container (max-height: 100px) {
+  .carousel .tile.widget.sensor.sensor ha-icon {
+    display: none;
+  }
+}
