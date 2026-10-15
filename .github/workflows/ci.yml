@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Preinstalled on GitHub's ubuntu runners; puppeteer-core does not download a browser.
+      CHROME_PATH: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generated files are up to date
+        run: |
+          npm run gen
+          git diff --exit-code -- src/widgets/index.js tests/widgets/manifest.js src/overviews/index.js tests/overviews/manifest.js
+
+      - name: Generated docs are up to date
+        run: npm run gen-docs:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Widget contract
+        run: npm run check:widgets
+
+      - name: Overview contract
+        run: npm run check:overviews
+
+      - name: Unit and contract tests
+        run: npm run test:unit
+
+      - name: Development build
+        run: npm run build:dev
+
+      - name: Browser suite (tests/EXPECTED_CHECKS pins the check count)
+        run: npm run test:browser
+
+      - name: Browser suite against the production bundle
+        run: npm run test:browser:min
+
+      - name: Widget suite
+        run: npm run test:widgets
+
+      - name: Overview suite and real-input scripts
+        run: |
+          npm run test:overviews
+          npm run test:overviews:input
+          npm run test:overviews:timer
+          npm run test:overviews:automatic
+
+      - name: Production build
+        run: npm run build
+
+      - name: Size budget
+        run: npm run size

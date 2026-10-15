@@ -1,0 +1,21 @@
+# A camera widget that opens a full-screen grid of up to four cameras when tapped.
+#
+# Each entry has an entity (camera.*), an optional name, `stream: true` to use the camera stream instead of a
+# refreshing still image, and an optional `slot` from 0 to 3 (top left, top right, bottom left, bottom right).
+# Tap a camera in the grid to enlarge it; Back returns to the grid, Escape goes back one step.
+title: Cameras
+views:
+  - title: Cameras
+    path: cameras
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        camera_gallery:
+          - {entity: camera.front_door, name: Front door, slot: 0}
+          - {entity: camera.driveway, name: Driveway, stream: true, slot: 1}
+          - {entity: camera.back_garden, name: Back garden, slot: 2}
+          - {entity: camera.garage, name: Garage, slot: 3}
+        cards:
+          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door}
+          - {type: custom:houseview-clock-card}
+          - {type: custom:houseview-light-card, entity: light.porch}

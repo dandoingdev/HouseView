@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HouseView performance bench</title>
+<!--
+  Page side of tools/perf-bench.mjs. It loads the card bundle (?src=/dist/houseview.js), mounts a realistic
+  12-widget dashboard against a mock `hass` and exposes `window.__bench` for the driver. Nothing here talks to
+  Home Assistant: `callService` records the call and does nothing else.
+
+  The same page is what the owner opens on the real tablet to measure it (docs/performance.md):
+    http://<computer>:8765/tools/perf-bench.html?src=/dist/houseview.js&auto=1
+  and reads the table that `auto=1` prints into the page.
+-->
+<style>
+  :root{--primary-text-color:#212121;--secondary-text-color:#727272;--card-background-color:#fff;--divider-color:#e0e0e0;--primary-color:#03a9f4;--ha-card-border-radius:12px;--ha-card-border-width:1px;--ha-card-border-color:#e0e0e0;--primary-background-color:#fafafa}
+  html,body{margin:0;padding:0;background:#fafafa;color:#212121;font:14px/1.4 Roboto,system-ui,sans-serif}
+  #stage{width:100%}
+  #report{white-space:pre;font:12px/1.35 ui-monospace,Menlo,monospace;padding:8px}
+</style>
+<body><div id="stage"></div><div id="report"></div>
+<script type="module">
+const params = new URLSearchParams(location.search);
+const SRC = params.get('src') || '/dist/houseview.js';
+const NOW = Date.now();
+
+/* ---- doubles for Home Assistant elements (the same shapes as tools/style-snapshot.html) ---- */
+customElements.define('ha-icon', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({mode: 'open'}).innerHTML =
+    '<style>:host{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex:none;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;fill:currentColor}</style><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>'; }
+});
+customElements.define('ha-card', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({mode: 'open'}).innerHTML =
+    '<style>:host{display:block;position:relative;color:var(--primary-text-color);background:var(--ha-card-background,var(--card-background-color,#fff));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--ha-card-box-shadow,none);border-width:var(--ha-card-border-width,1px);border-style:solid;border-color:var(--ha-card-border-color,var(--divider-color,#e0e0e0))}</style><slot></slot>'; }
+});
+customElements.define('ha-form', class extends HTMLElement {});
+customElements.define('hui-stack-card-editor', class extends HTMLElement { setConfig(c) { this.config = c; } });
+
+/* ---- long tasks, collected for the whole session; the driver reads and clears them per phase ---- */
+const longTasks = [];
+try {
+  new PerformanceObserver((list) => {
+    for (const e of list.getEntries()) longTasks.push({start: e.startTime, duration: e.duration});
+  }).observe({type: 'longtask', buffered: true});
+} catch { /* no Long Tasks API */ }
+
+/* ---- the mock hass ---- */
+const iso = (ms) => new Date(ms).toISOString();
+const S = (state, attributes = {}) => ({state, attributes, last_changed: iso(NOW), last_updated: iso(NOW)});
+function baseStates() {
+  const states = {
+    'camera.front': S('idle', {friendly_name: 'Front door', entity_picture: '/camera_proxy/preview.svg'}),
+    'camera.garden': S('idle', {friendly_name: 'Garden', entity_picture: '/camera_proxy/preview.svg'}),
+    'timer.kitchen': S('active', {friendly_name: 'Kitchen timer', finishes_at: iso(NOW + 25 * 60000), duration: '0:30:00'}),
+    'media_player.kitchen': S('playing', {friendly_name: 'Kitchen speaker', media_title: 'Blue in Green', media_artist: 'Miles Davis', media_album_name: 'Kind of Blue', volume_level: 0.35, supported_features: 52 | 4, entity_picture: '/api/media_player_proxy/media_player.kitchen?token=x'}),
+    'weather.home': S('partlycloudy', {friendly_name: 'Home', temperature: 14, temperature_unit: '°C', humidity: 76, wind_speed: 7.4, wind_speed_unit: 'mph', pressure: 1012, pressure_unit: 'hPa', supported_features: 3}),
+    'sun.sun': S('above_horizon', {next_setting: iso(NOW + 5 * 3600e3), next_rising: iso(NOW + 17 * 3600e3)}),
+    'sensor.hall_temperature': S('21.4', {friendly_name: 'Hall temperature', unit_of_measurement: '°C'}),
+    'calendar.family': S('on', {friendly_name: 'Family', message: 'Dentist appointment', start_time: '2026-10-15 15:30:00', end_time: '2026-10-15 16:30:00'}),
+    'light.kitchen': S('on', {friendly_name: 'Kitchen', brightness: 180}),
+    'light.living_room': S('off', {friendly_name: 'Living room'}),
+    'lock.front_door': S('locked', {friendly_name: 'Front door lock'}),
+    'cover.bedroom_blinds': S('open', {friendly_name: 'Bedroom blinds', current_position: 60, supported_features: 11}),
+    'climate.living_room': S('heat', {friendly_name: 'Living room', temperature: 21, current_temperature: 20.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5, supported_features: 393, hvac_modes: ['off', 'cool', 'heat'], fan_modes: ['auto', 'quiet'], fan_mode: 'auto', hvac_action: 'heating'})
+  };
+  // A real house reports hundreds of entities that this card never looks at.
+  for (let i = 0; i < 400; i++) states[`sensor.noise_${i}`] = S(String(i), {friendly_name: `Noise ${i}`, unit_of_measurement: 'W'});
+  return states;
+}
+const CONNECTION = {
+  subscribeMessage: async (callback, message) => {
+    const daily = Array.from({length: 6}, (_, i) => ({datetime: iso(NOW + i * 86400e3), temperature: 14 - i, templow: 9 - i, precipitation: i === 1 ? 3 : 0, condition: i === 1 ? 'rainy' : 'cloudy'}));
+    const hourly = Array.from({length: 24}, (_, i) => ({datetime: iso(NOW + i * 3600e3), temperature: 12 + (i % 5), precipitation: 0, condition: 'cloudy'}));
+    queueMicrotask(() => callback({type: message.forecast_type, forecast: message.forecast_type === 'hourly' ? hourly : daily}));
+    return () => {};
+  },
+  subscribeEvents: async () => () => {}
+};
+const serviceCalls = [];
+// Like Home Assistant, a new hass object (and a new `states` object holding the unchanged state objects) per update.
+function hassFrom(states, overrides = {}) {
+  return {states, connection: CONNECTION, config: {unit_system: {temperature: '°C'}, time_zone: 'Europe/London'},
+    locale: {language: 'en-GB', time_format: '24', time_zone: 'local'}, themes: {darkMode: false},
+    callService: async (domain, service, data) => { serviceCalls.push({domain, service, data}); }, ...overrides};
+}
+
+/* ---- the dashboard: 12 widgets on 3 pages, a 2-camera gallery, optionally the weather screensaver ---- */
+function dashboardConfig({screensaver = false, performance = params.get('performance')} = {}) {
+  return {
+    type: 'custom:houseview-card',
+    ...(performance ? {performance} : {}),
+    pages: [
+      {name: 'Kitchen', surface: 'teal', layout: 'kitchen'},
+      {name: 'Music', surface: 'teal', layout: 'auto'},
+      {name: 'Home', surface: 'glass', layout: 'controls'}
+    ],
+    camera_gallery: [{entity: 'camera.front', name: 'Front door'}, {entity: 'camera.garden', name: 'Garden'}],
+    cards: [
+      {type: 'custom:houseview-clock-card', page: 'Kitchen'},
+      {type: 'custom:houseview-date-card', page: 'Kitchen'},
+      {type: 'custom:houseview-camera-card', entity: 'camera.front', name: 'Front door', page: 'Kitchen'},
+      {type: 'custom:houseview-timer-card', entity: 'timer.kitchen', page: 'Kitchen'},
+      {type: 'custom:houseview-media_player-card', entity: 'media_player.kitchen', page: 'Music', size: 'large'},
+      {type: 'custom:houseview-weather-card', entity: 'weather.home', page: 'Music'},
+      {type: 'custom:houseview-sensor-card', entity: 'sensor.hall_temperature', page: 'Music'},
+      {type: 'custom:houseview-light-card', entity: 'light.kitchen', page: 'Home'},
+      {type: 'custom:houseview-light-card', entity: 'light.living_room', page: 'Home'},
+      {type: 'custom:houseview-lock-card', entity: 'lock.front_door', page: 'Home'},
+      {type: 'custom:houseview-cover-card', entity: 'cover.bedroom_blinds', page: 'Home'},
+      {type: 'custom:houseview-climate-card', entity: 'climate.living_room', page: 'Home'}
+    ],
+    ...(screensaver ? {screensaver: {type: 'weather', entity: 'weather.home', idle_timeout: 3600}} : {})
+  };
+}
+
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => r()));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const stats = (values) => {
+  if (!values.length) return {n: 0, mean: 0, p95: 0, max: 0, total: 0};
+  const sorted = [...values].sort((a, b) => a - b);
+  const total = values.reduce((a, b) => a + b, 0);
+  return {n: values.length, mean: total / values.length, p95: sorted[Math.floor(sorted.length * 0.95)], max: sorted.at(-1), total};
+};
+
+const bench = {
+  states: null,
+  card: null,
+  hass: null,
+  serviceCalls,
+
+  /** Import the bundle. fetchMs = request start to last byte; evalMs = last byte to the module having run. */
+  async load() {
+    const t0 = performance.now();
+    await import(SRC);
+    const t1 = performance.now();
+    const entry = performance.getEntriesByType('resource').find((r) => r.name.includes(SRC.split('?')[0]));
+    const fetchEnd = entry ? entry.responseEnd : t0;
+    return {
+      t0, importMs: t1 - t0,
+      fetchMs: entry ? entry.responseEnd - entry.startTime : 0,
+      evalMs: Math.max(0, t1 - fetchEnd),
+      transferSize: entry?.transferSize ?? 0,
+      encodedBodySize: entry?.encodedBodySize ?? 0
+    };
+  },
+
+  /** Create the card, hand it the config and hass, and wait for the first painted frame with the stylesheet loaded. */
+  async mount(options = {}) {
+    this.unmount();
+    this.states = baseStates();
+    this.hass = hassFrom(this.states);
+    const t0 = performance.now();
+    const card = document.createElement('houseview-card');
+    card.setConfig(dashboardConfig(options));
+    card.hass = this.hass;
+    document.getElementById('stage').append(card);
+    this.card = card;
+    const link = card.shadowRoot.querySelector('link[rel=stylesheet]');
+    const styled = link
+      ? new Promise((resolve) => {
+          if (link.sheet) resolve();
+          link.addEventListener('load', resolve, {once: true});
+          link.addEventListener('error', resolve, {once: true});
+        })
+      : Promise.resolve();
+    const tTiles = performance.now() - t0;
+    await styled;
+    const tStyled = performance.now() - t0;
+    await nextFrame();
+    await nextFrame();
+    const tPainted = performance.now() - t0;
+    const shell = card.shadowRoot.querySelector('.shell');
+    const tile = card.shadowRoot.querySelector('.tile.widget') || card.shadowRoot.querySelector('.tile');
+    return {tilesMs: tTiles, styledMs: tStyled, firstPaintMs: tPainted,
+      tiles: card.shadowRoot.querySelectorAll('.tile').length,
+      lite: !!shell?.classList.contains('perf-lite'),
+      tileBackdrop: tile ? getComputedStyle(tile).backdropFilter || getComputedStyle(tile).webkitBackdropFilter || 'none' : ''};
+  },
+
+  unmount() {
+    if (this.card) this.card.remove();
+    this.card = null;
+    document.getElementById('stage').replaceChildren();
+  },
+
+  /**
+   * n hass updates; `related` = the change touches an entity the card shows. Each update is a new hass object.
+   * Returns the time each assignment took (the whole synchronous cost of `card.hass = ...`).
+   */
+  hassStorm(n, related) {
+    const cards = ['light.kitchen', 'light.living_room', 'switch.none', 'sensor.hall_temperature', 'cover.bedroom_blinds', 'lock.front_door'];
+    let states = this.states;
+    const objects = [];
+    for (let i = 0; i < n; i++) {
+      const id = related ? cards[i % cards.length] : `sensor.noise_${i % 400}`;
+      const old = states[id];
+      if (!old) { objects.push(hassFrom(states)); continue; }
+      const next = {...old, state: related ? (old.state === 'on' ? 'off' : old.state === 'off' ? 'on' : String(Number(old.state) + 0.1 || old.state)) : String(i), last_updated: iso(NOW + i)};
+      states = {...states, [id]: next};
+      objects.push(hassFrom(states));
+    }
+    const times = [];
+    for (const hass of objects) {
+      const t = performance.now();
+      this.card.hass = hass;
+      times.push(performance.now() - t);
+    }
+    this.states = states;
+    this.hass = objects.at(-1) ?? this.hass;
+    return stats(times);
+  },
+
+  /** Set one entity state (new objects, like Home Assistant) and push the hass. */
+  setState(id, state, attributes = {}) {
+    const old = this.states[id];
+    this.states = {...this.states, [id]: {...old, state, attributes: {...old.attributes, ...attributes}}};
+    this.hass = hassFrom(this.states);
+    this.card.hass = this.hass;
+  },
+
+  /**
+   * The display period: the median rAF interval of a quiet page. 16.7 ms on a 60 Hz screen; a headless browser
+   * may tick slower, so dropped frames are counted against what this browser can deliver when idle.
+   */
+  async calibrate() {
+    const deltas = [];
+    let last = await new Promise((r) => requestAnimationFrame(r));
+    for (let i = 0; i < 40; i++) {
+      const now = await new Promise((r) => requestAnimationFrame(r));
+      deltas.push(now - last);
+      last = now;
+    }
+    deltas.sort((a, b) => a - b);
+    const median = deltas[deltas.length >> 1];
+    this.vsync = median < 22 ? 1000 / 60 : median;
+    return this.vsync;
+  },
+
+  /** rAF sampler. Returns the frame deltas of `ms` milliseconds. */
+  async frames(ms) {
+    const deltas = [];
+    let last = await new Promise((r) => requestAnimationFrame(r));
+    const end = last + ms;
+    while (last < end) {
+      const now = await new Promise((r) => requestAnimationFrame(r));
+      deltas.push(now - last);
+      last = now;
+    }
+    // a frame that took n display periods dropped n-1 of them
+    const vsync = this.vsync || 1000 / 60;
+    const dropped = deltas.reduce((sum, d) => sum + Math.max(0, Math.round(d / vsync) - 1), 0);
+    const sorted = [...deltas].sort((a, b) => a - b);
+    return {frames: deltas.length, dropped, p95: sorted[Math.floor(sorted.length * 0.95)] ?? 0, worst: sorted.at(-1) ?? 0, ms, vsync};
+  },
+
+  /** Long tasks since the last call. */
+  takeLongTasks() {
+    const out = longTasks.splice(0);
+    return {count: out.length, total: out.reduce((a, t) => a + t.duration, 0), max: out.reduce((a, t) => Math.max(a, t.duration), 0)};
+  },
+
+  /** Page coordinates of the carousel face, for the driver's touch swipes. */
+  faceBox() {
+    const r = this.card.shadowRoot.querySelector('.face').getBoundingClientRect();
+    return {x: r.x, y: r.y, width: r.width, height: r.height};
+  },
+  pageIndex() { return this.card._pageIndex; },
+  setPage(i) { this.card._setPage(i); },
+
+  async screensaver(on) {
+    const ss = this.card._screensaver;
+    if (!ss?.idle) throw new Error('no screensaver in this config');
+    if (on) ss.idle.activate(); else ss.idle.wake('api');
+    await sleep(on ? 600 : 400);
+    return {active: !!this.card._screensaver.active, layer: !!this.card.shadowRoot.querySelector('.hv-screensaver')};
+  },
+
+  /** What the browser reports about the environment (the report header). */
+  environment() {
+    return {userAgent: navigator.userAgent, hardwareConcurrency: navigator.hardwareConcurrency, deviceMemory: navigator.deviceMemory ?? null,
+      width: innerWidth, height: innerHeight, dpr: devicePixelRatio, version: customElements.get('houseview-card') ? 'loaded' : 'not loaded'};
+  }
+};
+window.__bench = bench;
+window.__benchReady = true;
+
+/* ---- stand-alone mode (?auto=1): run the page-side metrics in this browser and print them, no driver needed ---- */
+if (params.get('auto')) {
+  const out = (text) => { document.getElementById('report').textContent += text + '\n'; };
+  try {
+    const env = bench.environment();
+    out(`HouseView performance bench (page mode)\n${env.userAgent}\ncores ${env.hardwareConcurrency}, memory ${env.deviceMemory ?? '?'} GB, ${env.width}x${env.height}@${env.dpr}\nadd &performance=lite (or full) to the address to force the look\n`);
+    await bench.calibrate();
+    const load = await bench.load();
+    out(`bundle fetch ${load.fetchMs.toFixed(0)} ms, parse+eval ${load.evalMs.toFixed(0)} ms`);
+    const mount = await bench.mount({screensaver: true});
+    out(`first paint ${mount.firstPaintMs.toFixed(0)} ms after mount (${mount.tiles} tiles, the card chose the ${mount.lite ? 'lite' : 'full'} look)`);
+    bench.takeLongTasks();
+    for (const related of [false, true]) {
+      const s = bench.hassStorm(500, related);
+      out(`hass update (${related ? 'a shown entity changed' : 'an unrelated entity changed'}): mean ${s.mean.toFixed(3)} ms, p95 ${s.p95.toFixed(3)} ms, max ${s.max.toFixed(2)} ms`);
+    }
+    const idle = await bench.frames(3000);
+    out(`3 s idle: ${idle.frames} frames, ${idle.dropped} dropped, worst ${idle.worst.toFixed(1)} ms`);
+    for (let i = 1; i <= 4; i++) { bench.setPage(i % 3); await sleep(500); }
+    const lt = bench.takeLongTasks();
+    out(`long tasks (>50 ms) so far: ${lt.count}, longest ${lt.max.toFixed(0)} ms`);
+    await bench.screensaver(true);
+    const ss = await bench.frames(3000);
+    out(`3 s screensaver: ${ss.frames} frames, ${ss.dropped} dropped, worst ${ss.worst.toFixed(1)} ms`);
+    out('\nCompare with tools/perf-budgets.json (the numbers there are for 6x CPU throttle on a Mac).');
+  } catch (e) {
+    out(`bench failed: ${e.stack || e}`);
+  }
+}
+</script>

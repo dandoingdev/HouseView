@@ -1,0 +1,406 @@
+// houseview-editor: the visual editor of `custom:houseview-card` (the carousel). It edits the global look, the
+// camera grid, the screensaver and the pages; each page's cards are edited by Home Assistant's own
+// `hui-stack-card-editor`, which in turn creates houseview-widget-editor for HouseView cards.
+//
+// The editor keeps a normalised copy of the config (`cards:` format, at least one page) and emits it whole in
+// `config-changed`. Forms are updated in place when Home Assistant echoes a changed config back, so typing in a
+// field or in a nested card editor never loses focus to a full rebuild.
+import {fromCard, onPage, toCards} from '../config/convert.js';
+import {fireEvent} from '../core/events.js';
+import {overviewList} from '../core/overview-registry.js';
+import {PERFORMANCE_MODES} from '../core/performance.js';
+import {
+  applyAutomatic,
+  automaticData,
+  automaticSchema,
+  showAutomatic
+} from './automatic-displays-form.js';
+import {CAMERA_SLOTS, applySlot, slotData, slotHeadingKey, slotSchema} from './camera-forms.js';
+import {STYLES, createForm, field, select, text, textOrNone} from './form.js';
+import {createStackEditor, hasForm, hasStackEditor, whenNativeReady} from './native-stack.js';
+import {
+  applyScreensaver,
+  extraEntries,
+  screensaverData,
+  screensaverLabels,
+  screensaverSchema
+} from './screensaver-form.js';
+
+/** Keys of the pre-widgets (single climate) config, dropped once its widgets have been converted to cards. */
+const TOP_LEVEL_KEYS = ['climate', 'clock', 'camera', 'scene', 'lock', 'secondary_light', 'light'];
+
+const APPEARANCE_DEFAULTS = {
+  appearance: 'auto',
+  wallpaper: 'page',
+  palette: 'stone',
+  performance: 'auto'
+};
+const SURFACES = ['glass', 'soft', 'teal', 'silver', 'champagne'];
+const LAYOUTS = ['auto', 'grid', 'modular', 'kitchen', 'controls'];
+
+const newPage = (name, surface = 'glass') => ({name, surface, layout: 'auto'});
+
+/**
+ * The config the editor works on: cards instead of widgets, no top-level keys of the removed single-climate shape, and a page for the
+ * first card and for every page name a card refers to.
+ */
+export function editorConfig(config) {
+  const next = structuredClone(config);
+  next.cards = toCards(next);
+  delete next.widgets;
+  for (const key of TOP_LEVEL_KEYS) delete next[key];
+  next.pages = next.pages?.length ? next.pages : [newPage('Home')];
+  for (const card of next.cards) {
+    const page = fromCard(card).page;
+    if (page && !next.pages.some((p) => p.name === page)) next.pages.push(newPage(page));
+  }
+  return next;
+}
+
+/** Cards of `page`; cards that name no page belong to the first one. */
+export const cardsOfPage = (config, page) =>
+  config.cards.filter((card) => (fromCard(card).page || config.pages[0].name) === page.name);
+
+export const appearanceData = (config) =>
+  Object.fromEntries(
+    ['appearance', 'wallpaper', 'palette', 'bedtime', 'high_contrast', 'performance'].map((key) => [
+      key,
+      config[key] ?? APPEARANCE_DEFAULTS[key]
+    ])
+  );
+
+export const appearanceSchema = (hass) => [
+  field('appearance', select(hass, ['auto', 'light', 'dark'])),
+  field('wallpaper', select(hass, ['page', 'teal', 'silver', 'champagne'])),
+  field('palette', select(hass, ['stone', 'forest'])),
+  field('bedtime', {boolean: {}}),
+  field('high_contrast', {boolean: {}}),
+  field('performance', select(hass, PERFORMANCE_MODES))
+];
+
+/** Helper text under a field of the appearance form: only the fields that have one (`editor.helper.<name>`). */
+export const appearanceHelper = (hass) => (item) => textOrNone(hass, `editor.helper.${item.name}`);
+
+export const pageData = (page) => ({
+  surface: page.surface || 'glass',
+  layout: page.layout || 'auto',
+  columns: page.columns
+});
+
+const pageSchema = (hass) => [
+  field('surface', select(hass, SURFACES)),
+  field('layout', select(hass, LAYOUTS)),
+  field('columns', {number: {min: 2, max: 5, step: 1, mode: 'box'}})
+];
+
+/** The screensaver section appears when an overview is registered, or when the config already has the key. */
+const showScreensaver = (config) => overviewList().length > 0 || config.screensaver !== undefined;
+
+/** Changes in this key need a rebuild; anything else is updated in place. */
+const structureKey = (config) =>
+  JSON.stringify([
+    config.pages.map((page) => page.name),
+    showScreensaver(config),
+    showAutomatic(config)
+  ]);
+
+const panel = (parent, header, expanded = false) => {
+  const el = document.createElement('ha-expansion-panel');
+  el.header = header;
+  if (expanded) el.expanded = true;
+  const section = document.createElement('section');
+  el.append(section);
+  parent.append(el);
+  return {el, section};
+};
+
+export class HouseViewEditor extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({mode: 'open'});
+    // Cards in the page stacks ask whether they sit inside this editor (see houseview-widget-editor).
+    this.addEventListener('houseview-editor-context', (event) => {
+      event.detail.embedded = true;
+    });
+  }
+
+  set hass(hass) {
+    this._hass = hass;
+    for (const el of this.shadowRoot.querySelectorAll('ha-form,hui-stack-card-editor'))
+      el.hass = hass;
+    if (this._config && !this.shadowRoot.querySelector('.editor')) this._render();
+  }
+
+  set lovelace(value) {
+    this._lovelace = value;
+    for (const el of this.shadowRoot.querySelectorAll('hui-stack-card-editor')) el.lovelace = value;
+  }
+
+  setConfig(config) {
+    const next = editorConfig(config);
+    if (JSON.stringify(next) === JSON.stringify(this._config)) return;
+    this._config = next;
+    if (this._view?.key === structureKey(next)) this._sync();
+    else this._render();
+  }
+
+  _emit() {
+    fireEvent(this, 'config-changed', {config: structuredClone(this._config)});
+  }
+
+  _status(message) {
+    this.shadowRoot.querySelector('.status').textContent = message;
+  }
+
+  _label = (item) => text(this._hass, `editor.${item.name}`, item.name);
+
+  _form(parent, options) {
+    return createForm(parent, {hass: this._hass, computeLabel: this._label, ...options});
+  }
+
+  // ---- rendering ----
+
+  _render() {
+    if (!this._config) return;
+    this._view = null;
+    this.shadowRoot.innerHTML =
+      STYLES + '<div class="editor"><ha-alert class="status" alert-type="error"></ha-alert></div>';
+    const parent = this.shadowRoot.querySelector('.editor');
+    if (!hasForm()) return this._renderDegraded(parent);
+    const view = {key: structureKey(this._config), cameras: [], pages: []};
+    this._view = view;
+    view.appearance = this._renderAppearance(parent);
+    this._renderCameras(parent, view);
+    if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
+    if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
+    this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
+    this._renderAddPage(parent);
+    if (!hasStackEditor()) this._upgradeWhenReady();
+  }
+
+  // No ha-form: nothing to edit with. Say so, and rebuild once Home Assistant has loaded its editors.
+  _renderDegraded(parent) {
+    const message = document.createElement('p');
+    message.textContent = text(this._hass, 'editor.degraded');
+    parent.append(message);
+    this._upgradeWhenReady();
+  }
+
+  _upgradeWhenReady() {
+    if (this._upgrading) return;
+    this._upgrading = true;
+    whenNativeReady().then((ready) => {
+      this._upgrading = false;
+      if (ready && this.isConnected && this._config) this._render();
+    });
+  }
+
+  _renderAppearance(parent) {
+    return this._form(parent, {
+      data: appearanceData(this._config),
+      schema: appearanceSchema(this._hass),
+      computeHelper: appearanceHelper(this._hass),
+      changed: (value) => {
+        this._config = {...this._config, ...value};
+        this._emit();
+      }
+    });
+  }
+
+  _renderCameras(parent, view) {
+    const outer = panel(parent, text(this._hass, 'editor.camera_grid'));
+    for (let slot = 0; slot < CAMERA_SLOTS; slot++) {
+      const {section} = panel(outer.section, text(this._hass, slotHeadingKey(slot)));
+      view.cameras.push(
+        this._form(section, {
+          data: slotData(this._config.camera_gallery, slot),
+          schema: slotSchema(),
+          changed: (value) => this._cameraChanged(slot, value)
+        })
+      );
+    }
+  }
+
+  _cameraChanged(slot, value) {
+    const {gallery, error} = applySlot(this._config.camera_gallery, slot, value);
+    if (error) return this._status(text(this._hass, `editor.${error}`));
+    if (gallery) this._config.camera_gallery = gallery;
+    else delete this._config.camera_gallery;
+    this._status('');
+    this._emit();
+  }
+
+  _renderScreensaver(parent, view) {
+    const {section} = panel(
+      parent,
+      text(this._hass, 'screensaver.section'),
+      this._config.screensaver !== undefined
+    );
+    const note = document.createElement('p');
+    const data = screensaverData(this._config);
+    const form = createForm(section, {
+      hass: this._hass,
+      data,
+      schema: screensaverSchema(this._hass, data),
+      // The labels depend on the chosen overview, so they are looked up when ha-form renders.
+      computeLabel: (item) =>
+        screensaverLabels(this._hass, screensaverData(this._config).type).computeLabel(item),
+      computeHelper: (item) =>
+        screensaverLabels(this._hass, screensaverData(this._config).type).computeHelper(item),
+      changed: (value) => this._screensaverChanged(value)
+    });
+    section.append(note);
+    view.screensaver = {form, note};
+    this._showScreensaverNote();
+  }
+
+  _renderAutomatic(parent, view) {
+    const {section} = panel(
+      parent,
+      text(this._hass, 'editor.automatic_displays'),
+      this._config.timer_display !== undefined || this._config.music_screensaver !== undefined
+    );
+    view.automatic = this._form(section, {
+      data: automaticData(this._config),
+      schema: automaticSchema(),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
+      changed: (value) => {
+        this._config = applyAutomatic(this._config, value);
+        this._emit();
+      }
+    });
+  }
+
+  _showScreensaverNote() {
+    const extra = extraEntries(this._config);
+    const {note} = this._view.screensaver;
+    note.textContent =
+      extra > 0 ? text(this._hass, 'screensaver.list_note', undefined, {n: extra + 1}) : '';
+    note.hidden = extra <= 0;
+  }
+
+  _screensaverChanged(value) {
+    this._config = applyScreensaver(this._config, value);
+    const {form} = this._view.screensaver;
+    const data = screensaverData(this._config);
+    const schema = screensaverSchema(this._hass, data);
+    // A new overview type brings other fields; keep the user's typing alone otherwise.
+    if (schema.map((item) => item.name).join() !== form.schema.map((item) => item.name).join()) {
+      form.schema = schema;
+      form.data = data;
+    }
+    this._showScreensaverNote();
+    this._emit();
+  }
+
+  _stackConfig(index) {
+    const page = this._config.pages[index];
+    return {type: 'vertical-stack', title: page.name, cards: cardsOfPage(this._config, page)};
+  }
+
+  _renderPage(parent, view, index) {
+    const page = this._config.pages[index];
+    const {el, section} = panel(parent, page.name, index === 0);
+    const form = this._form(section, {
+      data: pageData(page),
+      schema: pageSchema(this._hass),
+      changed: (value) => this._pageChanged(index, value)
+    });
+    const pageView = {panel: el, form};
+    view.pages.push(pageView);
+    if (!hasStackEditor()) {
+      const note = document.createElement('p');
+      note.textContent = text(this._hass, 'editor.degraded_cards');
+      section.append(note);
+      return;
+    }
+    const config = this._stackConfig(index);
+    const stack = createStackEditor({
+      hass: this._hass,
+      lovelace: this._lovelace,
+      title: config.title,
+      cards: config.cards
+    });
+    pageView.stack = stack;
+    pageView.stackKey = JSON.stringify(config);
+    stack.addEventListener('config-changed', (event) => {
+      event.stopPropagation();
+      this._stackChanged(index, event.detail.config);
+    });
+    section.append(stack);
+  }
+
+  _pageChanged(index, value) {
+    const page = this._config.pages[index];
+    Object.assign(page, {surface: value.surface || 'glass', layout: value.layout || 'auto'});
+    if (value.columns) page.columns = value.columns;
+    else delete page.columns;
+    this._emit();
+  }
+
+  // The stack editor reports the page's whole card list and, when the title field was edited, a page name.
+  _stackChanged(index, stackConfig) {
+    const cards = stackConfig.cards;
+    if (!Array.isArray(cards)) return;
+    const {pages} = this._config;
+    const page = pages[index];
+    const first = pages[0].name;
+    const old = page.name;
+    const name = (stackConfig.title ?? old).trim();
+    if (!name || pages.some((other, i) => i !== index && other.name === name)) {
+      return this._status(text(this._hass, 'editor.page_name_invalid'));
+    }
+    const others = this._config.cards.filter((card) => (fromCard(card).page || first) !== old);
+    page.name = name;
+    this._config.cards = others.concat(cards.map((card) => onPage(card, name)));
+    const pageView = this._view.pages[index];
+    pageView.panel.header = name;
+    // What the stack editor now shows is what it reported; remember it so a later echo is not pushed back in.
+    pageView.stackKey = JSON.stringify(this._stackConfig(index));
+    this._view.key = structureKey(this._config);
+    this._status('');
+    this._emit();
+  }
+
+  _renderAddPage(parent) {
+    const add = document.createElement('ha-button');
+    add.textContent = text(this._hass, 'editor.add_page');
+    add.addEventListener('click', () => {
+      let n = 2;
+      while (this._config.pages.some((page) => page.name === `Page ${n}`)) n++;
+      this._config.pages.push(newPage(`Page ${n}`, 'teal'));
+      this._emit();
+      this._render();
+    });
+    parent.append(add);
+  }
+
+  // ---- updating in place ----
+
+  // Home Assistant pushed a different config with the same pages: refresh values, keep every element.
+  _sync() {
+    const view = this._view;
+    const config = this._config;
+    view.appearance.data = appearanceData(config);
+    view.cameras.forEach((form, slot) => {
+      form.data = slotData(config.camera_gallery, slot);
+    });
+    if (view.automatic) view.automatic.data = automaticData(config);
+    if (view.screensaver) {
+      const data = screensaverData(config);
+      view.screensaver.form.schema = screensaverSchema(this._hass, data);
+      view.screensaver.form.data = data;
+      this._showScreensaverNote();
+    }
+    config.pages.forEach((page, index) => {
+      const pageView = view.pages[index];
+      pageView.form.data = pageData(page);
+      if (!pageView.stack) return;
+      const stackConfig = this._stackConfig(index);
+      const key = JSON.stringify(stackConfig);
+      if (key === pageView.stackKey) return;
+      pageView.stackKey = key;
+      pageView.stack.setConfig(stackConfig);
+    });
+  }
+}

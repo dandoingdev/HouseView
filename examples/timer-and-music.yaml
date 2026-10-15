@@ -1,0 +1,34 @@
+# The automatic displays (docs/screensavers.md#automatic-displays): nothing to configure beyond the widgets.
+#
+#  * While a timer runs, the timer display takes the whole screen (a black ring of ticks and the time left). A tap puts the
+#    dashboard back; it goes by itself when the timer ends. Switch it off with `timer_display: false`.
+#  * When the screensaver would start and a speaker is playing, the album cover is shown instead of the weather scene.
+#    Switch it off with `music_screensaver: false`.
+#
+# Two cards below, separated by `---`.
+
+# 1. The defaults: the timer widget and the music widget switch their displays on by themselves.
+type: custom:houseview-card
+pages:
+  - {name: Kitchen, surface: teal, layout: auto}
+  - {name: Music, surface: teal, layout: auto}
+cards:
+  - {type: custom:houseview-clock-card, page: Kitchen}
+  - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}
+  - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}
+screensaver:
+  type: weather # the everyday screensaver; the cover art wins while the speaker plays
+  entity: weather.home
+  idle_timeout: 120
+---
+# 2. Choosing: only one speaker shows its cover, and one timer has its display switched off with an explicit entry.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-timer-card, entity: timer.kitchen_timer}
+  - {type: custom:houseview-timer-card, entity: timer.laundry}
+  - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker}
+  - {type: custom:houseview-media_player-card, entity: media_player.office_speaker}
+music_screensaver: [media_player.kitchen_speaker] # a list replaces the widgets' speakers
+screensaver:
+  - {type: weather, entity: weather.home, idle_timeout: 120}
+  - {type: timer, entity: timer.laundry, enabled: false} # no display for this timer

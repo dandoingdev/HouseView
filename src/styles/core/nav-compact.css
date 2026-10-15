@@ -1,0 +1,41 @@
+/* @owns empty-cards page-nav face */
+/*
+ * Core compact normal-flow navigation and the empty state.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase nav-compact */
+.empty-cards {
+  grid-column: 1/-1;
+  grid-row: 1/-1;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  text-align: center;
+  color: inherit;
+  opacity: .8;
+}
+
+/* Compact normal-flow page controls: return the spare space to the cards. */
+
+:host {
+  --hv-nav-height: 52px;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel .page-nav,
+:host([tablet-mode]) .page-nav {
+  height: var(--hv-nav-height) !important;
+  min-height: var(--hv-nav-height) !important;
+}
+
+.carousel:not(.single-widget) .face,
+:host([tablet-mode]) .carousel .face {
+  padding-bottom: 8px;
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .carousel .face {
+  height: calc(100% - var(--hv-nav-height)) !important;
+}

@@ -1,0 +1,32 @@
+# The weather overview as a page of a HouseView carousel and as a standalone card (docs/overviews/weather.md).
+# Entity ids are placeholders: use your own weather entity.
+#
+# Three cards below, separated by `---`.
+
+# 1. A page of its own. A lone `large` card on a page fills the whole page; tapping it opens the weather entity.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: teal, layout: auto}
+  - {name: Weather, surface: glass, layout: auto}
+cards:
+  - {type: custom:houseview-clock-card, page: Home}
+  - type: custom:houseview-weather-overview-card
+    entity: weather.home
+    page: Weather
+    details: [sunset, wind, humidity, rain]
+---
+# 2. A standalone card (a dashboard card of its own, 380 px high unless you set `height`).
+# `show_time: false` hides the clock when the card sits beside a clock widget; `frosted: false` gives solid numerals.
+type: custom:houseview-weather-overview-card
+entity: weather.home
+height: 380
+show_time: false
+---
+# 3. A small widget (`display: tile`): condition, temperature range and a press opens the full weather scene. Handy beside
+# the clock and the date on a kitchen page.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+  - type: custom:houseview-weather-overview-card
+    entity: weather.home
+    display: tile

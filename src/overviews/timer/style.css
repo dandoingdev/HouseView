@@ -1,0 +1,89 @@
+/* @phase overviews */
+/* @owns ov-timer-scene ov-timer-stage ov-timer-ring ov-timer-tick ov-timer-face ov-timer-time ov-timer-long ov-timer-cap */
+
+/*
+ * The timer display: pure black, a ring of 60 short ticks on a rounded square, the time left and the timer's length.
+ * No images, no gradients, no filters, no animation: it is a still picture that the shared 1 s tick patches. Every size
+ * is a percentage of the stage (the largest centred square of the box) or a container query unit (cqmin) of `.ov`,
+ * so the same markup fits 1280 x 800, 800 x 1280, 390 x 844 and a 380 x 380 card.
+ * Lit ticks are `.on`; the others are the same orange at low alpha (a colour, not `opacity`, so no stacking context per tick).
+ */
+.ov-timer-scene {
+  --ov-timer-orange: #f4a14b;
+  background: #000;
+  color: #fff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+}
+
+/* The stage: the largest square that fits, centred; the rest of the box stays black. */
+.ov-timer-stage {
+  position: absolute;
+  inset: 0;
+  width: 100cqmin;
+  height: 100cqmin;
+  margin: auto;
+}
+.ov-timer-ring {
+  position: absolute;
+  inset: 0;
+}
+
+/* One tick: a rounded bar centred on (--x, --y) percent of the stage, turned by --a degrees (see ring.js). */
+.ov-timer-tick {
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: 1.15%;
+  height: 4.6%;
+  border-radius: 999px;
+  background: rgba(244, 161, 75, 0.22);
+  transform: translate(-50%, -50%) rotate(calc(var(--a) * 1deg));
+}
+.ov-timer-tick.on {
+  background: var(--ov-timer-orange);
+}
+
+/* The face: the time and, beneath it, the length of the timer, centred as one block. */
+.ov-timer-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.2%;
+  text-align: center;
+  /* "15 MIN" must not be bidi-reordered to "MIN 15" on an RTL dashboard: the face is a picture, not running text */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.ov-timer-time {
+  font-size: 24cqmin;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* h:mm:ss is two characters wider: smaller, so it keeps inside the ring */
+.ov-timer-long {
+  font-size: 16cqmin;
+}
+.ov-timer-cap {
+  min-height: 1em;
+  font-size: 5.2cqmin;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--ov-timer-orange);
+  white-space: nowrap;
+}
+
+/* Unavailable: a quiet note instead of the time, the ring unlit. */
+.ov-timer-scene[data-status='unavailable'] .ov-timer-time {
+  font-size: 6cqmin;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.6);
+}

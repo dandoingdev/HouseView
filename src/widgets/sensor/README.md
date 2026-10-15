@@ -1,0 +1,24 @@
+---
+type: sensor
+label: Sensor
+entity: required
+since: 1.0
+---
+# Sensor
+
+Shows a `sensor.*` entity as a widget with a large value, its unit of measurement and the name. The widget is display
+only: a tap opens the more-info dialog (history graph and details). An unavailable, unknown or missing sensor shows
+a dash and the widget is disabled.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| entity | entity | required | A `sensor.*` entity |
+| name | string | friendly name | Label |
+| size | normal/wide/tall/large | normal | Widget size on carousel pages |
+| icon | icon | `mdi:gauge` | Override the icon. A name without a prefix is an `mdi:` icon |
+
+```yaml
+type: custom:houseview-sensor-card
+entity: sensor.living_room_temperature
+icon: mdi:thermometer
+```

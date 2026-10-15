@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HouseView widget preview</title>
+<style>
+  :root { --primary-text-color: #212121; --secondary-text-color: #727272; --card-background-color: #fff; --divider-color: #e0e0e0; --primary-color: #03a9f4; --ha-card-border-radius: 12px; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; color: #212121; background: #f2f2f2 }
+  body.dark { background: #1c1c1c; color: #eee; --primary-text-color: #eee; --card-background-color: #2a2a2a }
+  header { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 10px 16px; background: #fffe; backdrop-filter: blur(6px); border-bottom: 1px solid #0002 }
+  body.dark header { background: #222e }
+  header h1 { font-size: 16px; margin: 0 }
+  label { display: inline-flex; gap: 6px; align-items: center }
+  main { padding: 8px 16px 160px }
+  h2 { margin: 24px 0 4px; font-size: 15px }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px }
+  figure { margin: 0; display: grid; gap: 4px }
+  figcaption { font: 12px ui-monospace, monospace; opacity: .75 }
+  .box { position: relative; height: var(--box-h, 240px); border-radius: 12px; overflow: hidden; outline: 1px dashed #0003 }
+  #log { position: fixed; left: 0; right: 0; bottom: 0; max-height: 140px; overflow: auto; margin: 0; padding: 8px 16px; font: 12px ui-monospace, monospace; background: #111d; color: #cfc; white-space: pre-wrap }
+  .note { padding: 12px 16px; background: #fff3cd; color: #664d03 }
+</style>
+<header>
+  <h1>HouseView widget preview</h1>
+  <label>Widget <select id="kind"><option value="">all</option></select></label>
+  <label>Size <select id="size"><option value="">fixture</option><option>normal</option><option>wide</option><option>tall</option><option>large</option></select></label>
+  <label>Appearance <select id="appearance"><option>light</option><option>dark</option><option>auto</option></select></label>
+  <label><input type="checkbox" id="show-states"> states</label>
+  <span id="count"></span>
+</header>
+<div id="notice" class="note" hidden></div>
+<main id="stage"></main>
+<pre id="log">Service calls from the previews are recorded here and go nowhere. Nothing in this page contacts Home Assistant.</pre>
+<script type="module">
+  // Playground that mounts every widget variant from src/widgets/<type>/fixtures.js through its real element.
+  //   tests/preview.html                         against /dist/houseview.js (run `npm run build:dev` first; serve with `npm run dev`)
+  //   tests/preview.html?src=/dist-min/houseview.js              against another bundle
+  //   ?kind=light&size=wide&appearance=dark      preset the controls
+  //   ?manifest=...&widgets=...                  preview another widget tree (the harness self-test uses tests/fixtures/mini-engine)
+  import {createMockHass} from './fixtures/mock-hass.js';
+
+  const params = new URLSearchParams(location.search);
+  const $ = (id) => document.getElementById(id);
+  const log = $('log');
+  const logLine = (text) => { log.textContent += `\n${text}`; log.scrollTop = log.scrollHeight; };
+
+  // Minimal doubles for Home Assistant's own elements: ha-icon shows its mdi name so icons are identifiable.
+  const define = (tag, ctor) => customElements.get(tag) || customElements.define(tag, ctor);
+  define('ha-icon', class extends HTMLElement {
+    static get observedAttributes() { return ['icon']; }
+    connectedCallback() { this.render(); }
+    attributeChangedCallback() { this.render(); }
+    render() {
+      const name = (this.getAttribute('icon') || '').split(':').pop();
+      this.title = this.getAttribute('icon') || '';
+      this.style.cssText = 'display:inline-flex;align-items:center;justify-content:center;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px);font:700 10px system-ui;overflow:hidden';
+      this.textContent = name.slice(0, 2).toUpperCase();
+    }
+  });
+  define('ha-card', class extends HTMLElement {});
+  define('ha-form', class extends HTMLElement {});
+
+  function notice(text) { const n = $('notice'); n.hidden = false; n.textContent = text; }
+
+  let manifest = [];
+  try {
+    manifest = (await import(/* @vite-ignore */ params.get('manifest') || './widgets/manifest.js')).default;
+  } catch (e) {
+    notice(`tests/widgets/manifest.js could not be loaded (${e.message}). Run \`npm run gen\`.`);
+  }
+  if (!manifest.length) notice('No widgets registered yet: nothing to preview.');
+
+  try {
+    await import(params.get('src') || '/dist/houseview.js');
+  } catch (e) {
+    notice(`Could not load ${params.get('src') || '/dist/houseview.js'} (${e.message}). Run \`npm run build:dev\` or pass ?src=.`);
+    manifest = [];
+  }
+
+  const loaded = [];
+  document.body.dataset.ready = 'false';
+  for (const { type } of manifest) {
+    try {
+      const base = (params.get('widgets') || '/src/widgets').replace(/\/$/, '');
+      const { variants } = await import(/* @vite-ignore */ `${base}/${type}/fixtures.js`);
+      loaded.push({ type, variants });
+    } catch (e) {
+      notice(`fixtures.js of ${type} failed to load: ${e.message}`);
+    }
+  }
+
+  const kindSelect = $('kind');
+  for (const { type } of loaded) kindSelect.add(new Option(type, type));
+  for (const id of ['kind', 'size', 'appearance']) if (params.get(id)) $(id).value = params.get(id);
+  if (params.get('states')) $('show-states').checked = true;
+
+  const heights = { climate: 280, media_player: 380 };
+  function render() {
+    const stage = $('stage');
+    stage.replaceChildren();
+    const only = kindSelect.value;
+    const size = $('size').value;
+    const appearance = $('appearance').value;
+    document.body.classList.toggle('dark', appearance === 'dark');
+    let count = 0;
+    for (const { type, variants } of loaded) {
+      if (only && only !== type) continue;
+      const h2 = document.createElement('h2');
+      h2.textContent = type;
+      const grid = document.createElement('div');
+      grid.className = 'grid';
+      stage.append(h2, grid);
+      for (const [name, variant] of Object.entries(variants)) {
+        count++;
+        const mock = createMockHass({ ...(variant.hass || {}), states: variant.states });
+        // Previews must never reach a service: record the call and succeed.
+        const original = mock.hass.callService;
+        mock.hass.callService = (d, s, data) => { logLine(`${type}/${name}: ${d}.${s} ${JSON.stringify(data)}`); return original(d, s, data); };
+        const figure = document.createElement('figure');
+        const box = document.createElement('div');
+        box.className = 'box';
+        box.style.setProperty('--box-h', `${heights[type] || 240}px`);
+        const caption = document.createElement('figcaption');
+        caption.textContent = name;
+        figure.append(box, caption);
+        if ($('show-states').checked) {
+          const pre = document.createElement('pre');
+          pre.textContent = JSON.stringify({ widget: variant.widget, states: variant.states }, null, 1);
+          pre.style.cssText = 'font-size:11px;margin:0;opacity:.7;white-space:pre-wrap';
+          figure.append(pre);
+        }
+        grid.append(figure);
+        try {
+          const el = document.createElement(`houseview-${type}-card`);
+          box.append(el);
+          const { type: alias, ...widget } = variant.widget;
+          void alias;
+          el.setConfig({ type: `custom:houseview-${type}-card`, ...widget, ...(size ? { size } : {}), ...(variant.config || {}), appearance });
+          el.hass = mock.hass;
+          el.addEventListener('hass-more-info', (e) => logLine(`${type}/${name}: more-info ${e.detail?.entityId}`));
+        } catch (e) {
+          box.textContent = `failed: ${e.message}`;
+        }
+      }
+    }
+    $('count').textContent = `${count} variants`;
+  }
+  for (const id of ['kind', 'size', 'appearance', 'show-states']) $(id).addEventListener('change', render);
+  render();
+  document.body.dataset.ready = 'true';
+</script>
+</html>

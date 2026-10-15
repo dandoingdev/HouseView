@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>HouseView overview suite</title>
+<style>
+  body { font: 16px system-ui; max-width: 900px; margin: 24px auto; padding: 16px }
+  li { margin: 8px 0 }
+  #stage { position: absolute; left: -9999px; top: 0 }
+  #stage section { display: block }
+</style>
+<h1>HouseView overview suite</h1>
+<p id="summary">Running…</p>
+<ol id="results"></ol>
+<div id="stage"></div>
+<script type="module">
+  // Runs every overview's fixtures and test.js against the dev bundle (?src=/dist/houseview.js by default),
+  // then the zero-impact test. ?kind=weather filters. Run it with: npm run test:overviews
+  import {runSuite} from './harness.js';
+  try {
+    await runSuite({
+      params: new URLSearchParams(location.search),
+      results: document.querySelector('#results'),
+      summary: document.querySelector('#summary'),
+      stage: document.querySelector('#stage')
+    });
+  } catch (e) {
+    document.querySelector('#summary').textContent = `harness crashed: ${e.message}`;
+    const li = document.createElement('li');
+    li.textContent = `FAIL — harness crashed: ${e.stack || e.message}`;
+    document.querySelector('#results').append(li);
+  }
+</script>
+</html>

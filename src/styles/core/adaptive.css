@@ -1,0 +1,149 @@
+/* @owns shell adaptive face widget control widget-value feedback fullscreen manage */
+/*
+ * Core rules of the adaptive canvas (v2): .adaptive, fullscreen button.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase adaptive */
+/* Adaptive HomeView canvas — v2. Rotation and widget count drive placement. */
+:host {
+  --hv-chrome: 56px;
+}
+
+:host(:fullscreen) {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: auto;
+  --hv-chrome: 0px;
+  background: #817c70;
+}
+
+.shell.adaptive {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  position: relative;
+}
+
+.adaptive .face {
+  aspect-ratio: auto;
+  border-radius: 0;
+  gap: clamp(10px,1.6vw,22px);
+  padding: clamp(16px,2.6vw,32px);
+  min-height: calc(100vh - var(--hv-chrome));
+  min-height: calc(100dvh - var(--hv-chrome));
+  grid-template-columns: repeat(var(--columns,4),minmax(0,1fr));
+  grid-template-rows: repeat(var(--rows,3),minmax(140px,1fr));
+  overflow: visible;
+  align-items: stretch;
+}
+
+.adaptive .face::before {
+  inset: -40% -20%;
+  border-width: 100px;
+}
+
+.adaptive .widget {
+  grid-column: auto;
+  grid-row: auto;
+  min-height: 0;
+  container-type: inline-size;
+  border-radius: clamp(24px,3vw,38px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.adaptive strong,
+.adaptive .control span {
+  font-size: clamp(16px,7cqi,23px);
+}
+
+.adaptive small {
+  font-size: clamp(13px,5cqi,18px);
+}
+
+.adaptive ha-icon {
+  --mdc-icon-size: 42px;
+  margin-bottom: 16px;
+}
+
+.adaptive .control {
+  padding: 20px;
+}
+
+/* @important overrides an earlier !important rule */
+/* shared: sensor, weather */
+.adaptive .widget-value {
+  font-size: clamp(30px,20cqi,60px) !important;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -.03em;
+  margin-bottom: 10px;
+}
+
+/* shared: sensor, weather */
+.widget-value sup {
+  font-size: .35em;
+  margin-left: 4px;
+}
+
+.adaptive .feedback {
+  position: absolute;
+  left: 16px;
+  right: 70px;
+  bottom: 4px;
+  margin: 0;
+  pointer-events: none;
+  font-size: 12px;
+  min-height: 0;
+}
+
+@media (max-width:479px) {
+  .adaptive .face {
+    padding: 10px;
+    gap: 8px;
+    grid-template-rows: repeat(var(--rows,3),minmax(125px,1fr));
+  }
+
+  .adaptive .widget {
+    border-radius: 22px;
+  }
+
+  .adaptive .control {
+    padding: 12px;
+  }
+
+  .adaptive ha-icon {
+    --mdc-icon-size: 32px;
+    margin-bottom: 10px;
+  }
+}
+
+@supports not (container-type:inline-size) {
+  .adaptive strong,
+  .adaptive .control span {
+    font-size: 19px;
+  }
+
+  .adaptive small {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  /* @important overrides an earlier !important rule */
+  .adaptive * {
+    transition: none !important;
+  }
+}
+
+.adaptive .feedback {
+  bottom: 10px;
+  left: 145px;
+}

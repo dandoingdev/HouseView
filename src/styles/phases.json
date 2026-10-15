@@ -1,0 +1,65 @@
+{
+  "note": "Ordered cascade phases. The array order IS the cascade: tools/assemble-css.mjs emits phase by phase (see docs/architecture.md).",
+  "phases": [
+    {
+      "name": "base",
+      "note": "shell, face, tile, thermostat, clock, camera, control basics, dark/forest/contrast, small-screen overrides"
+    },
+    {
+      "name": "adaptive",
+      "note": "adaptive canvas v2 (.adaptive), fullscreen and manage buttons"
+    },
+    {
+      "name": "carousel",
+      "note": "screen-sized faces, page navigation, soft surface, calendar/timer/music/date/alarm panels"
+    },
+    {
+      "name": "surface-teal",
+      "note": "teal folded-glass surface"
+    },
+    {
+      "name": "carousel-widgets",
+      "note": "default phase for a new widget: timer presets and the dedicated music face"
+    },
+    {
+      "name": "canvas",
+      "note": "full-height canvas, page controls float over the wallpaper"
+    },
+    {
+      "name": "layout-controls",
+      "note": "kitchen controls layout: broad glass tiles"
+    },
+    {
+      "name": "night",
+      "note": "bedroom variant: night mode and the dim button"
+    },
+    {
+      "name": "tablet",
+      "note": "tablet host canvas and normal-flow navigation"
+    },
+    {
+      "name": "widgets-late",
+      "note": "camera status, blinds, climate faces"
+    },
+    {
+      "name": "gallery",
+      "note": "camera gallery overlay"
+    },
+    {
+      "name": "lifted",
+      "note": "lifted glass, silver and champagne surfaces, page glide"
+    },
+    {
+      "name": "reuse",
+      "note": "reusable cards: host, native cards, single widget, reference tile proportions"
+    },
+    {
+      "name": "nav-compact",
+      "note": "empty state and compact normal-flow navigation"
+    },
+    {
+      "name": "overviews",
+      "note": "overview and screensaver layer: matches nothing unless an overview exists"
+    }
+  ]
+}

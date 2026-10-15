@@ -1,0 +1,244 @@
+/* @owns camera camera-label camera-status has-image camera-gallery camera-gallery-grid gallery-back gallery-camera gallery-camera-placeholder gallery-camera-name camera-view-open */
+/*
+ * camera widget styles (tile in the base/adaptive/surface phases, camera grid in the `gallery` phase).
+ * Every rule keeps its cascade position: do not merge or reorder rules, and add new ones to the section of the
+ * phase they belong to. A section is a cascade phase (src/styles/phases.json) and sections stay in phase order;
+ * a pin only reorders sections inside one phase.
+ * `.camera-view-open` (last rule) is the shell class the gallery extension adds while the grid is open.
+ */
+
+/* @phase base */
+.camera {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 12px;
+  text-align: center;
+}
+
+.camera img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.camera.has-image img {
+  display: block;
+}
+
+.camera.has-image::after {
+  content: '';
+  position: absolute;
+  inset: 45% 0 0;
+  background: linear-gradient(transparent,#000b);
+}
+
+.camera-label,
+.camera-status {
+  position: relative;
+  z-index: 1;
+}
+
+.camera-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.camera.has-image {
+  justify-content: flex-end;
+}
+
+.camera.has-image ha-icon {
+  display: none;
+}
+
+/* @phase base @pin 1 */
+@media (max-width:460px) {
+  .camera {
+    padding: 6px;
+  }
+
+  .camera-label {
+    font-size: 11px;
+  }
+
+  .camera-status {
+    font-size: 11px;
+  }
+}
+
+/* @phase adaptive */
+/* Adaptive HomeView canvas — v2. Rotation and widget count drive placement. */
+.adaptive .camera-label {
+  font-size: 18px;
+}
+
+.adaptive .camera {
+  padding: 20px;
+}
+
+/* @phase carousel */
+/* Screen-sized faces and kitchen controls — v3. */
+.surface-soft .camera.has-image {
+  color: white;
+}
+
+/* @phase surface-teal */
+/* Teal folded-glass face, inspired by the supplied HomeView reference. */
+.surface-teal .camera.has-image {
+  border-color: #d2fff23b;
+}
+
+.surface-teal .camera.has-image::after {
+  background: linear-gradient(transparent,#002a28b8);
+}
+
+/* @phase widgets-late */
+/* Keep a working camera preview free of redundant status text. */
+.camera-status:empty {
+  display: none;
+}
+
+/* @phase gallery */
+/* Four camera faces, edge-to-edge inside the tablet canvas. */
+.camera-gallery header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+.camera-gallery header>strong {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -.03em;
+}
+
+.gallery-back {
+  position: absolute;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 0 16px 0 8px;
+  border: 1px solid #e9fff63d;
+  border-radius: 999px;
+  background: #b8ffed22;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gallery-back ha-icon {
+  --mdc-icon-size: 28px;
+  margin: 0;
+}
+
+.camera-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-rows: repeat(2,minmax(0,1fr));
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+.camera-gallery-grid.single {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+.gallery-camera {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid #ddfff33b;
+  border-radius: 24px;
+  background: #052d30;
+  color: inherit;
+  font: inherit;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+}
+
+.gallery-camera img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gallery-camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: .75;
+}
+
+.gallery-camera-placeholder ha-icon {
+  --mdc-icon-size: 36px;
+  margin: 0;
+}
+
+.gallery-camera.has-image .gallery-camera-placeholder {
+  display: none;
+}
+
+.gallery-camera-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 32px 16px 14px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  background: linear-gradient(transparent,#002529b3);
+  pointer-events: none;
+}
+
+.gallery-back:focus-visible,
+.gallery-camera:focus-visible {
+  outline: 2px solid #effffa;
+  outline-offset: -3px;
+}
+
+@media (max-width:519px) {
+  .camera-gallery {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .gallery-camera {
+    border-radius: 20px;
+  }
+
+  .gallery-camera-name {
+    font-size: 13px;
+    padding: 24px 12px 12px;
+  }
+}
+
+.camera-view-open>.face,
+.camera-view-open>.page-nav,
+.camera-view-open>.dim-screen {
+  visibility: hidden;
+}

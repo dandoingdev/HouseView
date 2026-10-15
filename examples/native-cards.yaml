@@ -1,0 +1,29 @@
+# Home Assistant's own cards on a HouseView page. Any card that is not a HouseView card is created through
+# Home Assistant and placed on the page named by `view_layout.houseview_page`; `houseview_size` is normal, wide,
+# tall or large (default normal). Native cards look like Home Assistant, not like HouseView, and are created
+# lazily, so they appear a moment after the page.
+title: Mixed page
+views:
+  - title: Mixed
+    path: mixed
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        pages:
+          - {name: Home, surface: glass, layout: auto}
+          - {name: Details, surface: soft, layout: auto}
+        cards:
+          - {type: custom:houseview-clock-card, page: Home}
+          - {type: custom:houseview-light-card, entity: light.living_room, page: Home}
+          - type: entities
+            title: Heating
+            entities:
+              - climate.living_room
+              - sensor.hallway_temperature
+            view_layout:
+              houseview_page: Details
+              houseview_size: wide
+          - type: markdown
+            content: "Back at six."
+            view_layout:
+              houseview_page: Details

@@ -1,0 +1,45 @@
+/* @owns native-card shell single-widget face page-nav */
+/*
+ * Core host rules: reusable cards, native cards, single widget.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase reuse */
+/* Reusable cards retain the same grid cells and shared glass styling. */
+houseview-widget-card {
+  display: contents;
+}
+
+.native-card {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  --ha-card-background: transparent;
+  --ha-card-border-width: 0;
+  --ha-card-box-shadow: none;
+}
+
+.native-card>* {
+  display: block;
+  height: 100%;
+}
+
+/* @important overrides an earlier !important rule */
+.shell.single-widget {
+  border-radius: 36px !important;
+  min-height: 220px;
+}
+
+/* @important overrides an earlier !important rule */
+.shell.single-widget .face {
+  padding: 0 !important;
+  gap: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+/* @important overrides an earlier !important rule */
+.shell.single-widget .page-nav {
+  display: none !important;
+}

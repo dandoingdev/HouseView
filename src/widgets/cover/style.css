@@ -1,0 +1,128 @@
+/* @owns cover blinds-panel blinds-heading blinds-controls blind-key blinds-simple bs-heading bs-name bs-status bs-keys bs-key bs-open bs-stop bs-close bs-glyph */
+/*
+ * cover widget styles.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase widgets-late */
+/* Blinds: a quiet glass header and three generous, explicit touch targets. */
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+
+/* @phase lifted */
+/*
+ * Look (matches the thermostat): the tile keeps the glass of every other tile. The name and the position sit in
+ * the middle (one big key: tapping opens more-info) and three plain keys run along the bottom: up, stop, down. The keys
+ * have no border, no fill and no shadow; only the glyph is drawn. Sizes come from the tile (container query units).
+ */
+.carousel .tile.widget.blinds-simple.blinds-simple {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+  container-type: size;
+}
+
+.carousel .blinds-simple .bs-heading {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  margin: 0;
+  padding: 0 6cqw;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  text-align: center;
+}
+
+.carousel .blinds-simple .bs-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(18px, 9cqmin, 52px);
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carousel .blinds-simple .bs-status {
+  display: block;
+  margin: 0;
+  font-size: clamp(14px, 6.4cqmin, 34px);
+  font-weight: 400;
+  line-height: 1.25;
+  opacity: 0.72;
+}
+
+.carousel .blinds-simple .bs-keys {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  padding: 0 0 clamp(8px, 6cqmin, 36px);
+}
+
+.carousel .blinds-simple .bs-key {
+  display: grid;
+  place-items: center;
+  width: clamp(48px, 14cqmin, 96px);
+  height: clamp(48px, 14cqmin, 96px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  line-height: 0;
+}
+
+.carousel .blinds-simple .bs-glyph {
+  width: clamp(28px, 11cqmin, 72px);
+  height: clamp(28px, 11cqmin, 72px);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The stop key is a small rounded square: drawn in outline like the chevrons, never boxed. */
+.carousel .blinds-simple .bs-stop .bs-glyph {
+  width: clamp(24px, 9cqmin, 60px);
+  height: clamp(24px, 9cqmin, 60px);
+}
+
+.carousel .blinds-simple .bs-key:disabled {
+  opacity: 0.35;
+}
+
+.carousel .blinds-simple .bs-key:not(:disabled):active {
+  filter: none;
+  opacity: 0.6;
+}
+
+.carousel .blinds-simple .bs-heading:not(:disabled):active {
+  filter: none;
+  opacity: 0.75;
+}
+
+.carousel .blinds-simple .bs-key:focus-visible,
+.carousel .blinds-simple .bs-heading:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -6px;
+}

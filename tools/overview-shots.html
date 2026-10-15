@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en-GB">
+<meta charset="utf-8" />
+<title>HouseView overview shots</title>
+<!--
+  Page for tools/overview-shots.mjs: mounts the real bundle (/dist/houseview.js) with the weather overview as a preview
+  screensaver over a one-card carousel, on a mock hass. Nothing here reaches Home Assistant or the network.
+
+    overview-shots.html?condition=rainy&tod=night&variant=<fixture name>&mode=card
+
+  condition  a HA weather state; tod day|night (night = the sun entity is below the horizon); variant picks any fixture
+  by name instead (src/overviews/weather/fixtures.js); mode=card shows the overview card instead of the screensaver.
+  window.__shotReady becomes true when the scene is on screen.
+-->
+<style>
+  html,
+  body {
+    margin: 0;
+    height: 100%;
+    background: #0b1530;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+</style>
+<body>
+  <script type="module">
+    import {variants, NIGHT_VARIANTS} from '/src/overviews/weather/fixtures.js';
+
+    // ---- doubles for the Home Assistant elements the card uses ----
+    // <ha-icon>: a drawn line glyph per icon name used by the weather overview (NOT mdi: nothing is fetched).
+    // These show layout, not icon fidelity.
+    const CLOUD = 'M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 8.5a4.75 4.75 0 0 1 .5 9.5Z';
+    const CLOUD_HI = 'M7 14a3.6 3.6 0 0 1-.5-7.17A5 5 0 0 1 16 5.4a4.3 4.3 0 0 1 .5 8.6Z';
+    const rays = (cx, cy, r1, r2) =>
+      Array.from({length: 8}, (_, i) => {
+        const a = (i * Math.PI) / 4;
+        const at = (r) => `${(cx + Math.cos(a) * r).toFixed(2)} ${(cy + Math.sin(a) * r).toFixed(2)}`;
+        return `M${at(r1)}L${at(r2)}`;
+      }).join('');
+    const GLYPHS = {
+      'weather-sunny': `<circle cx="12" cy="12" r="4"/><path d="${rays(12, 12, 6.8, 9.6)}"/>`,
+      'weather-night': '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>',
+      'weather-partly-cloudy': `<circle cx="8" cy="8" r="3"/><path d="${rays(8, 8, 4.8, 6.6)}"/><path d="M10 20a3.6 3.6 0 0 1-.4-7.2 4.8 4.8 0 0 1 9.2 1.2A3.1 3.1 0 0 1 18.5 20Z"/>`,
+      'weather-cloudy': `<path d="${CLOUD}"/>`,
+      'weather-cloudy-alert': `<path d="${CLOUD}"/><path d="M12 11v3M12 16.2v.1"/>`,
+      'weather-fog': `<path d="${CLOUD_HI}"/><path d="M4 17h12M7 20.5h13"/>`,
+      'weather-hail': `<path d="${CLOUD_HI}"/><circle cx="8" cy="18" r=".6"/><circle cx="12" cy="20" r=".6"/><circle cx="16" cy="18" r=".6"/>`,
+      'weather-lightning': `<path d="${CLOUD_HI}"/><path d="M12.5 13l-2.5 4h3l-2 4"/>`,
+      'weather-lightning-rainy': `<path d="${CLOUD_HI}"/><path d="M12.5 13l-2.5 3.5h3l-2 3.5M7 16l-1 3M17 16l-1 3"/>`,
+      'weather-pouring': `<path d="${CLOUD_HI}"/><path d="M8 16l-1 4M12 16l-1 4M16 16l-1 4"/>`,
+      'weather-rainy': `<path d="${CLOUD_HI}"/><path d="M9 17l-1 3.5M14 17l-1 3.5"/>`,
+      'weather-snowy': `<path d="${CLOUD_HI}"/><circle cx="8" cy="18" r=".7"/><circle cx="12" cy="20" r=".7"/><circle cx="16" cy="18" r=".7"/>`,
+      'weather-snowy-rainy': `<path d="${CLOUD_HI}"/><path d="M8 16.5l-1 3.5"/><circle cx="13" cy="19.5" r=".7"/><path d="M17 16.5l-1 3.5"/>`,
+      'weather-windy':
+        '<path d="M3 9h10a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 13h14a2.5 2.5 0 1 1-2.5 2.5"/><path d="M3 17h6"/>',
+      'weather-windy-variant':
+        '<path d="M3 11h9.5a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 15h13a2.5 2.5 0 1 1-2.5 2.5"/><circle cx="18" cy="6" r="2.2"/>',
+      'alert-circle-outline': '<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16v.1"/>',
+      'weather-sunset-down': '<path d="M4 17h16M7.5 17a4.5 4.5 0 0 1 9 0M12 4v5M9.5 7l2.5 2.5L14.5 7"/>',
+      'weather-sunset-up': '<path d="M4 17h16M7.5 17a4.5 4.5 0 0 1 9 0M12 9V4M9.5 6.5L12 4l2.5 2.5"/>',
+      'water-percent':
+        '<path d="M12 3.5C9 7.5 6.5 10.2 6.5 13.6a5.5 5.5 0 0 0 11 0C17.5 10.2 15 7.5 12 3.5Z"/><path d="M9.8 15.6l4.4-4M10 11.8v.1M14 15.6v.1"/>',
+      gauge: '<path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 14l4-4.5"/><circle cx="12" cy="14.5" r="1.1"/>',
+      'sun-wireframe': `<circle cx="12" cy="12" r="3.6"/><path d="${rays(12, 12, 6.2, 9)}"/>`,
+      'eye-outline':
+        '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
+      'water-thermometer-outline':
+        '<path d="M8 4.5a2 2 0 0 1 4 0v8.2a3.6 3.6 0 1 1-4 0Z"/><path d="M17 12c-1.7 2.2-2.8 3.4-2.8 4.8a2.8 2.8 0 0 0 5.6 0C19.8 15.4 18.7 14.2 17 12Z"/>',
+      thermometer: '<path d="M9.5 5a2.5 2.5 0 0 1 5 0v8.2a4.2 4.2 0 1 1-5 0Z"/><path d="M12 9v7"/>',
+      'cloud-outline': `<path d="${CLOUD}"/>`
+    };
+    customElements.define(
+      'ha-icon',
+      class extends HTMLElement {
+        static observedAttributes = ['icon'];
+        constructor() {
+          super();
+          this.attachShadow({mode: 'open'});
+        }
+        connectedCallback() {
+          this.draw();
+        }
+        attributeChangedCallback() {
+          this.draw();
+        }
+        // Like the real element, everything lives in a shadow root: the host keeps whatever style the card gave it.
+        draw() {
+          const name = (this.getAttribute('icon') || '').replace(/^mdi:/, '');
+          const body = GLYPHS[name] || '<rect x="5" y="5" width="14" height="14" rx="3"/>';
+          this.shadowRoot.innerHTML =
+            '<style>:host{display:inline-flex;flex:none;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}' +
+            'svg{width:100%;height:100%}</style>' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" ' +
+            `stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+        }
+      }
+    );
+    customElements.define('ha-card', class extends HTMLElement {});
+    customElements.define('ha-form', class extends HTMLElement {});
+    customElements.define('hui-stack-card-editor', class extends HTMLElement {});
+
+    // ---- which fixture ----
+    const query = new URLSearchParams(location.search);
+    const wanted = query.get('variant');
+    const condition = query.get('condition') || 'partlycloudy';
+    const night = query.get('tod') === 'night';
+    const key = wanted || (night && condition !== 'clear-night' ? `${condition}@night` : condition);
+    const variant = variants[key] || NIGHT_VARIANTS[key];
+    if (!variant) throw new Error(`overview-shots: no weather fixture "${key}"`);
+
+    // ---- mock hass: states and locale from the fixture, forecasts through a fake subscription ----
+    const hass = {
+      states: structuredClone(variant.states),
+      ...structuredClone(variant.hass),
+      themes: {darkMode: false},
+      callService: () => Promise.reject(new Error('the shots page never calls a service')),
+      connection: {
+        subscribeMessage(callback, message) {
+          const forecast = variant.forecasts?.[message.forecast_type];
+          queueMicrotask(() => callback({type: message.forecast_type, forecast: forecast ?? null}));
+          return Promise.resolve(() => {});
+        },
+        subscribeEvents: () => Promise.resolve(() => {})
+      }
+    };
+
+    // ---- the real bundle ----
+    await import(query.get('src') || '/dist/houseview.js');
+    const card = document.createElement('houseview-card');
+    document.body.append(card);
+    // tablet_mode makes the shell fill the viewport, like a wall tablet; preview shows the screensaver at once.
+    // mode=card paints the overview as a page card instead (a page of its own: the lone large card fills it).
+    const asCard = query.get('mode') === 'card';
+    card.setConfig({
+      tablet_mode: true,
+      preview_time: variant.config.preview_time,
+      ...(asCard
+        ? {cards: [{type: 'custom:houseview-weather-overview-card', ...variant.options}]}
+        : {
+            cards: [{type: 'custom:houseview-clock-card'}],
+            screensaver: {type: 'weather', ...variant.options, preview: true}
+          })
+    });
+    card.hass = hass;
+
+    // ready: the layer exists, has faded in, fonts are loaded and the layout has settled
+    const shown = () =>
+      asCard
+        ? !!card.shadowRoot?.querySelector('.ov-weather-scene')
+        : card.shadowRoot?.querySelector('.hv-screensaver')?.dataset.state === 'on';
+    for (let i = 0; i < 100 && !shown(); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    await document.fonts.ready;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    window.__shotReady = shown();
+  </script>
+</body>
+</html>

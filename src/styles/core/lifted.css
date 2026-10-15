@@ -1,0 +1,36 @@
+/* @owns tile widget face page-outgoing */
+/*
+ * Core lifted-glass rules and the page glide.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+.carousel .tile.widget {
+  border-radius: clamp(36px,4.6vw,58px);
+  border: 1px solid #effff98a;
+  box-shadow: inset 0 2px 3px #ffffff70,inset 0 -2px 4px #041f2c55,0 9px 22px #001c292b,0 2px 5px #00171f30;
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+}
+
+@media (max-width:519px) {
+  .carousel .tile.widget {
+    border-radius: 32px;
+  }
+}
+
+/* Short directional glide; the wallpaper and navigation stay anchored. */
+.carousel .face.page-outgoing {
+  position: absolute;
+  inset: 0 0 auto;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion:no-preference) {
+  .page-dot span {
+    transition: width .24s ease,opacity .24s ease;
+  }
+}

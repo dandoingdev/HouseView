@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-min/
+.DS_Store
+*.log
+coverage/
+.tmp/
+tools/.scratch*/

@@ -1,0 +1,132 @@
+/* @owns shell face page-nav manage dim-screen feedback page-indicators */
+/*
+ * Core tablet host rules (?tablet=1 / tablet-mode): the canvas belongs to the viewport.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase tablet */
+/* Tablet canvas belongs to the viewport, independent of HA panel sizing. */
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  z-index: 5;
+  background: #103f42;
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .shell,
+:host([tablet-mode]) .face {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+}
+
+/* Keep tablet navigation in its own viewport layer on Android WebView. */
+
+:host([tablet-mode]) .page-nav {
+  position: fixed;
+  top: auto;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 72px;
+  min-height: 72px;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+:host([tablet-mode]) .dim-screen {
+  position: fixed;
+  right: 10px;
+  bottom: 8px;
+  transform: translateZ(0);
+}
+
+:host([tablet-mode]) .feedback {
+  position: fixed;
+  bottom: 68px;
+  transform: translateZ(0);
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .page-nav {
+  min-width: 100vw;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px;
+  line-height: 1;
+  isolation: isolate;
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .page-nav button {
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  transform: none !important;
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .page-indicators {
+  flex: 0 0 auto !important;
+  min-height: 60px;
+  overflow: visible;
+}
+
+/* Normal-flow navigation avoids Android WebView fixed-layer text distortion. */
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .face {
+  height: calc(100% - 72px) !important;
+  padding-bottom: 24px;
+}
+
+/* @important overrides an earlier !important rule */
+:host([tablet-mode]) .page-nav {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+  backface-visibility: visible;
+  isolation: auto;
+  height: 72px;
+  min-height: 72px;
+  background: transparent !important;
+}
+
+@media (max-width:519px) {
+  :host([tablet-mode]) .face {
+    padding-bottom: 10px;
+  }
+}
+
+.carousel .face {
+  padding-bottom: 24px;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel .page-nav {
+  position: relative;
+  inset: auto;
+  transform: none;
+  background: transparent !important;
+}
+
+@media (max-width:519px) {
+  .carousel .face {
+    padding-bottom: 10px;
+  }
+}

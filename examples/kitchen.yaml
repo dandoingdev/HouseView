@@ -1,0 +1,33 @@
+# A wall-tablet dashboard in three pages: Kitchen (clock, date, camera, timer), Music and Home controls.
+#
+# The `kitchen` layout looks for one clock, one date (or calendar), one camera and one timer on the page
+# and arranges them as a single screen. Swipe left and right between pages, or tap the page dots.
+# Add ?tablet=1 to the dashboard address on the tablet to hide Home Assistant's sidebar and header
+# (see docs/tablet.md).
+title: Kitchen tablet
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        # performance: lite # auto (the default) already picks lite on a weak tablet; see docs/performance.md
+        pages:
+          - {name: Kitchen, surface: teal, layout: kitchen}
+          - {name: Music, surface: teal, layout: auto}
+          - {name: Home, surface: glass, layout: controls}
+        cards:
+          # Kitchen
+          - {type: custom:houseview-clock-card, page: Kitchen}
+          - {type: custom:houseview-date-card, page: Kitchen}
+          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen}
+          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}
+          # Music
+          - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}
+          # Home controls
+          - {type: custom:houseview-light-card, entity: light.kitchen, page: Home}
+          - {type: custom:houseview-light-card, entity: light.living_room, page: Home}
+          - {type: custom:houseview-climate-card, entity: climate.living_room, page: Home}
+          - {type: custom:houseview-weather-card, entity: weather.home, page: Home}
+          - {type: custom:houseview-lock-card, entity: lock.front_door, page: Home}
+          - {type: custom:houseview-action-card, entity: scene.morning, page: Home}

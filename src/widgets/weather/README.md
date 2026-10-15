@@ -1,0 +1,27 @@
+---
+type: weather
+label: Weather
+entity: required
+since: 1.0
+---
+# Weather
+
+Shows a `weather.*` entity as a small widget: a condition icon, the current temperature with its unit, the name and
+the condition text (`partlycloudy`, `lightning rainy`, ...). The widget is display only: a tap opens the entity's
+more-info dialog. Conditions without a dedicated icon use a partly cloudy icon. The unit is the entity's
+`temperature_unit`, otherwise the Home Assistant unit system; values are never converted. A missing or non-numeric
+temperature shows a dash, and an unavailable entity is shown disabled.
+
+For a full-page forecast with an animated sky, use the [weather overview](../overviews/weather.md), which can also
+appear as a small widget that opens the full scene when pressed (`display: tile`).
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| entity | entity | required | A `weather.*` entity |
+| name | string | friendly name | Label |
+| size | normal/wide/tall/large | normal | Widget size on carousel pages |
+
+```yaml
+type: custom:houseview-weather-card
+entity: weather.home
+```

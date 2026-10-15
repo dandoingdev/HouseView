@@ -1,0 +1,138 @@
+/* @phase overviews */
+/* @owns ov-photo_frame-scene ov-photo-frame ov-photo-img ov-photo-a ov-photo-b ov-photo-rim ov-photo-scrim ov-photo-note ov-photo-clock ov-photo-time ov-photo-date */
+
+/*
+ * The photo frame. Screensaver: pure black with the photo in a big rounded square inset from the edges (the black
+ * frame is part of the look), the time and the date bottom right over a soft scrim. Card: the photo fills the card
+ * with a thin light rim. Two stacked <img> layers cross-fade (opacity only; no filter, no blur, no animation
+ * otherwise), so it is cheap on a weak tablet. Sizes are container query units of `.ov`.
+ */
+.ov-photo_frame-scene {
+  --ov-pf-side: 88.4cqmin;
+  --ov-pf-radius: 11cqmin;
+  background: #000;
+  color: #fff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+}
+.ov-photo_frame-scene[data-mode='card'] {
+  background: transparent;
+}
+
+.ov-photo-frame {
+  position: absolute;
+  inset: 0;
+  width: var(--ov-pf-side);
+  height: var(--ov-pf-side);
+  margin: auto;
+  border-radius: var(--ov-pf-radius);
+  overflow: hidden; /* clips the photo layers to the rounded square */
+  background: #1c1c1e;
+}
+.ov-photo_frame-scene[data-mode='card'] .ov-photo-frame {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+/* the thin light rim of the card sits ABOVE the photo (an inset shadow on the frame would be painted under it) */
+.ov-photo-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.72);
+  pointer-events: none;
+}
+
+.ov-photo-img,
+.ov-photo-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.ov-photo-img {
+  display: block;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.ov-photo-frame[data-layer='a'] .ov-photo-a,
+.ov-photo-frame[data-layer='b'] .ov-photo-b {
+  opacity: 1;
+}
+.ov-photo-frame:not([data-state='ready']) .ov-photo-img {
+  display: none; /* nothing loaded yet (or nothing to show): no broken-image glyph */
+}
+@media (prefers-reduced-motion: reduce) {
+  .ov-photo-img {
+    transition: none;
+  }
+}
+.perf-lite .ov-photo-img {
+  transition: none;
+}
+
+/* A static scrim under the clock (only rendered in the screensaver): the bottom of the photo, eased out. */
+.ov-photo-scrim {
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.4) 14%,
+    rgba(0, 0, 0, 0.2) 28%,
+    rgba(0, 0, 0, 0.06) 40%,
+    rgba(0, 0, 0, 0) 50%
+  );
+}
+.ov-photo-frame:not([data-state='ready']) .ov-photo-scrim {
+  display: none;
+}
+
+/* Loading, no folder, empty folder, error: one calm line. */
+.ov-photo-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 8%;
+  text-align: center;
+  font-size: 4cqmin;
+  color: rgba(255, 255, 255, 0.55);
+}
+.ov-photo-frame[data-state='ready'] .ov-photo-note {
+  display: none;
+}
+
+/* The time, bottom right (screensaver). */
+.ov-photo-clock {
+  position: absolute;
+  right: 9%;
+  bottom: 8.4%;
+  text-align: end;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+}
+.ov-photo-frame:not([data-state='ready']) .ov-photo-clock {
+  display: none;
+}
+.ov-photo-time,
+.ov-photo-date {
+  margin: 0;
+  white-space: nowrap;
+}
+.ov-photo-time {
+  font-size: 10.5cqmin;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ov-photo-date {
+  margin-top: 0.8cqmin;
+  font-size: 3.4cqmin;
+  font-weight: 400;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.7);
+}

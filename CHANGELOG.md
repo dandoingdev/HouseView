@@ -1,0 +1,50 @@
+# Changelog
+
+All notable changes to HouseView are recorded here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
+The release workflow publishes the section of the tagged version as the release notes.
+
+## [1.0.0] - 2026-10-15
+
+First public release.
+
+### Added
+
+* **The carousel**, `custom:houseview-card`: swipeable, screen-sized pages of widgets with `auto`, `grid`, `controls`,
+  `modular` and `kitchen` layouts, numbered continuation pages, page dots and arrows, arrow-key navigation, and Home
+  Assistant cards (`entities`, `markdown`, ...) placed on a page with `view_layout`.
+* **16 widgets**, each usable in the carousel and as a card of its own (`custom:houseview-<type>-card`, or
+  `custom:houseview-widget-card` with `widget_type`): clock, date, calendar, camera, thermostat, light, switch, fan, blinds,
+  lock, sensor, weather, music player, timer, alarm panel and action.
+* **5 overviews**: the weather scene (CSS sky, forecast range, up to six details, a small widget form), the photo frame
+  (photos from a Home Assistant media folder), the month calendar, the timer display and the album cover art. Overviews can
+  be screensavers (after `idle_timeout` seconds; the first tap only wakes the dashboard), automatic displays, opened by
+  pressing a widget, or used as cards. A `screensaver` list takes turns; some overviews rank above others; edit mode, the
+  camera grid, the timer alarm and pending service calls hold a screensaver back.
+* **Automatic displays**: `timer_display` shows the timer display while a timer runs; `music_screensaver` shows the album
+  cover when the screensaver would start and a speaker is playing; `calendar_view` lets the clock, date and calendar widgets
+  open the month calendar.
+* **Camera grid** (`camera_gallery`) for up to four cameras, with snapshots or streams.
+* **Looks**: `glass`, `soft`, `teal`, `silver` and `champagne` surfaces, one `wallpaper` for every page, `stone` and
+  `forest` palettes, light, dark and automatic appearance, `high_contrast`, and `bedtime` with a Dim button.
+* **Performance**: `performance: auto | full | lite`. `auto` picks the lite look (opaque glass, no decorative animation, a still
+  weather scene) on devices with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView. A covering overview
+  stops all other work. A benchmark page measures a real tablet.
+* **Tablet mode**: `?tablet=1` or `tablet_mode: true` hides Home Assistant's sidebar and header.
+* **Home Assistant conventions**: card picker entries and a visual editor for the carousel and every widget,
+  `tap_action`, `hold_action` and `double_tap_action` (`more-info`, `toggle`, `perform-action`, `navigate`, `url`, `none`)
+  with optional confirmation, `confirm_mode: inline`, `localized_states`, and an optional Home Assistant theme.
+* **Developer tooling**: a widget and an overview contract with linters, scaffolding (`npm run new:widget`,
+  `npm run new:overview`), generated documentation pages, unit, browser and real-input test suites, and a production build
+  into a single file.
+
+### Notes
+
+* Requires Home Assistant 2024.8.0 or newer and a browser based on Chrome 105 or later.
+* Interface text is English. Dates, times and numbers follow your Home Assistant language; the weather overview also ships
+  German text.
+* Tablet mode and the edit-mode detection of screensavers reach into Home Assistant frontend internals that are not a public
+  API. They are feature-detected and fail safe, but a Home Assistant update can stop them from working.
+* HouseView is an independent project, not affiliated with Apple, Home Assistant or Nabu Casa.
+
+[1.0.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.0.0

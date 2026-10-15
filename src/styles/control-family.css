@@ -1,0 +1,45 @@
+/* @owns control */
+/*
+ * Shared .control tile proportions for the icon-tile family; the class list is generated (family
+ * icon-tile).
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase reuse */
+/* Reference tile proportions: equal-size title/subtitle, a larger icon and air between the glyph and the labels. Scale by the tile's shorter dimension. */
+@supports (container-type:size) {
+  .carousel .control:is(@family(icon-tile)) {
+    container-type: size;
+  }
+
+  .carousel.layout-controls .control:is(@family(icon-tile))>ha-icon {
+    --mdc-icon-size: clamp(46px,40cqmin,160px);
+    margin: 0 0 clamp(12px,10cqmin,44px);
+    flex-shrink: 0;
+  }
+
+  .carousel.layout-controls .control:is(@family(icon-tile))>span:not(.control-note):not(.widget-value) {
+    font-size: clamp(18px,11.5cqmin,44px);
+    font-weight: 600;
+    line-height: 1.24;
+    letter-spacing: -.025em;
+    max-width: 100%;
+    text-wrap: balance;
+  }
+
+  .carousel.layout-controls .control:is(@family(icon-tile))>small {
+    font-size: clamp(18px,11.5cqmin,44px);
+    font-weight: 400;
+    line-height: 1.24;
+    letter-spacing: -.025em;
+    margin-top: clamp(4px,2cqmin,9px);
+    opacity: .74;
+  }
+}
+
+@media (orientation:portrait) {
+  .carousel.layout-controls .control:is(@family(icon-tile)) {
+    padding: clamp(14px,3vw,24px);
+  }
+}

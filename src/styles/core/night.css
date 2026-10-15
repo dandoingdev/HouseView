@@ -1,0 +1,57 @@
+/* @owns widget dim-screen carousel screen-dim night-mode */
+/*
+ * Core night-mode rules: the bedtime dimmer button.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase night */
+/* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
+.night-mode .widget {
+  border-color: #e1f5df2b;
+}
+
+.dim-screen {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 86px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid #cce8d822;
+  border-radius: 24px;
+  background: #072f3166;
+  color: #e2eddb;
+  font-size: 13px;
+}
+
+.dim-screen ha-icon {
+  --mdc-icon-size: 20px;
+  margin: 0;
+}
+
+.carousel.screen-dim {
+  filter: brightness(.20);
+}
+
+@media (prefers-reduced-motion:no-preference) {
+  .night-mode {
+    transition: filter .2s ease;
+  }
+}
+
+@media (max-width:519px) {
+  .dim-screen {
+    min-width: 60px;
+    padding: 0 10px;
+  }
+
+  .dim-screen span {
+    display: none;
+  }
+}

@@ -1,0 +1,8 @@
+/* @owns sensor */
+/*
+ * sensor widget styles.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* No rules of its own: the widget is styled by the shared icon-tile family lists and the generic .control / .tile rules. */

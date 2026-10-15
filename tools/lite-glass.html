@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en-GB">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HouseView lite glass calibration</title>
+<!-- Page side of tools/lite-glass.mjs: one card from ?cfg=<json>, mock hass, the usual doubles for Home Assistant elements. -->
+<style>
+  :root{--primary-text-color:#212121;--secondary-text-color:#727272;--card-background-color:#fff;--divider-color:#e0e0e0;--primary-color:#03a9f4;--ha-card-border-radius:12px;--ha-card-border-width:1px;--ha-card-border-color:#e0e0e0;--primary-background-color:#fafafa}
+  html,body{margin:0;padding:0;background:#fafafa}
+</style>
+<body><div id="stage"></div>
+<script type="module">
+const params = new URLSearchParams(location.search);
+customElements.define('ha-icon', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({mode: 'open'}).innerHTML =
+    '<style>:host{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex:none;width:var(--mdc-icon-size,24px);height:var(--mdc-icon-size,24px)}svg{width:100%;height:100%;fill:currentColor}</style><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>'; }
+});
+customElements.define('ha-card', class extends HTMLElement {
+  constructor() { super(); this.attachShadow({mode: 'open'}).innerHTML =
+    '<style>:host{display:block;position:relative;color:var(--primary-text-color);background:var(--ha-card-background,var(--card-background-color,#fff));border-radius:var(--ha-card-border-radius,12px);box-shadow:var(--ha-card-box-shadow,none);border-width:var(--ha-card-border-width,1px);border-style:solid;border-color:var(--ha-card-border-color,var(--divider-color,#e0e0e0))}</style><slot></slot>'; }
+});
+const S = (state, attributes = {}) => ({state, attributes});
+const states = {
+  'light.a': S('on', {friendly_name: 'Lamp', brightness: 180}), 'light.b': S('off', {friendly_name: 'Hall'}),
+  'lock.a': S('locked', {friendly_name: 'Front door'}), 'switch.a': S('on', {friendly_name: 'Heater'}),
+  'sensor.a': S('21.4', {friendly_name: 'Hall', unit_of_measurement: '°C'}), 'fan.a': S('off', {friendly_name: 'Fan'}),
+  'cover.a': S('open', {friendly_name: 'Blinds', current_position: 60, supported_features: 11}),
+  'climate.a': S('heat', {friendly_name: 'Living', temperature: 21, current_temperature: 20.4, min_temp: 7, max_temp: 30, target_temp_step: 0.5, supported_features: 393, hvac_modes: ['off','heat'], hvac_action: 'heating'}),
+  'media_player.a': S('playing', {friendly_name: 'Speaker', media_title: 'Blue', media_artist: 'Miles', volume_level: .3, supported_features: 52|4}),
+  'weather.a': S('sunny', {friendly_name: 'Home', temperature: 18, temperature_unit: '°C'}),
+  'timer.a': S('idle', {friendly_name: 'Timer'}), 'calendar.a': S('off', {friendly_name: 'Family'}),
+  'camera.a': S('idle', {friendly_name: 'Cam'}), 'alarm_control_panel.a': S('disarmed', {friendly_name: 'Alarm', supported_features: 47}),
+  'scene.a': S('2026-10-14T07:00:00+00:00', {friendly_name: 'Morning'})
+};
+const cfg = JSON.parse(params.get('cfg') || '{}');
+await import(params.get('src') || '/dist/houseview.js');
+const card = document.createElement('houseview-card');
+card.setConfig({type: 'custom:houseview-card', ...cfg});
+card.hass = {states, config: {unit_system: {temperature: '°C'}}, locale: {language: 'en-GB'}, themes: {darkMode: false}, callService: async () => {}};
+document.getElementById('stage').append(card);
+window.__card = card;
+window.__ready = true;
+</script>

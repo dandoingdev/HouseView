@@ -1,0 +1,109 @@
+/* @owns calendar calendar-content calendar-event date-heading date-weekday */
+/*
+ * calendar widget styles.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase carousel */
+/* Screen-sized faces and kitchen controls — v3. */
+.calendar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 24px;
+  gap: 10px;
+}
+
+.calendar-event {
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.calendar-content small {
+  line-height: 1.5;
+}
+
+/* @phase carousel @pin 1 */
+/* Screen-sized faces and kitchen controls — v3. */
+@media (max-height:600px) {
+  .calendar-content {
+    gap: 5px;
+    padding: 16px;
+  }
+}
+
+/* @phase lifted */
+/*
+ * Restyle: the same centred "Thu Oct / 15" face as the date tile with the next event underneath, on the
+ * tile's own glass. Everything is centred Doubled class beats the base rules.
+ */
+.carousel .tile.widget.calendar-content.calendar-content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0;
+  padding: 3% 5%;
+}
+
+.carousel .calendar-content .date-heading {
+  display: block;
+  width: 100%;
+  font-size: clamp(18px, min(12cqi, 7vh), 60px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.carousel .calendar-content .date-weekday {
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+.carousel .calendar-content .calendar-month {
+  display: inline;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  opacity: 0.6;
+}
+
+/* @important the base .calendar-day rules and the short-screen media rule use !important */
+.carousel .calendar-content .calendar-day {
+  display: block;
+  width: 100%;
+  font-size: clamp(56px, min(44cqi, 26vh), 220px) !important;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0;
+  font-variant-numeric: proportional-nums;
+  text-align: center;
+  color: inherit;
+}
+
+.carousel .calendar-content .calendar-event {
+  display: block;
+  width: 100%;
+  margin-top: 0.4em;
+  font-size: clamp(14px, 6cqi, 24px);
+  font-weight: 600;
+  text-align: center;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.carousel .calendar-content small {
+  display: block;
+  width: 100%;
+  margin-top: 2px;
+  font-size: clamp(12px, 4.2cqi, 17px);
+  text-align: center;
+  color: inherit;
+  opacity: 0.65;
+}

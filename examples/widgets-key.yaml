@@ -1,0 +1,15 @@
+# The `widgets:` key: an accepted alias of `cards:`. New dashboards should use `cards:` (see minimal.yaml); the visual
+# editor converts a `widgets:` list to `cards:` the first time you save.
+#
+# Differences worth knowing: each entry uses `type: <widget>` instead of a card type, and the types `scene`, `script`,
+# `button` and `input_button` are accepted as the `action` widget.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: teal, layout: modular}
+widgets:
+  - {type: climate, entity: climate.living_room, size: large}
+  - {type: clock}
+  - {type: camera, entity: camera.front_door, name: Front door}
+  - {type: light, entity: light.living_room}
+  - {type: scene, entity: scene.morning}
+  - {type: lock, entity: lock.front_door}

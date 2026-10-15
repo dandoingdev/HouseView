@@ -1,0 +1,224 @@
+/* @owns clock dial hand hour minute pin clock-number clock-caption clock-date */
+/*
+ * clock widget styles.
+ * A section is a cascade phase (src/styles/phases.json) and sections stay in phase order; a rule's position inside
+ * its phase is part of the cascade, so do not merge or reorder rules. A pin only reorders sections inside one phase.
+ * The dial's size is set inline by the controller (_sizeDial), and the
+ * hands' rotation inline by clock/dial.js, so none of the rules below sets them.
+ */
+
+/* @phase base */
+.clock {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  padding: 8px;
+}
+
+.dial {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.dial i {
+  position: absolute;
+  inset: 0;
+  transform: rotate(calc(var(--tick)*30deg));
+}
+
+.dial i::before {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 8%;
+  left: calc(50% - 1.5px);
+  top: 0;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.hand {
+  position: absolute;
+  width: 4px;
+  left: calc(50% - 2px);
+  bottom: 50%;
+  transform-origin: 50% 100%;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px #0005;
+}
+
+.hour {
+  height: 27%;
+}
+
+.minute {
+  height: 39%;
+}
+
+.pin {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  left: calc(50% - 4px);
+  top: calc(50% - 4px);
+}
+
+.clock {
+  overflow: hidden;
+}
+
+/* @phase base @pin 1 */
+@media (max-width:460px) {
+  .clock {
+    border-radius: 50%;
+    padding: 6px;
+  }
+}
+
+/* @phase adaptive */
+/* Adaptive HomeView canvas — v2. Rotation and widget count drive placement. */
+.adaptive .clock {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+
+.adaptive .dial {
+  aspect-ratio: 1;
+  height: auto;
+  width: min(100%,210px);
+  flex-shrink: 0;
+}
+
+.adaptive .clock-caption {
+  text-align: center;
+}
+
+.adaptive .clock-date {
+  font-size: 13px;
+}
+
+@media (max-width:479px) {
+  .adaptive .clock {
+    padding: 12px;
+  }
+}
+
+.adaptive .clock {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.adaptive .clock-caption {
+  flex-shrink: 0;
+}
+
+/* @phase carousel */
+/* Screen-sized faces and kitchen controls — v3. */
+.clock-number {
+  display: none;
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  transform: rotate(var(--angle));
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.clock-number>span {
+  display: inline-block;
+  transform: rotate(calc(-1 * var(--angle)));
+}
+
+.surface-soft .clock {
+  background: #fff;
+}
+
+.surface-soft .dial i {
+  display: none;
+}
+
+.surface-soft .clock-number {
+  display: block;
+}
+
+.surface-soft .hand,
+.surface-soft .pin {
+  background: #27272b;
+  box-shadow: none;
+}
+
+@media (max-height:600px) {
+  .carousel .clock {
+    gap: 4px;
+  }
+}
+
+/* @phase surface-teal */
+/* Teal folded-glass face, inspired by the supplied HomeView reference. */
+.surface-teal .clock {
+  background: rgba(109,204,194,.2);
+}
+
+.surface-teal .dial i::before {
+  width: 3px;
+  height: 9%;
+  background: #f0fffb;
+  border-radius: 3px;
+}
+
+.surface-teal .hand,
+.surface-teal .pin {
+  background: #f5fffc;
+  box-shadow: none;
+}
+
+.surface-teal .clock-number {
+  display: none;
+}
+
+.surface-teal .clock-date {
+  color: #defff7;
+  opacity: .8;
+}
+
+/* @phase night */
+/* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
+.night-mode .clock-caption {
+  color: #dce9da;
+}
+
+.night-mode .hand,
+.night-mode .pin,
+.night-mode .dial i::before {
+  background: #e4efdf;
+}
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+.carousel:is(.surface-silver,.surface-champagne) .clock-number {
+  display: none;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .dial i {
+  display: block;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .dial i::before {
+  background: #fff;
+  border-radius: 4px;
+  width: 4px;
+  height: 9%;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .hand,
+.carousel:is(.surface-silver,.surface-champagne) .pin {
+  background: #fff;
+  box-shadow: 0 2px 3px #2b2d3055;
+}

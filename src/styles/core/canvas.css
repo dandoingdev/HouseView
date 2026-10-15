@@ -1,0 +1,29 @@
+/* @owns face page-nav manage */
+/*
+ * Core full-height canvas rules: page controls float over the wallpaper.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase canvas */
+/* Full-height canvas: page controls float over the wallpaper, never a footer bar. */
+.carousel .face {
+  padding-bottom: 96px;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel .page-nav {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 72px;
+  background: transparent !important;
+  z-index: 2;
+}
+
+@media (max-width:519px) {
+  .carousel .face {
+    padding-bottom: 82px;
+  }
+}

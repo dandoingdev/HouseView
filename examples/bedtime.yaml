@@ -1,0 +1,38 @@
+# A bedtime page: dark and dimmed, with a Dim button and widgets that only ever switch things off.
+#
+# `bedtime: true` adds the night styling and the Dim button. A light with `action: off` never turns on,
+# whatever its state, which is what you want from a "goodnight" widget. The lock asks for confirmation
+# before it unlocks, as always.
+title: Bedtime
+views:
+  - title: Bedtime
+    path: bedtime
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        bedtime: true
+        appearance: dark
+        palette: forest
+        pages:
+          - {name: Bedtime, surface: glass, layout: controls}
+        cards:
+          - type: custom:houseview-action-card
+            entity: script.good_night
+            name: Good night
+            note: Lights off, doors locked
+          - type: custom:houseview-light-card
+            entity: light.landing
+            action: off
+            name: Landing off
+          - type: custom:houseview-light-card
+            entity: light.hallway
+            action: off
+            name: Hallway off
+          - type: custom:houseview-cover-card
+            entity: cover.bedroom_blinds
+            name: Blinds
+          - type: custom:houseview-lock-card
+            entity: lock.front_door
+          - type: custom:houseview-alarm_control_panel-card
+            entity: alarm_control_panel.home
+          - type: custom:houseview-clock-card

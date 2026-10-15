@@ -1,0 +1,84 @@
+/* @phase overviews */
+/* @owns shell face page-nav perf-lite screen-dim */
+
+/*
+ * Rules that exist for speed, not for an overview. They live in the last phase so that they win by order over the base
+ * rules, and nothing here matches unless the card asks for it: `.shell[data-covered]` (a screensaver is up) or
+ * `.perf-lite` (the `performance` option resolved to lite, docs/performance.md). Without those, no element matches.
+ *
+ * tools/check-overviews.mjs does NOT apply the overview selector rules to this file (it styles existing classes on purpose);
+ * it checks that the file stays inert: both conditions above in every selector, no @import, @layer, url() or keyframes.
+ */
+
+/* ---- a screensaver covers the card: nothing underneath is painted (so no tile, no backdrop blur, no picture) ---- */
+.shell[data-covered] > :not(.hv-screensaver) {
+  visibility: hidden;
+}
+.shell[data-covered] > .face {
+  content-visibility: hidden;
+}
+
+/* ---- performance: lite ----------------------------------------------------------------------------------------------- */
+
+/* No backdrop blur: every glass tile would otherwise need an offscreen pass per frame on a weak GPU. */
+.perf-lite .tile,
+.perf-lite .widget {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* No decorative motion or fades (the page glide is switched off in JS). */
+.perf-lite,
+.perf-lite * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/*
+ * Opaque tinted glass. Every glass fill is `var(--hv-glass)`, a translucent colour over the blurred wallpaper. Without the
+ * blur the wallpaper would show through sharp, so the variable becomes the opaque colour that translucent fill and
+ * blurred wallpaper used to add up to (the mean tile colour, measured on 1280 x 800; `node tools/lite-glass.mjs --check`
+ * compares it with the blurred look and must be re-run when a wallpaper or a glass fill changes). The soft surface and the
+ * high-contrast fill are already opaque.
+ */
+.shell.perf-lite.surface-glass:not(.contrast) {
+  --hv-glass: #847e74;
+}
+.shell.perf-lite.surface-glass.dark:not(.contrast) {
+  --hv-glass: #3a3d38;
+}
+.shell.perf-lite.surface-glass.forest:not(.contrast) {
+  --hv-glass: #4d675f;
+}
+.shell.perf-lite.surface-glass.dark.forest:not(.contrast) {
+  --hv-glass: #384c48;
+}
+/* Teal tiles are translucent gradients only (no --hv-glass), so they get an opaque colour underneath: the wallpaper's own mean. */
+.shell.perf-lite.surface-teal {
+  --hv-glass: #165f5e;
+}
+.shell.perf-lite.surface-teal .tile,
+.shell.perf-lite.surface-teal .widget {
+  background-color: #165f5e !important;
+}
+.shell.perf-lite.surface-silver {
+  --hv-glass: #777b7f;
+}
+.shell.perf-lite.surface-champagne {
+  --hv-glass: #806e61;
+}
+
+/* The bedtime dimmer: a plain dark layer in place of a filter over the whole card (the filter needs an offscreen pass). */
+.shell.perf-lite.screen-dim {
+  filter: none;
+}
+.shell.perf-lite.screen-dim::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  border-radius: inherit;
+  background: #000;
+  opacity: 0.8;
+  pointer-events: none;
+}

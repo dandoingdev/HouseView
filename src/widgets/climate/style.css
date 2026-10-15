@@ -1,0 +1,231 @@
+/* @owns climate temperature climate-simple cs-number cs-value cs-bar cs-label cs-name cs-sub cs-step cs-up cs-down cs-chevron cs-dim cs-long cs-none */
+/*
+ * climate widget styles.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ * Keep every rule's cascade position (no merging or reordering across sections).
+ *
+ * The tile is the minimal `.climate-simple` face (a very large number, a down chevron, the name with a
+ * "room - current" line, an up chevron). It is layered at the end of the `lifted` phase with a doubled root
+ * class, so it wins without touching the earlier order.
+ */
+
+/* @phase base */
+
+.temperature {
+  font-size: clamp(64px,20cqi,132px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -.055em;
+  font-variant-numeric: tabular-nums;
+}
+
+.temperature sup {
+  font-size: .22em;
+  letter-spacing: 0;
+  vertical-align: top;
+  display: inline-block;
+  padding-top: .6em;
+  margin-left: .14em;
+}
+
+@media (max-width:460px) {
+  
+  .temperature {
+    font-size: 64px;
+  }
+
+  
+  }
+
+/* @phase adaptive */
+/* Adaptive HomeView canvas — v2. Rotation and widget count drive placement. */
+
+.adaptive .temperature {
+  font-size: clamp(70px,30cqi,150px);
+}
+
+@supports not (container-type:inline-size) {
+  .adaptive .temperature {
+    font-size: 100px;
+  }
+}
+
+/* @phase widgets-late */
+/* A single-cell climate tile keeps the temperature and arrows visible on landscape tablets. */
+
+/* Climate controls: direct power pill and circular glass temperature keys. */
+
+/* @important overrides an earlier !important rule */
+
+/* Climate shortcuts fit the smallest landscape tiles without scrolling. */
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+
+/*
+ * Minimal face. The tile keeps the glass of every other tile (surface, border, blur) and has no background
+ * of its own; text takes the tile's colour, so it is white on the glass surfaces and dark on the soft one.
+ * Everything is sized from the tile itself (container query units), so the same rules fit a one-cell tile and a
+ * large 2x2 tile at any screen size. Cheap on purpose: no filters, no shadows, one small transform.
+ */
+.carousel .tile.widget.climate-simple.climate-simple {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  text-align: center;
+  container-type: size;
+}
+
+/* The number is one big key: tapping it opens more-info. */
+.carousel .climate-simple .cs-number {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0 4cqw;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  text-align: center;
+}
+
+.carousel .climate-simple .cs-value {
+  font-family: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: clamp(44px, min(40cqmin, 64cqw), 360px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: proportional-nums;
+  white-space: nowrap;
+  /* the digits sit a little low in the line box; this centres them in the area */
+  transform: translateY(-3%);
+}
+
+/* Four characters ("21.5") are wider than two: keep them inside the tile. */
+.carousel .cs-long .cs-value {
+  font-size: clamp(40px, min(36cqmin, 40cqw), 320px);
+}
+
+/* An em dash at full size is a heavy bar; keep it a quiet placeholder. */
+.carousel .cs-none .cs-value {
+  font-size: clamp(28px, 20cqmin, 160px);
+}
+
+.carousel .cs-dim .cs-value {
+  opacity: 0.5;
+}
+
+/* Bottom row: chevron, name over "room - current", chevron. The outer columns are equal, so the text is centred. */
+.carousel .climate-simple .cs-bar {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(48px, 1fr) minmax(0, auto) minmax(48px, 1fr);
+  align-items: center;
+  padding: 0 0 clamp(8px, 7cqmin, 40px);
+}
+
+.carousel .climate-simple .cs-label {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: clamp(13px, 4.6cqmin, 30px);
+  line-height: 1.22;
+}
+
+.carousel .climate-simple .cs-name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.carousel .climate-simple .cs-sub {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 1em;
+  font-weight: 400;
+  opacity: 0.72;
+  text-wrap: balance;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.carousel .climate-simple .cs-sub:empty {
+  display: none;
+}
+
+/* Chevron keys: at least 48 x 48 to touch, a thin line to look at. */
+.carousel .climate-simple .cs-step {
+  display: grid;
+  place-items: center;
+  width: clamp(48px, 13cqmin, 96px);
+  height: clamp(48px, 13cqmin, 96px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  line-height: 0;
+}
+
+.carousel .climate-simple .cs-down {
+  justify-self: center;
+}
+
+.carousel .climate-simple .cs-up {
+  justify-self: center;
+}
+
+.carousel .climate-simple .cs-chevron {
+  width: clamp(28px, 13cqmin, 84px);
+  height: clamp(28px, 13cqmin, 84px);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.carousel .climate-simple .cs-step:disabled {
+  opacity: 0.35;
+}
+
+.carousel .climate-simple .cs-step:not(:disabled):active {
+  filter: none;
+  opacity: 0.6;
+}
+
+.carousel .climate-simple .cs-number:not(:disabled):active {
+  filter: none;
+  opacity: 0.75;
+}
+
+.carousel .climate-simple .cs-step:focus-visible,
+.carousel .climate-simple .cs-number:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: -6px;
+}
+
+@media (prefers-reduced-motion:no-preference) {
+  .carousel .climate-simple .cs-value,
+  .carousel .climate-simple .cs-step {
+    transition: opacity 0.18s ease;
+  }
+}

@@ -1,0 +1,776 @@
+/* @phase overviews */
+/* @owns ov-weather-scene ov-sky ov-sky-sun ov-sky-moon ov-sky-none ov-stars ov-orb ov-sun ov-moon ov-clouds ov-cloud ov-cloud-a ov-cloud-b ov-fx ov-fx-rain ov-fx-snow ov-fx-sleet ov-fx-hail ov-fx-lightning ov-fx-fog ov-scrim ov-content ov-top ov-cond ov-cond-line ov-cond-text ov-hl ov-time ov-ico ov-period ov-temp ov-temp-shade ov-temp-solid ov-temp-space ov-details ov-details-empty ov-detail ov-detail-icon ov-detail-value ov-detail-label */
+
+/*
+ * The weather scene, painted with gradients only: no images, no filters, no blur, no JS per frame, and no mask except
+ * the sun's static rays (not drawn in lite).
+ * Painting budget (docs/overview-api.md): the sky and the orb are painted into the scene; ALL clouds share one
+ * layer (`.ov-clouds`), an effect adds at most two more, so a scene has at most 3 animated layers and at most 3
+ * animations (one slow cloud drift, the effect's pair or the star twinkle). Animations move `transform` and `opacity`
+ * only, exist only under `prefers-reduced-motion: no-preference`, and are switched off by `performance: lite`
+ * (`.perf-lite`, the class the card puts on its shell, which also drops the effect and the sun's rays).
+ * Sizes use the container query units of `.ov` (cqw, cqh, cqmin) so one scene fits 380 x 380 up to 1280 x 800.
+ */
+
+/* ---- sky: three stops, a glow along the horizon, and the bloom of the sun or moon ---- */
+.ov-sky {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(130% 50% at 50% 112%, rgba(var(--haze), 0.5), rgba(var(--haze), 0) 72%),
+    linear-gradient(180deg, var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%);
+}
+.ov-sky-sun {
+  background:
+    radial-gradient(
+      50% 58% at 72% 28%,
+      rgba(255, 246, 214, 0.34) 0,
+      rgba(255, 246, 214, 0.17) 30%,
+      rgba(255, 246, 214, 0.05) 64%,
+      rgba(255, 246, 214, 0) 100%
+    ),
+    radial-gradient(130% 50% at 50% 112%, rgba(var(--haze), 0.5), rgba(var(--haze), 0) 72%),
+    linear-gradient(180deg, var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%);
+}
+.ov-sky-moon {
+  background:
+    radial-gradient(
+      44% 52% at 74% 30%,
+      rgba(150, 178, 240, 0.22) 0,
+      rgba(150, 178, 240, 0.12) 30%,
+      rgba(150, 178, 240, 0.04) 62%,
+      rgba(150, 178, 240, 0) 100%
+    ),
+    radial-gradient(130% 50% at 50% 112%, rgba(var(--haze), 0.5), rgba(var(--haze), 0) 72%),
+    linear-gradient(180deg, var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%);
+}
+
+/* ---- stars: hand placed, so nothing repeats; they breathe slowly ---- */
+.ov-stars {
+  position: absolute;
+  inset: 0 0 34% 0;
+  --ov-c: rgba(255, 255, 255, 0.85);
+  --ov-s: max(1px, 0.3cqmin);
+  --ov-m: max(1.3px, 0.42cqmin);
+  --ov-l: max(1.7px, 0.6cqmin);
+  background:
+    radial-gradient(circle var(--ov-m) at 21% 52%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 11% 70%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 48% 76%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 66% 29%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 13% 57%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 10% 32%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 72% 56%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 74% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 82% 82%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 9% 75%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 52% 8%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 7% 73%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 39% 55%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 71% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 41% 73%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 15% 76%, var(--ov-c), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ov-stars {
+    animation: ov-weather-twinkle 9s ease-in-out infinite alternate;
+  }
+  @keyframes ov-weather-twinkle {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.6;
+    }
+  }
+}
+
+/* ---- sun and moon ---- */
+.ov-orb {
+  position: absolute;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.ov-sun {
+  left: 72%;
+  top: 28%;
+  width: 60cqmin;
+  margin: -30cqmin 0 0 -30cqmin;
+  background: radial-gradient(
+    circle closest-side,
+    #fffef6 0,
+    #fffbe6 11%,
+    rgba(255, 244, 205, 0.97) 14%,
+    rgba(255, 232, 160, 0.62) 20%,
+    rgba(255, 222, 140, 0.26) 36%,
+    rgba(255, 214, 120, 0.09) 60%,
+    rgba(255, 214, 120, 0) 100%
+  );
+}
+/* faint rays: a conic fan faded out towards the rim (one static masked layer: not drawn in lite) */
+.ov-sun::before {
+  display: var(--ov-rays, block);
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 4deg,
+    rgba(255, 255, 255, 0.07) 0 2deg,
+    rgba(255, 255, 255, 0) 2deg 11deg
+  );
+  -webkit-mask-image: radial-gradient(circle closest-side, transparent 18%, #000 30%, transparent 100%);
+}
+.ov-moon {
+  left: 74%;
+  top: 30%;
+  width: 38cqmin;
+  margin: -19cqmin 0 0 -19cqmin;
+  background:
+    radial-gradient(
+        circle closest-side at 38% 34%,
+        #fdfdff 0,
+        #eaf0ff 46%,
+        #c6d3f2 92%,
+        rgba(198, 211, 242, 0) 100%
+      )
+      50% 50% / 30% 30% no-repeat,
+    radial-gradient(
+      circle closest-side,
+      rgba(210, 224, 255, 0.4) 0,
+      rgba(196, 212, 255, 0.18) 28%,
+      rgba(180, 200, 255, 0.05) 62%,
+      rgba(170, 195, 255, 0) 100%
+    );
+}
+
+/* ---- clouds: soft puffs painted as radial gradients that fade to nothing at the rim ("pre-blurred": the blur
+   is in the gradient, so no filter and no mask is needed). Each puff is drawn three times: the shade-coloured
+   silhouette below, a smaller and higher puff in the mean of the two tones on it, and a smaller and higher lit puff
+   on top, which leaves a smooth shaded underside. A few white highlights sit on the bumps. All clouds share ONE layer
+   (`.ov-clouds`) that drifts slowly; nothing inside it is a layer of its own. Keep every puff inside its cloud's box:
+   a puff cut by the box edge shows as a hard line. ---- */
+.ov-clouds {
+  position: absolute;
+  inset: 0;
+}
+.ov-cloud {
+  --ov-lit: rgba(var(--lit), 0.98);
+  --ov-lit-5: rgba(var(--lit), 0.5);
+  --ov-lit-0: rgba(var(--lit), 0);
+  --ov-mid: rgba(var(--mid), 0.98);
+  --ov-mid-5: rgba(var(--mid), 0.5);
+  --ov-mid-0: rgba(var(--mid), 0);
+  --ov-shade: rgba(var(--shade), 0.97);
+  --ov-shade-5: rgba(var(--shade), 0.5);
+  --ov-shade-0: rgba(var(--shade), 0);
+  position: absolute;
+  left: calc(var(--x) * 1cqw);
+  top: calc(var(--y) * 1cqh);
+  /* a landscape or square scene scales clouds with its width, a portrait one a little with its height */
+  width: calc(var(--w) * max(1cqw, 0.7cqh));
+  aspect-ratio: var(--ar);
+  opacity: var(--o);
+  background-repeat: no-repeat;
+}
+.ov-cloud-a {
+  background-image:
+    radial-gradient(ellipse 16% 26% at 48% 30%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 12% 22% at 28% 46%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 13% 24% at 67% 40%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 9.6% 24% at 12% 65%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 12% 30.4% at 28% 51%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 14.4% 36% at 48% 41%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 12.8% 32% at 67% 48%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 10.4% 24% at 85% 63%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 11% 27.6% at 12% 68.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 13.8% 35% at 28% 54.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 16.6% 41.4% at 48% 44.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 14.7% 36.8% at 67% 51.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 12% 27.6% at 85% 66.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 12% 30% at 12% 72%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 15% 38% at 28% 58%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 18% 45% at 48% 48%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 16% 40% at 67% 55%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 13% 30% at 85% 70%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 48% 20% at 50% 80%, var(--ov-shade) 0, var(--ov-shade) 36%, var(--ov-shade-0) 100%);
+}
+
+.ov-cloud-b {
+  background-image:
+    radial-gradient(ellipse 15% 26% at 42% 34%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 13% 24% at 60% 30%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 11% 20% at 24% 48%, rgba(255, 255, 255, calc(var(--hi) * 0.75)), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 8% 20.8% at 10% 67%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 11.2% 28.8% at 24% 53%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 13.6% 35.2% at 42% 43%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 12.8% 32.8% at 60% 38%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 11.2% 28.8% at 77% 49%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 8% 20.8% at 90% 65%, var(--ov-lit) 0, var(--ov-lit) 38%, var(--ov-lit-5) 68%, var(--ov-lit-0) 100%),
+    radial-gradient(ellipse 9.2% 23.9% at 10% 70.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 12.9% 33.1% at 24% 56.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 15.6% 40.5% at 42% 46.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 14.7% 37.7% at 60% 41.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 12.9% 33.1% at 77% 52.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 9.2% 23.9% at 90% 68.5%, var(--ov-mid) 0, var(--ov-mid) 38%, var(--ov-mid-5) 68%, var(--ov-mid-0) 100%),
+    radial-gradient(ellipse 10% 26% at 10% 74%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 14% 36% at 24% 60%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 17% 44% at 42% 50%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 16% 41% at 60% 45%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 14% 36% at 77% 56%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 10% 26% at 90% 72%, var(--ov-shade) 0, var(--ov-shade) 38%, var(--ov-shade-5) 68%, var(--ov-shade-0) 100%),
+    radial-gradient(ellipse 50% 18% at 50% 82%, var(--ov-shade) 0, var(--ov-shade) 36%, var(--ov-shade-0) 100%);
+}
+
+/* The whole cloud deck drifts as one: +-3 % of the scene width over `--drift` seconds, one animation, one layer. */
+@media (prefers-reduced-motion: no-preference) {
+  .ov-clouds {
+    animation: ov-weather-drift var(--drift, 120s) ease-in-out infinite alternate;
+  }
+  @keyframes ov-weather-drift {
+    from {
+      transform: translate3d(-3cqw, 0, 0);
+    }
+    to {
+      transform: translate3d(3cqw, 0, 0);
+    }
+  }
+}
+
+/* ---- effects: one per scene, subtle. Tiles are large and hand scattered so no lattice shows; an animation moves
+   a layer by exactly one tile, which makes the loop seamless ---- */
+.ov-fx {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  --ov-c: rgba(255, 255, 255, 0.8);
+  --ov-w: max(0.6px, 0.085cqmin);
+  --ov-s: max(1px, 0.2cqmin);
+  --ov-m: max(1.2px, 0.34cqmin);
+  --ov-l: max(1.6px, 0.6cqmin);
+  --ov-xl: max(2px, 0.85cqmin);
+}
+/* Each effect layer is only as big as it must be: the scene plus one tile period above it (`--ov-rise`: the loop
+   moves the layer down by exactly one tile) and a little to the sides (`--ov-bleed`; a slanted layer needs the
+   skew's share). Fewer pixels means fewer tiles for a weak GPU to rasterise and keep. */
+.ov-fx::before,
+.ov-fx::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--ov-rise, 80cqmin) * -1);
+  bottom: 0;
+  left: calc(var(--ov-bleed, 6cqmin) * -1);
+  right: calc(var(--ov-bleed, 6cqmin) * -1);
+}
+
+/* rain and sleet: thin slanted streaks (the layer is skewed, so they fall along their own slant) */
+.ov-fx-rain::before,
+.ov-fx-rain::after,
+.ov-fx-sleet::before {
+  transform: skewX(-9deg);
+}
+.ov-fx-rain::before,
+.ov-fx-sleet::before {
+  --ov-rise: 60cqmin;
+  --ov-bleed: calc(0.085 * (100cqh + 60cqmin));
+}
+.ov-fx-rain::after {
+  --ov-rise: 80cqmin;
+  --ov-bleed: calc(0.085 * (100cqh + 80cqmin));
+}
+.ov-fx-snow::before,
+.ov-fx-sleet::after {
+  --ov-rise: 56cqmin;
+}
+.ov-fx-snow::after {
+  --ov-rise: 37cqmin;
+}
+.ov-fx-hail::before {
+  --ov-rise: 44cqmin;
+  --ov-bleed: 8cqmin;
+}
+.ov-fx-hail::after {
+  --ov-rise: 61cqmin;
+  --ov-bleed: 10cqmin;
+}
+.ov-fx-rain::before,
+.ov-fx-sleet::before {
+  background:
+    radial-gradient(ellipse var(--ov-w) 3.2cqmin at 74% 62%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.2cqmin at 78% 27%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 2.7cqmin at 68% 63%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.5cqmin at 26% 15%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.2cqmin at 21% 14%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.4cqmin at 91% 84%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 2.5cqmin at 53% 60%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.6cqmin at 81% 86%, var(--ov-c), transparent);
+}
+
+.ov-fx-rain::before,
+.ov-fx-sleet::before {
+  background-size: 52cqmin 60cqmin;
+  opacity: 0.8;
+}
+.ov-fx-rain::after {
+  background:
+    radial-gradient(ellipse var(--ov-w) 3.1cqmin at 40% 13%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 1.8cqmin at 42% 57%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 2.3cqmin at 48% 19%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 2.8cqmin at 37% 59%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 1.8cqmin at 82% 61%, var(--ov-c), transparent),
+    radial-gradient(ellipse var(--ov-w) 3.1cqmin at 16% 13%, var(--ov-c), transparent);
+}
+
+.ov-fx-rain::after {
+  background-size: 68cqmin 80cqmin;
+  opacity: 0.5;
+}
+.ov-fx-rain[data-level='1']::after {
+  display: none;
+}
+.ov-fx-rain[data-level='3']::before {
+  opacity: 1;
+}
+.ov-fx-rain[data-level='3']::after {
+  opacity: 0.8;
+}
+
+/* snow and sleet: soft flakes */
+.ov-fx-snow::before,
+.ov-fx-sleet::after {
+  background:
+    radial-gradient(circle var(--ov-m) at 97% 48%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 62% 34%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 23% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 63% 34%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 72% 16%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 4% 96%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 55% 38%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 52% 23%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 20% 82%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 19% 19%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 3% 29%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 24% 24%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 43% 28%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 26% 91%, var(--ov-c), transparent);
+}
+
+.ov-fx-snow::before,
+.ov-fx-sleet::after {
+  --ov-c: rgba(255, 255, 255, 0.92);
+  background-size: 56cqmin 56cqmin;
+}
+.ov-fx-snow::after {
+  background:
+    radial-gradient(circle var(--ov-s) at 81% 50%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 20% 26%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 3% 46%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 62% 80%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 45% 73%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 92% 8%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 51% 24%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 60% 95%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 23% 24%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 9% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 67% 78%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 91% 52%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 16% 40%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-s) at 89% 31%, var(--ov-c), transparent);
+}
+
+.ov-fx-snow::after {
+  --ov-c: rgba(255, 255, 255, 0.7);
+  background-size: 37cqmin 37cqmin;
+  opacity: 0.85;
+}
+.ov-fx-sleet::after {
+  opacity: 0.8;
+}
+
+/* hail: bright pellets, fast and steep */
+.ov-fx-hail::before {
+  background:
+    radial-gradient(circle var(--ov-l) at 63% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-xl) at 21% 90%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 20% 17%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 32% 94%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 21% 97%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 87% 10%, var(--ov-c), transparent);
+}
+
+.ov-fx-hail::before {
+  --ov-c: rgba(255, 255, 255, 0.95);
+  background-size: 44cqmin 44cqmin;
+}
+.ov-fx-hail::after {
+  background:
+    radial-gradient(circle var(--ov-l) at 45% 32%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 52% 76%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 73% 38%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-l) at 96% 76%, var(--ov-c), transparent),
+    radial-gradient(circle var(--ov-m) at 34% 87%, var(--ov-c), transparent);
+}
+
+.ov-fx-hail::after {
+  --ov-c: rgba(235, 244, 255, 0.8);
+  background-size: 61cqmin 61cqmin;
+}
+
+/* lightning: a pale wash of the whole scene, two quick pulses every nine seconds (never above 0.16) */
+.ov-fx-lightning {
+  background: radial-gradient(90% 70% at 38% 12%, #f2f7ff, rgba(200, 218, 255, 0.55) 60%, rgba(180, 200, 255, 0.25));
+  opacity: 0;
+}
+.ov-fx-lightning::before,
+.ov-fx-lightning::after {
+  display: none;
+}
+
+/* fog: soft banks with feathered edges; they stay wider than the scene so no end is ever visible */
+.ov-fx-fog::before,
+.ov-fx-fog::after {
+  top: auto;
+  left: -30%;
+  right: -30%;
+  height: 46%;
+  bottom: 8%;
+  background:
+    radial-gradient(ellipse 22% 50% at 18% 50%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 28% 42% at 46% 56%, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 24% 52% at 74% 46%, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0)),
+    radial-gradient(ellipse 20% 40% at 94% 60%, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+}
+.ov-fx-fog::after {
+  bottom: 30%;
+  height: 40%;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* promoted to layers only here: a reduced-motion scene is static, and the overlay (and so its layers) exists only
+     while the screensaver is up */
+  .ov-clouds,
+  .ov-fx::before,
+  .ov-fx::after {
+    will-change: transform;
+  }
+  .ov-fx-lightning {
+    will-change: opacity;
+  }
+  .ov-fx-rain::before,
+  .ov-fx-sleet::before {
+    animation: ov-weather-rain-a 0.85s linear infinite;
+  }
+  .ov-fx-rain[data-level='3']::before {
+    animation-duration: 0.6s;
+  }
+  .ov-fx-rain::after {
+    animation: ov-weather-rain-b 1.2s linear infinite;
+  }
+  .ov-fx-snow::before,
+  .ov-fx-sleet::after {
+    animation: ov-weather-snow-a 12s linear infinite;
+  }
+  .ov-fx-snow::after {
+    animation: ov-weather-snow-b 8s linear infinite;
+  }
+  .ov-fx-hail::before {
+    animation: ov-weather-hail-a 0.7s linear infinite;
+  }
+  .ov-fx-hail::after {
+    animation: ov-weather-hail-b 1s linear infinite;
+  }
+  .ov-fx-lightning {
+    animation: ov-weather-flash 9s linear infinite;
+  }
+  .ov-fx-fog::before {
+    animation: ov-weather-bank 42s ease-in-out infinite alternate;
+  }
+  .ov-fx-fog::after {
+    animation: ov-weather-bank 58s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes ov-weather-rain-a {
+    to {
+      transform: skewX(-9deg) translate3d(0, 60cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-rain-b {
+    to {
+      transform: skewX(-9deg) translate3d(0, 80cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-snow-a {
+    to {
+      transform: translate3d(0, 56cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-snow-b {
+    to {
+      transform: translate3d(0, 37cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-hail-a {
+    to {
+      transform: translate3d(-6cqmin, 44cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-hail-b {
+    to {
+      transform: translate3d(-8cqmin, 61cqmin, 0);
+    }
+  }
+  @keyframes ov-weather-flash {
+    0%,
+    91%,
+    100% {
+      opacity: 0;
+    }
+    92% {
+      opacity: 0.15;
+    }
+    93% {
+      opacity: 0.02;
+    }
+    94.5% {
+      opacity: 0.1;
+    }
+    97% {
+      opacity: 0;
+    }
+  }
+  @keyframes ov-weather-bank {
+    to {
+      transform: translate3d(12cqw, 0, 0);
+    }
+  }
+}
+
+/* keeps white text readable on the lightest skies; the colour follows the sky (set per scene) */
+.ov-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--scrim), 0.3) 0%,
+    rgba(var(--scrim), 0) 24%,
+    rgba(var(--scrim), 0) 42%,
+    rgba(var(--scrim), 0.4) 76%,
+    rgba(var(--scrim), 0.68) 100%
+  );
+}
+
+/* ---- content ---- */
+.ov-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 2cqmin;
+  padding: clamp(14px, 5.2cqmin, 56px) clamp(16px, 6cqmin, 64px) clamp(14px, 5cqmin, 52px);
+  text-shadow: 0 1px 14px rgba(8, 32, 80, 0.35);
+}
+.ov-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 3cqmin;
+}
+.ov-cond {
+  display: grid;
+  gap: 0.6cqmin;
+  min-width: 0;
+}
+.ov-cond-line {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqmin;
+  font-size: clamp(14px, 4.4cqmin, 44px);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.ov-ico {
+  display: inline-flex;
+  flex: none;
+  --ov-icon: clamp(18px, 5.2cqmin, 52px);
+}
+.ov-cond-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ov-hl {
+  font-size: clamp(13px, 3.9cqmin, 40px);
+  font-weight: 500;
+  opacity: 0.92;
+}
+.ov-time {
+  font-size: clamp(26px, 11cqmin, 128px);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ov-period {
+  margin-left: 0.2em;
+  font-size: 0.32em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* The frosted temperature: gradient-filled glyphs (bright top, translucent bottom) over a soft shadow. No filter: the
+   glyphs are `background-clip: text`, and the shadow is the text-shadow of a second, transparent copy of the digits
+   (`.ov-temp-shade`) in the same grid cell, painted first. Both are rasterised once with the scene. */
+.ov-temp,
+.ov-temp-shade {
+  grid-area: 2 / 1;
+  align-self: center;
+  justify-self: start;
+  font-size: clamp(72px, 30vmin, 400px);
+  font-size: max(72px, min(44cqh, 36cqw));
+  font-weight: 300;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.ov-temp {
+  color: rgba(255, 255, 255, 0.6);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(230, 242, 255, 0.8) 40%,
+    rgba(184, 214, 252, 0.5) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+.ov-temp-shade {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0.6cqmin 2.4cqmin rgba(12, 40, 100, 0.26);
+  pointer-events: none;
+}
+.ov-temp-solid,
+.contrast .ov-temp {
+  background: none;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  text-shadow: 0 2px 18px rgba(8, 32, 80, 0.4);
+}
+.contrast .ov-temp-shade {
+  display: none;
+}
+
+.ov-details {
+  display: grid;
+  grid-template-columns: repeat(var(--ov-cols, 4), minmax(0, 1fr));
+  gap: 2.4cqmin 3cqmin;
+  align-items: start;
+}
+.ov-detail {
+  display: grid;
+  justify-items: start;
+  gap: 0.5cqmin;
+  min-width: 0;
+}
+.ov-detail-icon {
+  display: inline-flex;
+  --ov-icon: clamp(18px, 5.4cqmin, 50px);
+  opacity: 0.92;
+}
+.ov-detail-value,
+.ov-detail-label {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.ov-detail-value {
+  font-size: clamp(15px, 4.6cqmin, 46px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.ov-detail-label {
+  font-size: clamp(12px, 3.2cqmin, 32px);
+  font-weight: 500;
+  line-height: 1.15;
+  opacity: 0.88;
+}
+
+/* ---- performance: lite (card option `performance`; `auto` picks it on weak devices) ----
+   A still, simpler scene: sky, orb, stars and clouds stay, everything that moves or needs a mask goes. */
+.perf-lite .ov-fx,
+.perf-lite .ov-temp-shade {
+  display: none;
+}
+.perf-lite .ov-sun {
+  --ov-rays: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .perf-lite .ov-clouds,
+  .perf-lite .ov-stars {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+/* @phase overviews */
+/* @owns ov-mode-tile ov-tile-face ov-tile-ico ov-tile-text ov-tile-cond ov-tile-hl */
+/*
+ * The weather tile (card option display: tile): a flat slate face with the condition icon at the top left and the
+ * condition and today's range underneath, in large plain type. No gradients, no filters: cheap on a weak tablet.
+ * Sizes use the container units of `.ov` so it fits one grid cell or a bigger one.
+ */
+.ov-mode-tile {
+  --ov-tile-bg: #94a8ad;
+  --ov-tile-ink: #0a0b0c;
+  border-radius: clamp(22px, 3vw, 38px);
+  background: var(--ov-tile-bg);
+  color: var(--ov-tile-ink);
+  box-shadow: 0 2px 10px #0a1a1e22;
+}
+.dark .ov-mode-tile {
+  --ov-tile-bg: #3a474b;
+  --ov-tile-ink: #fff;
+}
+.ov-tile-face {
+  --ov-icon: clamp(34px, 28cqmin, 110px);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 9cqmin 10cqmin;
+  text-align: left;
+}
+.ov-tile-ico {
+  display: block;
+  line-height: 0;
+}
+.ov-tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  max-width: 100%;
+  font-size: clamp(17px, 11.5cqmin, 40px);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+}
+.ov-tile-cond,
+.ov-tile-hl {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.ov-tile-face[data-unavailable] {
+  opacity: 0.7;
+}

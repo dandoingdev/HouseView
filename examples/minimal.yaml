@@ -1,0 +1,21 @@
+# The smallest useful HouseView dashboard: one carousel page with a clock, a thermostat and three controls.
+#
+# Paste this into a dashboard's Raw configuration editor (Edit dashboard, three dots, Raw configuration editor).
+# Replace the entity ids with your own. The view must be a panel view: HouseView fills the whole screen.
+title: Home
+views:
+  - title: Home
+    path: home
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        cards:
+          - type: custom:houseview-clock-card
+          - type: custom:houseview-climate-card
+            entity: climate.living_room
+          - type: custom:houseview-light-card
+            entity: light.living_room
+          - type: custom:houseview-light-card
+            entity: light.hallway
+          - type: custom:houseview-switch-card
+            entity: switch.coffee_machine

@@ -1,0 +1,29 @@
+/* @owns dark face contrast */
+/*
+ * Dark, forest and high-contrast theme classes.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase base */
+.dark {
+  --hv-glass: rgba(22,24,25,.48);
+  background: #353734;
+}
+
+.dark .face {
+  background: radial-gradient(ellipse at 85% 10%,#8d9185,transparent 55%),linear-gradient(135deg,#595d52,#242b28 48%,#616559);
+}
+
+.forest .face {
+  background: radial-gradient(ellipse at 90% 70%,#56837c,transparent 45%),linear-gradient(125deg,#244942,#659087 44%,#173d39 70%,#386d60);
+}
+
+.contrast {
+  --hv-glass: #343a36;
+  --hv-edge: #c8cfc9;
+}
+
+.contrast .face::before {
+  display: none;
+}

@@ -1,0 +1,47 @@
+# A weather screensaver over a HouseView carousel (docs/screensavers.md).
+# Entity ids are placeholders: use your own weather entity.
+#
+# Three cards below, separated by `---`: the usual form, a list that rotates, and a preview for the card editor.
+
+# 1. One screensaver. It starts after two minutes without a touch; the first tap only wakes it.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: teal, layout: auto}
+  - {name: Lights, surface: glass, layout: auto}
+cards:
+  - {type: custom:houseview-clock-card, page: Home}
+  - {type: custom:houseview-light-card, entity: light.living_room, page: Lights}
+screensaver:
+  type: weather
+  entity: weather.home
+  idle_timeout: 120 # seconds; 0 = never start by itself; 5 to 86400
+  sun_entity: sun.sun
+  details: [sunset, wind, humidity, rain]
+---
+# 2. A list rotates: every time the screensaver starts it shows the next entry (round robin).
+# `idle_timeout` is read from the entry that is about to be shown; disabled entries are skipped.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+screensaver:
+  - type: weather
+    entity: weather.home
+    idle_timeout: 90
+  - type: weather
+    entity: weather.cabin
+    idle_timeout: 90
+    details: [wind, pressure, uv]
+  - type: weather
+    entity: weather.office
+    enabled: false # kept in the file, never shown
+---
+# 3. `preview: true` shows the screensaver as soon as the card renders, and again 5 seconds after each tap.
+# Handy while choosing options in the editor; remove it afterwards.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+screensaver:
+  type: weather
+  entity: weather.home
+  preview: true
+  start_in_edit_mode: true # also run while the dashboard is being edited

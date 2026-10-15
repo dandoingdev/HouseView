@@ -1,0 +1,47 @@
+/* @owns surface-soft face tile active page-nav manage fullscreen timer-preset */
+/*
+ * Soft surface rules that no single widget owns.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase carousel */
+/* Screen-sized faces and kitchen controls — v3. */
+/* @important overrides an earlier !important rule */
+.surface-soft {
+  background: #fafafa !important;
+}
+
+/* @important overrides an earlier !important rule */
+.surface-soft .face {
+  background: #fafafa !important;
+  color: #27272b;
+}
+
+.surface-soft .face::before {
+  display: none;
+}
+
+.surface-soft .tile {
+  background: #efeff1;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: #27272b;
+}
+
+.surface-soft .active {
+  background: #ddd6f4;
+}
+
+.surface-soft .page-nav {
+  background: #fafafa;
+  color: #5b5868;
+}
+
+/* shared: media_player, timer */
+.surface-soft .timer-preset,
+.surface-soft .transport button {
+  background: #e0d9f2;
+}

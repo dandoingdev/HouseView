@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>HouseView timer display: real input host</title>
+<body style="margin: 0; background: #333">
+<script type="module">
+  // Host page for tests/overviews/timer-input.mjs: the real bundle, a mock hass with a kitchen timer, and a fake
+  // clock. The script drives it with a real mouse and keyboard; this page only offers the small API below.
+  //
+  //   window.mount(screensaver, {hass})      a fresh <houseview-card>: two pages, two light widgets and a timer widget
+  //                                          on the first, the timer idle
+  //   window.setTimer(state, {left, total, id, push})
+  //                                          a NEW timer state object, like Home Assistant, then hass handed on
+  //                                          (state 'active': finishes_at = fake now + left, negative = already past;
+  //                                          'paused': remaining = left). id: timer.kitchen (default) or timer.second;
+  //                                          push: false waits for window.pushHass (two timers in one update)
+  //   window.jumpClock(seconds)              move the fake clock without any tick (a sleeping tablet)
+  //   window.setHidden(hidden)               document.hidden + a visibilitychange event
+  //   window.reconfigure                   setConfig again with a copy of the config the card was mounted with
+  //   window.reattach                      take the card out of the page and put it back (a view switch)
+  //   window.advance(seconds)                move the fake clock and fire the shared ticker once per second
+  //   window.calls / window.resetCalls   service calls as ['light:light.a', ...]
+  //   window.cycle(screensaver, n)           n create / activate / remove cycles; returns what is still registered
+  //   window.probe                           what the script may ask about the timer scene
+  //
+  // `?src=/dist/houseview.js` loads another bundle.
+  const params = new URLSearchParams(location.search);
+  const realSetTimeout = window.setTimeout.bind(window);
+  const realClearTimeout = window.clearTimeout.bind(window);
+
+  // ---- the fake clock: Date.now and setInterval are ours; setTimeout stays real (the fade is real time) ----
+  window.fake = {now: Date.parse('2026-10-15T10:09:00+01:00')};
+  Date.now = () => window.fake.now;
+  const intervals = new Map();
+  let nextId = 5_000_000;
+  window.setInterval = (fn, ms = 0, ...args) => {
+    intervals.set(++nextId, () => fn(...args));
+    return nextId;
+  };
+  window.clearInterval = (id) => intervals.delete(id);
+  window.intervals = intervals;
+  window.advance = (seconds) => {
+    for (let i = 0; i < seconds; i++) {
+      window.fake.now += 1000;
+      for (const run of [...intervals.values()]) run();
+    }
+  };
+
+  // ---- leak accounting: pending real timeouts, and listeners on the long-lived targets ----
+  const pending = new Set();
+  window.setTimeout = (fn, ms, ...args) => {
+    const id = realSetTimeout(
+      (...a) => {
+        pending.delete(id);
+        return typeof fn === 'function' ? fn(...a) : undefined;
+      },
+      ms,
+      ...args
+    );
+    pending.add(id);
+    return id;
+  };
+  window.clearTimeout = (id) => {
+    pending.delete(id);
+    return realClearTimeout(id);
+  };
+  const listeners = new Map(); // target label -> Set of "type|listener id|capture"
+  const ids = new WeakMap();
+  let nextListener = 0;
+  const idOf = (fn) => {
+    if (!ids.has(fn)) ids.set(fn, ++nextListener);
+    return ids.get(fn);
+  };
+  const label = (t) => (t === window ? 'window' : t === document ? 'document' : null);
+  const add = EventTarget.prototype.addEventListener;
+  const remove = EventTarget.prototype.removeEventListener;
+  EventTarget.prototype.addEventListener = function (type, fn, opts) {
+    const l = label(this);
+    if (l && fn) {
+      if (!listeners.has(l)) listeners.set(l, new Set());
+      listeners.get(l).add(`${type}|${typeof fn === 'function' ? idOf(fn) : idOf(fn.handleEvent)}|${typeof opts === 'object' ? !!opts?.capture : !!opts}`);
+    }
+    return add.call(this, type, fn, opts);
+  };
+  EventTarget.prototype.removeEventListener = function (type, fn, opts) {
+    const l = label(this);
+    if (l && fn) {
+      listeners.get(l)?.delete(`${type}|${typeof fn === 'function' ? idOf(fn) : idOf(fn.handleEvent)}|${typeof opts === 'object' ? !!opts?.capture : !!opts}`);
+    }
+    return remove.call(this, type, fn, opts);
+  };
+  const listenerCount = () => [...listeners.values()].reduce((n, s) => n + s.size, 0);
+
+  const {createMockHass} = await import('../fixtures/mock-hass.js');
+  const {defineDoubles} = await import('../widgets/harness.js');
+  const {variants} = await import('../../src/overviews/weather/fixtures.js');
+  defineDoubles();
+  await import(params.get('src') || '/dist/houseview.js');
+
+  const weather = variants.ok;
+  const subs = {open: 0, opened: 0};
+  let mock;
+  window.subs = subs;
+  window.calls = () => mock.calls.map((c) => `${c.d}:${c.s}:${c.data?.entity_id}`);
+  window.resetCalls = () => {
+    mock.calls.length = 0;
+  };
+
+  const TIMER = 'timer.kitchen';
+  const SECOND = 'timer.second';
+  const NAMES = {[TIMER]: 'Kitchen timer', [SECOND]: 'Second timer'};
+  const hms = (s) =>
+    `${Math.floor(s / 3600)}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+  function build(screensaver, {editMode = false, hass = {}} = {}) {
+    mock = createMockHass({
+      ...weather.hass,
+      ...hass,
+      connection: true,
+      states: {
+        ...weather.states,
+        'light.a': {state: 'on', attributes: {friendly_name: 'Light A'}},
+        'light.b': {state: 'off', attributes: {friendly_name: 'Light B'}},
+        [TIMER]: {state: 'idle', attributes: {friendly_name: 'Kitchen timer', duration: '0:15:00', editable: true}},
+        [SECOND]: {state: 'idle', attributes: {friendly_name: 'Second timer', duration: '0:05:00'}}
+      }
+    });
+    mock.hass.connection.subscribeMessage = (callback, msg) => {
+      const forecast = weather.forecasts?.[msg.forecast_type];
+      queueMicrotask(() => callback({type: msg.forecast_type, forecast: forecast ?? null}));
+      subs.open++;
+      subs.opened++;
+      let closed = false;
+      return Promise.resolve(() => {
+        if (!closed) subs.open--;
+        closed = true;
+      });
+    };
+    window.mock = mock;
+    const card = document.createElement('houseview-card');
+    card.style.cssText = 'display:block;height:100vh';
+    const config = {
+      preview_time: undefined,
+      pages: [{name: 'Home'}, {name: 'More'}],
+      cards: [
+        {type: 'custom:houseview-light-card', entity: 'light.a', page: 'Home'},
+        {type: 'custom:houseview-light-card', entity: 'light.b', page: 'Home'},
+        {type: 'custom:houseview-timer-card', entity: TIMER, page: 'Home'},
+        {type: 'custom:houseview-clock-card', page: 'More'}
+      ]
+    };
+    if (screensaver !== undefined) config.screensaver = screensaver;
+    if (editMode) {
+      const wrapper = document.createElement('hui-card-options');
+      document.body.append(wrapper);
+      wrapper.append(card);
+    } else document.body.append(card);
+    window.card = card;
+    window.lastConfig = config;
+    card.setConfig(config);
+    card.hass = mock.hass;
+    return card;
+  }
+
+  window.mount = async (screensaver, opts) => {
+    document.body.replaceChildren();
+    const card = build(screensaver, opts);
+    await new Promise((resolve) => realSetTimeout(resolve, 60));
+    return card;
+  };
+
+  window.setTimer = (state, {left = 900, total = 900, id = TIMER, push = true} = {}) => {
+    const attributes = {friendly_name: NAMES[id], duration: hms(total), editable: true};
+    if (state === 'active') {
+      attributes.remaining = hms(Math.max(0, left));
+      attributes.finishes_at = new Date(window.fake.now + left * 1000).toISOString();
+    } else if (state === 'paused') attributes.remaining = hms(left);
+    // Home Assistant pushes a NEW state object for a change, and a NEW hass object
+    window.mock.replaceState(id, {state, attributes});
+    if (push) window.pushHass();
+  };
+  window.pushHass = () => {
+    window.card.hass = {...window.mock.hass};
+  };
+  window.jumpClock = (seconds) => {
+    window.fake.now += seconds * 1000;
+  };
+  window.setHidden = (hidden) => {
+    Object.defineProperty(document, 'hidden', {configurable: true, get: () => hidden});
+    document.dispatchEvent(new Event('visibilitychange'));
+  };
+  window.reconfigure = () => window.card.setConfig(JSON.parse(JSON.stringify(window.lastConfig)));
+  window.reattach = () => {
+    const card = window.card;
+    const parent = card.parentNode;
+    card.remove();
+    parent.append(card);
+  };
+
+  window.cycle = async (screensaver, n) => {
+    const out = {};
+    for (let i = 0; i < n; i++) {
+      document.body.replaceChildren();
+      const card = build(screensaver);
+      window.setTimer('active', {left: 600});
+      window.advance(1);
+      if (i % 3 === 0) {
+        // dismiss it half the time before the card goes away
+        card.shadowRoot.querySelector('.hv-screensaver .ov-dismiss')?.click();
+      }
+      if (i === 4) out.listenersAfterWarmup = listenerCount();
+      card.remove();
+      document.body.replaceChildren();
+    }
+    out.listeners = listenerCount();
+    return out;
+  };
+  window.leaks = () => ({
+    intervals: intervals.size,
+    timeouts: pending.size,
+    listeners: listenerCount(),
+    subscriptions: subs.open
+  });
+
+  // ---- the timer scene, as far as the script needs to know ----
+  const root = () => window.card.shadowRoot;
+  window.probe = {
+    layer: () => {
+      const l = root().querySelector('.hv-screensaver');
+      return l ? {state: l.dataset.state, timer: !!l.querySelector('.ov-timer-scene'), weather: !!l.querySelector('.ov-weather-scene')} : null;
+    },
+    layers: () => root().querySelectorAll('.hv-screensaver').length,
+    time: () => root().querySelector('.ov-timer-scene [data-ov="time"]')?.textContent ?? null,
+    caption: () => root().querySelector('.ov-timer-scene [data-ov="caption"]')?.textContent ?? null,
+    name: () => root().querySelector('.ov-timer-scene')?.getAttribute('aria-label') ?? null,
+    lit: () => root().querySelectorAll('.ov-timer-tick.on').length,
+    ticks: () => root().querySelectorAll('.ov-timer-tick').length,
+    background: () => {
+      const l = root().querySelector('.hv-screensaver');
+      return l ? getComputedStyle(l.querySelector('.ov-timer-scene')).backgroundColor : null;
+    }
+  };
+  window.ready = true;
+</script>
+</body>
+</html>

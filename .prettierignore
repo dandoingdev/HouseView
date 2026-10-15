@@ -1,0 +1,15 @@
+dist
+dist-min
+node_modules
+tools/.scratch*
+package-lock.json
+# Templates contain {{placeholders}} and are not valid JS
+tools/templates
+# CSS keeps its hand-ordered layout: cascade order and rule text matter
+*.css
+# Prose and tables are hand-formatted
+*.md
+*.html
+*.yaml
+*.yml
+*.svg

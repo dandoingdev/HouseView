@@ -1,0 +1,15 @@
+/* @owns action script scene button input_button */
+/*
+ * action widget styles.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ * Keep every rule's cascade position: do not merge or reorder rules.
+ * The tile proportions of the action tile (family 'icon-tile') come from the generated shared lists, so this
+ * file only holds the one script-caption rule.
+ */
+
+/* @phase night */
+/* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
+.carousel.layout-controls .script small {
+  text-transform: none;
+}

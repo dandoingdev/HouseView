@@ -1,0 +1,35 @@
+# The month calendar overview (docs/overviews/calendar_month.md). It needs no entity.
+#
+# Pressing a clock, date or calendar widget opens it full screen; a tap closes it. Nothing else is needed for that. The
+# examples below show the options and the other ways to use it.
+#
+# Three cards below, separated by `---`.
+
+# 1. Opened by pressing the clock or the date. An explicit entry only supplies the options (week_start, show_time); it also
+#    makes the month calendar a screensaver after two minutes without a touch.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+  - {type: custom:houseview-date-card}
+  - {type: custom:houseview-calendar-card, entity: calendar.family}
+screensaver:
+  type: calendar_month
+  week_start: monday # auto, monday, sunday or saturday
+  show_time: true
+  idle_timeout: 120
+---
+# 2. Pressing the widgets does nothing special: they keep their own behaviour (the calendar widget opens its dialog).
+type: custom:houseview-card
+calendar_view: false
+cards:
+  - {type: custom:houseview-clock-card}
+  - {type: custom:houseview-calendar-card, entity: calendar.family}
+---
+# 3. As a card on a page of its own.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: teal, layout: auto}
+  - {name: Calendar, surface: glass, layout: auto}
+cards:
+  - {type: custom:houseview-clock-card, page: Home}
+  - {type: custom:houseview-calendar-month-overview-card, week_start: sunday, page: Calendar}

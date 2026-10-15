@@ -1,0 +1,10 @@
+# Normalise line endings; the tree is LF everywhere.
+* text=auto eol=lf
+*.gz binary
+*.png binary
+*.jpg binary
+*.sha256 text
+
+# Build output is not part of source archives.
+/dist/ export-ignore
+/dist-min/ export-ignore

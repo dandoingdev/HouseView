@@ -1,0 +1,74 @@
+/* @owns carousel surface-silver surface-champagne face tile widget control active page-nav manage dim-screen night-mode camera-gallery calendar-month */
+/*
+ * Silver and champagne surface rules, wallpaper url()s and every user of --hv-wallpaper.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+/* @important overrides an earlier !important rule */
+.carousel.surface-silver {
+  --hv-glass: #555d6580;
+  --hv-edge: #ffffff90;
+  --hv-wallpaper: url('../assets/silver-ribbons.svg');
+  background: #818584 var(--hv-wallpaper) center/cover !important;
+  color: #fff;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-champagne {
+  --hv-glass: #63554b80;
+  --hv-edge: #fff1d890;
+  --hv-wallpaper: url('../assets/champagne-ribbons.svg');
+  background: #967d68 var(--hv-wallpaper) center/cover !important;
+  color: #fff8ee;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel:is(.surface-silver,.surface-champagne) .face {
+  background: transparent !important;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .face::before {
+  display: none;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .tile.widget {
+  background: linear-gradient(145deg,#ffffff1f,#ffffff05),var(--hv-glass);
+  border-color: var(--hv-edge);
+  color: inherit;
+  text-shadow: 0 1px 2px #20252c66;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .control.active {
+  background: linear-gradient(145deg,#ffffff48,#ffffff18),var(--hv-glass);
+  border-color: #ffffffd9;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .page-nav {
+  background: transparent;
+  color: inherit;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .dim-screen {
+  background: #39404b45;
+  color: inherit;
+  border-color: #fff5;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel:is(.surface-silver,.surface-champagne).night-mode {
+  background-image: linear-gradient(#14192438,#14192438),var(--hv-wallpaper) !important;
+}
+
+.carousel:is(.surface-silver,.surface-champagne) .camera-gallery {
+  background: #777c7c var(--hv-wallpaper) center/cover;
+  color: inherit;
+}
+
+/* shared: calendar, date */
+.carousel:is(.surface-silver,.surface-champagne) .calendar-month {
+  color: inherit;
+  opacity: .8;
+}

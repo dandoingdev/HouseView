@@ -1,0 +1,193 @@
+/* @owns carousel face widget page-nav page-indicators calendar-month calendar-day timer-panel music-panel timer-presets transport control feedback calendar-content */
+/*
+ * Core shell/face/page-nav rules of the carousel, and rules shared by several widgets.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase carousel */
+/* Screen-sized faces and kitchen controls — v3. */
+/* @important overrides an earlier !important rule */
+.carousel {
+  overflow: hidden !important;
+  background: #817c70 !important;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel .face {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  grid-template-rows: repeat(var(--rows,3),minmax(0,1fr)) !important;
+  padding: 24px;
+  gap: 14px;
+  box-sizing: border-box;
+  touch-action: pan-y;
+}
+
+.carousel .widget {
+  overflow: hidden;
+  border-radius: 30px;
+}
+
+.carousel .page-nav {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  background: #6e6d64;
+}
+
+.page-nav button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.page-nav ha-icon {
+  --mdc-icon-size: 24px;
+  margin: 0;
+}
+
+.page-indicators {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-bottom: 0;
+}
+
+.page-dot span {
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: .35;
+}
+
+.page-dot.selected span {
+  opacity: 1;
+  width: 20px;
+  border-radius: 6px;
+}
+
+.page-nav button:disabled {
+  opacity: .3;
+}
+
+/* shared: calendar, date */
+.calendar-month {
+  font-size: 20px;
+  color: #e65358;
+}
+
+/* @important overrides an earlier !important rule */
+/* shared: calendar, date */
+.calendar-day {
+  font-size: clamp(54px,25cqi,100px) !important;
+  line-height: 1;
+  font-weight: 300;
+}
+
+/* shared: media_player, timer */
+.timer-panel,
+.music-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* shared: media_player, timer */
+.timer-presets,
+.transport {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* shared: media_player, timer */
+.transport button {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff30;
+  color: inherit;
+}
+
+/* shared: media_player, timer */
+.transport ha-icon {
+  --mdc-icon-size: 26px;
+  margin: 0;
+}
+
+@media (max-height:600px) {
+  /* @important overrides an earlier !important rule */
+  /* shared: calendar, date */
+  .calendar-day {
+    font-size: 50px !important;
+  }
+
+  .carousel .control {
+    padding: 10px;
+  }
+}
+
+/* @phase carousel @pin 1 */
+/* Screen-sized faces and kitchen controls — v3. */
+.carousel .feedback {
+  bottom: 68px;
+  left: 20px;
+  right: 20px;
+}
+
+.carousel button:focus-visible {
+  outline: 3px solid #9abaff;
+  outline-offset: -4px;
+}
+
+@media (max-width:519px) {
+  .carousel .face {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .carousel .widget {
+    border-radius: 22px;
+  }
+
+  /* shared: calendar, media_player, timer */
+  .calendar-content,
+  .timer-panel,
+  .music-panel {
+    padding: 12px;
+  }
+}
+
+@media (max-height:600px) {
+  /* shared: media_player, timer */
+  .timer-panel,
+  .music-panel {
+    gap: 6px;
+    padding: 12px;
+  }
+
+  /* shared: media_player, timer */
+  .transport button {
+    width: 44px;
+    height: 44px;
+  }
+}

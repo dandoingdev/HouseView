@@ -1,0 +1,46 @@
+# HouseView widgets as ordinary dashboard cards, one widget each. Use these in a masonry or sections view,
+# next to cards from Home Assistant or other projects. `height` is in pixels. Standalone cards default to a
+# light look on a teal background; `appearance: auto` follows the Home Assistant theme.
+title: Single cards
+views:
+  - title: Cards
+    path: cards
+    cards:
+      - type: custom:houseview-light-card
+        entity: light.living_room
+        name: Living room
+        appearance: auto
+      # Hold for the entity dialog, double tap to turn it off (see docs/actions.md)
+      - type: custom:houseview-light-card
+        entity: light.kitchen
+        wallpaper: silver
+        tap_action:
+          action: toggle
+        hold_action:
+          action: more-info
+        double_tap_action:
+          action: perform-action
+          perform_action: light.turn_off
+          target:
+            entity_id: light.kitchen
+      - type: custom:houseview-climate-card
+        entity: climate.living_room
+        height: 300
+      - type: custom:houseview-weather-card
+        entity: weather.home
+        wallpaper: champagne
+      - type: custom:houseview-media_player-card
+        entity: media_player.kitchen_speaker
+        appearance: dark
+        height: 400
+      - type: custom:houseview-sensor-card
+        entity: sensor.hallway_temperature
+        icon: mdi:thermometer
+      # The generic form: any widget through its widget_type
+      - type: custom:houseview-widget-card
+        widget_type: lock
+        entity: lock.front_door
+      # A weather overview card (see docs/screensavers.md)
+      - type: custom:houseview-weather-overview-card
+        entity: weather.home
+        height: 380

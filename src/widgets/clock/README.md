@@ -1,0 +1,27 @@
+---
+type: clock
+label: Clock
+entity: none
+since: 1.0
+---
+# Clock
+
+An analogue clock. It needs no entity and is always available. The hour and minute hands and the screen-reader label
+(the time, for example "10:10") update from the browser clock, in the language of the Home Assistant user. The dial
+grows to fill its widget, between 48 and 220 px. On the `soft` surface the dial shows numerals instead of ticks.
+
+The name is shown under the dial only when you set one. Set `preview_time` on the carousel card to freeze the clock
+for screenshots.
+
+A tap opens the full-screen [month calendar](../overviews/calendar_month.md). Set `calendar_view: false` on the card
+to turn that off.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | string | none | Optional caption under the dial |
+| size | normal/wide/tall/large | normal | Widget size on carousel pages |
+
+```yaml
+type: custom:houseview-clock-card
+name: Kitchen
+```

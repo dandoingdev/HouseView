@@ -1,0 +1,26 @@
+HouseView:
+  primary-color: '#6f8c79'
+  accent-color: '#bba477'
+  primary-font-family: 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif'
+  ha-card-border-radius: '24px'
+  ha-card-border-width: '1px'
+  ha-card-box-shadow: '0 6px 20px rgba(40, 40, 30, 0.06)'
+  modes:
+    light:
+      primary-background-color: '#eae7e0'
+      secondary-background-color: '#f4f2ed'
+      card-background-color: '#f6f4ef'
+      ha-card-background: '#f6f4ef'
+      primary-text-color: '#2b302c'
+      secondary-text-color: '#62675f'
+      divider-color: '#d4d4cb'
+      ha-card-border-color: '#d4d4cb'
+    dark:
+      primary-background-color: '#202623'
+      secondary-background-color: '#29312c'
+      card-background-color: '#303a33'
+      ha-card-background: '#303a33'
+      primary-text-color: '#f2f3ed'
+      secondary-text-color: '#bdc7bc'
+      divider-color: '#4d574e'
+      ha-card-border-color: '#4d574e'

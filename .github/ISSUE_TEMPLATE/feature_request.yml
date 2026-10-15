@@ -1,0 +1,17 @@
+name: Feature request
+description: Suggest a widget, option or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you want to do?
+      description: Describe the use case, not just the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: Optional. A sketch of the YAML you would like to write.
+      render: yaml

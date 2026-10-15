@@ -1,0 +1,127 @@
+/* @owns carousel surface-teal face widget calendar-month calendar-day timer-preset page-nav manage night-mode camera-gallery tile control active */
+/*
+ * Teal surface rules that no single widget owns, and the teal wallpaper url().
+ * Teal x layout-controls generic rules live in layouts/controls.css.
+ * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
+ * sections inside one phase.
+ */
+
+/* @phase surface-teal */
+/* Teal folded-glass face, inspired by the supplied HomeView reference. */
+/* @important overrides an earlier !important rule */
+.carousel.surface-teal {
+  --hv-glass: rgba(107,203,191,.15);
+  --hv-edge: rgba(204,255,245,.34);
+  background: #0c5555 url('../assets/teal-folds.svg') center/cover !important;
+  color: #fff;
+}
+
+/* @important overrides an earlier !important rule */
+.surface-teal .face {
+  background: transparent !important;
+  gap: 14px;
+}
+
+.surface-teal .face::before {
+  display: none;
+}
+
+.surface-teal .widget {
+  background: var(--hv-glass);
+  border: 1px solid var(--hv-edge);
+  box-shadow: inset 0 1px 1px #e8fff53b,inset 0 -1px 1px #053c3c45,0 3px 12px #002e2d16;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: white;
+  border-radius: 30px;
+}
+
+/* shared: calendar, date */
+.surface-teal .calendar-month {
+  color: #dcfff8;
+  opacity: .85;
+  font-size: 15px;
+  letter-spacing: .12em;
+}
+
+/* shared: calendar, date */
+.surface-teal .calendar-day {
+  font-weight: 250;
+  letter-spacing: -.055em;
+  line-height: 1.05;
+}
+
+/* shared: media_player, timer */
+.surface-teal .timer-preset,
+.surface-teal .transport button {
+  background: #a9eddd26;
+  border: 1px solid #d2fff22b;
+  box-shadow: inset 0 1px 1px #edfff51f;
+}
+
+.surface-teal button:disabled {
+  opacity: .4;
+}
+
+.surface-teal .page-nav {
+  background: transparent;
+  color: #e9fff9;
+}
+
+/* @phase surface-teal @pin 1 */
+/* Teal folded-glass face, inspired by the supplied HomeView reference. */
+@supports not (backdrop-filter:blur(1px)) {
+  .surface-teal .widget {
+    background: #216d68e6;
+  }
+}
+
+/* @phase night */
+/* Bedroom variant: quieter glass, warm white type, and a reversible screen dimmer. */
+/* @important overrides an earlier !important rule */
+.carousel.surface-teal.night-mode {
+  background-image: linear-gradient(#001d2360,#001d2360),url('../assets/teal-folds.svg') !important;
+  color: #edf2e7;
+}
+
+/* @phase tablet */
+/* Tablet canvas belongs to the viewport, independent of HA panel sizing. */
+/* @important overrides an earlier !important rule */
+.carousel.surface-teal {
+  background-repeat: no-repeat !important;
+  background-position: center center !important;
+  background-size: cover !important;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-teal.night-mode {
+  background-repeat: no-repeat,no-repeat !important;
+  background-position: center center,center center !important;
+  background-size: cover,cover !important;
+}
+
+/* @phase gallery */
+/* Four camera faces, edge-to-edge inside the tablet canvas. */
+.camera-gallery {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+  background: #08474a url('../assets/teal-folds.svg') center/cover;
+  color: #effffa;
+  overflow: hidden;
+}
+
+/* @phase lifted */
+/* Lifted glass: softer geometry, a luminous rim and deeper separation. */
+.carousel.surface-teal .tile.widget {
+  background: linear-gradient(145deg,#b8ffee27,#58bdae12);
+}
+
+.carousel.surface-teal .control.active {
+  background: linear-gradient(145deg,#d5fff252,#a1edda32);
+  border-color: #f1fffbb0;
+}

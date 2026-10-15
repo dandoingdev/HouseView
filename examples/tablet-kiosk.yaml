@@ -1,0 +1,41 @@
+# A wall-tablet page: panel view, `tablet_mode` (the same as ?tablet=1), pages for the kitchen, music and home controls,
+# a weather screensaver, a bedtime dim button and inline confirmations (docs/tablet.md).
+#
+# `tablet_mode: true` hides Home Assistant's sidebar and header on this dashboard. It reaches into Home Assistant internals
+# that are not a public API: if it stops working after an update, open the dashboard in a kiosk browser instead. Instead of
+# `tablet_mode` you can open the dashboard with `?tablet=1` on the tablet only and keep Home Assistant's normal look
+# everywhere else.
+#
+# `confirm_mode: inline` asks for confirmation (unlocking, replacing a running timer) with a sheet inside the card, which
+# works in kiosk browsers that block the browser's own dialogs.
+title: Wall tablet
+views:
+  - title: Wall
+    path: wall
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        tablet_mode: true
+        bedtime: true
+        confirm_mode: inline
+        performance: auto
+        pages:
+          - {name: Kitchen, surface: teal, layout: kitchen}
+          - {name: Music, surface: teal, layout: auto}
+          - {name: Home, surface: glass, layout: controls, columns: 4}
+        cards:
+          - {type: custom:houseview-clock-card, page: Kitchen}
+          - {type: custom:houseview-date-card, page: Kitchen}
+          - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen}
+          - {type: custom:houseview-timer-card, entity: timer.kitchen_timer, page: Kitchen}
+          - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, page: Music, size: large}
+          - {type: custom:houseview-light-card, entity: light.kitchen, page: Home}
+          - {type: custom:houseview-light-card, entity: light.living_room, page: Home}
+          - {type: custom:houseview-switch-card, entity: switch.coffee_machine, page: Home}
+          - {type: custom:houseview-lock-card, entity: lock.front_door, page: Home}
+          - {type: custom:houseview-cover-card, entity: cover.living_room_blinds, page: Home}
+          - {type: custom:houseview-action-card, entity: script.good_night, name: Good night, page: Home}
+        screensaver:
+          type: weather
+          entity: weather.home
+          idle_timeout: 180

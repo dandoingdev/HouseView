@@ -1,0 +1,31 @@
+# The photo frame overview: photos from a Home Assistant media folder as a screensaver and as a card
+# (docs/overviews/photo_frame.md). The folder is a placeholder: use a folder of your own under /media or the local media
+# folder, ideally with resized photos (about 1600 px wide).
+#
+# Two cards below, separated by `---`.
+
+# 1. A screensaver. After two minutes without a touch the photos take over the screen; the first tap only wakes it.
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+  - {type: custom:houseview-date-card}
+screensaver:
+  type: photo_frame
+  folder: media-source://media_source/local/Photos # also: /media/Photos, local/Photos or just Photos
+  interval: 30 # seconds between photos (5 to 86400)
+  shuffle: true
+  recursive: false
+  show_time: true
+  idle_timeout: 120
+---
+# 2. A page of its own. Pressing the card opens the photos full screen.
+type: custom:houseview-card
+pages:
+  - {name: Home, surface: teal, layout: auto}
+  - {name: Photos, surface: glass, layout: auto}
+cards:
+  - {type: custom:houseview-clock-card, page: Home}
+  - type: custom:houseview-photo-frame-overview-card
+    folder: media-source://media_source/local/Photos
+    interval: 300
+    page: Photos
