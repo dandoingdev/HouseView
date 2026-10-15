@@ -262,7 +262,9 @@ export class HouseViewEditor extends HTMLElement {
     const {section} = panel(
       parent,
       text(this._hass, 'editor.automatic_displays'),
-      this._config.timer_display !== undefined || this._config.music_screensaver !== undefined
+      this._config.timer_display !== undefined ||
+        this._config.music_screensaver !== undefined ||
+        this._config.home_overview !== undefined
     );
     view.automatic = this._form(section, {
       data: automaticData(this._config),

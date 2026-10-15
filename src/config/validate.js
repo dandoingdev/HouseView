@@ -49,6 +49,12 @@ function validateOptionalSettings(config) {
   if (config.performance !== undefined && !PERFORMANCE_MODES.includes(config.performance)) {
     throw new Error(`performance must be ${sentenceList(PERFORMANCE_MODES)}.`);
   }
+  if (config.home_overview !== undefined && typeof config.home_overview !== 'boolean') {
+    throw new Error('home_overview must be true or false.');
+  }
+  if (config.home_title !== undefined && typeof config.home_title !== 'string') {
+    throw new Error('home_title must be text.');
+  }
   if (config.editor_preview !== undefined && !EDITOR_PREVIEWS.includes(config.editor_preview)) {
     throw new Error(`editor_preview must be ${sentenceList(EDITOR_PREVIEWS)}.`);
   }
@@ -136,13 +142,41 @@ function validateWidgetsConfig(config) {
  * @param {Object} input   what setConfig received
  * @returns {Object} the config to keep as `card._config`: `{...config, widgets}`
  */
+/**
+ * `home_overview: true` puts the home overview (a scrollable home screen built from the dashboard's widgets) on a page
+ * of its own at the start of the carousel. Widgets that named no page belonged to the first page: they keep belonging to
+ * it, so adding the overview moves nothing. The card never writes this page into the saved configuration (the editor
+ * edits the raw config); it exists only in the running card.
+ */
+function addHomeOverview(config) {
+  if (config.home_overview !== true || config.single_widget || !getWidget('home_overview')) {
+    return config;
+  }
+  const pages = config.pages?.length ? config.pages : [{name: 'Home', surface: 'glass'}];
+  let name = 'Home overview';
+  while (pages.some((page) => page.name === name)) name += ' ';
+  const widgets = config.widgets.map((widget) =>
+    widget.page ? widget : {...widget, page: pages[0].name}
+  );
+  const overview = {
+    type: 'home_overview',
+    page: name,
+    ...(config.home_title ? {title: config.home_title} : {})
+  };
+  return {
+    ...config,
+    pages: [{name, surface: pages[0].surface || 'glass'}, ...pages],
+    widgets: [overview, ...widgets]
+  };
+}
+
 export function validateConfig(input) {
   if (!isObject(input)) throw new Error('HouseView needs a configuration.');
   const config = input.cards ? widgetsFromCards(input) : input;
   for (const {extension} of extensions()) extension.validateConfig?.(config);
   validateOptionalSettings(config);
   if (!config.widgets) throw new Error('HouseView needs a list of cards.');
-  const validated = validateWidgetsConfig(config);
+  const validated = addHomeOverview(validateWidgetsConfig(config));
   validateScreensaver(validated);
   return validated;
 }

@@ -19,6 +19,9 @@ export default {
     'editor.automatic_displays': 'Automatic displays',
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
+    'editor.home_overview': 'Add a home overview as the first page',
+    'editor.helper.home_overview':
+      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. It becomes the first page and nothing else moves. Set the title with home_title in YAML.',
     'editor.helper.timer_display':
       'Every timer widget on the dashboard gets a full-screen countdown while it runs. It replaces the screensaver and returns control when the timer ends. A list of timer entities in YAML replaces the widgets.',
     'editor.helper.music_screensaver':

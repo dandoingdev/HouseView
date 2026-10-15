@@ -246,6 +246,7 @@ More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel
 | `palette` | `stone`, `forest` |
 | `high_contrast`, `bedtime` | `true` / `false`; bedtime adds night styling and a Dim button |
 | `performance` | `auto`, `full`, `lite`: `lite` uses opaque glass and no decorative animation. `auto` picks it on a device with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView |
+| `home_overview` | `true` adds a scrollable home screen (chips, cameras, scenes) built from your widgets as the first page; `home_title` sets its title |
 | `editor_preview` | `landscape` (default), `portrait` or `auto`: how the preview in the card editor is drawn. The card is laid out as a wall tablet and scaled to fit the preview, so it shows the real arrangement |
 
 See [theming](docs/theming.md) and [performance](docs/performance.md).

@@ -48,6 +48,18 @@
   text-align: center;
 }
 
+/* The icon above the name; it goes first when the tile gets short. */
+.carousel .blinds-simple .bs-heading ha-icon {
+  --mdc-icon-size: clamp(22px, min(24cqh, 20cqw), 64px);
+  margin: 0 0 0.15em;
+}
+
+@container (max-height: 150px) {
+  .carousel .blinds-simple .bs-heading ha-icon {
+    display: none;
+  }
+}
+
 .carousel .blinds-simple .bs-name {
   max-width: 100%;
   overflow: hidden;

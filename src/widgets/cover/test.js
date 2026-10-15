@@ -109,4 +109,17 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.ok);
   await t.act('cover-open', 'light.other');
   check('cover action on a non-cover entity is ignored', t.calls.length === 0);
+
+  // ---- icon ----
+  t = await mount(variants.ok);
+  check(
+    'the heading shows the blinds icon by default',
+    !!t.q('.bs-heading ha-icon[icon="mdi:blinds-horizontal"]')
+  );
+  t = await mount({...variants.ok, widget: {...variants.ok.widget, icon: 'mdi:window-shutter'}});
+  check(
+    'a configured icon replaces it',
+    !!t.q('.bs-heading ha-icon[icon="mdi:window-shutter"]') &&
+      !t.q('.bs-heading ha-icon[icon="mdi:blinds-horizontal"]')
+  );
 }

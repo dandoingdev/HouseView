@@ -75,11 +75,15 @@ export default defineWidget({
   label: 'Blinds',
   order: 90,
   availability: 'allow-unknown',
+  // The icon above the name (default: blinds). A name without a prefix is an mdi icon.
+  options: {
+    icon: {type: 'icon'}
+  },
   render(ctx) {
     // The heading is the tile's "info" button (more-info). ok is true for state "unknown", so it stays usable.
     const heading = ctx.btn(
       'info',
-      `<span class="bs-name">${ctx.name}</span><small class="bs-status">${ctx.esc(statusText(ctx))}</small>`,
+      `${ctx.icon(ctx.iconName('blinds-horizontal'))}<span class="bs-name">${ctx.name}</span><small class="bs-status">${ctx.esc(statusText(ctx))}</small>`,
       'bs-heading',
       ctx.ok
     );

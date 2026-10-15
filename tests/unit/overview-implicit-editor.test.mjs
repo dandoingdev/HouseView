@@ -16,13 +16,14 @@ test('the section is offered when the timer or cover art overview is in the bund
   assert.equal(form.showAutomatic({}), true);
 });
 
-test('two native boolean fields, in this order', () => {
+test('three native boolean fields, in this order', () => {
   const schema = form.automaticSchema();
   assert.deepEqual(
     schema.map((f) => [f.name, f.selector]),
     [
       ['timer_display', {boolean: {}}],
-      ['music_screensaver', {boolean: {}}]
+      ['music_screensaver', {boolean: {}}],
+      ['home_overview', {boolean: {}}]
     ]
   );
 });
@@ -37,15 +38,37 @@ test('labels are the owner strings', () => {
 });
 
 test('data: on by default, off only for false, a list reads as on', () => {
-  assert.deepEqual(form.automaticData({}), {timer_display: true, music_screensaver: true});
+  assert.deepEqual(form.automaticData({}), {
+    timer_display: true,
+    music_screensaver: true,
+    home_overview: false
+  });
   assert.deepEqual(form.automaticData({timer_display: false, music_screensaver: true}), {
     timer_display: false,
-    music_screensaver: true
+    music_screensaver: true,
+    home_overview: false
   });
   assert.deepEqual(form.automaticData({timer_display: ['timer.a'], music_screensaver: []}), {
     timer_display: true,
-    music_screensaver: true
+    music_screensaver: true,
+    home_overview: false
   });
+});
+
+test('home overview is off unless the config says true; the switch writes true or removes the key', () => {
+  assert.equal(form.automaticData({home_overview: true}).home_overview, true);
+  assert.deepEqual(
+    form.applyAutomatic({}, {...form.automaticData({}), home_overview: true}).home_overview,
+    true
+  );
+  assert.equal(
+    'home_overview' in
+      form.applyAutomatic(
+        {home_overview: true},
+        {...form.automaticData({home_overview: true}), home_overview: false}
+      ),
+    false
+  );
 });
 
 test('turning a switch off writes false, turning it on removes the key', () => {

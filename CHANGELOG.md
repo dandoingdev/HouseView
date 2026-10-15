@@ -14,6 +14,9 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* `home_overview: true` (a switch in the card editor) adds the home overview as the first page of the carousel without placing a
+  card; `home_title` sets its title. Off by default.
+
 * **Home overview** (`custom:houseview-home-overview-card`, `type: home`): a scrollable home screen that builds itself from the
   widgets on the carousel: a large title with the time, chips for climate (the temperature range), lights (how many are on),
   locks (how many are locked, amber when one is open) and media, up to three rounded camera snapshots with a "2m ago" label,

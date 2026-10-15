@@ -131,6 +131,12 @@ check('Editor preview is laid out as a landscape tablet and scaled to the previe
 previewCard.setConfig({widgets:[{type:'clock'}],editor_preview:'auto'});await new Promise(r=>setTimeout(r,200));
 check('editor_preview: auto leaves the preview box as it is',!previewShell().style.transform&&previewCard.style.height==='');
 previewBox.remove();
+// home_overview: true puts the home screen on a page of its own at the start; the other widgets stay together on the old first page.
+card.setConfig({home_overview:true,widgets:[{type:'clock'},{type:'light',entity:'light.second'}]});card.hass=hass;
+check('home_overview adds the home screen as the first page and moves nothing else',card._screens.length===2&&card._screens[0].placements.length===1&&card._screens[0].placements[0].widget.type==='home_overview'&&card._screens[1].placements.length===2);
+card.setConfig({home_overview:false,widgets:[{type:'clock'}]});card.hass=hass;
+check('home_overview: false adds nothing',card._screens.length===1&&card._screens[0].placements[0].widget.type==='clock');
+let badHome=false;try{card.setConfig({home_overview:'yes',widgets:[{type:'clock'}]})}catch{badHome=true}check('home_overview must be true or false',badHome);
 card.remove();check('Clock timer cleared on detach',card._timer===null);
 document.querySelector('#summary').textContent=`${passed} passed; ${failed} failed.`;
 </script></html>

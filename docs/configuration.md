@@ -40,6 +40,8 @@ screensaver:
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
+| `home_overview` | `false` | `true` adds the [home overview](overviews/home.md) (a scrollable home screen built from this dashboard's widgets) as the first page of the carousel. Nothing else moves. Also a switch in the card editor |
+| `home_title` | `Home` | The title shown on the home overview when `home_overview` is on |
 | `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |
