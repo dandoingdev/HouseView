@@ -226,6 +226,11 @@ try {
   await page.setViewport({width: 1280, height: 800, hasTouch: false});
   await page.waitForFunction('window.ready === true');
   await page.evaluate(() => {
+    // Linux headless Chrome can advertise no primary pointer even with touch emulation disabled.
+    // This case explicitly models a mouse desktop; keep other media queries native for layout checks.
+    const matchMedia = window.matchMedia.bind(window);
+    window.matchMedia = (query) =>
+      query === '(hover: hover) and (pointer: fine)' ? {matches: true} : matchMedia(query);
     window.card?.remove();
     window.card = document.createElement('houseview-card');
     document.body.replaceChildren(window.card);
