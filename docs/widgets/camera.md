@@ -9,7 +9,7 @@ snapshot every 30 seconds, so the picture never goes stale and the camera is not
 pictures from your own Home Assistant (the page origin, or the `hassUrl` origin) and under `/camera_proxy/` are
 loaded; anything else leaves the widget showing "Snapshot unavailable".
 
-A tap opens the more-info dialog. When the card config has a `camera_gallery`, a tap opens the camera grid instead,
+A long press opens the more-info dialog. When the card config has a `camera_gallery`, a tap opens the camera grid instead,
 and the widget stays usable while its own camera is offline.
 
 | Option | Type | Default | Description |

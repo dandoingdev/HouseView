@@ -435,11 +435,12 @@ export const screensaverMixin = {
 
   /**
    * The blockers for showing (or keeping) `entry`: the gallery, the timer alarm, a pending service call and edit mode.
-   * An event entry ignores the pending call: starting a timer from a HouseView tile must be able to trigger it.
+   * An event entry ignores pending calls so starting a timer can trigger it. Active control panels stay open while commands finish.
    */
   _screensaverBlockedFor(entry) {
     if (this._navigationBlocked?.() || this._galleryOpen || this._alarm) return true;
-    if (this._pending?.size && !entry?.event) return true;
+    const controlling = entry?.overview.controls && this._screensaver?.active?.entry === entry;
+    if (this._pending?.size && !entry?.event && !controlling) return true;
     return !!entry && !entry.startInEditMode && !entry.preview && isEditMode(this);
   },
 
@@ -588,7 +589,7 @@ export const screensaverMixin = {
     const stop =
       layer.querySelector('.ov-dismiss') ||
       layer.querySelector('button[data-action="overview-close"]');
-    stop?.focus({preventScroll: true});
+    if (!this._syncingEditorPreview) stop?.focus({preventScroll: true});
     ss.active = {
       entry,
       layer,

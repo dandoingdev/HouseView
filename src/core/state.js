@@ -1,6 +1,6 @@
 // Entity availability. The policy "state unknown still counts as available" is data on the registry
-// (a widget's unknownOkDomains), not code here: this file names no widget kind.
-import {unknownOkDomains} from './registry.js';
+// (a widget's allowsUnknownDomain), not code here: this file names no widget kind.
+import {allowsUnknownDomain} from './registry.js';
 
 /** `light.kitchen` -> `light`. Anything that is not an entity id gives ''. */
 export function domainOf(id) {
@@ -17,7 +17,7 @@ export function isAvailable(state, id) {
   return (
     !!state &&
     state.state !== 'unavailable' &&
-    (unknownOkDomains().includes(domainOf(id)) || state.state !== 'unknown')
+    (allowsUnknownDomain(domainOf(id)) || state.state !== 'unknown')
   );
 }
 

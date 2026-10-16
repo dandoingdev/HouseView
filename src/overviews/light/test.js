@@ -151,7 +151,7 @@ export default async function ({mount, check, variants, wait}) {
     bare: true,
     cards: [{type: 'custom:houseview-light-card', entity, name: 'Desk', icon: 'desk-lamp'}]
   });
-  await t.click('light-view', entity);
+  await t.card._act('light-view', entity);
   await t.settle(50);
   check(
     'pressing a light opens the existing control-panel layer with its configured name and icon',

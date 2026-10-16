@@ -1,3 +1,4 @@
+import {dateTimeFormatter} from '../../core/intl.js';
 import {defineOverview} from '../../core/define-overview.js';
 import {setText} from '../_shared/dom.js';
 import strings from './strings.js';
@@ -5,7 +6,7 @@ import {monthCells, weekdayOrder, weekStartOf} from './model.js';
 
 /** A calendar date formatted in the user's language without any time zone shift (the fields are already local). */
 const format = (ctx, options, y, m, d) =>
-  new Intl.DateTimeFormat(ctx.lang(), {...options, timeZone: 'UTC'}).format(Date.UTC(y, m - 1, d));
+  dateTimeFormatter(ctx.lang(), {...options, timeZone: 'UTC'}).format(Date.UTC(y, m - 1, d));
 
 /** "M T W T F S S" in the user's language, in the order the week starts. */
 const weekdayInitials = (ctx, weekStart) =>

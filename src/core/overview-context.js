@@ -3,6 +3,8 @@
 import {esc, num, iconHTML} from './html.js';
 import {t as translate} from './i18n.js';
 import {peek} from './subscriptions.js';
+import {hourOptions, temperatureUnit, timeZoneOf} from './format.js';
+import {dateTimeFormatter, numberFormatter} from './intl.js';
 
 /**
  * @typedef {Object} OverviewContext
@@ -43,40 +45,6 @@ export function specsFor(overview, hass, options) {
   return overview.data ? overview.data({hass, options, entityId: options.entity}) || {} : {};
 }
 
-/** Intl objects are expensive to build: one per (kind, locale, options) for the life of the page. */
-const formatters = new Map();
-
-/**
- * @param {string} key   identifies the format
- * @param {(locale: string|undefined, timeZone: string|undefined) => any} make
- * @param {string|undefined} locale
- * @param {string|undefined} timeZone
- */
-function formatter(key, make, locale, timeZone) {
-  let found = formatters.get(key);
-  if (!found) {
-    try {
-      found = make(locale, timeZone);
-    } catch {
-      // A malformed language tag or time zone name must not break a screensaver: use the browser's own.
-      found = make(undefined, undefined);
-    }
-    formatters.set(key, found);
-  }
-  return found;
-}
-
-/** Intl options for hass.locale.time_format: 'language' | 'system' | '12' | '24'. */
-function hourOptions(timeFormat) {
-  if (timeFormat === '24') return {hour: '2-digit', hourCycle: 'h23'};
-  if (timeFormat === '12') return {hour12: true};
-  return {};
-}
-
-/** Display time zone: 'server' means hass.config.time_zone, anything else the browser's. */
-const zoneOf = (hass) =>
-  hass?.locale?.time_zone === 'server' ? hass.config?.time_zone : undefined;
-
 /**
  * @param {Object} args
  * @param {any} args.hass
@@ -88,7 +56,7 @@ const zoneOf = (hass) =>
  */
 export function createOverviewContext({hass, config = {}, options, mode, overview}) {
   const lang = hass?.locale?.language;
-  const timeZone = zoneOf(hass);
+  const timeZone = timeZoneOf(hass);
   const stateOf = (id) => hass?.states?.[id];
   const attrsOf = (id) => stateOf(id)?.attributes || {};
   const availableOf = (id) => {
@@ -109,46 +77,37 @@ export function createOverviewContext({hass, config = {}, options, mode, overvie
   /** {main:'10:09', period:'' | 'AM', text:'10:09 AM'} in the user's time format and zone. */
   const timeParts = (ms) => {
     const timeFormat = hass?.locale?.time_format;
-    const fmt = formatter(
-      `t|${lang}|${timeFormat}|${timeZone}`,
-      (locale, zone) =>
-        new Intl.DateTimeFormat(locale, {
-          hour: 'numeric',
-          minute: '2-digit',
-          timeZone: zone,
-          ...hourOptions(timeFormat)
-        }),
+    const fmt = dateTimeFormatter(
       lang || undefined,
-      timeZone
+      {hour: 'numeric', minute: '2-digit', timeZone, ...hourOptions(timeFormat)},
+      {fallback: true}
     );
     const parts = fmt.formatToParts(ms);
-    return {
-      main: parts
-        .filter((p) => p.type !== 'dayPeriod')
-        .map((p) => p.value)
-        .join('')
-        .trim(),
-      period: parts.find((p) => p.type === 'dayPeriod')?.value || '',
-      text: fmt.format(ms)
-    };
+    let main = '';
+    let period = '';
+    let text = '';
+    for (const part of parts) {
+      text += part.value;
+      if (part.type === 'dayPeriod') period = part.value;
+      else main += part.value;
+    }
+    return {main: main.trim(), period, text};
   };
 
   /** Calendar fields of `ms` in the display zone (numbers), for "today"/"tomorrow" logic. */
   const localParts = (ms) => {
-    const fmt = formatter(
-      `p|${timeZone}`,
-      (_locale, zone) =>
-        new Intl.DateTimeFormat('en-US', {
-          timeZone: zone,
-          hourCycle: 'h23',
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric'
-        }),
-      undefined,
-      timeZone
+    const fmt = dateTimeFormatter(
+      'en-US',
+      {
+        timeZone,
+        hourCycle: 'h23',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      },
+      {fallback: true, fallbackLanguage: 'en-US'}
     );
     const p = Object.fromEntries(fmt.formatToParts(ms).map((x) => [x.type, Number(x.value)]));
     return {year: p.year, month: p.month, day: p.day, hour: p.hour % 24, minute: p.minute};
@@ -180,18 +139,13 @@ export function createOverviewContext({hass, config = {}, options, mode, overvie
     num,
     t: (key, vars) => translate(hass, key, vars),
     lang: () => lang,
-    unit: () => hass?.config?.unit_system?.temperature || '°C',
+    unit: () => temperatureUnit(hass),
     icon: iconHTML,
     now,
     timeParts,
     formatTime: (ms) => timeParts(ms).text,
     formatNumber: (value, opts = {maximumFractionDigits: 0}) =>
-      formatter(
-        `n|${lang}|${JSON.stringify(opts)}`,
-        (locale) => new Intl.NumberFormat(locale, opts),
-        lang || undefined,
-        undefined
-      ).format(value),
+      numberFormatter(lang || undefined, opts, {fallback: true}).format(value),
     localParts,
     /** Whole days from today (display zone) to the day containing `ms`; negative = past. */
     dayOffset: (ms) => dayNumber(ms) - dayNumber(now())

@@ -1,5 +1,6 @@
 // Tablet mode: hide Home Assistant's own sidebar and header so the carousel can use the whole screen
-// (`?tablet=1` in the dashboard URL, or `tablet_mode: true`).
+// (`?tablet=1` explicitly, or `tablet_mode: true` on a touch display).
+// Desktop users keep HA navigation and its dashboard editor; editing always restores them.
 //
 // THIS IS THE ONLY CODE THAT TOUCHES HOME ASSISTANT'S PRIVATE DOM. It reaches into the shadow roots of
 // `home-assistant` > `home-assistant-main` > `ha-drawer` and of the `hui-root` that contains the card, none of
@@ -7,6 +8,8 @@
 // Therefore everything here is feature-detected and wrapped: when a piece of HA is not where we expect it we
 // do nothing, and when anything throws we undo what we did and carry on without tablet mode. A failure here
 // must never break the card. Re-check after each major HA frontend release.
+
+import {isEditMode} from './screensaver.js';
 
 const DRAWER_CSS =
   '.sidebar-shell{display:none!important}.layout{grid-template-columns:1fr!important}.app-content{margin:0!important;padding:0!important;width:100%!important}';
@@ -17,20 +20,24 @@ let warned = false;
 
 /** `?tablet=1` in the address, parsed again only when the address changes (this runs on every layout pass). */
 let lastSearch;
-let lastSearchTablet = false;
+let lastSearchTablet;
 function tabletInAddress() {
   const search = window.location.search;
   if (search !== lastSearch) {
     lastSearch = search;
-    lastSearchTablet = new URLSearchParams(search).get('tablet') === '1';
+    const value = new URLSearchParams(search).get('tablet');
+    lastSearchTablet = value === '1' ? true : value === '0' ? false : undefined;
   }
   return lastSearchTablet;
 }
 
 /** Was tablet mode asked for? */
 function tabletRequested(card) {
-  if (card._config?.tablet_mode === true) return true;
-  return tabletInAddress();
+  if (isEditMode(card)) return false;
+  const override = tabletInAddress();
+  if (override !== undefined) return override;
+  const desktop = window.matchMedia?.('(hover: hover) and (pointer: fine)')?.matches;
+  return card._config?.tablet_mode === true && !desktop;
 }
 
 /** The `ha-drawer` of the running Home Assistant frontend, or undefined. */

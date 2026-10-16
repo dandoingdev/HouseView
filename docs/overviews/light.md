@@ -4,7 +4,7 @@
 
 > Overview type `light` (since 1.1). Entity: required, a `light` entity. Card type `custom:houseview-light-overview-card` (widget type `light_overview`), screensaver `type: light`.
 
-Press a light widget’s icon to open its full-screen brightness control. The entire view shows the brightness
+Hold a light widget to open its full-screen brightness control. The entire view shows the brightness
 with an edge-to-edge flat yellow fill on pale grey-blue. A bold percentage and the widget’s icon sit in the centre. Coloured light modes use the entity's RGB colour. White and colour-temperature modes, including near-white RGB updates after dimming, keep the app's active-light yellow so the fill stays visible.
 The name, icon and percentage follow the entity. Close with the close key or Escape; the power key toggles the light
 and the settings key opens Home Assistant's more-info dialog.
@@ -17,7 +17,7 @@ is pending retain the latest value and send it after that call completes.
 
 Off lights show zero and can be dragged on. Zero calls `light.turn_off`; positive values call `light.turn_on` with
 `brightness_pct`. Unavailable, unknown and missing entities cannot be dimmed. Lights that only support on/off keep
-the power and settings keys but disable the slider. The rest of the light tile toggles on/off. Explicit `action: toggle` and `action: off` on a widget preserve
+the power and settings keys but disable the slider. A normal tap on the light tile toggles on/off. Explicit `action: toggle` and `action: off` on a widget preserve
 those direct actions, along with configured Home Assistant tap/hold/double-tap actions.
 
 | Option | Type | Default | Description |
@@ -33,4 +33,11 @@ entity: light.living_room
 
 The same view can be placed on a carousel or used as a standalone card. Its fill has no animation so the boundary
 stays under the pointer, including with reduced motion and on low-performance devices.
+
+For colour-capable lights, the palette key beside power opens a full-screen colour field. Drag across the field
+for hue and saturation, with white at the centre. The marker follows your finger and changes apply as you move, with no confirmation key.
+The X or Escape returns to brightness and keeps the selected colour. Opening or closing the picker sends no change. Lights supporting colour temperature
+also offer a thermometer key to switch to a warm-to-cool white field, limited to the entity's supported Kelvin range.
+Temperature-only lights open that field directly. Keyboard users can tab to the native hue, saturation and temperature
+sliders. Selection stays under your finger through Home Assistant updates; unavailable lights cannot change. Rapid changes are coalesced and the final selection is retained.
 

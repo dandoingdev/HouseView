@@ -1,3 +1,4 @@
+import {dateTimeFormatter} from '../../core/intl.js';
 import {defineOverview} from '../../core/define-overview.js';
 import {setText} from '../_shared/dom.js';
 import strings from './strings.js';
@@ -6,7 +7,7 @@ import {listPhotos, normalizeFolder, photoUrl, shuffled, slotAt} from './library
 /** Weekday, day and month ("Thursday 15 October") of the display zone's calendar day, in the user's language. */
 function dateText(ctx, ms) {
   const p = ctx.localParts(ms);
-  return new Intl.DateTimeFormat(ctx.lang(), {
+  return dateTimeFormatter(ctx.lang(), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

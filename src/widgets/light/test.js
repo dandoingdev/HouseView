@@ -2,8 +2,8 @@
 export default async function ({mount, check, variants}) {
   let t = await mount(variants.ok);
   check(
-    'a default light has separate toggle and brightness buttons',
-    !!t.q('[data-action="light"]') && !!t.q('[data-action="light-view"]') && !t.q('button button')
+    'a default light has one toggle tile with no separate icon action',
+    !!t.q('[data-action="light"]') && !t.q('[data-action="light-view"]') && !t.q('button button')
   );
   check('an on light is marked active', !!t.q('.control.active'));
 
@@ -13,9 +13,9 @@ export default async function ({mount, check, variants}) {
     t.calls[0]?.s === 'toggle' && !t.q('.hv-screensaver')
   );
   t = await mount(variants.ok);
-  await t.click('light-view');
+  await t.hold();
   check(
-    'pressing only the icon opens brightness without toggling',
+    'holding the tile opens brightness without toggling',
     !!t.q('.ov-light-scene') && t.calls.length === 0
   );
 
@@ -28,9 +28,9 @@ export default async function ({mount, check, variants}) {
     'configured tap actions still apply to the main tile',
     t.infos.includes('light.test') && t.calls.length === 0
   );
-  await t.click('light-view');
+  await t.hold();
   check(
-    'the separate icon still opens brightness with a configured tap action',
+    'holding still opens brightness with a configured tap action',
     !!t.q('.ov-light-scene') && t.calls.length === 0
   );
 

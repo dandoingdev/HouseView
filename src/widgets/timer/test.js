@@ -130,8 +130,8 @@ export default async function (h) {
 
   // ---- custom -------------------------------------------------------------------------------------------------
   t = await mount(variants.ok);
-  await t.click('info');
-  check('Custom opens more-info', t.infos.includes('timer.test') && t.calls.length === 0);
+  await t.hold('[data-action="info"]');
+  check('holding Custom opens more-info', t.infos.includes('timer.test') && t.calls.length === 0);
 
   // ---- countdown ----------------------------------------------------------------------------------------------
   t = await mount({

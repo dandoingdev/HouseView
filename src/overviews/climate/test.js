@@ -287,10 +287,10 @@ export default async function ({mount, check, variants, wait}) {
   const widget = {type: 'custom:houseview-climate-card', entity: ENTITY, name: 'Lounge'};
   t = await mount(variants.ok, {mode: 'carousel', cards: [widget]});
   check('a carousel with a thermostat widget shows no layer by itself', !t.layer);
-  await t.click('climate-view', ENTITY);
+  await t.hold('.cs-number');
   await t.settle(50);
   check(
-    'pressing the number on the widget opens the thermostat view, named after the widget',
+    'holding the number on the widget opens the thermostat view, named after the widget',
     !!t.layer?.querySelector('.ov-climate-scene') &&
       t.layer.querySelector('.ov-climate-title').textContent === 'Lounge' &&
       t.calls.length === 0 &&
@@ -301,7 +301,7 @@ export default async function ({mount, check, variants, wait}) {
   check('and it closes again', !t.layer);
 
   t = await mount(variants.ok, {mode: 'carousel', cards: [widget], config: {climate_view: false}});
-  await t.click('info', ENTITY);
+  await t.hold('.cs-number');
   await t.settle(50);
   check(
     'climate_view: false keeps the entity dialog on the widget instead',

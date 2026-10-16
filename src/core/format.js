@@ -1,3 +1,5 @@
+import {dateTimeFormatter, numberFormatter} from './intl.js';
+
 // Locale-aware number, date and time formatters (docs/architecture.md).
 //
 // The defaults: numbers use hass.locale.language, dates use whatever the
@@ -17,7 +19,7 @@ export function temperatureUnit(hass) {
 
 /** A number formatter in the user's language. */
 export function numberFormat(hass, options = {}) {
-  return new Intl.NumberFormat(hass?.locale?.language || undefined, options);
+  return numberFormatter(hass?.locale?.language || undefined, options);
 }
 
 /**
@@ -29,7 +31,7 @@ export function numberFormat(hass, options = {}) {
 export function dateFormat(hass, options = {}, {browserLocale = false} = {}) {
   const language = browserLocale ? undefined : hass?.locale?.language || undefined;
   const timeZone = timeZoneOf(hass);
-  return new Intl.DateTimeFormat(language, timeZone ? {...options, timeZone} : options);
+  return dateTimeFormatter(language, timeZone ? {...options, timeZone} : options);
 }
 
 /** 12:34 in the user's language and zone (no seconds). */
@@ -40,4 +42,11 @@ export function formatTime(hass, date) {
 /** Format a number with at most `digits` decimals in the user's language. */
 export function formatNumber(hass, value, digits = 1) {
   return numberFormat(hass, {maximumFractionDigits: digits}).format(value);
+}
+
+/** Intl options for Home Assistant's explicit 12/24-hour preferences. */
+export function hourOptions(timeFormat) {
+  if (timeFormat === '24') return {hour: '2-digit', hourCycle: 'h23'};
+  if (timeFormat === '12') return {hour12: true};
+  return {};
 }

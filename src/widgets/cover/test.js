@@ -78,7 +78,7 @@ export default async function ({mount, check, variants}) {
   );
 
   t = await mount(variants.unknown);
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check(
     'heading on an unknown cover opens more-info, no service',
     t.infos.includes('cover.test') && t.calls.length === 0

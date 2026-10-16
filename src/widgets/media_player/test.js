@@ -24,9 +24,9 @@ export default async function ({mount, check, variants}) {
       .map((b) => b.dataset.action)
       .join() === 'media-player-shuffle,media-prev,media,media-next,media-player-repeat' &&
       t
-        .qa('.mc-volume button')
+        .qa('.mc-volume')
         .map((b) => b.dataset.action)
-        .join() === 'volume-down,volume-up'
+        .join() === 'media-player-volume-view'
   );
 
   await t.click('media');
@@ -43,6 +43,18 @@ export default async function ({mount, check, variants}) {
   await t.click('media');
   check('play/pause on a paused player calls the service', t.calls.length === 1);
 
+  t = await mount(variants.idlePlayable);
+  await t.click('media');
+  check(
+    'an idle speaker with PLAY support resumes its queue',
+    t.calls[0]?.s === 'media_play' && t.calls[0]?.data.entity_id === ENTITY && t.infos.length === 0
+  );
+  t = await mount(variants.ok);
+  await t.hold('.mc-details');
+  check(
+    'holding track information opens speaker controls',
+    t.infos.includes(ENTITY) && t.calls.length === 0
+  );
   for (const variant of ['idle', 'off']) {
     t = await mount(variants[variant]);
     await t.click('media');
@@ -68,7 +80,7 @@ export default async function ({mount, check, variants}) {
   );
 
   t = await mount(variants.ok);
-  await t.click('volume-up');
+  await t.act('volume-up', ENTITY);
   check(
     'volume up moves 5 points',
     t.calls.length === 1 &&
@@ -77,14 +89,14 @@ export default async function ({mount, check, variants}) {
       Object.keys(t.calls[0].data).sort().join() === 'entity_id,volume_level'
   );
   t = await mount(variants.ok);
-  await t.click('volume-down');
+  await t.act('volume-down', ENTITY);
   check('volume down moves 5 points', Math.abs(t.calls[0].data.volume_level - 0.35) < 1e-9);
 
   t = await mount(variants.volumeHigh);
-  await t.click('volume-up');
+  await t.act('volume-up', ENTITY);
   check('volume is clamped at 1', t.calls[0].data.volume_level === 1);
   t = await mount(variants.volumeZero);
-  await t.click('volume-down');
+  await t.act('volume-down', ENTITY);
   check('volume is clamped at 0', t.calls[0].data.volume_level === 0);
 
   t = await mount(variants.volumeFraction);
@@ -93,9 +105,8 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.noVolume);
   check('no volume level shows a dash', t.text('.mc-volume-value') === '—');
   check(
-    'volume keys are disabled without the volume bit; prev and next stay enabled',
-    t.q('[data-action="volume-up"]').disabled &&
-      t.q('[data-action="volume-down"]').disabled &&
+    'volume button is disabled without the volume bit; prev and next stay enabled',
+    t.q('[data-action="media-player-volume-view"]').disabled &&
       !t.q('[data-action="media-prev"]').disabled &&
       !t.q('[data-action="media-next"]').disabled
   );
@@ -110,13 +121,16 @@ export default async function ({mount, check, variants}) {
     'no features disables prev, next and volume but not play/pause',
     t.q('[data-action="media-prev"]').disabled &&
       t.q('[data-action="media-next"]').disabled &&
-      t.q('[data-action="volume-up"]').disabled &&
+      t.q('[data-action="media-player-volume-view"]').disabled &&
       !t.q('[data-action="media"]').disabled
   );
 
   t = await mount(variants.ok);
-  await t.click('info');
-  check('speaker options opens more-info', t.infos.includes(ENTITY) && t.calls.length === 0);
+  await t.hold('[data-action="info"]');
+  check(
+    'holding speaker options opens more-info',
+    t.infos.includes(ENTITY) && t.calls.length === 0
+  );
 
   t = await mount(variants.artwork);
   const img = t.q('.music-art img');
@@ -175,6 +189,35 @@ export default async function ({mount, check, variants}) {
   check(
     'a player without a duration shows an empty, hidden progress row',
     t.text('.mc-elapsed') === '' && t.q('.mc-progress').getAttribute('aria-hidden') === 'true'
+  );
+
+  t = await mount(variants.seekable);
+  check(
+    'seekable tracks expose a native labelled range',
+    !t.q('.mc-seek').disabled &&
+      t.q('.mc-seek').max === '200' &&
+      t.q('.mc-seek').getAttribute('aria-label') === 'Track position'
+  );
+  await t.act('media-player-seek-90', ENTITY);
+  check(
+    'seeking uses media_seek with an absolute position in seconds',
+    t.calls.length === 1 && t.calls[0].s === 'media_seek' && t.calls[0].data.seek_position === 90
+  );
+  for (const position of ['-1', '201', 'NaN', '1.5']) {
+    await t.act(`media-player-seek-${position}`, ENTITY);
+    check(`invalid seek ${position} is ignored`, t.calls.length === 0);
+  }
+  t = await mount(variants.liveSeek);
+  await t.act('media-player-seek-30', ENTITY);
+  check(
+    'live streams with no duration cannot seek',
+    t.q('.mc-seek').disabled && t.calls.length === 0
+  );
+  t = await mount(variants.progress);
+  await t.act('media-player-seek-30', ENTITY);
+  check(
+    'known durations without SEEK remain read-only',
+    t.q('.mc-seek').disabled && t.calls.length === 0
   );
 
   t = await mount(variants.shuffleRepeat);

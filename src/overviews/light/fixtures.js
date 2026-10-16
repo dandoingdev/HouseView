@@ -15,7 +15,13 @@ const make = (state = 'on', attributes = {}, options = {}) => ({
 });
 export const variants = {
   ok: make(),
-  color: make('on', {rgb_color: [255, 140, 60]}),
+  color: make('on', {
+    rgb_color: [255, 140, 60],
+    hs_color: [25, 76],
+    supported_color_modes: ['xy', 'color_temp'],
+    min_color_temp_kelvin: 2200,
+    max_color_temp_kelvin: 6500
+  }),
   off: make('off'),
   onoff: make('on', {supported_color_modes: ['onoff'], brightness: undefined}),
   unavailable: make('unavailable'),

@@ -6,21 +6,29 @@ Card type `custom:houseview-media_player-card`, or `type: media_player` in the `
 
 A now-playing panel for a `media_player.*` entity: a large rounded album cover with the title and artist over its
 lower edge, a progress bar with elapsed and remaining time, shuffle / previous / play-pause / next / repeat, a volume
-pill and an options button (the dots over the cover) that opens the more-info dialog.
+button showing the current volume and an options button (hold the dots over the cover) that opens the more-info dialog.
 
 * Previous and next are enabled when the entity advertises the `supported_features` bits 16 and 32; the volume
   keys when it advertises bit 4; shuffle and repeat with bits 32768 and 262144. Play / pause is enabled whenever the
   speaker is available.
-* Play / pause only sends `media_play_pause` while the state is `playing` or `paused`; in any other state
-  (`idle`, `off`, `standby`) the button opens more-info instead.
-* Each volume press calls `media_player.volume_set`, moving `volume_level` by 5 percentage points, clamped between 0
-  and 1. Shuffle calls `shuffle_set`; repeat steps through off, all and one with `repeat_set`.
+* Play / pause sends `media_play_pause` while playing or paused. An idle player advertising PLAY (bit 512) resumes
+  its queue with `media_play`. Other inactive players open more-info. Hold the track title or artist to open
+  speaker controls, including on compact tiles.
+* The volume button opens the [full-screen volume view](../overviews/volume.md). Drag vertically to choose 0–100%;
+  release sends one `media_player.volume_set` command. Zero stays silent without stopping playback. Mute/unmute
+  appears when supported. Opening the view never starts or pauses music. Shuffle calls `shuffle_set`; repeat steps
+  through off, all and one with `repeat_set`.
+* Drag the progress bar, or tap a point on it, to seek when the player advertises [seek support](https://developers.home-assistant.io/docs/core/entity/media-player/) (bit 2). The elapsed and remaining times follow your finger; release sends one `media_player.media_seek` command. Arrow keys, Home and End work too. Cancelled drags and track changes send no seek. Rapid adjustments keep only the latest queued position. Live radio, line-in, unavailable players and tracks with no duration stay read-only.
 * The progress bar needs `media_duration` (radio streams have none and show an empty bar). It advances once a second
   while the player is `playing`.
 * Artwork is shown only when `entity_picture` points to `/api/media_player_proxy/` on this Home Assistant
   (the page origin or the configured base URL). Anything else falls back to a music-note icon.
 * While a speaker plays and nobody touches the screen, the [cover art](../overviews/cover_art.md) overview can take
   the whole screen (see the `music_screensaver` card option).
+
+On compact square-panel tiles, the volume and Browse buttons, track information and playback controls occupy separate rows. Buttons keep
+at least 44-pixel touch targets at a 225 × 178 tile size, including seeking for tracks with a known duration, so four tiles can share a 480 × 480 screen with the header enabled.
+Older panel browsers without container queries use a compact layout with fixed pixel sizes.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

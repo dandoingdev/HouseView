@@ -36,10 +36,17 @@ These apply whatever `performance` says.
 
 * **A second that changes nothing writes nothing.** The clock widget ticks every second but moves its hands and its label once
   a minute. The `Intl` formatters it needs are built once.
+* **Formatting is shared and bounded.** Clocks, calendars, photo dates, number labels and the dashboard header share
+  `core/intl.js`, retaining at most 128 recently used formatters. Locale, time zone, options and fallback policy are part
+  of the key, so switching profile preferences does not reuse the wrong formatter.
+* **Registry lookups reuse derived data.** The sorted widget list, extension definitions and unknown-state domain set are
+  rebuilt only when a widget is registered or the registry resets. Entity availability checks use set membership without
+  rebuilding an array for each widget.
 * **One layout pass reads, then writes.** Resizing, a stylesheet arriving or the resize observer do not rewrite the grid, the
   page navigation and the dial sizes when their inputs have not changed.
 * **Changes are patched, not rebuilt.** A state change updates only the widgets it touches, in place, so images, focus and
-  animations survive. A state change of an entity the card does not show costs a signature comparison.
+  animations survive. The patcher traverses siblings directly rather than allocating child arrays for every element.
+  A state change of an entity the card does not show costs a signature comparison.
 * **An overview is cheap.** Once its fade-in has finished the layer is opaque and HouseView hides the carousel under it
   (`visibility: hidden`, retaining layout), so the widgets, their blur and the camera picture are not painted. While it covers
   the card nothing underneath is updated: no widget repaint, no countdown, no clock hands, **no camera snapshot request**, no
@@ -64,7 +71,7 @@ These apply whatever `performance` says.
 
 `tools/perf-bench.mjs` drives Chrome through the DevTools protocol. It emulates 1280 x 800 and 800 x 1280 touch tablets,
 throttles the CPU (4x and 6x) and the network, loads the real card with a mock `hass` and a realistic dashboard (12 widgets
-on three pages, a two-camera grid, the weather screensaver) and measures bundle fetch and parse time, time to first render,
+on three pages, a two-camera grid, the weather screensaver; automatic timer/music overlays disabled during dashboard phases) and measures bundle fetch and parse time, time to first render,
 the JavaScript time per `hass` update, main-thread busy time and dropped frames while idle, on swipe and under a
 screensaver, and memory.
 

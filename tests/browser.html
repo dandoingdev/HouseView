@@ -63,11 +63,11 @@ hass.states['timer.test']={state:'active',attributes:{finishes_at:new Date(Date.
 const saveConfirm=window.confirm;window.confirm=()=>false;await click('timer-start-5');window.confirm=saveConfirm;check('Running timer cannot be replaced without confirmation',calls.length===0);
 hass.states['timer.test']={state:'paused',attributes:{remaining:'00:01:30'}};card.hass=hass;await click('timer-resume');check('Resume preserves remaining duration',calls[0]?.s==='start' && !('duration' in calls[0].data));
 await click('timer-cancel');check('Cancel uses timer cancel service',calls[0]?.s==='cancel');
-card.setConfig({widgets:[{type:'media_player',entity:'media_player.test'}]});hass.states['media_player.test'].attributes={volume_level:.98,supported_features:52};card.hass=hass;await click('volume-up');check('Volume clamped to 100 percent',calls[0]?.s==='volume_set'&&calls[0]?.data.volume_level===1);hass.states['media_player.test'].attributes.volume_level=.01;card.hass=hass;await click('volume-down');check('Volume clamped to zero',calls[0]?.data.volume_level===0);await click('media-next');check('Next track uses mapped Music entity',calls[0]?.s==='media_next_track'&&calls[0]?.data.entity_id==='media_player.test');
+card.setConfig({widgets:[{type:'media_player',entity:'media_player.test'}]});hass.states['media_player.test'].attributes={volume_level:.98,supported_features:52};card.hass=hass;calls=[];await card._act('volume-up','media_player.test');check('Volume clamped to 100 percent',calls[0]?.s==='volume_set'&&calls[0]?.data.volume_level===1);hass.states['media_player.test'].attributes.volume_level=.01;card.hass=hass;calls=[];await card._act('volume-down','media_player.test');check('Volume clamped to zero',calls[0]?.data.volume_level===0);await click('media-next');check('Next track uses mapped Music entity',calls[0]?.s==='media_next_track'&&calls[0]?.data.entity_id==='media_player.test');
 card._suppressClickUntil=0;hass.states['light.bedroom']={state:'on',attributes:{}};hass.states['script.test']={state:'off',attributes:{friendly_name:'Reusable action',icon:'mdi:weather-night'}};calls=[];card.setConfig({widgets:[{type:'script',entity:'script.test',name:'Bedtime',note:'Any saved script'}]});card.hass=hass;check('Rendering a script button never runs it',calls.length===0);await click('run-action');check('Script button starts only its selected script',calls.length===1&&calls[0]?.d==='script'&&calls[0]?.s==='turn_on'&&calls[0]?.data.entity_id==='script.test');hass.states['script.test'].state='on';card.hass=hass;await click('run-action');check('Running script is shown and cannot be restarted or toggled off',calls.length===0&&card.shadowRoot.querySelector('[data-action="run-action"]').disabled&&card.shadowRoot.querySelector('[data-action="run-action"]').textContent.includes('Running'));hass.states['script.test'].state='unavailable';card.hass=hass;await click('run-action');check('Unavailable script cannot run',calls.length===0);hass.states['script.test'].state='off';card.hass=hass;reject=true;await click('run-action');reject=false;check('Script failures surface the actual error',card.shadowRoot.querySelector('.feedback').textContent.includes('Permission denied'));calls=[];await card._act('run-action','script.unconfigured');check('Unconfigured scripts cannot be started by an action',calls.length===0);
 card.setConfig({widgets:[{type:'light',entity:'light.bedroom',action:'off'}]});await click('light-off');check('Bedroom off never toggles lights on',calls[0]?.s==='turn_off'&&calls[0]?.data.entity_id==='light.bedroom');
 card.setConfig({widgets:[{type:'light',entity:'light.bedroom',action:false}]});await click('light-off');check('YAML boolean off is normalized to an explicit lights-off action',calls[0]?.s==='turn_off'&&calls[0]?.data.entity_id==='light.bedroom');
-hass.states['alarm_control_panel.test']={state:'disarmed',attributes:{supported_features:47}};card.setConfig({bedtime:true,widgets:[{type:'alarm_control_panel',entity:'alarm_control_panel.test'}]});await click('info');check('Alarm panel opens native controls without arming/disarming during setup',calls.length===0&&infos.includes('alarm_control_panel.test'));await click('dim');check('Bedtime dimmer darkens screen without device command',card.shadowRoot.querySelector('.screen-dim')&&calls.length===0);await click('dim');check('Bedtime dimmer restores brightness',!card.shadowRoot.querySelector('.screen-dim'));
+hass.states['alarm_control_panel.test']={state:'disarmed',attributes:{supported_features:47}};card.setConfig({bedtime:true,widgets:[{type:'alarm_control_panel',entity:'alarm_control_panel.test'}]});calls=[];card.shadowRoot.querySelector('[data-action="info"]').dispatchEvent(new KeyboardEvent('keydown',{key:'F10',shiftKey:true,bubbles:true}));await new Promise(r=>setTimeout(r,20));check('Alarm panel opens native controls without arming/disarming during setup',calls.length===0&&infos.includes('alarm_control_panel.test'));await click('dim');check('Bedtime dimmer darkens screen without device command',card.shadowRoot.querySelector('.screen-dim')&&calls.length===0);await click('dim');check('Bedtime dimmer restores brightness',!card.shadowRoot.querySelector('.screen-dim'));
 let invalidScript=false;try{card.setConfig({widgets:[{type:'script',entity:'light.bedroom'}]})}catch{invalidScript=true}check('Script widget rejects non-script entities',invalidScript);
 card.setConfig({widgets:[{type:'cover',entity:'cover.test',name:'Bedroom blinds'}]});hass.states['cover.test']={state:'unknown',attributes:{supported_features:11}};card.hass=hass;
 for(const [action,service] of [['open','open_cover'],['stop','stop_cover'],['close','close_cover']]){await click('cover-'+action);check('Blind '+action+' routes to its cover even without position feedback',calls.length===1&&calls[0]?.d==='cover'&&calls[0]?.s===service&&calls[0]?.data.entity_id==='cover.test');}
@@ -80,7 +80,7 @@ for(const entity of ['climate.bedroom_ac','climate.guest_ac']){
  check('Rendering '+entity+' never sends a command',calls.length===0);
  check('Simple thermostat has the number, two chevrons, name and room line for '+entity,!!climateTile()&&!card.shadowRoot.querySelector('.thermostat')&&card.shadowRoot.querySelector('.cs-value').textContent==='22'&&card.shadowRoot.querySelector('.cs-name').textContent==='Air con'&&card.shadowRoot.querySelector('.cs-sub').textContent==='Off • Bedroom • 21°'&&climateButtons().map(b=>b.dataset.action).join()==='climate-view,down,up');
  check('Simple thermostat has no power button and no Cool, Heat or Quiet shortcuts for '+entity,!card.shadowRoot.querySelector('.climate-power, .climate-quick, .climate-quick-key, .climate-room')&&!climateButtons().some(b=>/^climate-(on|off|cool|heat|quiet)$/.test(b.dataset.action)));
- infos.length=0;await click('climate-view');check('Tapping the temperature opens the thermostat view for '+entity+' without a command',calls.length===0&&infos.length===0&&!!card.shadowRoot.querySelector('.ov-climate-scene'));await click('overview-close');await new Promise(r=>setTimeout(r,400));
+ infos.length=0;await card._act('climate-view',entity);check('The temperature control opens the thermostat view for '+entity+' without a command',calls.length===0&&infos.length===0&&!!card.shadowRoot.querySelector('.ov-climate-scene'));await click('overview-close');await new Promise(r=>setTimeout(r,400));
  await click('up');check('Up raises only '+entity+' by half a degree',calls.length===1&&calls[0]?.d==='climate'&&calls[0]?.s==='set_temperature'&&calls[0]?.data.entity_id===entity&&calls[0]?.data.temperature===22.5&&!('hvac_mode' in calls[0].data));
  await click('down');check('Down lowers only '+entity+' by half a degree',calls.length===1&&calls[0]?.s==='set_temperature'&&calls[0]?.data.entity_id===entity&&calls[0]?.data.temperature===21.5);
  check('Off thermostat dims its number but stays tappable for '+entity,climateTile().classList.contains('cs-dim')&&!card.shadowRoot.querySelector('[data-action="climate-view"]').disabled);
@@ -124,18 +124,124 @@ const retainEditor=document.createElement('houseview-editor');retainEditor.hass=
 card.setConfig({cards:[],pages:[{name:'Empty'}]});card.hass=hass;check('Removing the final card leaves an editable full-height empty carousel',!!card.shadowRoot.querySelector('.empty-cards')&&card._screens.length===1);
 // Deferred mock services expose the pending state without operating a device.
 const originalService=hass.callService;const pendingCalls=[];hass.callService=(d,s,data)=>new Promise((resolve,reject)=>pendingCalls.push({d,s,data,resolve,reject}));hass.states['light.test']={state:'on',attributes:{}};hass.states['light.second']={state:'on',attributes:{}};hass.states['camera.test'].state='idle';card.setConfig({bedtime:true,widgets:[{type:'light',entity:'light.test'},{type:'light',entity:'light.second'},{type:'camera',entity:'camera.test'},{type:'clock'}]});card.hass=hass;const pressedTile=card.shadowRoot.querySelector('button[data-widget="0"]'),neighbour=card.shadowRoot.querySelector('button[data-widget="1"]'),imageBefore=card.shadowRoot.querySelector('.camera img'),navBefore=card.shadowRoot.querySelector('.page-nav');const pendingFirst=card._act('light','light.test');check('Pressing one device disables only that device',pressedTile.disabled&&!neighbour.disabled);check('Pending command preserves neighbouring card, navigation and camera image',neighbour===card.shadowRoot.querySelector('button[data-widget="1"]')&&navBefore===card.shadowRoot.querySelector('.page-nav')&&imageBefore===card.shadowRoot.querySelector('.camera img'));await card._act('light','light.test');check('Repeated press is suppressed only for the pending entity',pendingCalls.length===1);const pendingSecond=card._act('light','light.second');check('Other devices remain independently responsive',pendingCalls.length===2&&pendingCalls[1].data.entity_id==='light.second');pendingCalls[0].resolve();await pendingFirst;check('Completion preserves both tiles and the other pending request',pressedTile===card.shadowRoot.querySelector('button[data-widget="0"]')&&!pressedTile.disabled&&neighbour.disabled);pendingCalls[1].reject(Error('Mock service failed'));await pendingSecond;check('Failed command releases its own button and displays the error',!neighbour.disabled&&card.shadowRoot.querySelector('.feedback').textContent.includes('Mock service failed'));const beforeDim=card.shadowRoot.querySelector('button[data-widget="0"]');await card._act('dim');check('Dim toggles without rebuilding any control',beforeDim===card.shadowRoot.querySelector('button[data-widget="0"]')&&card.shadowRoot.querySelector('.screen-dim'));await card._act('dim');hass.callService=originalService;
+// The DOM patcher must retain live controls while replacing, adding and removing neighbouring nodes.
+const patchHost=document.createElement('div');document.body.append(patchHost);
+patchHost.innerHTML='<section style="grid-column:2"><button>Old</button><span>Replace</span><i>Remove</i></section>';
+const patchRoot=patchHost.firstChild,patchButton=patchRoot.firstChild;patchButton.focus();
+const patchNext=document.createElement('section');patchNext.innerHTML='<button>Updated</button><strong>Replacement</strong><!--comment-->tail';
+card._patchNode(patchRoot,patchNext,true);
+check('DOM patching keeps focused controls and layout-owned root styles',patchRoot.firstChild===patchButton&&document.activeElement===patchButton&&patchRoot.style.gridColumn==='2'&&patchButton.textContent==='Updated');
+check('DOM patching replaces mismatched siblings and appends text without consuming the template',patchRoot.innerHTML===patchNext.innerHTML&&patchNext.childNodes.length===4&&patchRoot.children[1].tagName==='STRONG');
+patchNext.innerHTML='<button>Final</button>';card._patchNode(patchRoot,patchNext,true);
+check('DOM patching removes surplus siblings without disconnecting the retained button',patchRoot.childNodes.length===1&&patchRoot.firstChild===patchButton&&document.activeElement===patchButton&&patchButton.textContent==='Final');
+patchNext.replaceChildren();card._patchNode(patchRoot,patchNext,true);patchNext.innerHTML='text<b>new</b>';card._patchNode(patchRoot,patchNext,true);
+check('DOM patching handles empty and repopulated parents',patchRoot.innerHTML==='text<b>new</b>');patchHost.remove();
 // The card editor's preview box is a narrow column: lay out as a landscape tablet and scale to the box width.
 const previewBox=document.createElement('hui-card');previewBox.setAttribute('preview','');previewBox.style.cssText='display:block;width:400px';document.body.append(previewBox);const previewCard=document.createElement('houseview-card');previewBox.append(previewCard);previewCard.setConfig({widgets:[{type:'clock'},{type:'date'},{type:'light',entity:'light.second'}]});previewCard.hass=hass;await new Promise(r=>setTimeout(r,200));
 const previewShell=()=>previewCard.shadowRoot.querySelector('.shell');
 check('Editor preview is laid out as a landscape tablet and scaled to the preview box',previewShell().style.width==='1280px'&&previewShell().style.transform.startsWith('scale(0.3125')&&previewCard.style.height==='250px'&&previewCard._screens[0].columns>=3);
 previewCard.setConfig({widgets:[{type:'clock'}],editor_preview:'auto'});await new Promise(r=>setTimeout(r,200));
 check('editor_preview: auto leaves the preview box as it is',!previewShell().style.transform&&previewCard.style.height==='');
-previewCard.setConfig({home_overview:true,widgets:[{type:'clock'}]});previewCard.hass=hass;
-window.__houseviewHomePreview=true;window.dispatchEvent(new CustomEvent('houseview-home-preview'));
-check('The editor preview shows the home overview while the Home section is open',!!previewCard.shadowRoot.querySelector('.hv-screensaver'));
-window.__houseviewHomePreview=false;window.dispatchEvent(new CustomEvent('houseview-home-preview'));await new Promise(r=>setTimeout(r,500));
-check('and goes back to the dashboard when it closes',!previewCard.shadowRoot.querySelector('.hv-screensaver')||previewCard.shadowRoot.querySelector('.hv-screensaver').dataset.state==='leaving');
+const previewEditor=document.createElement('houseview-editor');document.body.append(previewEditor);previewEditor.hass=hass;
+const editConfig={pages:[{name:'Kitchen'},{name:'Bedroom'},{name:'Empty'}],cards:[
+  {type:'custom:houseview-clock-card',page:'Kitchen'},
+  {type:'custom:houseview-light-card',entity:'light.second',page:'Bedroom'}],
+  screensaver:{type:'weather',entity:'weather.test'},camera_gallery:[{entity:'camera.test'}]};
+previewEditor.setConfig(editConfig);previewCard.setConfig(editConfig);previewCard.hass=hass;
+previewEditor.addEventListener('config-changed',event=>{previewEditor.setConfig(event.detail.config);previewCard.setConfig(event.detail.config);});
+const editPanel=name=>[...previewEditor.shadowRoot.querySelectorAll('ha-expansion-panel')].find(el=>el.header===name);
+const expandEditor=name=>{const el=editPanel(name);el.expanded=true;el.dispatchEvent(new CustomEvent('expanded-changed'));return el;};
+expandEditor('Bedroom');
+check('Opening a page editor immediately selects that page in the preview',previewCard._screens[previewCard._pageIndex].name==='Bedroom');
+const bedroomForm=previewEditor._view.pages[1].form;
+bedroomForm.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{surface:'silver',columns:2}}}));
+check('A page stays selected as edited values are echoed back from HA',previewCard._screens[previewCard._pageIndex].name==='Bedroom'&&previewShell().classList.contains('surface-silver'));
+expandEditor('Home summary');
+check('Opening Home summary previews it even before its home button is enabled',previewCard._screensaver?.active?.entry.type==='home');
+expandEditor('Kitchen');
+check('Editing a page immediately replaces an open Home preview',previewCard._screens[previewCard._pageIndex].name==='Kitchen'&&!previewCard.shadowRoot.querySelector('.hv-screensaver'));
+bedroomForm.dispatchEvent(new FocusEvent('focusin',{bubbles:true,composed:true}));
+check('Returning keyboard focus to an already open page selects it again',previewCard._screens[previewCard._pageIndex].name==='Bedroom');
+const screensaverPanel=expandEditor('Screensaver');
+check('Opening Screensaver immediately previews its configured view',previewCard._screensaver?.active?.entry.type==='weather');
+previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{type:'calendar_month'}}}));
+check('Changing the screensaver type replaces the preview immediately',previewCard._screensaver?.active?.entry.type==='calendar_month');
+previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{type:'clock',face:'digital'}}}));
+const replacementPreview=document.createElement('houseview-card');replacementPreview.setConfig(previewEditor._config);replacementPreview.hass=hass;
+check('Preparing a detached replacement does not open a preview outside the editor',!replacementPreview.shadowRoot.querySelector('.hv-screensaver'));
+previewBox.append(replacementPreview);
+check('Attaching a replacement preview restores the digital clock being edited',!!replacementPreview.shadowRoot.querySelector('.ov-clock-digital-time'));
+replacementPreview.remove();previewBox.append(replacementPreview);
+check('Reconnecting the same preview restores its selected clock face',!!replacementPreview.shadowRoot.querySelector('.ov-clock-digital-time'));
+replacementPreview.remove();
+
+screensaverPanel.dispatchEvent(new CustomEvent('expanded-changed',{bubbles:true}));
+expandEditor('Empty');
+check('An empty page can be previewed without showing another page',previewCard._screens[previewCard._pageIndex].name==='Empty'&&!previewCard._screens[previewCard._pageIndex].placements.length);
+expandEditor('Camera grid');
+check('The camera settings preview the camera grid',!!previewCard.shadowRoot.querySelector('.camera-gallery'));
+expandEditor('Bedroom');
+check('Page editing clears the camera preview',!previewCard.shadowRoot.querySelector('.camera-gallery')&&previewCard._screens[previewCard._pageIndex].name==='Bedroom');
+check('Editor selections never navigate the live dashboard',!card.shadowRoot.querySelector('.hv-screensaver')&&!card._galleryOpen);
+const homePanel=expandEditor('Home summary');homePanel.expanded=false;homePanel.dispatchEvent(new CustomEvent('expanded-changed'));
+check('Closing the selected section clears its overlay immediately',!previewCard.shadowRoot.querySelector('.hv-screensaver'));
+expandEditor('Automatic displays');
+check('Automatic display settings preview the selected display',previewCard._screensaver?.active?.entry.type==='timer');
+previewEditor._view.automatic.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{timer_display:true,music_screensaver:false}}}));
+check('Changing another automatic display switches to its screen',previewCard._screensaver?.active?.entry.type==='cover_art');
+expandEditor('Home summary');
+const textInput=document.createElement('input');previewEditor._view.home.append(textInput);textInput.focus();
+previewEditor._view.home.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{...previewEditor._view.home.data,home_title:'Our home'}}}));
+check('Home title updates stay visible without stealing editor focus',previewCard.shadowRoot.querySelector('.ov-home-title')?.textContent==='Our home'&&previewEditor.shadowRoot.activeElement===textInput);
+const manyCards=Array.from({length:18},(_,i)=>({type:'custom:houseview-light-card',entity:`light.overflow_${i}`,page:'Bedroom'}));
+const overflowConfig={...editConfig,cards:[editConfig.cards[0],...manyCards]};
+previewEditor.setConfig(overflowConfig);previewCard.setConfig(overflowConfig);expandEditor('Bedroom');
+const nestedEditor=document.createElement('houseview-widget-editor');nestedEditor.setConfig(manyCards.at(-1));previewEditor._view.pages[1].panel.querySelector('section').append(nestedEditor);nestedEditor.dispatchEvent(new FocusEvent('focusin',{bubbles:true,composed:true}));
+check('Editing a widget on a continuation screen previews that screen',previewCard._screens[previewCard._pageIndex].placements.some(p=>p.widget.entity==='light.overflow_17'));
+const beforeAdd=previewEditor._config.pages.length;previewEditor.shadowRoot.querySelector('ha-button').click();
+check('Adding a page opens and previews the new empty page',previewEditor._config.pages.length===beforeAdd+1&&previewCard._screens[previewCard._pageIndex].name===previewEditor._config.pages.at(-1).name);
+expandEditor('Home summary');previewEditor._view.appearance.dispatchEvent(new FocusEvent('focusin',{bubbles:true,composed:true}));
+check('Global appearance editing returns to the last edited page',!previewCard.shadowRoot.querySelector('.hv-screensaver')&&previewCard._screens[previewCard._pageIndex].name===previewEditor._config.pages.at(-1).name);
+expandEditor('Home summary');previewEditor.remove();
+check('Closing the editor clears its preview selection',!previewCard.shadowRoot.querySelector('.hv-screensaver'));
 previewBox.remove();
+// Compact square-panel music keeps every visible control inside a single 225 x 200 tile.
+const compactMusic=document.createElement('houseview-media_player-card');compactMusic.style.cssText='display:block;width:225px;height:200px';document.body.append(compactMusic);
+compactMusic.setConfig({entity:'media_player.compact',height:200,performance:'lite'});compactMusic.hass={...hass,states:{...hass.states,'media_player.compact':{state:'paused',attributes:{media_title:'Evening music',media_artist:'Speaker',volume_level:.2,supported_features:131124}}}};
+await new Promise(r=>setTimeout(r,150));const compactRoot=compactMusic.shadowRoot.querySelector('houseview-card').shadowRoot,compactTile=compactRoot.querySelector('.mc'),compactBounds=compactTile.getBoundingClientRect();
+const compactButtons=[...compactRoot.querySelectorAll('.mc button')].filter(b=>b.getBoundingClientRect().width>0);
+check('Square-panel music keeps volume, Browse and playback controls inside the tile',compactButtons.length===6&&compactButtons.every(b=>{const r=b.getBoundingClientRect();return r.left>=compactBounds.left&&r.right<=compactBounds.right&&r.top>=compactBounds.top&&r.bottom<=compactBounds.bottom;}));
+check('Square-panel music buttons have at least 44px touch targets',compactButtons.every(b=>{const r=b.getBoundingClientRect();return r.width>=44&&r.height>=44;}));
+check('Icon-only compact Browse keeps its accessible name',compactRoot.querySelector('.mc-browse').getAttribute('aria-label')==='Browse');
+check('Narrow music tiles keep the volume button icons visible',getComputedStyle(compactRoot.querySelector('.mc-volume ha-icon')).display!=='none');compactMusic.remove();
+// The optional header shares the ticker and survives page changes without replacing tiles.
+const headerCard=document.createElement('houseview-card');headerCard.style.cssText='display:block;width:480px';document.body.append(headerCard);
+const headerConfig={show_header:true,preview_time:'2026-10-16T23:59:00Z',performance:'lite',pages:[{name:'First',surface:'teal'},{name:'Second',surface:'teal'}],widgets:[{type:'light',entity:'light.second',page:'First'},{type:'light',entity:'light.second',page:'Second'}]};
+headerCard.setConfig({...headerConfig,show_header:false});headerCard.hass={...hass,locale:{language:'en-GB',time_format:'24',time_zone:'server'},config:{...hass.config,time_zone:'UTC'}};
+check('The dashboard header is off by default and when disabled',!card.shadowRoot.querySelector('.dashboard-header')&&!headerCard.shadowRoot.querySelector('.dashboard-header'));
+headerCard.setConfig(headerConfig);await new Promise(r=>setTimeout(r,150));
+const headerNode=headerCard.shadowRoot.querySelector('.dashboard-header'),headerTime=headerNode.querySelector('.dashboard-time');
+check('The enabled header shows the configured date and time',headerTime.textContent==='23:59'&&headerNode.querySelector('.dashboard-date').textContent.includes('16'));
+const headerBox=headerNode.getBoundingClientRect(),timeBox=headerTime.getBoundingClientRect(),dateBox=headerNode.querySelector('.dashboard-date').getBoundingClientRect();
+check('Header time is centred independently of the left-aligned date',Math.abs(timeBox.x+timeBox.width/2-(headerBox.x+headerBox.width/2))<1&&dateBox.x<headerBox.x+25&&getComputedStyle(headerNode.querySelector('.dashboard-date')).textAlign==='left');
+headerCard.setConfig({...headerConfig,preview_time:undefined});const headerTile=headerCard.shadowRoot.querySelector('.face').firstElementChild;headerCard._tickAt.clear();headerCard._tick(Date.parse('2026-10-16T23:59:00Z'));headerCard._tick(Date.parse('2026-10-17T00:00:00Z'));
+check('A clock tick updates time and date at midnight without rebuilding the header or tiles',headerCard.shadowRoot.querySelector('.dashboard-header')===headerNode&&headerTime.textContent==='00:00'&&headerNode.querySelector('.dashboard-date').textContent.includes('17')&&headerCard.shadowRoot.querySelector('.face').firstElementChild===headerTile);
+headerCard._setPage(1);check('The same header stays above every swipe page',headerCard._pageIndex===1&&headerCard.shadowRoot.querySelector('.dashboard-header')===headerNode);
+const headerFaceHeight=parseFloat(headerCard.shadowRoot.querySelector('.face').style.height);headerCard.setConfig({...headerConfig,show_header:false});
+check('Disabling the header returns its space to the page',!headerCard.shadowRoot.querySelector('.dashboard-header')&&parseFloat(headerCard.shadowRoot.querySelector('.face').style.height)===headerFaceHeight+44);
+headerCard.remove();
+// Test the four-control layout in an actual 480 x 480 browsing context.
+const headerFrame=document.createElement('iframe');headerFrame.style.cssText='width:480px;height:480px;border:0';headerFrame.srcdoc='<html><style>html,body{margin:0;height:100%}</style><script type="module">import "/bundle/houseview.js";<\/script></html>';
+await new Promise(resolve=>{headerFrame.onload=resolve;document.body.append(headerFrame)});
+// This fixture represents a touch wall panel; a narrow desktop should retain HA chrome instead.
+const panelMedia=headerFrame.contentWindow.matchMedia.bind(headerFrame.contentWindow);headerFrame.contentWindow.matchMedia=q=>q==='(hover: hover) and (pointer: fine)'?{matches:false}:panelMedia(q);
+const panelHeaderCard=headerFrame.contentDocument.createElement('houseview-card');headerFrame.contentDocument.body.append(panelHeaderCard);
+const panelHeaderConfig={show_header:true,tablet_mode:true,performance:'lite',pages:[{name:'Panel',surface:'teal',columns:2}],widgets:[{type:'light',entity:'light.test',size:'normal'},{type:'light',entity:'light.second',size:'normal'},{type:'climate',entity:'climate.test',size:'normal'},{type:'media_player',entity:'media_player.test',size:'normal'}]};
+panelHeaderCard.setConfig(panelHeaderConfig);panelHeaderCard.hass=hass;await new Promise(r=>setTimeout(r,150));
+const panelHeaderRoot=panelHeaderCard.shadowRoot,panelHeaderBounds=panelHeaderRoot.querySelector('.dashboard-header').getBoundingClientRect(),panelHeaderTiles=[...panelHeaderRoot.querySelectorAll('.face > houseview-widget-card')].map(w=>w.firstElementChild.getBoundingClientRect());
+check('A 480x480 panel keeps four tiles below the header and above navigation',headerFrame.contentWindow.innerWidth===480&&panelHeaderBounds.height===44&&panelHeaderTiles.length===4&&panelHeaderTiles.every(r=>r.left>=0&&r.right<=480&&r.top>=44&&r.bottom<=panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().top));
+panelHeaderCard.setConfig({...panelHeaderConfig,show_header:false});await new Promise(r=>setTimeout(r,80));
+check('A 480x480 panel restores its full page height when the header is disabled',!panelHeaderRoot.querySelector('.dashboard-header')&&panelHeaderRoot.querySelector('.face').getBoundingClientRect().height===480-panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().height);headerFrame.remove();
 // home_overview: true adds a home button at the bottom left (no page); pressing it opens the home overview full screen.
 card.setConfig({home_overview:true,widgets:[{type:'clock'},{type:'light',entity:'light.second'}]});card.hass=hass;
 check('home_overview adds a home button and no page',card._screens.length===1&&!!card.shadowRoot.querySelector('.home-button'));

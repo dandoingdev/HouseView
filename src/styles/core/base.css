@@ -198,3 +198,16 @@ ha-icon {
     margin-bottom: 6px;
   }
 }
+
+/* Holding a widget opens its controls rather than selecting its label. */
+.widget {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Icon-only controls must not inherit the spacing used by stacked widget labels. */
+:host button:not(.control) > ha-icon {
+  margin: 0;
+  line-height: 0;
+}

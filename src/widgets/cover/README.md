@@ -9,7 +9,7 @@ since: 1.0
 Open, stop and close a `cover.*` entity. Keys are disabled when the entity does not advertise the matching
 `supported_features` bit (open 1, close 2, stop 8). A cover whose state is `unknown` stays controllable, because
 blinds without position feedback never report anything else. The heading shows an icon, the name and the position (`40% open`), or
-`Position unknown`, or the raw state, and opens the more-info dialog. The keys call `cover.open_cover`,
+`Position unknown`, or the raw state, and opens the more-info dialog when held. The keys call `cover.open_cover`,
 `cover.stop_cover` and `cover.close_cover`.
 
 | Option | Type | Default | Description |

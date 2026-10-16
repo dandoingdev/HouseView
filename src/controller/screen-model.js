@@ -1,11 +1,12 @@
 // The screen model (which widgets go on which carousel page, at which size) and the layout pass that
 // positions the current page. Ported from the original; the maths is unchanged.
+import {editorPreviewFor} from '../core/editor-preview.js';
 import {buildScreens} from '../layout/index.js';
 import {isHomePage} from './render.js';
 
 /** Height used for the carousel when nothing else is known, and the smallest height it is ever given. */
 const MIN_HEIGHT = 250;
-const FALLBACK_NAV_HEIGHT = 52;
+const FALLBACK_NAV_HEIGHT = 64;
 
 const cssNumber = (element, property) =>
   parseFloat(getComputedStyle(element).getPropertyValue(property));
@@ -56,9 +57,23 @@ export const screenModelMixin = {
     const columns = width < 520 ? 2 : width > height * 1.15 ? 5 : 3;
     const padding = width < 520 ? 20 : width < 1000 ? 40 : 48;
     const gap = width < 520 ? 8 : 14;
-    const contentHeight = height - (cssNumber(this, '--hv-nav-height') || FALLBACK_NAV_HEIGHT);
+    const contentHeight =
+      height - (cssNumber(this, '--hv-nav-height') || FALLBACK_NAV_HEIGHT) - this._headerHeight();
     const maxRows = Math.max(2, Math.floor((contentHeight - padding + gap) / (145 + gap)));
     const screens = buildScreens(this._config.widgets, this._config.pages, columns, maxRows);
+    const target = inCardPreview(this) ? editorPreviewFor(this) : undefined;
+    if (target?.kind === 'page' && !screens.some((screen) => screen.name === target.name)) {
+      const page = this._config.pages?.find((page) => page.name === target.name);
+      if (page)
+        screens.push({
+          ...page,
+          key: `${page.name}:0`,
+          label: page.name,
+          columns,
+          rows: 1,
+          placements: []
+        });
+    }
     if (!screens.length) {
       screens.push({
         ...(this._config.pages?.[0] || {}),
@@ -72,6 +87,14 @@ export const screenModelMixin = {
     const oldKey = this._screenKey;
     this._screens = screens;
     let index = oldKey ? screens.findIndex((s) => s.key === oldKey) : 0;
+    if (target?.kind === 'page') {
+      const selected = screens.findIndex(
+        (screen) =>
+          screen.name === target.name &&
+          (target.widget === undefined || screen.placements.some((p) => p.index === target.widget))
+      );
+      if (selected >= 0) index = selected;
+    }
     if (index < 0) index = Math.min(this._pageIndex || 0, screens.length - 1);
     this._pageIndex = Math.max(0, index);
     this._screenKey = screens[this._pageIndex]?.key;

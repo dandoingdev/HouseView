@@ -1,86 +1,120 @@
 /* @phase overviews */
-/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-light-icon */
-.ov-light-scene {
-  --ov-panel-key-bg: rgba(23, 40, 45, 0.08);
-  background: #dce5e8;
-  color: #17282d;
-}
-.ov-light-head {
-  position: absolute;
-  inset: 0 0 auto;
-}
-.ov-light-control {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  border-radius: inherit;
-  background: #dce5e8;
-  border: 0;
-  isolation: isolate;
-  touch-action: none;
-  cursor: ns-resize;
-}
-/* Keyboard focus marks the percentage without drawing a frame around the light screen. */
-.ov-light-control:has(:focus-visible) .ov-light-value {
-  text-decoration: underline;
-  text-underline-offset: 0.12em;
-  text-decoration-thickness: 2px;
-}
+/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-light-icon ov-light-dimmer ov-light-colour ov-light-mode ov-light-spectrum ov-light-swatch ov-light-colour-head ov-light-colour-foot ov-light-kelvin-value ov-light-colour-inputs ov-light-hue ov-light-saturation ov-light-kelvin */
+
 .ov-light-fill {
-  position: absolute;
-  inset: auto 0 0;
   height: var(--brightness);
   background: var(--light-color, #f2c200);
-  pointer-events: none;
 }
-.ov-light-readout {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
+
 .ov-light-readout .ov-light-icon {
   --mdc-icon-size: clamp(32px, 10cqmin, 72px);
   margin: 0 0 2cqmin;
 }
 .ov-light-value {
   font-size: 20cqmin;
-  line-height: 1;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
 }
 .ov-light-percent {
-  font-weight: 600;
   font-size: 6cqmin;
 }
-.ov-light-input {
+
+.ov-light-foot {
+  padding: 3cqmin;
+}
+.ov-light-dimmer {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  pointer-events: none;
-  cursor: ns-resize;
-  touch-action: none;
-  writing-mode: vertical-lr;
-  direction: rtl;
 }
-.ov-light-input:disabled {
-  cursor: default;
+.ov-light-dimmer[hidden],
+.ov-light-colour[hidden],
+.ov-light-mode[hidden] {
+  display: none;
 }
 .ov-light-foot {
+  gap: 3cqmin;
+}
+.ov-light-colour {
   position: absolute;
-  inset: auto 0 0;
-  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  color: white;
+  --ov-panel-key-bg: rgba(255, 255, 255, 0.18);
+}
+.ov-light-spectrum {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+  background: radial-gradient(closest-side, white, transparent),
+    conic-gradient(blue, cyan, lime, yellow, red, magenta, blue);
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-spectrum {
+  background: linear-gradient(90deg, #ff9b32, #ffdfb4 35%, #fff9ef 60%, #b9d9ff);
+}
+.ov-light-swatch {
+  position: absolute;
+  left: var(--colour-x, 50%);
+  top: var(--colour-y, 50%);
+  width: clamp(32px, 11cqmin, 64px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--swatch, white);
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+.ov-light-colour-head,
+.ov-light-colour-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
   padding: 3cqmin;
   pointer-events: none;
-  min-height: 44px;
+}
+.ov-light-colour-head {
+  top: 0;
+}
+.ov-light-colour-foot {
+  bottom: 0;
+  justify-content: flex-end;
+  gap: 3cqmin;
+}
+.ov-light-kelvin-value {
+  display: none;
+  color: #17282d;
+  font-size: clamp(16px, 5cqmin, 24px);
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-kelvin-value {
+  display: block;
+}
+/* Native keyboard and assistive controls appear on focus, without covering the touch field at rest. */
+.ov-light-colour-inputs {
+  position: absolute;
+  bottom: 20%;
+  left: 15%;
+  right: 15%;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+}
+.ov-light-colour-inputs:focus-within {
+  opacity: 1;
+}
+.ov-light-hue,
+.ov-light-saturation,
+.ov-light-kelvin {
+  width: 100%;
+}
+.ov-light-kelvin,
+.ov-light-colour[data-mode='temperature'] .ov-light-hue,
+.ov-light-colour[data-mode='temperature'] .ov-light-saturation {
+  display: none;
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-kelvin {
+  display: block;
 }

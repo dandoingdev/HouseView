@@ -5,7 +5,7 @@
 Card type `custom:houseview-sensor-card`, or `type: sensor` in the `cards` list of `custom:houseview-card`. Available since 1.0.
 
 Shows a `sensor.*` entity as a widget with a large value, its unit of measurement and the name. The widget is display
-only: a tap opens the more-info dialog (history graph and details). An unavailable, unknown or missing sensor shows
+only: a long press opens the more-info dialog (history graph and details). An unavailable, unknown or missing sensor shows
 a dash and the widget is disabled.
 
 | Option | Type | Default | Description |

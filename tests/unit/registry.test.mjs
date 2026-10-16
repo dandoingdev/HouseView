@@ -103,6 +103,43 @@ describe('registerWidget and lookup', () => {
     assert.equal(list[0].def.type, 'camera');
   });
 
+  it('invalidates derived lookups on registration and reset', () => {
+    assert.equal(registry.allowsUnknownDomain('scene'), false);
+    assert.deepEqual(registry.extensions(), []);
+    registry.registerWidget(
+      widget('action', 10, {entity: 'custom', unknownOkDomains: ['scene'], extension: {}})
+    );
+    assert.equal(registry.allowsUnknownDomain('scene'), true);
+    assert.deepEqual(
+      registry.extensions().map((entry) => entry.type),
+      ['action']
+    );
+    registry.registerWidget(
+      widget('other', 5, {entity: 'custom', unknownOkDomains: ['button'], extension: {}})
+    );
+    assert.deepEqual(registry.unknownOkDomains(), ['button', 'scene']);
+    assert.deepEqual(
+      registry.extensions().map((entry) => entry.type),
+      ['other', 'action']
+    );
+    registry._resetRegistry();
+    assert.equal(registry.allowsUnknownDomain('scene'), false);
+    assert.deepEqual(registry.extensions(), []);
+  });
+
+  it('does not expose mutable registry caches through public lists', () => {
+    registry.registerWidget(
+      widget('action', 10, {entity: 'custom', unknownOkDomains: ['scene'], extension: {}})
+    );
+    registry.unknownOkDomains().push('light');
+    const entries = registry.extensions();
+    entries[0].type = 'changed';
+    entries.pop();
+    assert.equal(registry.allowsUnknownDomain('light'), false);
+    assert.deepEqual(registry.unknownOkDomains(), ['scene']);
+    assert.equal(registry.extensions()[0].type, 'action');
+  });
+
   it('registers the strings passed with the widget', () => {
     registry.registerWidget(widget('cover', 90), {en: {'cover.open': 'Open'}});
     assert.equal(translate('en', 'cover.open'), 'Open');

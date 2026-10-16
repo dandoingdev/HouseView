@@ -1,3 +1,4 @@
+import {relativeTimeFormatter} from '../../core/intl.js';
 import {defineOverview} from '../../core/define-overview.js';
 import {attentionRules, attentionIds, attentionItems} from '../../core/home-attention.js';
 import {panelKey} from '../_shared/control-panel.js';
@@ -26,24 +27,15 @@ const CHIP_ICONS = {
   media: 'mdi:speaker'
 };
 
-/** One formatter per language: Intl objects are expensive to build. */
-const relativeFormats = new Map();
-
 /** "2m ago", "now", "3h ago" in the user's language; '' when the time is unknown. */
 function agoText(ctx, since) {
   const when = ago(since, ctx.now());
   if (!when) return '';
-  const lang = ctx.lang() || '';
-  let format = relativeFormats.get(lang);
-  if (!format) {
-    const options = {numeric: 'auto', style: 'narrow'};
-    try {
-      format = new Intl.RelativeTimeFormat(lang || undefined, options);
-    } catch {
-      format = new Intl.RelativeTimeFormat(undefined, options);
-    }
-    relativeFormats.set(lang, format);
-  }
+  const format = relativeTimeFormatter(
+    ctx.lang() || undefined,
+    {numeric: 'auto', style: 'narrow'},
+    {fallback: true}
+  );
   return format.format(when.value, when.unit);
 }
 

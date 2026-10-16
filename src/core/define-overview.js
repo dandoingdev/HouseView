@@ -1,7 +1,9 @@
 // defineOverview: fill defaults, validate the shape, derive the card-mode widget, freeze.
 // The derived widget is registered with the ordinary widget registry: overviews do not fork the engine.
-import {defineWidget} from './define-widget.js';
+import {defineWidget, OPTION_TYPES} from './define-widget.js';
+export {OPTION_TYPES} from './define-widget.js';
 import {createOverviewContext} from './overview-context.js';
+import {isColour} from './colour.js';
 import {esc} from './html.js';
 
 /**
@@ -83,7 +85,6 @@ export const RESERVED_KEYS = [
   'page',
   'size'
 ];
-export const OPTION_TYPES = ['text', 'icon', 'enum', 'boolean', 'number', 'entity', 'enum_list'];
 export const OVERVIEW_MODES = ['screensaver', 'card'];
 const ENTITY_RULES = ['required', 'optional', 'none'];
 export const ACTIVATIONS = ['idle', 'event'];
@@ -279,6 +280,9 @@ export function checkOptions(overview, options) {
         if (!finite || outside) bad(`${label} ${key} must be a number${range}.`);
         break;
       }
+      case 'colour':
+        if (!isColour(value)) bad(`${label} ${key} must be a hex colour or RGB triplet.`);
+        break;
       case 'text':
       case 'icon':
         if (typeof value !== 'string') bad(`${label} ${key} must be text.`);
@@ -378,6 +382,7 @@ function toWidget(overview) {
     standaloneHeight: 380,
     cardRows: 6,
     gridOptions: {min_columns: 3, min_rows: 4},
+    editor: overview.editor,
     options: overview.tile
       ? {display: {type: 'enum', values: DISPLAYS, default: 'scene'}, ...overview.options}
       : overview.options,

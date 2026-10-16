@@ -367,8 +367,9 @@ describe('gesture detector', () => {
     assert.deepEqual(events, []);
     advance(1);
     assert.deepEqual(events, ['suppress:400', 'hold']);
+    advance(1000);
     detector.up(press());
-    assert.deepEqual(events, ['suppress:400', 'hold']);
+    assert.deepEqual(events, ['suppress:400', 'hold', 'suppress:400']);
   });
 
   it('a release before the hold time cancels the hold timer', () => {

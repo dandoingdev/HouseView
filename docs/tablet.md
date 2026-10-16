@@ -19,8 +19,13 @@ http://homeassistant.example:8123/dashboard-wall/home?tablet=1
 
 With that parameter HouseView hides the sidebar and the header and uses the whole window. Remove the parameter, or navigate
 away, and Home Assistant looks normal again; HouseView puts back everything it hid. You can also set `tablet_mode: true` in
-the card configuration to get the same effect without the parameter, which suits a dashboard that is only ever used on a
-tablet.
+the card configuration to fill touch displays without the parameter. On a desktop with a mouse, this saved setting
+leaves Home Assistant’s header and sidebar visible, so its dashboard menu and **Edit dashboard** remain available.
+This uses the primary input type, not the window size: a small desktop window is still editable and a large touch
+display can still fill its screen. The explicit `?tablet=1` parameter remains available for a desktop kiosk.
+
+Dashboard editing and card editor previews always restore normal positioning and Home Assistant’s controls, even
+with `?tablet=1`. The preview stays inside the editor dialog.
 
 > **Unsupported Home Assistant internals.** Hiding the sidebar and header means reaching into elements of the Home Assistant
 > frontend that are not a public API. HouseView detects what it needs, does nothing if something is not where it expects,
@@ -73,3 +78,5 @@ and does no work.
 On a weak tablet (about 2 GB of RAM or less, a 4-core SoC, an old Android WebView) HouseView switches to the **lite** look by
 itself: opaque tinted glass instead of blurred glass, no page glide and no decorative animation. Force it with
 `performance: lite` (or keep the full look with `performance: full`). See [performance](performance.md).
+
+To temporarily show Home Assistant’s dashboard editing controls on a dashboard configured with `tablet_mode: true`, open its address with `?tablet=0`. The saved full-screen setting stays enabled for the wall panel.

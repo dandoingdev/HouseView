@@ -1,3 +1,5 @@
+import {dateTimeFormatter} from '../../core/intl.js';
+
 const zones = new Map();
 
 /** Validate timezone metadata rather than guessing offsets from a formatted clock value. */
@@ -5,7 +7,7 @@ export function validZone(value) {
   if (typeof value !== 'string' || !value) return null;
   if (zones.has(value)) return zones.get(value);
   try {
-    new Intl.DateTimeFormat('en', {timeZone: value}).format(0);
+    dateTimeFormatter('en', {timeZone: value}).format(0);
     zones.set(value, value);
     return value;
   } catch {
@@ -40,21 +42,16 @@ export function discover(entries = [], configs = []) {
     }));
 }
 
-const formatters = new Map();
 function parts(now, zone) {
-  let formatter = formatters.get(zone);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat('en-GB', {
-      timeZone: zone,
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      hourCycle: 'h23'
-    });
-    formatters.set(zone, formatter);
-  }
+  const formatter = dateTimeFormatter('en-GB', {
+    timeZone: zone,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hourCycle: 'h23'
+  });
   const p = Object.fromEntries(
     formatter.formatToParts(now).map((part) => [part.type, Number(part.value)])
   );
@@ -72,7 +69,7 @@ export function relativeTime(now, zone, localZone) {
 export function localZoneOf(hass) {
   return (
     (hass?.locale?.time_zone === 'server' && validZone(hass?.config?.time_zone)) ||
-    Intl.DateTimeFormat().resolvedOptions().timeZone
+    dateTimeFormatter().resolvedOptions().timeZone
   );
 }
 

@@ -39,6 +39,7 @@ function scalars(hass) {
   return [
     hass?.config?.unit_system?.temperature,
     hass?.locale?.language,
+    hass?.locale?.time_format,
     hass?.themes?.darkMode,
     hass?.locale?.time_zone,
     hass?.config?.time_zone

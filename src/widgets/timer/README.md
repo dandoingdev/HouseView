@@ -7,7 +7,7 @@ since: 1.0
 # Timer
 
 A kitchen timer for a `timer.*` entity: the countdown, four preset buttons (5, 10, 15 and 30 minutes), pause or
-resume, cancel, and a **Custom** button that opens the more-info dialog, where Home Assistant offers any duration.
+resume, cancel, and a **Custom** button that opens on long press the more-info dialog, where Home Assistant offers any duration.
 
 * A preset calls `timer.start` with `duration` in seconds. When the timer is already running or paused, the widget
   asks "Replace the running kitchen timer?" first (`confirm_mode: inline` shows the question inside the card).

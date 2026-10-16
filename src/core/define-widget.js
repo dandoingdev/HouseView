@@ -6,7 +6,16 @@ export const SIZES = ['normal', 'wide', 'tall', 'large'];
 export const ENTITY_POLICIES = ['required', 'none', 'custom'];
 export const AVAILABILITY_POLICIES = ['entity', 'always', 'allow-unknown'];
 export const ACTION_AVAILABILITY = ['entity', 'allow-unknown'];
-export const OPTION_TYPES = ['text', 'icon', 'enum', 'boolean', 'number', 'entity', 'enum_list'];
+export const OPTION_TYPES = [
+  'text',
+  'icon',
+  'enum',
+  'boolean',
+  'number',
+  'entity',
+  'enum_list',
+  'colour'
+];
 export const TAG_NAME = /^houseview-[a-z0-9]+(-[a-z0-9]+)*-card$/;
 export const FAMILIES = ['icon-tile'];
 export const TYPE_NAME = /^[a-z][a-z0-9_]*$/;

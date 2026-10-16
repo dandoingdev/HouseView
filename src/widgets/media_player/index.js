@@ -1,15 +1,18 @@
 // Music card: a large rounded album cover with the title and artist over its lower edge, a progress bar
-// with elapsed and remaining time, shuffle / previous / play-pause / next / repeat, a volume pill and an options
+// with elapsed and remaining time, shuffle / previous / play-pause / next / repeat, a volume button and an options
 // button. The actions of (media, media-prev, media-next, volume-up, volume-down, info) are unchanged; shuffle and
 // repeat are new. The progress bar is moved by a 1 s tick (a bare render could not advance it between state changes).
 import {defineWidget} from '../../core/define-widget.js';
 import {artworkHTML} from './artwork.js';
 import library from './library.js';
 import {libraryEditor} from './library-editor.js';
+import {canSetVolume, canMuteVolume} from '../../core/media-volume.js';
 import {BROWSE_MEDIA} from './library-data.js';
+import {canSeek, progressOf, progressRow, bindProgress, paintProgress} from './progress.js';
+export {progressOf} from './progress.js';
 
 // MediaPlayerEntityFeature bits in `supported_features` (Home Assistant core).
-const VOLUME_SET = 4;
+const PLAY = 512;
 const PREVIOUS_TRACK = 16;
 const NEXT_TRACK = 32;
 const SHUFFLE_SET = 32768;
@@ -45,48 +48,6 @@ const control = (ctx, action, icon, label, cls, enabled, extra = {}) =>
 
 const volumeText = (ctx) =>
   ctx.num(ctx.attrs.volume_level) ? `${Math.round(ctx.attrs.volume_level * 100)}%` : '—';
-
-/** "1:35", or "1:02:03" past an hour. */
-function clockText(seconds) {
-  const whole = Math.max(0, Math.floor(seconds));
-  const h = Math.floor(whole / 3600);
-  const m = Math.floor((whole % 3600) / 60);
-  const s = String(whole % 60).padStart(2, '0');
-  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
-}
-
-/**
- * Where the track is now: Home Assistant reports `media_position` as of `media_position_updated_at`, and a playing
- * player keeps moving after that. Null when the player has no duration (radio, line-in).
- * @returns {{position: number, duration: number}|null}
- */
-export function progressOf(ctx) {
-  const {
-    media_duration: duration,
-    media_position: reported,
-    media_position_updated_at: at
-  } = ctx.attrs;
-  if (!ctx.ok || !ctx.num(duration) || duration <= 0) return null;
-  let position = ctx.num(reported) ? reported : 0;
-  if (ctx.state?.state === 'playing' && at) {
-    const since = ctx.time(at);
-    if (!Number.isNaN(since)) position += Math.max(0, (ctx.now() - since) / 1000);
-  }
-  return {position: Math.min(duration, Math.max(0, position)), duration};
-}
-
-/** Progress bar and the two times. Empty (but present, so the layout does not jump) without a duration. */
-function progressRow(ctx) {
-  const progress = progressOf(ctx);
-  const fraction = progress ? progress.position / progress.duration : 0;
-  const label = ctx.esc(ctx.t('media_player.progress'));
-  return (
-    `<div class="mc-progress"${progress ? ` role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${Math.round(progress.duration)}" aria-valuenow="${Math.round(progress.position)}"` : ' aria-hidden="true"'}>` +
-    `<i class="mc-track"><b class="mc-fill" style="transform:scaleX(${fraction.toFixed(4)})"></b></i>` +
-    `<span class="mc-elapsed">${progress ? clockText(progress.position) : ''}</span>` +
-    `<span class="mc-remaining">${progress ? '-' + clockText(progress.duration - progress.position) : ''}</span></div>`
-  );
-}
 
 const SHUFFLE_ICONS = {true: 'shuffle-variant', false: 'shuffle-disabled'};
 const REPEAT_ICONS = {off: 'repeat-off', all: 'repeat', one: 'repeat-once'};
@@ -143,27 +104,16 @@ function transportRow(ctx) {
   );
 }
 
-const volumePill = (ctx) => {
-  const down = control(
-    ctx,
-    'volume-down',
-    'volume-minus',
-    ctx.t('media_player.volume_down'),
-    'mc-vbtn',
-    ctx.feature(VOLUME_SET)
+const volumeButton = (ctx) =>
+  ctx.btn(
+    'media-player-volume-view',
+    `${ctx.icon(ctx.attrs.is_volume_muted ? 'volume-off' : 'volume-high')}<span class="mc-volume-value">${volumeText(ctx)}</span>`,
+    'mc-volume',
+    ctx.ok && canSetVolume(ctx.attrs),
+    {attrs: `aria-label="${ctx.esc(ctx.t('media_player.adjust_volume'))}" `}
   );
-  const up = control(
-    ctx,
-    'volume-up',
-    'volume-plus',
-    ctx.t('media_player.volume_up'),
-    'mc-vbtn',
-    ctx.feature(VOLUME_SET)
-  );
-  return `<div class="mc-volume" role="group" aria-label="${ctx.esc(ctx.t('media_player.volume'))}">${down}${ctx.icon('volume-high')}<span class="mc-volume-value">${volumeText(ctx)}</span>${up}</div>`;
-};
 
-/** "Speaker options" (the dots over the cover) opens the more-info dialog. */
+/** Holding "Speaker options" (the dots over the cover) opens the more-info dialog. */
 const optionsButton = (ctx) =>
   ctx.btn(
     'info',
@@ -209,52 +159,68 @@ export default defineWidget({
 
   render(ctx) {
     const art = artworkHTML(ctx) || ctx.icon('music-note');
-    // The speaker name is only for screen readers; the volume pill is the one control in the top row.
-    const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumePill(ctx)}${ctx.feature(BROWSE_MEDIA) ? ctx.btn(`media-player-browse-${ctx.index}`, `${ctx.icon('playlist-music')}<span>${ctx.esc(ctx.t('media_player.browse'))}</span>`, 'mc-browse') : ''}</div>`;
+    // The speaker name is only for screen readers; volume and Browse share the top row.
+    const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumeButton(ctx)}${ctx.feature(BROWSE_MEDIA) ? ctx.btn(`media-player-browse-${ctx.index}`, `${ctx.icon('playlist-music')}<span>${ctx.esc(ctx.t('media_player.browse'))}</span>`, 'mc-browse', true, {attrs: `aria-label="${ctx.esc(ctx.t('media_player.browse'))}" `}) : ''}</div>`;
     const stage =
       `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>` +
-      `<div class="mc-meta"><strong class="mc-title">${ctx.esc(titleText(ctx))}</strong>` +
-      `<span class="mc-artist">${ctx.esc(artistText(ctx))}</span></div>${optionsButton(ctx)}</div></div>`;
+      `<div class="mc-meta">${ctx.btn('info', `<strong class="mc-title">${ctx.esc(titleText(ctx))}</strong><span class="mc-artist">${ctx.esc(artistText(ctx))}</span>`, 'mc-details', ctx.ok, {attrs: `aria-label="${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}" `})}</div>${optionsButton(ctx)}</div></div>`;
     // `.mc-body` is the grid: the root is the size container the layout reacts to (a container cannot restyle itself).
     return ctx.root(
       'section',
-      'music-panel mc',
+      `music-panel mc${progressOf(ctx) ? ' mc-has-progress' : ''}`,
       `<div class="mc-body">${top}${stage}${progressRow(ctx)}${transportRow(ctx)}</div>`
     );
   },
 
-  // Move the progress bar and the two times between state changes: only when something differs, and only while the
-  // tile is mounted. Costs one scaleX and two text nodes a second for a playing player, nothing otherwise.
-  tick: {
-    every: 1000,
-    run(ctx) {
-      const el = ctx.el;
-      const progress = progressOf(ctx);
-      if (!el || !progress) return;
-      const bar = el.querySelector('.mc-progress');
-      if (!bar) return;
-      const set = (selector, text) => {
-        const node = el.querySelector(selector);
-        if (node && node.textContent !== text) node.textContent = text;
-      };
-      set('.mc-elapsed', clockText(progress.position));
-      set('.mc-remaining', `-${clockText(progress.duration - progress.position)}`);
-      const fill = el.querySelector('.mc-fill');
-      const scale = `scaleX(${(progress.position / progress.duration).toFixed(4)})`;
-      if (fill && fill.style.transform !== scale) fill.style.transform = scale;
-      bar.setAttribute('aria-valuenow', String(Math.round(progress.position)));
-    }
-  },
+  afterRender: bindProgress,
+  tick: {every: 1000, run: paintProgress},
 
   actions: {
+    'media-player-seek-*': {
+      guard: (ctx, id) =>
+        canSeek(ctx.stateOf(id)) &&
+        /^\d{1,8}$/.test(ctx.param) &&
+        Number(ctx.param) <= Math.floor(ctx.attrsOf(id).media_duration),
+      run: (ctx, id) =>
+        ctx.call('media_player', 'media_seek', {
+          entity_id: id,
+          seek_position: Number(ctx.param)
+        })
+    },
     // `media` is a un-prefixed action name kept for compatibility (docs/widget-api.md).
     media: {
-      // Idle, off or standby players have nothing to pause: open more-info instead.
-      guard: (ctx, id) => (TRANSPORT_STATES.includes(ctx.stateOf(id)?.state) ? true : 'info'),
-      run: (ctx, id) => ctx.call('media_player', 'media_play_pause', {entity_id: id})
+      // An idle speaker can resume its queue when it supports PLAY; other inactive devices need settings.
+      guard: (ctx, id) =>
+        TRANSPORT_STATES.includes(ctx.stateOf(id)?.state) ||
+        (ctx.stateOf(id)?.state === 'idle' && ctx.attrsOf(id).supported_features & PLAY)
+          ? true
+          : 'info',
+      run: (ctx, id) =>
+        ctx.call(
+          'media_player',
+          ctx.stateOf(id)?.state === 'idle' ? 'media_play' : 'media_play_pause',
+          {entity_id: id}
+        )
     },
     'media-prev': trackAction('media_previous_track'),
     'media-next': trackAction('media_next_track'),
+    'media-player-volume-set-*': {
+      guard: (ctx, id) =>
+        /^\d{1,3}$/.test(ctx.param) && Number(ctx.param) <= 100 && canSetVolume(ctx.attrsOf(id)),
+      run: (ctx, id) =>
+        ctx.call('media_player', 'volume_set', {
+          entity_id: id,
+          volume_level: Number(ctx.param) / 100
+        })
+    },
+    'media-player-volume-mute': {
+      guard: (ctx, id) => canMuteVolume(ctx.attrsOf(id)),
+      run: (ctx, id) =>
+        ctx.call('media_player', 'volume_mute', {
+          entity_id: id,
+          is_volume_muted: !ctx.attrsOf(id).is_volume_muted
+        })
+    },
     'volume-up': volumeAction(1),
     'volume-down': volumeAction(-1),
     'media-player-shuffle': {

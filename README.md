@@ -107,7 +107,7 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 3. Hard-refresh your browser.
 
 **Caching.** Browsers and wall tablets keep the old file. After an update append a version to the resource URL
-(`/local/houseview/houseview.js?v=1.2.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
+(`/local/houseview/houseview.js?v=1.3.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
 
 **Kiosk mode.** Add `?tablet=1` to the dashboard address (or set `tablet_mode: true`) and HouseView hides Home Assistant's
 sidebar and header so the carousel uses the whole screen. This relies on Home Assistant internals that are not a public API,
@@ -170,7 +170,7 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 | [Calendar](docs/widgets/calendar.md) | `calendar` | `calendar.*` | | Opens the month calendar (or the entity dialog with `calendar_view: false`) |
 | [Camera](docs/widgets/camera.md) | `camera` | `camera.*` | card option `camera_gallery` | Opens the camera grid, or the entity dialog |
 | [Thermostat](docs/widgets/climate.md) | `climate` | `climate.*` | `room` | Chevrons set the target temperature; the number opens the thermostat view (or the dialog with `climate_view: false`) |
-| [Light](docs/widgets/light.md) | `light` | `light.*` | `action` (`view`, `toggle`, `off`), `icon` | Icon opens brightness; tile toggles, or turns off |
+| [Light](docs/widgets/light.md) | `light` | `light.*` | `action` (`view`, `toggle`, `off`), `icon` | Hold opens brightness; tap toggles, or turns off |
 | [Switch](docs/widgets/switch.md) | `switch` | `switch.*` | `icon` | Toggles |
 | [Fan](docs/widgets/fan.md) | `fan` | `fan.*` | `icon` | Toggles |
 | [Blinds](docs/widgets/cover.md) | `cover` | `cover.*` | | Keys open, stop and close |
@@ -193,10 +193,12 @@ them and how to combine them.
 | [Timer display](docs/overviews/timer.md) | `timer` | Event: while a timer runs (automatic) | `timer.*` | none | `custom:houseview-timer-overview-card` |
 | [Cover art](docs/overviews/cover_art.md) | `cover_art` | Idle, wins over weather while a speaker plays (automatic) | `media_player.*` | none | `custom:houseview-cover-art-overview-card` |
 | [Photo frame](docs/overviews/photo_frame.md) | `photo_frame` | Idle screensaver; opened by pressing the card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | `custom:houseview-photo-frame-overview-card` |
+| [Volume view](docs/overviews/volume.md) | `volume` | Opened by the music volume button | `media_player.*` | none | `custom:houseview-volume-overview-card` |
+| [Clock](docs/overviews/clock.md) | `clock` | Analogue or digital idle screensaver; opened by pressing the card | none | `face`, `use_dashboard_background`, `background_color`, `second_color`, `show_seconds`, `show_date` | `custom:houseview-clock-overview-card` |
 | [World Clock](docs/overviews/world_clock.md) | `world_clock` | Opened by pressing the clock widget | none | `entities`, `show_local` | `custom:houseview-world-clock-overview-card` |
 | [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
 | [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
-| [Light view](docs/overviews/light.md) | `light` | Control panel opened by pressing a light widget’s icon | `light.*` | `icon` | `custom:houseview-light-overview-card` |
+| [Light view](docs/overviews/light.md) | `light` | Control panel opened by holding a light widget | `light.*` | `icon` | `custom:houseview-light-overview-card` |
 | [Thermostat view](docs/overviews/climate.md) | `climate` | Control panel opened by pressing the thermostat widget's number; not a screensaver choice | `climate.*` | `show_time` | `custom:houseview-climate-overview-card` |
 
 ```yaml
@@ -261,7 +263,7 @@ See [theming](docs/theming.md) and [performance](docs/performance.md).
 
 Every card has a visual editor that uses Home Assistant's own forms: the carousel editor has Appearance, one section per page
 (with Home Assistant's card editor for the widgets on it), Screensaver, Automatic displays and Camera grid sections; widget
-cards have a settings form with entity selectors. YAML always works, and options the forms do not show (such as a list of
+cards have a settings form with entity selectors. The preview follows the page or full-screen view you are editing. YAML always works, and options the forms do not show (such as a list of
 screensavers, `confirm_mode` or `tap_action`) are kept when you edit.
 
 ## Configuration reference
@@ -281,6 +283,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |
 | `tablet_mode` | The same as `?tablet=1` |
+| `show_header` | Show the date on the left and time centred above every page |
 | `home_overview`, `home_title` | Show the home summary button and choose its title |
 | `home_attention` | Choose the doors, lights and devices to watch for attention |
 | `home_battery_auto` | Find low batteries automatically; see [Home summary](docs/overviews/home.md) |

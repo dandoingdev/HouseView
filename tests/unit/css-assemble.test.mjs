@@ -89,6 +89,21 @@ describe('css-parse: reader', () => {
     assert.throws(() => parseStylesheet('a { color: red'), /unbalanced/);
     assert.throws(() => parseStylesheet('a { b { c: d } }'), /nesting/);
     assert.throws(() => parseStylesheet('}'), /unexpected/);
+    assert.throws(
+      () => parseStylesheet('/* missing end .a { color: red }'),
+      /unterminated comment/
+    );
+    assert.throws(
+      () => parseStylesheet('.a { color: red } /* missing end'),
+      /unterminated comment/
+    );
+    assert.throws(
+      () =>
+        assemble([
+          src('src/styles/core/broken.css', '/* @phase base */ /* missing end .a { color: red }')
+        ]),
+      /unterminated comment/
+    );
   });
 });
 

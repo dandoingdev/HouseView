@@ -13,9 +13,9 @@ export default async function ({mount, check, variants}) {
       t.q('.tile').dataset.entity === 'sensor.test' &&
       t.q('ha-icon').getAttribute('icon') === 'mdi:gauge'
   );
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check(
-    'tap opens more-info and calls no service',
+    'hold opens more-info and calls no service',
     t.infos.includes('sensor.test') && t.calls.length === 0
   );
 
@@ -55,6 +55,6 @@ export default async function ({mount, check, variants}) {
   }
   t = await mount(variants.unavailable);
   check('unavailable sensor keeps its unit', t.text('.widget-value sup') === '°C');
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check('disabled sensor does not open more-info', t.infos.length === 0 && t.calls.length === 0);
 }

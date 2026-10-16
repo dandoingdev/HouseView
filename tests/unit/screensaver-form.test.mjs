@@ -146,3 +146,33 @@ test('automatic displays are not offered in the screensaver list, but one writte
     'a configured automatic display is still shown'
   );
 });
+
+// Clock uses the same native selector in both the screensaver and standalone widget editor.
+test('clock native colour selectors preserve old hex overrides and round-trip RGB without losing inheritance', async () => {
+  const {default: clock} = await import('../../src/overviews/clock/index.js');
+  const {compileWidgetSchema, widgetFormData} = await import('../../src/editor/fields.js');
+  // Importing the widget editor registers the built-in overviews.
+  const config = {screensaver: {type: 'clock', background_color: '#abc'}};
+  const data = screensaverData(config);
+  assert.deepEqual(data.background_color, [170, 187, 204]);
+  assert.deepEqual(data.second_color, [185, 237, 199]);
+  assert.equal(data.use_dashboard_background, false);
+  assert.equal(screensaverData({screensaver: {type: 'clock'}}).use_dashboard_background, true);
+  const schema = screensaverSchema(hass, data);
+  assert.deepEqual(schema.find((f) => f.name === 'background_color').selector, {color_rgb: {}});
+  const updated = applyScreensaver(config, {...data, use_dashboard_background: true});
+  assert.equal(
+    screensaverSchema(hass, screensaverData(updated)).some((f) => f.name === 'background_color'),
+    false
+  );
+  assert.deepEqual(updated.screensaver.background_color, [170, 187, 204]);
+  const form = widgetFormData(clock.widget, {background_color: '#abc'});
+  assert.equal(form.use_dashboard_background, false);
+  assert.deepEqual(form.background_color, [170, 187, 204]);
+  assert.deepEqual(
+    compileWidgetSchema(hass, clock.widget, {embedded: true, data: form}).find(
+      (f) => f.name === 'background_color'
+    ).selector,
+    {color_rgb: {}}
+  );
+});

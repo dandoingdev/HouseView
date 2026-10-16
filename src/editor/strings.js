@@ -5,6 +5,9 @@
 export default {
   en: {
     // carousel editor
+    'editor.show_header': 'Show time and date header',
+    'editor.helper.show_header':
+      'Date on the left, time centred above every page. Uses your Home Assistant language, time format and time zone.',
     'editor.appearance': 'Appearance',
     'editor.palette': 'Palette',
     'editor.wallpaper': 'Background',

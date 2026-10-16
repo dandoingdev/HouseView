@@ -27,3 +27,18 @@ export function colorOf(attrs = {}) {
   if (highest === 0 || (highest - Math.min(...channels)) / highest < 0.12) return yellow;
   return `rgb(${channels.join(',')})`;
 }
+
+/** Modern HA colour modes are authoritative; white/brightness are not colour pickers. */
+export function colourModes(attrs = {}) {
+  const modes = attrs.supported_color_modes || [];
+  return {
+    colour: modes.some((mode) => ['hs', 'xy', 'rgb', 'rgbw', 'rgbww'].includes(mode)),
+    temperature: modes.includes('color_temp')
+  };
+}
+
+export function kelvinRange(attrs = {}) {
+  const min = attrs.min_color_temp_kelvin || (attrs.max_mireds ? 1e6 / attrs.max_mireds : 2000);
+  const max = attrs.max_color_temp_kelvin || (attrs.min_mireds ? 1e6 / attrs.min_mireds : 6500);
+  return [Math.round(min), Math.round(Math.max(min + 1, max))];
+}

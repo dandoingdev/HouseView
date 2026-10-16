@@ -2,10 +2,6 @@
 // The `dim` action itself is a core feature (core/core-actions.js); it calls `_toggleDim` below.
 import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
-import {inCardPreview} from './screen-model.js';
-
-/** The card editor's Home summary section tells the preview to show the home summary while it is open. */
-export const HOME_PREVIEW_EVENT = 'houseview-home-preview';
 
 export const dimMixin = {
   /** Fill the dim button for the current state (label, icon, text). */
@@ -48,22 +44,6 @@ export const dimMixin = {
     }
     button.setAttribute('aria-label', t(this._hass, 'home.open'));
     button.innerHTML = this._icon('home-variant');
-  },
-
-  /** In the card editor's preview only: show the home summary while the editor's Home section is open. */
-  _syncHomePreview() {
-    if (!this._config || !inCardPreview(this)) return;
-    const want = window.__houseviewHomePreview === true && this._config.home_overview === true;
-    const active = this._screensaver?.active;
-    const showing = active?.entry.manual && active.entry.type === 'home';
-    if (want && !active && !this._screensaver?.leaving) {
-      this._screensaverOpenType(
-        'home',
-        this._config.home_title ? {title: this._config.home_title} : {}
-      );
-    } else if (!want && showing) {
-      this._screensaver.idle?.wake('api');
-    }
   },
 
   /** Toggle the dim state in place: no re-render, so nothing under the finger is rebuilt. */

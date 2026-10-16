@@ -23,7 +23,8 @@ function skipString(text, i) {
 /** Index just after the comment that opens at `i`. */
 function skipComment(text, i) {
   const close = text.indexOf('*/', i + 2);
-  return close === -1 ? text.length : close + 2;
+  if (close === -1) throw new Error(`unterminated comment at offset ${i}`);
+  return close + 2;
 }
 
 /**

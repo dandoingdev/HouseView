@@ -573,8 +573,9 @@ describe('lifecycle', () => {
       shell.slice(shell.indexOf(`${name}(`), shell.indexOf('\n  }\n', shell.indexOf(`${name}(`)));
     assert.match(method('set hass').trim().split('\n').at(-1), /this\._screensaverHass\(\);/);
     assert.match(
-      method('connectedCallback').trim().split('\n').at(-1),
-      /this\._screensaverConnect\(\);/
+      method('connectedCallback').trim(),
+      /this\._screensaverConnect\(\);[^]*this\._syncEditorPreview\(true\);$/,
+      'connect the idle controller before restoring an attached editor preview'
     );
     assert.match(
       method('disconnectedCallback').split('\n')[1],
@@ -726,7 +727,11 @@ describe('tap_action / hold_action on the primary button (opt-in)', () => {
     target: {entity_id: 'light.a'}
   };
   const primary = (index) => ({
-    dataset: {action: 'light', entity: 'light.a'},
+    dataset: {action: 'light', entity: 'light.a', widget: String(index)},
+    closest(selector) {
+      return selector === 'button' || selector === '[data-widget]' ? this : null;
+    },
+    matches: (selector) => selector === 'button[data-widget]',
     disabled: false,
     isConnected: true,
     getAttribute: (name) => (name === 'data-widget' ? String(index) : null)
@@ -781,7 +786,7 @@ describe('tap_action / hold_action on the primary button (opt-in)', () => {
     });
     const button = primary(0);
     const pointer = {
-      target: {closest: () => button},
+      target: button,
       clientX: 5,
       clientY: 5,
       button: 0,
@@ -813,7 +818,7 @@ describe('tap_action / hold_action on the primary button (opt-in)', () => {
     });
     const button = primary(0);
     const pointer = {
-      target: {closest: () => button},
+      target: button,
       clientX: 5,
       clientY: 5,
       button: 0,

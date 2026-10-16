@@ -20,8 +20,8 @@ export default async function ({mount, check, variants, advance, settle}) {
     'without a gallery the tile opens more-info',
     !!t.q('button.camera[data-action="info"]') && !t.q('[data-action="camera-grid"]')
   );
-  await t.click('info');
-  check('pressing the tile asks for more-info of its own camera', t.infos.join() === 'camera.test');
+  await t.hold('[data-action="info"]');
+  check('holding the tile asks for more-info of its own camera', t.infos.join() === 'camera.test');
 
   const img = t.q('.camera img');
   const first = img && new URL(img.src);

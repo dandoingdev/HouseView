@@ -35,8 +35,9 @@
 .home-button {
   right: auto;
   left: 10px;
-  min-width: 44px;
-  width: 44px;
+  min-width: 56px;
+  width: 56px;
+  height: 56px;
   padding: 0;
 }
 .home-button ha-icon {

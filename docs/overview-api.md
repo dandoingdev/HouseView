@@ -326,3 +326,9 @@ German table; other languages are siblings of `en`.
 5. Write `README.md`: front matter (`type`, `label`, `entity`, `domains`, `since`), an option table that matches `options`,
    a YAML example. Run `npm run gen-docs`.
 6. Run `npm run gen`, `npm run check:overviews`, `npm run test:unit`, `npm run test:overviews` and `npm run lint`.
+
+Editor previews restore their selected overview after the card connects. Home Assistant can prepare a replacement
+card before attaching it, or detach and reconnect the same card when an option changes. The card first connects
+the screensaver controller, then forces editor-preview synchronisation so the selected face remains visible.
+
+Colour options use `type: 'colour'`: opaque hex strings or RGB triplets, edited with Home Assistant’s `color_rgb` selector. An overview may provide `editor.toForm(config)` to prepare its form defaults in both editors, and `when(data)` on options to control visibility.

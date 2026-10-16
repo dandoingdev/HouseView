@@ -1,0 +1,98 @@
+/* @phase overviews */
+/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-volume-scene ov-volume-head ov-volume-control ov-volume-fill ov-volume-readout ov-volume-value ov-volume-percent ov-volume-input ov-volume-foot */
+/* Shared vertical level layout; each overview keeps its colour, value property and legacy fallbacks. */
+.ov-light-scene,
+.ov-volume-scene {
+  --ov-panel-key-bg: rgba(23, 40, 45, 0.08);
+  background: #dce5e8;
+  color: #17282d;
+}
+
+.ov-light-head,
+.ov-volume-head {
+  position: absolute;
+  inset: 0 0 auto;
+}
+
+.ov-light-control,
+.ov-volume-control {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #dce5e8;
+  border: 0;
+  isolation: isolate;
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.ov-light-control:has(:focus-visible) .ov-light-value,
+.ov-volume-control:has(:focus-visible) .ov-volume-value {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 2px;
+}
+
+.ov-light-fill,
+.ov-volume-fill {
+  position: absolute;
+  inset: auto 0 0;
+  pointer-events: none;
+}
+
+.ov-light-readout,
+.ov-volume-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ov-light-value,
+.ov-volume-value {
+  line-height: 1;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.ov-light-percent,
+.ov-volume-percent {
+  font-weight: 600;
+}
+
+.ov-light-input,
+.ov-volume-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  cursor: ns-resize;
+  touch-action: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.ov-light-input:disabled,
+.ov-volume-input:disabled {
+  cursor: default;
+}
+
+.ov-light-foot,
+.ov-volume-foot {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  min-height: 44px;
+}

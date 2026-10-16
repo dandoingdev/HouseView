@@ -109,6 +109,14 @@ export const hooksMixin = {
     // Under an opaque screensaver nobody sees the clock hands, the countdown or the camera picture: no work, no
     // snapshot requests. `_resumeAfterCover` catches everything up the moment the layer goes.
     if (this._screensaverCovered?.()) return;
+    if (this._headerHeight())
+      this._tickWorkIfDue(
+        'dashboard-header',
+        60000,
+        now,
+        () => this._syncDashboardHeader(undefined, now),
+        'minute'
+      );
     for (const [widget, index, def] of this._mountedWidgets()) {
       const tick = def.tick;
       if (!tick) continue;

@@ -24,6 +24,20 @@ let prefixActions = [];
 const listeners = new Set();
 
 let listCache = null;
+let extensionCache = null;
+let unknownDomainCache = null;
+
+function invalidateLists() {
+  listCache = extensionCache = unknownDomainCache = null;
+}
+
+function sortedWidgets() {
+  return (listCache ||= [...widgets.values()].sort((a, b) => a.order - b.order));
+}
+
+function unknownDomains() {
+  return (unknownDomainCache ||= new Set(sortedWidgets().flatMap((def) => def.unknownOkDomains)));
+}
 
 // ---- actions ---------------------------------------------------------------------------------------------------
 
@@ -180,7 +194,7 @@ export function registerWidget(def, strings) {
     addAction({key, owner: def.type, source, def: action});
   }
   if (strings) registerStrings(strings);
-  listCache = null;
+  invalidateLists();
   notify('widget');
   return def;
 }
@@ -197,18 +211,17 @@ export function widgetByTag(tag) {
 
 /** Definitions sorted by `order` (picker and editor order). A new array each call. */
 export function widgetList() {
-  listCache ||= [...widgets.values()].sort((a, b) => a.order - b.order);
-  return [...listCache];
+  return [...sortedWidgets()];
 }
 
 /** Canonical widget types in picker order. */
 export function widgetKinds() {
-  return widgetList().map((def) => def.type);
+  return sortedWidgets().map((def) => def.type);
 }
 
 /** {type: label}, in picker order. */
 export function widgetLabels() {
-  return Object.fromEntries(widgetList().map((def) => [def.type, def.label]));
+  return Object.fromEntries(sortedWidgets().map((def) => [def.type, def.label]));
 }
 
 /** Every type setConfig accepts: canonical types, aliases and the native_card pseudo-type. */
@@ -218,7 +231,12 @@ export function knownTypes() {
 
 /** Domains whose state "unknown" still counts as available (the action widget's scene, button...). */
 export function unknownOkDomains() {
-  return [...new Set(widgetList().flatMap((def) => def.unknownOkDomains))];
+  return [...unknownDomains()];
+}
+
+/** Availability checks avoid allocating a domain list for every entity and every hook. */
+export function allowsUnknownDomain(domain) {
+  return unknownDomains().has(domain);
 }
 
 /** Size a widget gets when its config has none ('normal' for unknown types and native cards). */
@@ -228,9 +246,8 @@ export function defaultSizeOf(type) {
 
 /** Widgets that declare a card-level extension, in picker order. */
 export function extensions() {
-  return widgetList()
-    .filter((def) => def.extension)
-    .map((def) => ({type: def.type, extension: def.extension, def}));
+  extensionCache ||= sortedWidgets().filter((def) => def.extension);
+  return extensionCache.map((def) => ({type: def.type, extension: def.extension, def}));
 }
 
 // ---- change notification and tests -----------------------------------------------------------------------------
@@ -261,7 +278,7 @@ export function _resetRegistry() {
   aliases.clear();
   exactActions.clear();
   prefixActions = [];
-  listCache = null;
+  invalidateLists();
   seedCoreActions();
   notify('reset');
 }

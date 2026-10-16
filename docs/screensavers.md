@@ -14,6 +14,8 @@ be used four ways:
 
 | Overview | `type` | Activation | Entity | Key options | Pressing |
 | --- | --- | --- | --- | --- | --- |
+| [Volume view](overviews/volume.md) | `volume` | opened by the music volume button, card | `media_player.*` | none | Drag to set volume; close or Escape returns |
+| [Clock](overviews/clock.md) | `clock` | idle, card | none | `face`, `use_dashboard_background`, `background_color`, `second_color`, `show_seconds`, `show_date` | Tap to wake; card opens full-screen |
 | [Weather overview](overviews/weather.md) | `weather` | idle (screensaver), opened by pressing its small widget (`display: tile`), card | `weather.*` | `sun_entity`, `details`, `show_time`, `show_unit`, `frosted`, `daylight`, `display` | Card: more-info of the entity. Small widget: opens the full scene |
 | [Timer display](overviews/timer.md) | `timer` | event (while the timer is `active`), automatic with `timer_display`, card | `timer.*` | none | Screensaver: closes it. Card: more-info |
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |

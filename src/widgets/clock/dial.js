@@ -1,3 +1,5 @@
+import {dateTimeFormatter} from '../../core/intl.js';
+
 // The analogue dial: markup and the hand/label update. Used by the clock widget (and refreshed through the
 // controller's role `clock`).
 // Pure functions with no DOM access at import time, so they load in plain Node.
@@ -30,31 +32,17 @@ export function dialNumbers() {
 /** The hands and the centre pin. */
 export const DIAL_HANDS = '<b class="hand hour"></b><b class="hand minute"></b><b class="pin"></b>';
 
-// Intl formatters cost far more than the text they produce (tens to hundreds of microseconds each, on a weak tablet
-// milliseconds), and the clock asks for the same two labels every second. One formatter per (kind, language) for
-// the life of the page; a bad language tag throws on every call as it always did, because nothing is stored.
-const formatters = new Map();
 const TIME_OPTIONS = {hour: 'numeric', minute: '2-digit'};
 const DATE_OPTIONS = {weekday: 'long', day: 'numeric', month: 'long'};
 
-function formatterFor(kind, options, language) {
-  const key = `${kind}|${language ?? ''}`;
-  let formatter = formatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat(language, options);
-    formatters.set(key, formatter);
-  }
-  return formatter;
-}
-
 /** The label screen readers get, e.g. "10:10". `language` undefined = the browser locale (the default). */
 export function timeLabel(date, language) {
-  return formatterFor('time', TIME_OPTIONS, language).format(date);
+  return dateTimeFormatter(language, TIME_OPTIONS).format(date);
 }
 
 /** The caption under the dial, e.g. "Thursday 15 October". */
 export function dateLabel(date, language) {
-  return formatterFor('date', DATE_OPTIONS, language).format(date);
+  return dateTimeFormatter(language, DATE_OPTIONS).format(date);
 }
 
 /** The labels of the last minute asked for: every clock widget on the page shares them. */

@@ -36,11 +36,17 @@ export function bindEvents(card) {
     card._gesturePointerCancel();
   });
 
+  root.addEventListener('contextmenu', (event) => card._gestureContextMenu(event));
+
   root.addEventListener('keydown', (event) => {
     if (TEXT_ENTRY_TAGS.includes(event.target.tagName)) return;
     // An extension that owns the screen (the camera gallery) gets the key first
     if (card._extensionKeydown(event)) return;
     if (card._navigationBlocked()) return;
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      card._gestureContextMenu(event);
+      return;
+    }
     if (event.key === 'ArrowRight') {
       event.preventDefault();
       card._setPage((card._pageIndex || 0) + 1);

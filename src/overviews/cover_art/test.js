@@ -54,9 +54,9 @@ export default async function ({mount, check, variants, wait}) {
       getComputedStyle(artist(t)).whiteSpace === 'nowrap' &&
       getComputedStyle(artist(t)).textOverflow === 'ellipsis'
   );
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check(
-    'a tap on the card opens more-info of the speaker and calls no service',
+    'a hold on the card opens more-info of the speaker and calls no service',
     t.infos[0] === PLAYER && t.calls.length === 0
   );
 

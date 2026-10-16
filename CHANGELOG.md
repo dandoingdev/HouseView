@@ -6,6 +6,47 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-16
+
+HouseView 1.3 improves everyday touch controls, adds configurable clock faces and speaker volume controls, and makes editing and updates more reliable on wall panels and tablets.
+
+### Added
+
+* **Clock overview and screensaver** with four faces: Bold and Sculpted analogue clocks, Digital · Classic, and Digital · Stacked. Works as a screensaver or a standalone `custom:houseview-clock-overview-card`, with optional seconds and date, Home Assistant time-zone support, localised dates and digital digits, and 12/24-hour digital time. No additional integration or entity is needed.
+* **Clock appearance controls**: inherit the dashboard background by default or choose custom background and seconds colours with Home Assistant's native colour picker. Text and hands adapt to background brightness; RGB triplets and existing three- or six-digit hex YAML colours are supported. Returning to the dashboard background preserves the custom colour for later.
+* **Full-screen speaker volume view** from the music widget's volume button, also available as `custom:houseview-volume-overview-card`. Drag vertically for immediate fill and percentage feedback; release sends one final volume command. Supports native keyboard controls and mute/unmute on compatible speakers. Opening the view never starts playback; zero volume does not stop playback.
+* **Light colour controls** within the dimmer: a draggable colour field and white-temperature mode for supported lights. Actual colour changes apply directly; closing the view keeps the chosen colour. Brightness and colour controls follow Home Assistant updates without interrupting an active gesture.
+* **Media seeking** by touch, mouse or keyboard on seek-capable tracks, including a separate 44px seek target in compact wall-panel tiles. Track changes cancel stale gestures and queued commands; unsupported players, live streams and tracks without a known duration do not seek.
+* **Optional dashboard header** (`show_header`): the date on the left and the time centred above every page, following Home Assistant language, time format and time zone. Updates in place through the shared ticker and is available in the visual editor.
+
+### Changed
+
+* **Hold a widget to open its controls or settings**, while everyday taps retain their normal actions. Light dimmers open on hold; thermostat controls and native entity settings follow the same interaction pattern. Custom hold actions and double taps remain supported, swipes cancel pending holds, and releasing a completed hold does not trigger an extra tap. Right-click, the context-menu key and Shift+F10 provide keyboard/mouse access to the same widget controls or settings.
+* **Larger round buttons and centred icons**: overview controls are at least 64 × 64 CSS pixels and scale up to 88px; shared dashboard navigation and transport controls are 56px. Shared icon-only button rules remove inherited spacing, while compact widget controls retain at least 44px touch targets.
+* **Compact music layouts** keep volume, Browse, track information, seeking and playback controls within their tiles. Narrow tiles retain visible volume icons; playable idle speakers resume with the play button, and active players retain normal play/pause behaviour.
+
+### Fixed
+
+* **Editor previews follow the selected settings**: pages, continuation screens, newly added or empty pages, screensavers, automatic displays and the camera grid. Changes echoed back by Home Assistant do not steal focus or switch the preview unexpectedly; closing a section clears its overlay. Selected clock faces and preview selections survive detached replacement cards and reconnection.
+* **Desktop dashboard editing remains reachable** with `tablet_mode: true`: mouse desktops retain Home Assistant's header and sidebar, while touch panels keep the full-screen layout. Dashboard editing and editor previews restore normal positioning even with `?tablet=1`.
+* **Panel resizing and rotation** preserve the header, bottom navigation, overlays and touch controls across square, portrait and landscape displays, including older panel WebViews without container-unit support.
+* **Seeking remains visible on 480px panels** after the navigation controls grow, with separate seek and playback targets that do not overlap.
+* **Slow or changing device state** no longer causes intermediate volume/seek values to overtake the latest gesture. Cancelled drags restore local feedback; unavailable devices and invalid values send no command.
+
+### Performance and development
+
+* Share a bounded cache of 128 Intl formatters across clocks, calendars, photo dates, number labels and the header, retaining each caller's locale, time-zone and fallback behaviour.
+* Cache registry-derived lists and availability lookups; traverse DOM siblings without temporary child arrays while preserving live controls, keyboard focus and loaded images. Light and volume views share their common level-control CSS and gesture handling.
+* Correct the performance fixture so automatic timer/music overlays cannot hide the measured dashboard, and measure state updates against visible entities.
+* Restore exact browser-suite check counts, reject unterminated CSS comments during build validation, and expand real touch, keyboard, resize, preview, clock, colour, volume, seeking and lifecycle regression coverage. CI and releases run the new panel, clock, volume, seeking and touch-target checks.
+* Add `AGENTS.md` with touch-target, icon-alignment, compatibility, cache-lifetime and performance-verification rules for future AI-assisted changes. Update widget, overview, configuration and tablet documentation for the new behaviour.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.3.0`.
+
+Existing dashboard configurations remain supported. Note the interaction change for lights: tap for the everyday on/off action; hold to open brightness and colour controls. The new header is off by default. Select Clock in the screensaver editor to use the new faces.
+
 ## [1.2.0] - 2026-10-16
 
 ### Added
@@ -125,3 +166,6 @@ First public release.
 [1.0.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.0.0
 
 [1.1.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.1.0
+
+[1.2.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.2.0
+[1.3.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.3.0

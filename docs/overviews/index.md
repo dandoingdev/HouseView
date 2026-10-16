@@ -15,3 +15,5 @@ An overview fills a whole page. Use it as a [screensaver](../screensavers.md) ov
 | [Thermostat view](climate.md) | `climate` | `custom:houseview-climate-overview-card` | required, a `climate` entity | 1.1 |
 | [Light view](light.md) | `light` | `custom:houseview-light-overview-card` | required, a `light` entity | 1.1 |
 | [World Clock](world_clock.md) | `world_clock` | `custom:houseview-world-clock-overview-card` | none | 1.1 |
+| [Clock](clock.md) | `clock` | `custom:houseview-clock-overview-card` | none | 1.3 |
+| [Volume view](volume.md) | `volume` | `custom:houseview-volume-overview-card` | required, a `media_player` entity | 1.3 |

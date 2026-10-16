@@ -37,6 +37,7 @@ screensaver:
 | `appearance` | `auto` | `auto` follows the Home Assistant light/dark mode; `light` and `dark` force it |
 | `palette` | `stone` | `stone` or `forest`: the colour family of the faces |
 | `wallpaper` | the page's `surface` | `teal`, `silver` or `champagne` puts that background behind **every** page, overriding each page's `surface`. Leave it out (editor: "page") to let pages choose |
+| `show_header` | `false` | Show a compact header above every swipe page: date on the left, time centred. Uses your Home Assistant language, 12/24-hour preference and time zone. Updates every minute, including the date at midnight. Available as **Show time and date header** in the visual editor |
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
@@ -56,7 +57,7 @@ screensaver:
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
 | `localized_states` | `false` | Show entity states in your Home Assistant language instead of the raw state value |
 | `state_compare` | `auto` | How state changes are detected: `reference` compares state objects by identity, `deep` compares their content, `auto` picks `reference` in Home Assistant. Leave it alone |
-| `tablet_mode` | `false` | Same as adding `?tablet=1` to the address. See [tablet mode](tablet.md) |
+| `tablet_mode` | `false` | Fill touch displays; keep Home Assistant navigation/editing controls on mouse desktops. `?tablet=1` explicitly forces full-screen outside editing. See [tablet mode](tablet.md) |
 | `preview_time` | now | An ISO date and time (`2026-10-15T10:10:00`) that the clock, date, calendar and overviews show instead of the real time. For screenshots and testing |
 
 A wrong value in an option that is checked is reported when the card loads (see [errors](#errors)).
@@ -188,3 +189,12 @@ A broken configuration shows a red error card with one of these messages:
 | `timer_display must be true, false or a list of timer entities.` | A bad `timer_display` (`music_screensaver` likewise) |
 | `Tap action must be one of more-info, toggle, ...` | A bad action in `tap_action` (`Hold action`, `Double tap action` likewise) |
 | `Screensaver ...`, `<type> screensaver needs ...` | See [overviews and screensavers](screensavers.md#errors) |
+
+### Holding widgets
+
+Tap a widget for its everyday action. Hold it for half a second to open its controls or settings:
+lights open the dimmer, thermostats open their full-screen control, and other entity widgets open Home Assistant’s
+entity dialog. Holding the track information or options dots opens speaker settings. Operational keys such as
+volume, playback, Browse and temperature arrows still work with a tap. Moving your finger cancels a hold so swiping
+continues to turn pages. A configured `hold_action` takes precedence, including `action: none`.
+Keyboard users can focus a widget or settings key and press Shift+F10 or the context-menu key.

@@ -177,6 +177,21 @@ export function createHandle({type, env, stage, check, variants}) {
         await settle();
         return button;
       },
+      /** Hold a widget without also sending its tap action. */
+      async hold(selector = '[data-widget]') {
+        const target = root()?.querySelector(selector);
+        if (!target) throw new Error(`no ${selector} in the rendered widget`);
+        mock.calls.length = 0;
+        target.dispatchEvent(
+          new PointerEvent('pointerdown', {bubbles: true, button: 0, pointerId: 1, isPrimary: true})
+        );
+        await delay(550);
+        target.dispatchEvent(
+          new PointerEvent('pointerup', {bubbles: true, button: 0, pointerId: 1, isPrimary: true})
+        );
+        card._suppressClickUntil = 0;
+        await settle();
+      },
       /** Call the controller's _act directly (bypasses disabled buttons, like a stale click would). */
       async act(action, id) {
         mock.calls.length = 0;

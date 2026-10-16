@@ -1,6 +1,7 @@
 // The "Screensaver" section of the carousel editor: ha-form schema, labels and the config round trip.
 // Pure functions (no DOM) so they are unit-testable; carousel-editor.js renders the <ha-form> and calls these.
 import {getOverview, overviewList} from '../core/overview-registry.js';
+import {colourFormData} from '../core/colour.js';
 import {t} from '../core/i18n.js';
 
 const FRAMEWORK_FIELDS = [
@@ -16,6 +17,8 @@ function selectorFor(hass, overview, key, spec) {
   const label = (value) => t(hass, `${overview.type}_overview.option.${key}.value.${value}`);
   const names = (values) => values.map((value) => ({value, label: label(value)}));
   switch (spec.type) {
+    case 'colour':
+      return {color_rgb: {}};
     case 'boolean':
       return {boolean: {}};
     case 'number':
@@ -37,7 +40,14 @@ function selectorFor(hass, overview, key, spec) {
 export function screensaverData(config) {
   const raw = config.screensaver;
   const entry = Array.isArray(raw) ? raw[0] : raw;
-  return entry ? {enabled: true, ...entry} : {};
+  if (!entry) return {};
+  const overview = getOverview(entry.type);
+  return {
+    enabled: true,
+    ...entry,
+    ...colourFormData(overview?.options, entry),
+    ...overview?.editor?.toForm?.(entry)
+  };
 }
 
 /** Number of entries beyond what the form can show (a list is edited in YAML). */
@@ -70,6 +80,7 @@ export function screensaverSchema(hass, data) {
     });
   }
   for (const [key, spec] of Object.entries(overview.options)) {
+    if (spec.when && !spec.when(data)) continue;
     schema.push({name: key, selector: selectorFor(hass, overview, key, spec)});
   }
   schema.push(

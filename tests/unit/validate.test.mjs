@@ -487,3 +487,12 @@ describe('optional settings (checked only when present)', () => {
     );
   });
 });
+
+it('the optional dashboard header accepts booleans and rejects other values', () => {
+  for (const show_header of [undefined, true, false]) {
+    assert.equal(validateConfig({cards: [], show_header}).show_header, show_header);
+  }
+  for (const show_header of ['true', 1, null, {}]) {
+    assert.equal(messageOf({cards: [], show_header}), 'show_header must be true or false.');
+  }
+});

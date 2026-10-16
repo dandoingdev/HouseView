@@ -1,4 +1,4 @@
-/* @owns empty-cards page-nav face */
+/* @owns empty-cards page-nav face dashboard-header dashboard-date dashboard-time has-header */
 /*
  * Core compact normal-flow navigation and the empty state.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
@@ -20,7 +20,7 @@
 /* Compact normal-flow page controls: return the spare space to the cards. */
 
 :host {
-  --hv-nav-height: 52px;
+  --hv-nav-height: 64px;
 }
 
 /* @important overrides an earlier !important rule */
@@ -37,5 +37,48 @@
 
 /* @important overrides an earlier !important rule */
 :host([tablet-mode]) .carousel .face {
-  height: calc(100% - var(--hv-nav-height)) !important;
+  height: calc(100% - var(--hv-nav-height) - var(--hv-header-height,0px)) !important;
+}
+
+.carousel {
+  --hv-header-height: 0px;
+}
+.carousel.has-header {
+  --hv-header-height: 44px;
+}
+.carousel .dashboard-header {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
+  align-items: center;
+  height: var(--hv-header-height);
+  box-sizing: border-box;
+  padding: 0 24px;
+  color: inherit;
+  font-family: inherit;
+  line-height: 1;
+}
+.carousel .dashboard-date {
+  grid-column: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 14px;
+  opacity: .85;
+}
+.carousel .dashboard-time {
+  grid-column: 2;
+  white-space: nowrap;
+  font-size: 20px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width:519px) {
+  .carousel .dashboard-header {
+    padding: 0 12px;
+  }
+  .carousel .dashboard-date {
+    font-size: 12px;
+  }
 }

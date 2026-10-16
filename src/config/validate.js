@@ -50,7 +50,13 @@ function validateOptionalSettings(config) {
   if (config.performance !== undefined && !PERFORMANCE_MODES.includes(config.performance)) {
     throw new Error(`performance must be ${sentenceList(PERFORMANCE_MODES)}.`);
   }
-  for (const key of ['calendar_view', 'weather_view', 'climate_view', 'world_clock_view']) {
+  for (const key of [
+    'calendar_view',
+    'weather_view',
+    'climate_view',
+    'world_clock_view',
+    'show_header'
+  ]) {
     if (config[key] !== undefined && typeof config[key] !== 'boolean') {
       throw new Error(`${key} must be true or false.`);
     }

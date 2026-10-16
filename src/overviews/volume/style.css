@@ -1,0 +1,36 @@
+/* @phase overviews */
+/* @owns ov-volume-scene ov-volume-head ov-volume-control ov-volume-fill ov-volume-readout ov-volume-value ov-volume-percent ov-volume-input ov-volume-foot ov-volume-icon ov-volume-muted */
+
+.ov-volume-fill {
+  height: var(--volume);
+  background: #64cbb5;
+}
+
+.ov-volume-readout .ov-volume-icon {
+  --mdc-icon-size: 48px;
+  --mdc-icon-size: clamp(32px, 10cqmin, 72px);
+  margin: 0 0 2cqmin;
+}
+.ov-volume-value {
+  font-size: 20vmin;
+  font-size: 20cqmin;
+}
+.ov-volume-percent {
+  font-size: 6vmin;
+  font-size: 6cqmin;
+}
+
+.ov-volume-foot {
+  align-items: center;
+  gap: 3cqmin;
+  padding: 14px;
+  padding: 3cqmin;
+}
+
+.ov-volume-muted { font-size: clamp(16px, 4cqmin, 24px); }
+
+@supports not (width: 1cqmin) {
+  .ov-volume-readout .ov-volume-icon {
+    --mdc-icon-size: 48px;
+  }
+}

@@ -4,6 +4,7 @@
 // Field order (the original order, which the browser suite's selectors do not depend on but users do):
 //   widget_type, entity, name, size (embedded only), the widget's own options in definition order,
 //   appearance, wallpaper, height (standalone only).
+import {colourFormData} from '../core/colour.js';
 import {widgetList} from '../core/registry.js';
 import {capitalise, field, select, text, textField, textOrNone} from './form.js';
 
@@ -60,6 +61,8 @@ export function optionSelector(hass, def, key, spec) {
   const valueLabel = (value) =>
     text(hass, `${def.type}.option.${key}.value.${value}`, capitalise(value));
   switch (spec.type) {
+    case 'colour':
+      return {color_rgb: {}};
     case 'boolean':
       return {boolean: {}};
     case 'number':
@@ -129,6 +132,7 @@ export function widgetFormData(def, config) {
   return {
     ...config,
     size: config.size || def.defaultSize || 'normal',
+    ...colourFormData(def.options, config),
     ...def.editor?.toForm?.(config)
   };
 }

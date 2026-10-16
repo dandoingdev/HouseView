@@ -7,7 +7,7 @@ import {t as translateFor} from './i18n.js';
 import {getWidget} from './registry.js';
 import {isAvailable, isUsable} from './state.js';
 
-const DEFAULT_UNIT = '°C';
+import {temperatureUnit} from './format.js';
 
 /** Stores that survive renders, one per widget object (a new setConfig builds new widget objects). */
 const stores = new WeakMap();
@@ -35,7 +35,7 @@ export function createBaseContext(card) {
     esc,
     num,
     t: (key, vars) => translateFor(hass, key, vars),
-    unit: () => hass?.config?.unit_system?.temperature || DEFAULT_UNIT,
+    unit: () => temperatureUnit(hass),
     lang: () => hass?.locale?.language,
     icon: iconHTML,
     isPending: (id) => !!card._pending?.has(id),

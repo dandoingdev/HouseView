@@ -28,12 +28,20 @@ export const patchMixin = {
       if (current.getAttribute(attr.name) !== attr.value)
         current.setAttribute(attr.name, attr.value);
     }
-    const children = [...current.childNodes];
-    const desired = [...next.childNodes];
-    desired.forEach((child, i) => {
-      if (children[i]) this._patchNode(children[i], child);
-      else current.append(child.cloneNode(true));
-    });
-    for (let i = desired.length; i < children.length; i++) children[i].remove();
+    // Walk siblings directly: state updates visit whole subtrees, so avoid two temporary arrays per element.
+    // Capture the sibling before patching because a tag/type change can replace the current child.
+    let child = current.firstChild;
+    for (let desired = next.firstChild; desired; desired = desired.nextSibling) {
+      if (child) {
+        const sibling = child.nextSibling;
+        this._patchNode(child, desired);
+        child = sibling;
+      } else current.append(desired.cloneNode(true));
+    }
+    while (child) {
+      const sibling = child.nextSibling;
+      child.remove();
+      child = sibling;
+    }
   }
 };

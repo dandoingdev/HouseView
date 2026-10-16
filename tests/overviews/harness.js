@@ -214,6 +214,20 @@ export function createHandle({type, env, stage, check, variants}) {
         await settle();
         return button;
       },
+      async hold(selector) {
+        const target = root()?.querySelector(selector);
+        if (!target) throw new Error(`no ${selector} to hold`);
+        mock.calls.length = 0;
+        target.dispatchEvent(
+          new PointerEvent('pointerdown', {bubbles: true, button: 0, pointerId: 1, isPrimary: true})
+        );
+        await new Promise((resolve) => setTimeout(resolve, 550));
+        target.dispatchEvent(
+          new PointerEvent('pointerup', {bubbles: true, button: 0, pointerId: 1, isPrimary: true})
+        );
+        card._suppressClickUntil = 0;
+        await settle();
+      },
       /** A tap on the screensaver: pointerdown, pointerup, click at the dismiss button. */
       async tap() {
         const button = layer()?.querySelector('.ov-dismiss');

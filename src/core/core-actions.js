@@ -1,3 +1,4 @@
+import {canSetVolume} from './media-volume.js';
 // Actions that belong to no widget: the shared `info` and `toggle`, and the card-level features
 // (`dim`, `page-prev`, `page-next`, `page-select`).
 //
@@ -91,6 +92,19 @@ export const featureActions = freeze({
   'overview-open': freeze({immediate: true, run: openOverview}),
   // The close button of a control panel layer (the thermostat view). Nothing is called on Home Assistant.
   'overview-close': freeze({immediate: true, run: (ctx) => ctx.card._screensaverClose?.()}),
+  'media-player-volume-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      if (!ctx.availableOf(id) || !canSetVolume(ctx.attrsOf(id))) return undefined;
+      const widget = ctx.card._config?.widgets?.find(
+        (w) => w.type === 'media_player' && w.entity === id
+      );
+      return ctx.card._screensaverOpenType?.('volume', {
+        entity: id,
+        ...(widget?.name ? {name: widget.name} : {})
+      });
+    }
+  }),
   'light-view': freeze({
     immediate: true,
     run: (ctx, id) => {

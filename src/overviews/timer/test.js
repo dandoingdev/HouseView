@@ -68,9 +68,9 @@ export default async function ({mount, check, variants, wait, now}) {
       getComputedStyle(t.q('[data-ov="time"]')).fontWeight === '500' &&
       getComputedStyle(t.q('[data-ov="time"]')).fontVariantNumeric.includes('tabular-nums')
   );
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check(
-    'a tap on the card opens more-info of the timer and calls no service',
+    'a hold on the card opens more-info of the timer and calls no service',
     t.infos[0] === KITCHEN && t.calls.length === 0
   );
 

@@ -1,0 +1,187 @@
+/* @phase overviews */
+/* @owns ov-clock-scene ov-clock-backdrop ov-clock-board ov-clock-numeral ov-clock-n12 ov-clock-n3 ov-clock-n6 ov-clock-n9 ov-clock-hand ov-clock-hour ov-clock-minute ov-clock-second ov-clock-pin ov-clock-date */
+.ov-clock-scene {
+  background: #3b925f;
+}
+.ov-clock-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--clock-bg);
+  color: var(--clock-ink);
+}
+.ov-clock-board {
+  position: relative;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  font-family: system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+}
+.ov-clock-numeral {
+  position: absolute;
+  font-size: calc(var(--clock-size, 480px) * 0.52);
+  font-weight: 200;
+  line-height: 0.88;
+  letter-spacing: -0.085em;
+  padding-right: 0.085em;
+  user-select: none;
+}
+.ov-clock-n12 {
+  letter-spacing: -0.12em;
+  padding-right: 0.12em;
+}
+.ov-clock-hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  width: 3.2%;
+  margin-left: -1.6%;
+  height: 29%;
+  border-radius: 999px;
+  background: var(--clock-hand);
+  transform-origin: 50% 100%;
+  box-shadow: 0 calc(var(--clock-size, 480px) * 0.006) calc(var(--clock-size, 480px) * 0.016) #0003;
+}
+.ov-clock-minute {
+  height: 42%;
+}
+.ov-clock-second {
+  height: 44%;
+  width: 0.55%;
+  margin-left: -0.275%;
+  background: var(--clock-second);
+  box-shadow: none;
+}
+.ov-clock-second::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  height: 18%;
+  background: inherit;
+}
+.ov-clock-pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3.6%;
+  height: 3.6%;
+  transform: translate(-50%, -50%);
+  box-sizing: border-box;
+  border: calc(var(--clock-size, 480px) * 0.008) solid var(--clock-hand);
+  background: var(--clock-second);
+  border-radius: 50%;
+  box-shadow: 0 1px 4px #0003;
+}
+.ov-clock-date {
+  position: absolute;
+  left: 7%;
+  bottom: 6%;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: calc(var(--clock-size, 480px) * 0.052);
+  line-height: 1;
+}
+.ov-clock-backdrop[data-seconds='false'] .ov-clock-second,
+.ov-clock-backdrop[data-date='false'] .ov-clock-date {
+  display: none;
+}
+.ov-clock-backdrop[data-face='sculpted'] {
+  background-image: linear-gradient(135deg, #ffffff18, #00000024);
+}
+.ov-clock-backdrop[data-face='sculpted'] .ov-clock-numeral {
+  font-size: calc(var(--clock-size, 480px) * 0.14);
+  font-weight: 300;
+  letter-spacing: -0.05em;
+  padding-right: 0.05em;
+  color: var(--clock-bg);
+  text-shadow: -1px -1px 1px #0007, 1px 2px 1px #fff8;
+  opacity: 0.8;
+}
+.ov-clock-backdrop[data-face='sculpted'] .ov-clock-date {
+  opacity: 0.8;
+}
+
+/* Container units size the face immediately, including while its stylesheet first loads. */
+@supports (width: 1cqmin) {
+  .ov-clock-board {
+    --clock-size: 100cqmin;
+    width: var(--clock-size);
+    height: var(--clock-size);
+  }
+}
+
+/* @owns ov-clock-digital ov-clock-digital-time ov-clock-digital-hour ov-clock-digital-minute ov-clock-digital-separator ov-clock-digital-meta ov-clock-digital-period ov-clock-digital-second */
+.ov-clock-digital {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--clock-size, 480px) * 0.025);
+  padding-bottom: 4%;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.ov-clock-digital-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--clock-size, 480px) * 0.28);
+  font-weight: 600;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+}
+.ov-clock-digital-separator {
+  padding: 0 0.025em 0.1em;
+}
+.ov-clock-digital-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: calc(var(--clock-size, 480px) * 0.045);
+  height: calc(var(--clock-size, 480px) * 0.09);
+  font-size: calc(var(--clock-size, 480px) * 0.065);
+  font-weight: 500;
+  line-height: 1;
+}
+.ov-clock-digital-second {
+  color: var(--clock-second);
+}
+.ov-clock-digital-second::before {
+  content: ':';
+}
+.ov-clock-backdrop[data-face^='digital'] .ov-clock-date {
+  left: 6%;
+  right: 6%;
+  max-width: 88%;
+  line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ov-clock-backdrop[data-seconds='false'] .ov-clock-digital-second {
+  display: none;
+}
+.ov-clock-backdrop[data-face='digital_stacked'] .ov-clock-digital-time {
+  flex-direction: column;
+  gap: calc(var(--clock-size, 480px) * 0.015);
+  font-size: calc(var(--clock-size, 480px) * 0.38);
+  line-height: 0.86;
+}
+.ov-clock-backdrop[data-face='digital_stacked'] .ov-clock-digital-hour {
+  font-weight: 700;
+}
+.ov-clock-backdrop[data-face='digital_stacked'] .ov-clock-digital-minute {
+  font-weight: 250;
+}
+.ov-clock-backdrop[data-face='digital_stacked'] .ov-clock-digital-separator {
+  display: none;
+}

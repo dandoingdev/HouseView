@@ -70,7 +70,7 @@
 }
 .ov-climate-row {
   display: grid;
-  grid-template-columns: max(48px, 14cqmin) auto max(48px, 14cqmin);
+  grid-template-columns: max(64px, 14cqmin) auto max(64px, 14cqmin);
   align-items: center;
   gap: 2cqmin;
 }
@@ -101,8 +101,8 @@
 .ov-climate-step {
   position: relative;
   box-sizing: border-box;
-  width: max(48px, 14cqmin);
-  height: max(48px, 14cqmin);
+  width: max(64px, 14cqmin);
+  height: max(64px, 14cqmin);
   margin: 0;
   padding: 0;
   border: 0;

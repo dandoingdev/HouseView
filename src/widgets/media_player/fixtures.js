@@ -20,6 +20,7 @@ export const variants = {
     volume_level: 0.4,
     supported_features: ALL
   }),
+  idlePlayable: make('idle', {volume_level: 0.4, supported_features: ALL | 512}),
   idle: make('idle', {volume_level: 0.4, supported_features: ALL}),
   off: make('off', {supported_features: ALL}),
   noVolume: make('playing', {media_title: 'Track', supported_features: 16 | 32}),
@@ -64,6 +65,14 @@ export const variants = {
     media_position_updated_at: '2026-10-15T10:00:00+01:00',
     supported_features: ALL
   }),
+  seekable: make('paused', {
+    media_title: 'Track',
+    media_content_id: 'track:1',
+    media_duration: 200,
+    media_position: 30,
+    supported_features: ALL | 2
+  }),
+  liveSeek: make('playing', {media_title: 'Live radio', supported_features: ALL | 2}),
   shuffleRepeat: make('playing', {
     shuffle: true,
     repeat: 'all',

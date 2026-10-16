@@ -88,6 +88,9 @@ function hassFrom(states, overrides = {}) {
 function dashboardConfig({screensaver = false, performance = params.get('performance')} = {}) {
   return {
     type: 'custom:houseview-card',
+    // Measure the visible dashboard; automatic timer/music overlays have separate interaction suites.
+    timer_display: false,
+    music_screensaver: false,
     ...(performance ? {performance} : {}),
     pages: [
       {name: 'Kitchen', surface: 'teal', columns: 4},
@@ -188,14 +191,15 @@ const bench = {
    * Returns the time each assignment took (the whole synchronous cost of `card.hass = ...`).
    */
   hassStorm(n, related) {
-    const cards = ['light.kitchen', 'light.living_room', 'switch.none', 'sensor.hall_temperature', 'cover.bedroom_blinds', 'lock.front_door'];
+    const cards = [...this.card._renderedCards.keys()].map((index) => this.card._config.widgets[index].entity).filter(Boolean);
+    if (related && !cards.length) throw new Error('hass benchmark needs a visible entity');
     let states = this.states;
     const objects = [];
     for (let i = 0; i < n; i++) {
       const id = related ? cards[i % cards.length] : `sensor.noise_${i % 400}`;
       const old = states[id];
       if (!old) { objects.push(hassFrom(states)); continue; }
-      const next = {...old, state: related ? (old.state === 'on' ? 'off' : old.state === 'off' ? 'on' : String(Number(old.state) + 0.1 || old.state)) : String(i), last_updated: iso(NOW + i)};
+      const next = {...old, state: related ? (id.startsWith('camera.') ? (i % 2 ? 'idle' : 'recording') : old.state) : String(i), attributes: related && id.startsWith('timer.') ? {...old.attributes, finishes_at: iso(NOW + 25 * 60000 + i * 1000)} : old.attributes, last_updated: iso(NOW + i)};
       states = {...states, [id]: next};
       objects.push(hassFrom(states));
     }
@@ -261,6 +265,7 @@ const bench = {
 
   /** Page coordinates of the carousel face, for the driver's touch swipes. */
   faceBox() {
+    if (this.card._screensaver?.active) throw new Error('swipe benchmark is covered by an overview');
     const r = this.card.shadowRoot.querySelector('.face').getBoundingClientRect();
     return {x: r.x, y: r.y, width: r.width, height: r.height};
   },

@@ -74,7 +74,7 @@ export function createGestureDetector({
   }
 
   function move(event) {
-    if (!start) return;
+    if (!start || consumed) return;
     const far = Math.hypot(event.clientX - start.x, event.clientY - start.y) > MOVE_TOLERANCE_PX;
     if (far) cancel();
   }
@@ -85,8 +85,8 @@ export function createGestureDetector({
     start = null;
     consumed = false;
     stopHold();
-    if (wasHold) return;
     suppress();
+    if (wasHold) return;
     if (!doubleTap) {
       onTap?.();
       return;

@@ -53,6 +53,78 @@ beforeEach(() => {
 afterEach(() => mock.restoreAll());
 
 describe('tablet chrome', () => {
+  it('keeps HA navigation and the editor available on a mouse desktop, even in a small window', () => {
+    mock.method(env.win, 'matchMedia', () => ({matches: true}));
+    const ha = homeAssistant();
+    const card = newCard({tablet_mode: true});
+    ha.hostFor(card);
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), false);
+    assert.equal(ha.drawer.shadowRoot.children.length, 0);
+    assert.equal(ha.root.shadowRoot.children.length, 0);
+    assert.equal(card.style.getPropertyValue('--hv-chrome'), '');
+  });
+
+  it('still permits an explicitly forced full-screen desktop kiosk', () => {
+    mock.method(env.win, 'matchMedia', () => ({matches: true}));
+    env.win.location.search = '?tablet=1';
+    const ha = homeAssistant();
+    const card = newCard();
+    ha.hostFor(card);
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), true);
+    assert.equal(ha.root.shadowRoot.children.length, 1);
+  });
+
+  it('restores the toolbar and normal positioning when an active panel enters dashboard editing', () => {
+    env.win.location.search = '?tablet=1';
+    const ha = homeAssistant();
+    const card = newCard({tablet_mode: true});
+    ha.hostFor(card);
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), true);
+    ha.root.lovelace = {editMode: true};
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), false);
+    assert.equal(ha.drawer.shadowRoot.children.length, 0);
+    assert.equal(ha.root.shadowRoot.children.length, 0);
+    assert.equal(card.style.getPropertyValue('--hv-chrome'), '');
+    ha.root.lovelace.editMode = false;
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), true);
+  });
+
+  it('keeps a card editor preview inside its dialog, including with a forced full-screen URL', () => {
+    env.win.location.search = '?tablet=1';
+    const ha = homeAssistant();
+    const card = newCard({tablet_mode: true});
+    card.getRootNode = () => ({host: {localName: 'hui-card-preview', parentElement: ha.root}});
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), false);
+    assert.equal(ha.root.shadowRoot.children.length, 0);
+  });
+
+  it('restores chrome if the primary input switches from touch to mouse', () => {
+    let desktop = false;
+    mock.method(env.win, 'matchMedia', () => ({matches: desktop}));
+    const ha = homeAssistant();
+    const card = newCard({tablet_mode: true});
+    ha.hostFor(card);
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), true);
+    desktop = true;
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), false);
+    assert.equal(ha.root.shadowRoot.children.length, 0);
+  });
+
+  it('?tablet=0 temporarily restores dashboard editing controls for a configured panel', () => {
+    env.win.location.search = '?tablet=0';
+    const card = newCard({tablet_mode: true});
+    card._tabletChrome();
+    assert.equal(card.hasAttribute('tablet-mode'), false);
+  });
+
   it('does nothing unless asked for', () => {
     const ha = homeAssistant();
     const card = newCard();
@@ -76,7 +148,7 @@ describe('tablet chrome', () => {
     assert.equal(card.style.getPropertyValue('--hv-chrome'), '0px');
   });
 
-  it('tablet_mode: true in the config does the same without the URL parameter', () => {
+  it('tablet_mode: true keeps a touch panel full-screen without a URL parameter', () => {
     const ha = homeAssistant();
     const card = newCard({tablet_mode: true});
     ha.hostFor(card);

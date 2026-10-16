@@ -5,9 +5,10 @@
 // The editor keeps a normalised copy of the config (`cards:` format, at least one page) and emits it whole in
 // `config-changed`. Forms are updated in place when Home Assistant echoes a changed config back, so typing in a
 // field or in a nested card editor never loses focus to a full rebuild.
+import {clearEditorPreview, selectEditorPreview} from '../core/editor-preview.js';
 import {fromCard, onPage, toCards} from '../config/convert.js';
 import {fireEvent} from '../core/events.js';
-import {overviewList} from '../core/overview-registry.js';
+import {AUTOMATIC_DISPLAYS, overviewList} from '../core/overview-registry.js';
 import {PERFORMANCE_MODES} from '../core/performance.js';
 import {
   applyAutomatic,
@@ -35,7 +36,8 @@ const APPEARANCE_DEFAULTS = {
   wallpaper: 'page',
   palette: 'stone',
   performance: 'auto',
-  editor_preview: 'landscape'
+  editor_preview: 'landscape',
+  show_header: false
 };
 const SURFACES = ['glass', 'soft', 'teal', 'silver', 'champagne'];
 
@@ -71,11 +73,13 @@ export const appearanceData = (config) =>
       'bedtime',
       'high_contrast',
       'performance',
-      'editor_preview'
+      'editor_preview',
+      'show_header'
     ].map((key) => [key, config[key] ?? APPEARANCE_DEFAULTS[key]])
   );
 
 export const appearanceSchema = (hass) => [
+  field('show_header', {boolean: {}}),
   field('appearance', select(hass, ['auto', 'light', 'dark'])),
   field('wallpaper', select(hass, ['page', 'teal', 'silver', 'champagne'])),
   field('palette', select(hass, ['stone', 'forest'])),
@@ -151,6 +155,7 @@ export class HouseViewEditor extends HTMLElement {
 
   _emit() {
     fireEvent(this, 'config-changed', {config: structuredClone(this._config)});
+    this._refreshPreview();
   }
 
   _status(message) {
@@ -167,7 +172,8 @@ export class HouseViewEditor extends HTMLElement {
 
   _render() {
     if (!this._config) return;
-    if (window.__houseviewHomePreview) this._setHomePreview(false); // a rebuilt editor starts collapsed
+    clearEditorPreview(this);
+    this._previewTarget = undefined;
     this._view = null;
     this.shadowRoot.innerHTML =
       STYLES + '<div class="editor"><ha-alert class="status" alert-type="error"></ha-alert></div>';
@@ -203,7 +209,7 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderAppearance(parent) {
-    return this._form(parent, {
+    const form = this._form(parent, {
       data: appearanceData(this._config),
       schema: appearanceSchema(this._hass),
       computeHelper: appearanceHelper(this._hass),
@@ -212,10 +218,22 @@ export class HouseViewEditor extends HTMLElement {
         this._emit();
       }
     });
+    const select = () => {
+      this._previewPanel = null;
+      this._previewTarget = () => ({
+        kind: 'page',
+        name: this._lastPreviewPage || this._config.pages[0].name
+      });
+      this._refreshPreview();
+    };
+    form.addEventListener('focusin', select);
+    form.addEventListener('pointerdown', select);
+    return form;
   }
 
   _renderCameras(parent, view) {
     const outer = panel(parent, text(this._hass, 'editor.camera_grid'));
+    this._followPreview(outer.el, () => ({kind: 'cameras'}));
     for (let slot = 0; slot < CAMERA_SLOTS; slot++) {
       const {section} = panel(outer.section, text(this._hass, slotHeadingKey(slot)));
       view.cameras.push(
@@ -238,7 +256,12 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderScreensaver(parent, view) {
-    const {section} = panel(parent, text(this._hass, 'screensaver.section'));
+    const {el, section} = panel(parent, text(this._hass, 'screensaver.section'));
+    this._followPreview(el, () => ({
+      kind: 'overview',
+      type: screensaverData(this._config).type,
+      options: screensaverData(this._config)
+    }));
     const note = document.createElement('p');
     const data = screensaverData(this._config);
     const form = createForm(section, {
@@ -258,12 +281,31 @@ export class HouseViewEditor extends HTMLElement {
   }
 
   _renderAutomatic(parent, view) {
-    const {section} = panel(parent, text(this._hass, 'editor.automatic_displays'));
+    const {el, section} = panel(parent, text(this._hass, 'editor.automatic_displays'));
+    const automaticTarget = (key) => {
+      const display = AUTOMATIC_DISPLAYS.find((d) => d.key === key) || AUTOMATIC_DISPLAYS[0];
+      const saved = this._config[display.key];
+      const entity = Array.isArray(saved)
+        ? saved[0]
+        : this._config.cards.map(fromCard).find((w) => w.type === display.widget)?.entity;
+      return {kind: 'overview', type: display.overview, options: {entity}};
+    };
+    for (const type of ['focusin', 'pointerdown'])
+      el.addEventListener(type, (event) => {
+        const field = event
+          .composedPath()
+          .find((node) => AUTOMATIC_DISPLAYS.some((d) => d.key === node.schema?.name));
+        if (field) this._automaticPreviewKey = field.schema.name;
+      });
+    this._followPreview(el, () => automaticTarget(this._automaticPreviewKey));
     view.automatic = this._form(section, {
       data: automaticData(this._config),
       schema: automaticSchema(),
       computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
       changed: (value) => {
+        this._automaticPreviewKey =
+          Object.keys(value).find((key) => value[key] !== automaticData(this._config)[key]) ||
+          this._automaticPreviewKey;
         this._config = applyAutomatic(this._config, value);
         this._emit();
       }
@@ -272,11 +314,11 @@ export class HouseViewEditor extends HTMLElement {
 
   _renderHome(parent, view) {
     const {el, section} = panel(parent, text(this._hass, 'editor.home_section'));
-    // While this section is open the preview shows the home summary, so its changes can be seen.
-    el.addEventListener('expanded-changed', (event) => {
-      if (event.target !== el) return;
-      this._setHomePreview(el.expanded === true);
-    });
+    this._followPreview(el, () => ({
+      kind: 'overview',
+      type: 'home',
+      options: this._config.home_title ? {title: this._config.home_title} : {}
+    }));
     view.home = this._form(section, {
       data: homeData(this._config),
       schema: homeSchema(),
@@ -288,13 +330,41 @@ export class HouseViewEditor extends HTMLElement {
     });
   }
 
-  _setHomePreview(on) {
-    window.__houseviewHomePreview = on;
-    window.dispatchEvent(new CustomEvent('houseview-home-preview'));
+  // Expansion, pointer input and keyboard focus all select the section, including nested HA editors.
+  _followPreview(el, target) {
+    const select = () => {
+      this._previewPanel = el;
+      this._previewTarget = target;
+      this._refreshPreview();
+    };
+    el.addEventListener('expanded-changed', (event) => {
+      if (event.target !== el) return;
+      if (el.expanded) select();
+      else if (this._previewPanel === el) {
+        this._previewTarget = undefined;
+        clearEditorPreview(this);
+      }
+    });
+    el.addEventListener('houseview-editor-context', () => {
+      if (el.expanded) select();
+    });
+    el.addEventListener('focusin', () => {
+      if (el.expanded) select();
+    });
+    el.addEventListener('pointerdown', () => {
+      if (el.expanded) select();
+    });
+  }
+
+  _refreshPreview() {
+    if (!this._previewTarget) return;
+    const target = this._previewTarget();
+    if (target.kind === 'page') this._lastPreviewPage = target.name;
+    selectEditorPreview(this, target);
   }
 
   disconnectedCallback() {
-    if (window.__houseviewHomePreview) this._setHomePreview(false);
+    clearEditorPreview(this);
   }
 
   _showScreensaverNote() {
@@ -327,6 +397,37 @@ export class HouseViewEditor extends HTMLElement {
   _renderPage(parent, view, index) {
     const page = this._config.pages[index];
     const {el, section} = panel(parent, page.name);
+    let focusedEditor;
+    const selectWidget = (event) => {
+      const editor = event
+        .composedPath()
+        .find((node) => node.localName === 'houseview-widget-editor');
+      if (editor) focusedEditor = editor;
+    };
+    for (const type of ['focusin', 'pointerdown', 'houseview-editor-context'])
+      el.addEventListener(type, selectWidget);
+    this._followPreview(el, () => {
+      const editing =
+        focusedEditor?.isConnected && focusedEditor._config
+          ? fromCard(focusedEditor._config)
+          : undefined;
+      const widgetIndex = editing
+        ? this._config.cards.findIndex((card) => {
+            const widget = fromCard(card);
+            return (
+              (widget.page || this._config.pages[0].name) === this._config.pages[index].name &&
+              widget.type === editing.type &&
+              widget.entity === editing.entity &&
+              widget.name === editing.name
+            );
+          })
+        : -1;
+      return {
+        kind: 'page',
+        name: this._config.pages[index].name,
+        widget: widgetIndex >= 0 ? widgetIndex : undefined
+      };
+    });
     const form = this._form(section, {
       data: pageData(page),
       schema: pageSchema(this._hass),
@@ -399,6 +500,9 @@ export class HouseViewEditor extends HTMLElement {
       this._config.pages.push(newPage(`Page ${n}`, 'teal'));
       this._emit();
       this._render();
+      const added = this._view.pages.at(-1).panel;
+      added.expanded = true;
+      added.dispatchEvent(new CustomEvent('expanded-changed'));
     });
     parent.append(add);
   }

@@ -9,9 +9,9 @@ export default async function ({mount, check, variants}) {
       t.text('small') === 'armed home'
   );
   check('tile carries the arming hint', t.text('.control-note') === 'Open arming controls');
-  await t.click('info');
+  await t.hold('[data-action="info"]');
   check(
-    'a tap opens more-info and never calls a service',
+    'a hold opens more-info and never calls a service',
     t.calls.length === 0 && t.infos.length === 1 && t.infos[0] === 'alarm_control_panel.test'
   );
 

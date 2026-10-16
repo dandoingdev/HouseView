@@ -42,7 +42,7 @@ test('shape errors', () => {
   );
   assert.throws(() => defineOverview({...base, strings: undefined}), /needs the English string/);
   assert.throws(() => defineOverview({...base, options: {entity: {type: 'text'}}}), /reserved/);
-  assert.throws(() => defineOverview({...base, options: {q: {type: 'colour'}}}), /unknown type/);
+  assert.throws(() => defineOverview({...base, options: {q: {type: 'unknown'}}}), /unknown type/);
   assert.throws(
     () => defineOverview({...base, options: {q: {type: 'enum'}}}),
     /needs a non-empty values list/

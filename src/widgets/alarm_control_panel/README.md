@@ -8,7 +8,7 @@ since: 1.0
 
 Shows an `alarm_control_panel.*` entity as an icon widget with its name, its state and the hint "Open arming
 controls". The widget is highlighted and uses the check shield while the state starts with `armed` (`armed_home`,
-`armed_away`, ...); otherwise it shows the moon shield. A tap opens the Home Assistant more-info dialog, which holds
+`armed_away`, ...); otherwise it shows the moon shield. A long press opens the Home Assistant more-info dialog, which holds
 the arming keypad. HouseView never arms or disarms the alarm itself. An unavailable or unknown alarm is shown disabled.
 
 | Option | Type | Default | Description |
@@ -43,6 +43,6 @@ entity: alarm_control_panel.alarmo
 name: Alarm
 ```
 
-Pressing the widget opens the more-info dialog, where you choose a mode and enter the code Alarmo asks for. The widget is
+Holding the widget opens the more-info dialog, where you choose a mode and enter the code Alarmo asks for. The widget is
 highlighted while the alarm is armed and shows its state (`disarmed`, `armed_home`, `arming`, `pending`, `triggered`, ...)
 as Home Assistant reports it.

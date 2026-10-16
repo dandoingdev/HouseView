@@ -59,13 +59,13 @@ export const renderMixin = {
     const extra = this._extensionShellClasses().join(' ');
     shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}`;
 
+    this._syncDashboardHeader(shell);
     this._fillFace(shell.querySelector('.face'), screen);
     this._writeNav();
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, true);
     this._syncDimButton(shell);
     this._syncHomeButton(shell);
-    this._syncHomePreview();
     this._layout(model);
     this._runAfterRender();
     if (this._focus) {
@@ -77,6 +77,7 @@ export const renderMixin = {
       target?.focus({preventScroll: true});
       this._focus = null;
     }
+    this._syncEditorPreview();
     this._screensaverSync();
   },
 
@@ -128,6 +129,7 @@ export const renderMixin = {
     for (const element of this._renderedCards?.values() || []) {
       if (element.localName === 'houseview-widget-card') element.update();
     }
+    this._syncDashboardHeader(shell);
     shell.classList.toggle('dark', !!this._isDark());
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, false);

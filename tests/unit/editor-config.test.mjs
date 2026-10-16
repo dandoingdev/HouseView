@@ -86,7 +86,8 @@ test('form data defaults', () => {
     bedtime: undefined,
     high_contrast: undefined,
     performance: 'auto',
-    editor_preview: 'landscape'
+    editor_preview: 'landscape',
+    show_header: false
   });
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
   assert.equal(appearanceData({wallpaper: 'silver', bedtime: false}).wallpaper, 'silver');
