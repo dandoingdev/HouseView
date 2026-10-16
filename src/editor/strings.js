@@ -23,6 +23,12 @@ export default {
     'editor.home_overview': 'Add a home button that opens the home summary',
     'editor.home_title': 'Title',
     'editor.helper.home_title': 'The large heading on the home summary. Empty uses "Home".',
+    'editor.home_battery_auto': 'Find low batteries automatically',
+    'editor.helper.home_battery_auto':
+      'Uses Home Assistant battery device classes. Shows levels at or below 20% and active low-battery sensors; hides percentage warnings while the device is charging. Hidden entities are excluded.',
+    'editor.home_attention': 'House needs attention',
+    'editor.helper.home_attention':
+      'Choose only devices to monitor. Opening: open doors/windows; battery: at or below 20% by default; light: on for 120 minutes; device: unavailable or unknown for 5 minutes. After changes the minute threshold; Below changes the battery threshold. Tap an issue to inspect it.',
     'editor.home_bins': 'Bins sensor',
     'editor.helper.home_bins':
       'A waste_collection_schedule sensor. The home summary shows an icon for each bin going out in the next 7 days.',

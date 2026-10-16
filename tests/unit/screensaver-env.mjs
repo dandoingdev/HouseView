@@ -135,7 +135,11 @@ export function setup(
   };
   Object.defineProperty(globalThis, 'document', {value: fakeDocument, configurable: true});
   Object.defineProperty(globalThis, 'window', {
-    value: {matchMedia: () => ({matches: reduced})},
+    value: {
+      matchMedia: () => ({matches: reduced}),
+      requestAnimationFrame: (callback) => setTimeout(callback, 0),
+      cancelAnimationFrame: (token) => clearTimeout(token)
+    },
     configurable: true
   });
 
@@ -174,6 +178,9 @@ export function setup(
       }
     },
     wait(ms) {
+      // Flush the two simulated paint frames before advancing fade/guard timers.
+      mock.timers.tick(0);
+      mock.timers.tick(0);
       mock.timers.tick(ms);
     },
     connect() {

@@ -46,6 +46,11 @@
   opacity: 0;
   transition-duration: 0.25s;
 }
+/* Resume and paint the underlay while the departing layer still fully covers it. */
+.hv-screensaver[data-state='leaving'][data-waking] {
+  opacity: 1;
+  transition: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .hv-screensaver {
     transition: none;

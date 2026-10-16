@@ -331,3 +331,9 @@ export default defineWidget({
 7. Write `README.md`: front matter (`type`, `label`, `entity`, `since`), a one-paragraph description, an option table
    that matches `options`, and a YAML example. Run `npm run gen-docs`.
 8. Run `npm run gen`, `npm run check:widgets`, `npm run test:unit`, `npm run test:widgets` and `npm run lint`.
+
+### Asynchronous native editor choices
+
+A widget can provide `editor.loadOptions(hass, config, signal)` to read choices such as a speaker’s favourites. The editor runs it once per entity and connection, cancels it when those change or the editor disconnects, and ignores stale responses. It must not call device services.
+
+`editor.schema(hass, config, schema, result)` can add native HA form selectors using those choices; `editor.helper(config, result, item)` provides status/help text for a field. Saved config remains authoritative while choices load or fail. The Music card uses these hooks for an ordered native multi-select without putting media-specific logic in the shared editor.

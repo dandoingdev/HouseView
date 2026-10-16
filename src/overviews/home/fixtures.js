@@ -70,6 +70,52 @@ const everything = [
 
 export const variants = {
   ok: make(everything),
+  attention: (() => {
+    const v = make([]);
+    v.config.home_attention = [
+      {entity: 'binary_sensor.window', kind: 'opening', name: 'Study window'},
+      {entity: 'sensor.button_battery', kind: 'battery', name: 'Bedside button'},
+      {entity: 'light.hall', kind: 'light', name: 'Hall lights'},
+      {entity: 'cover.blind', kind: 'device', name: 'Bedroom blind'}
+    ];
+    const last_changed = new Date(Date.parse(NOW) - 3 * 3600000).toISOString();
+    v.states['binary_sensor.window'] = {
+      state: 'on',
+      last_changed,
+      attributes: {device_class: 'window'}
+    };
+    v.states['sensor.button_battery'] = {
+      state: '0',
+      last_changed,
+      attributes: {device_class: 'battery', unit_of_measurement: '%'}
+    };
+    v.states['light.hall'] = {...v.states['light.hall'], last_changed};
+    v.states['cover.blind'] = {state: 'unknown', last_changed, attributes: {}};
+    return v;
+  })(),
+  autoBatteries: (() => {
+    const v = make([]);
+    v.config.home_battery_auto = true;
+    v.states['sensor.new_device'] = {
+      state: '15',
+      attributes: {device_class: 'battery', friendly_name: 'New device'}
+    };
+    v.states['sensor.charging_device'] = {
+      state: '5',
+      attributes: {device_class: 'battery', friendly_name: 'Charging phone'}
+    };
+    v.states['binary_sensor.charging_device'] = {
+      state: 'on',
+      attributes: {device_class: 'battery_charging'}
+    };
+    v.hass = {
+      entities: {
+        'sensor.charging_device': {device_id: 'phone'},
+        'binary_sensor.charging_device': {device_id: 'phone'}
+      }
+    };
+    return v;
+  })(),
   // no widget at all: a calm line
   empty: make([]),
   // only some kinds: the others have no chip and no section

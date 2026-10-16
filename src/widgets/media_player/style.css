@@ -382,3 +382,205 @@
     transition: transform 0.15s ease;
   }
 }
+
+/* @owns mc-browse media-library ml-header ml-key ml-content ml-grid ml-item ml-art ml-empty ml-footer */
+.carousel .mc .mc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.carousel .mc-browse {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.17);
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+.media-library {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: clamp(12px, 2vw, 28px);
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #f1fffc;
+  background: linear-gradient(145deg, #146d6a, #073f43 70%, #092e38);
+  border-radius: inherit;
+  container-type: size;
+}
+.ml-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.ml-header div {
+  min-width: 0;
+  text-align: center;
+}
+.ml-header h2 {
+  margin: 4px 0;
+  font-size: clamp(22px, 3vw, 36px);
+  letter-spacing: -0.035em;
+}
+.ml-header small {
+  opacity: 0.7;
+  font-size: 14px;
+}
+.ml-key {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: 1px solid #ffffff35;
+  background: #ffffff16;
+  color: inherit;
+}
+.ml-key ha-icon {
+  --mdc-icon-size: 28px;
+}
+.ml-content {
+  touch-action: pan-y;
+  user-select: none;
+  min-height: 0;
+  overflow: hidden;
+}
+.ml-grid {
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 2cqmin, 20px);
+}
+.ml-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(8px, 1.5cqmin, 12px);
+  border: 1px solid #ffffff55;
+  border-radius: clamp(24px, 5cqmin, 40px);
+  color: inherit;
+  background: linear-gradient(140deg, #ffffff30, #ffffff0c);
+  box-shadow:
+    inset 0 1px 2px #ffffff60,
+    0 8px 22px #001c2255;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    transform 0.18s,
+    background 0.18s;
+}
+.ml-item:active {
+  transform: scale(0.975);
+}
+.ml-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  justify-self: stretch;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: linear-gradient(150deg, #e2d6ad33, #79c4b333);
+}
+.ml-art ha-icon {
+  --mdc-icon-size: clamp(36px, 10cqmin, 64px);
+  opacity: 0.85;
+}
+.ml-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ml-item strong {
+  max-width: 100%;
+  font-size: clamp(16px, 3.5cqmin, 24px);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ml-item small {
+  font-size: 13px;
+  opacity: 0.7;
+}
+.ml-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 24px;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: clamp(18px, 4cqmin, 28px);
+  line-height: 1.5;
+}
+.ml-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 48px;
+  font-size: 14px;
+}
+.media-library button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.media-library button:focus-visible,
+.mc-browse:focus-visible {
+  outline: 3px solid #d8fff3;
+  outline-offset: 2px;
+}
+@container (aspect-ratio < 1) {
+  .ml-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (width < 300px) {
+  .mc-browse {
+    padding: 8px;
+  }
+  .mc-browse span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ml-item {
+    transition: none;
+  }
+}
+
+/* Overlay icons are centred controls, so they do not use the tiles’ caption spacing. */
+.media-library .ml-key ha-icon,
+.media-library .ml-art ha-icon {
+  margin: 0;
+  display: block;
+}

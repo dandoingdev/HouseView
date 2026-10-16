@@ -55,15 +55,19 @@ test('the home overview form: switch, title, bins and transport, empty values re
   const home = await import('../../src/editor/home-form.js');
   assert.deepEqual(home.homeData({}), {
     home_overview: false,
+    home_battery_auto: false,
     home_title: '',
     home_bins: '',
-    home_transport: []
+    home_transport: [],
+    home_attention: []
   });
   assert.deepEqual(home.homeData({home_transport: ['sensor.a'], home_bins: {entity: 'sensor.b'}}), {
     home_overview: false,
+    home_battery_auto: false,
     home_title: '',
     home_bins: 'sensor.b',
-    home_transport: [{entity: 'sensor.a'}]
+    home_transport: [{entity: 'sensor.a'}],
+    home_attention: []
   });
   const data = home.homeData({});
   const on = home.applyHome(
@@ -85,6 +89,7 @@ test('the home overview form: switch, title, bins and transport, empty values re
   });
   const off = home.applyHome(on, {
     home_overview: false,
+    home_battery_auto: false,
     home_title: '',
     home_bins: '',
     home_transport: []
@@ -120,4 +125,25 @@ test('applyAutomatic does not mutate its input and keeps unrelated keys', () => 
   const next = form.applyAutomatic(config, {timer_display: true, music_screensaver: true});
   assert.deepEqual(next, {cards: []});
   assert.deepEqual(config, {cards: [], timer_display: false});
+});
+
+test('attention rules use a native entity picker and preserve optional thresholds without null values', async () => {
+  const home = await import('../../src/editor/home-form.js');
+  const field = home.homeSchema().find((field) => field.name === 'home_attention');
+  assert.equal(field.selector.object.multiple, true);
+  assert.ok(field.selector.object.fields.entity.selector.entity);
+  const raw = {home_attention: [{entity: 'light.room', kind: 'light', after: 30}]};
+  assert.deepEqual(home.applyHome(raw, home.homeData(raw)), raw);
+  assert.deepEqual(
+    home.applyHome(
+      {},
+      {
+        home_attention: [
+          {entity: 'sensor.battery', kind: 'battery', after: null, below: 0, name: ''}
+        ]
+      }
+    ),
+    {home_attention: [{entity: 'sensor.battery', kind: 'battery', below: 0}]}
+  );
+  assert.deepEqual(home.applyHome(raw, {home_attention: []}), {});
 });

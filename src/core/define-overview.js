@@ -395,10 +395,11 @@ function toWidget(overview) {
         throw new Error(`${overview.label} display must be one of: ${DISPLAYS.join(', ')}.`);
       }
     },
-    watch: (widget, config) =>
-      [widget.entity, ...(overview.watch?.(resolveOptions(overview, widget), config) ?? [])].filter(
-        Boolean
-      ),
+    watch: (widget, config, hass) =>
+      [
+        widget.entity,
+        ...(overview.watch?.(resolveOptions(overview, widget), config, hass) ?? [])
+      ].filter(Boolean),
 
     // The root is NOT ctx.root/ctx.tile: `.tile` and `.widget` carry the shared glass styling and its
     // !important cascade. The grid still finds it by [data-widget].

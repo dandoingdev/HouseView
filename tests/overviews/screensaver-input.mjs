@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* global document, window, Event, card, mount, navigator */
+/* global document, window, Event, card, mount, navigator, getComputedStyle */
 // Real-input behaviour of the screensaver (docs/overview-api.md): a real mouse and keyboard through
 // puppeteer, the dist bundle, and a fake clock for the idle timer. Run it with:
 //
@@ -384,6 +384,139 @@ try {
   check(
     'disconnect: layer gone, ticker unsubscribed',
     await page.evaluate(() => window.intervals.size === 0)
+  );
+  // 10 wake paint: retain the layout and shield resumed tiles for two animation frames.
+  for (const mode of ['full', 'lite', 'reduced']) {
+    await page.emulateMediaFeatures([
+      {name: 'prefers-reduced-motion', value: mode === 'reduced' ? 'reduce' : 'no-preference'}
+    ]);
+    await page.evaluate((c) => mount(c), config);
+    await advance(11);
+    const wake = await page.evaluate((mode) => {
+      if (mode === 'lite') {
+        card._perf = 'lite';
+        card.shadowRoot.querySelector('.shell').classList.add('perf-lite');
+      }
+      const root = card.shadowRoot;
+      const layer = root.querySelector('.hv-screensaver');
+      const face = root.querySelector('.face');
+      const tile = face.firstElementChild;
+      const style = root.querySelector('link[rel=stylesheet]');
+      const retainedLayout = getComputedStyle(face).contentVisibility !== 'hidden';
+      const request = window.requestAnimationFrame;
+      const cancel = window.cancelAnimationFrame;
+      const frames = new Map();
+      let id = 0;
+      window.requestAnimationFrame = (callback) => {
+        frames.set(++id, callback);
+        return id;
+      };
+      window.cancelAnimationFrame = (token) => frames.delete(token);
+      const frame = () => {
+        const pending = [...frames.values()];
+        frames.clear();
+        for (const callback of pending) callback();
+      };
+      try {
+        card._screensaverClose();
+        const shielded = () =>
+          layer.hasAttribute('data-waking') && getComputedStyle(layer).opacity === '1';
+        const initial = shielded();
+        frame();
+        const first = shielded();
+        frame();
+        const second = !layer.hasAttribute('data-waking');
+        const stable =
+          face === root.querySelector('.face') &&
+          tile === face.firstElementChild &&
+          style === root.querySelector('link[rel=stylesheet]');
+        return {retainedLayout, initial, first, second, stable, calls: window.calls().length};
+      } finally {
+        window.requestAnimationFrame = request;
+        window.cancelAnimationFrame = cancel;
+      }
+    }, mode);
+    check(
+      `${mode}: wake keeps layout/style/tiles, paints behind an opaque shield, then reveals without services`,
+      wake.retainedLayout &&
+        wake.initial &&
+        wake.first &&
+        wake.second &&
+        wake.stable &&
+        wake.calls === 0
+    );
+    await sleep(400);
+    check(`${mode}: departing layer is cleaned up`, (await layerState()) === null);
+  }
+  await page.evaluate((c) => mount(c), config);
+  await advance(11);
+  const cleanup = await page.evaluate(() => {
+    const request = window.requestAnimationFrame;
+    const cancel = window.cancelAnimationFrame;
+    const frames = new Map();
+    let id = 0;
+    window.requestAnimationFrame = (callback) => {
+      frames.set(++id, callback);
+      return id;
+    };
+    window.cancelAnimationFrame = (token) => frames.delete(token);
+    try {
+      card._screensaverClose();
+      const pending = frames.size;
+      card.remove();
+      return (
+        pending === 1 && frames.size === 0 && !card.shadowRoot.querySelector('.hv-screensaver')
+      );
+    } finally {
+      window.requestAnimationFrame = request;
+      window.cancelAnimationFrame = cancel;
+    }
+  });
+  check('disconnect during wake cancels the pending paint and removes the layer', cleanup);
+  // 11 full-screen Home: touch activates scenes; background taps stay put; close/Escape return.
+  await page.setViewport({width: 800, height: 600, hasTouch: true});
+  await page.goto(`${server.url}/${pagePath}`);
+  await page.waitForFunction('window.ready === true');
+  await page.evaluate((c) => mount(c), config);
+  await page.evaluate(() => {
+    window.mock.hass.states['scene.evening'] = {
+      state: 'unknown',
+      attributes: {friendly_name: 'Evening'}
+    };
+    card.setConfig({widgets: [{type: 'action', entity: 'scene.evening'}], home_overview: true});
+    card.hass = window.mock.hass;
+    card._screensaverOpenType('home');
+  });
+  const tapHome = async (selector) => {
+    const point = await page.evaluate((selector) => {
+      const r = card.shadowRoot.querySelector(selector).getBoundingClientRect();
+      return {x: r.x + r.width / 2, y: r.y + r.height / 2};
+    }, selector);
+    await page.touchscreen.tap(point.x, point.y);
+    await sleep(80);
+  };
+  await tapHome('.ov-home-tile');
+  check(
+    'Home scene touch runs exactly the selected scene and keeps the overlay open',
+    (await calls()).join(',') === 'scene:scene.evening' && (await layerState()) === 'on'
+  );
+  await tapHome('.ov-home-title');
+  check(
+    'Home background touch keeps the overlay open without another service',
+    (await calls()).length === 1 && (await layerState()) === 'on'
+  );
+  await tapHome('.ov-home-close');
+  await sleep(450);
+  check(
+    'Home shared close button returns without another service',
+    (await layerState()) === null && (await calls()).length === 1
+  );
+  await page.evaluate(() => card._screensaverOpenType('home'));
+  await page.keyboard.press('Escape');
+  await sleep(450);
+  check(
+    'Home Escape also closes without another service',
+    (await layerState()) === null && (await calls()).length === 1
   );
   check('no console errors or uncaught exceptions during the whole run', browserErrors === 0);
 } finally {

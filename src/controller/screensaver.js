@@ -64,11 +64,12 @@ export function isEditMode(host) {
 function signatureOf(hass, entry, config) {
   const ids = [
     entry.options.entity,
-    ...(entry.overview.watch?.(entry.options, config) ?? [])
+    ...(entry.overview.watch?.(entry.options, config, hass) ?? [])
   ].filter(Boolean);
   const read = (id) => (hass.connection ? hass.states?.[id] : JSON.stringify(hass.states?.[id]));
   return [
     ...ids.map(read),
+    ...(config?.home_battery_auto ? [hass.entities, hass.devices] : []),
     hass.locale?.language,
     hass.locale?.time_format,
     hass.locale?.time_zone,
@@ -437,7 +438,7 @@ export const screensaverMixin = {
    * An event entry ignores the pending call: starting a timer from a HouseView tile must be able to trigger it.
    */
   _screensaverBlockedFor(entry) {
-    if (this._galleryOpen || this._alarm) return true;
+    if (this._navigationBlocked?.() || this._galleryOpen || this._alarm) return true;
     if (this._pending?.size && !entry?.event) return true;
     return !!entry && !entry.startInEditMode && !entry.preview && isEditMode(this);
   },
@@ -582,13 +583,12 @@ export const screensaverMixin = {
     shell.append(layer); // an overlay: nothing else in the shell is touched, re-rendered or made inert
     void layer.offsetWidth; // commit the opacity:0 start state, then fade in
     layer.dataset.state = 'on';
-    if (focusReturn) {
-      // the dismiss button, or the close button of a control panel
-      const stop =
-        layer.querySelector('.ov-dismiss') ||
-        layer.querySelector('button[data-action="overview-close"]');
-      stop?.focus({preventScroll: true});
-    }
+    // Focus the dismiss/close control even when touch or an API opened the view without a focused opener.
+    // Escape must reach the modal rather than the dashboard underneath it.
+    const stop =
+      layer.querySelector('.ov-dismiss') ||
+      layer.querySelector('button[data-action="overview-close"]');
+    stop?.focus({preventScroll: true});
     ss.active = {
       entry,
       layer,
@@ -701,6 +701,7 @@ export const screensaverMixin = {
       this._screensaverUnpark(ss, reason);
     }
     // A teardown, or a layer that another one replaces right now, has nothing to catch up.
+    const wasCovered = active.covered;
     this._screensaverUncover(active, reason !== 'dispose' && reason !== 'replace');
     ss.idle.configure({timeout: this._screensaverTimeoutNow()});
     if (reason === 'tap' || reason === 'key') {
@@ -710,13 +711,24 @@ export const screensaverMixin = {
       return void this._screensaverRemoveLayer(ss, active);
     }
     active.layer.dataset.state = 'leaving'; // stays in the DOM, still catching taps, until it has faded
-    ss.leaving = {
-      ...active,
-      timer: setTimeout(
-        () => this._screensaverRemoveLayer(ss),
+    const leaving = (ss.leaving = {...active, timer: null, wakeFrame: null});
+    const reveal = () => {
+      if (ss.leaving !== leaving) return;
+      leaving.wakeFrame = null;
+      delete active.layer.dataset.waking;
+      leaving.timer = setTimeout(
+        () => this._screensaverRemoveLayer(ss, leaving),
         reducedMotion() || this._perf === 'lite' ? GUARD_MS : FADE_OUT_MS + 50
-      )
+      );
     };
+    if (wasCovered) {
+      // Keep the opaque layer over the resumed tiles for a complete paint before fading it away.
+      // Android WebView otherwise exposes the first frame while glass/backdrop layers are still rebuilding.
+      active.layer.dataset.waking = '';
+      leaving.wakeFrame = window.requestAnimationFrame(() => {
+        leaving.wakeFrame = window.requestAnimationFrame(reveal);
+      });
+    } else reveal();
   },
 
   /**
@@ -737,6 +749,7 @@ export const screensaverMixin = {
     if (!target) return;
     if (ss.leaving?.layer === target.layer) {
       clearTimeout(ss.leaving.timer);
+      if (ss.leaving.wakeFrame != null) window.cancelAnimationFrame(ss.leaving.wakeFrame);
       ss.leaving = null;
     }
     target.layer.remove();

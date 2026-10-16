@@ -11,7 +11,7 @@ export default {
     'world_clock_overview.unavailable': 'Unavailable',
     'world_clock_overview.empty': 'No world clocks found',
     'world_clock_overview.empty_help':
-      'Add Worldclock in Home Assistant’s Devices & services, or select sensor entities in this view’s settings.',
+      'Add Worldclock in Home Assistant’s Devices & services to see more cities here.',
     'world_clock_overview.local': 'Local time',
     'world_clock_overview.option.show_local.label': 'Show local time',
     'world_clock_overview.option.entities.label': 'Worldclock entities',

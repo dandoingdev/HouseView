@@ -34,3 +34,18 @@ pill and an options button (the dots over the cover) that opens the more-info di
 type: custom:houseview-media_player-card
 entity: media_player.living_room
 ```
+
+## Playlists and favourites
+
+Browse appears when the speaker supports Home Assistant media browsing. It opens a teal glass library with artwork and six large tiles per page; swipe left/right or use the arrows to move through the list without scrolling. Back or Escape returns to the player. Opening, refreshing and editing this library never starts playback. Press a playlist tile to play it on that card’s speaker and return to the player after Home Assistant accepts playback. A failed request keeps the browser open with an error so you can retry. Artwork fills the width of each rounded glass tile, with its name below.
+
+In the native card editor, set **Shown playlists** to **Selected favourites**, then choose items under **Choose and order playlists**. Drag the selected chips to set their order. Each media card saves its own selection. **All favourites** is the default; an empty selected list deliberately shows none. Saved missing items remain visible in settings and disabled in the browser until removed or restored.
+
+Sonos playlists, radio stations and albums should first be saved in Sonos Favourites. Discovery reads Home Assistant’s standard media browser, including Sonos’s grouped favourites; it does not sign in to Spotify or Apple Music or crawl an entire library. Unsupported speakers keep their existing controls. A failed read offers Refresh and never substitutes another speaker or playlist. The library pauses idle screensavers while open.
+
+Playlist artwork uses the thumbnail URL returned by Home Assistant’s media browser. This can be a music-provider image or a URL on your Sonos speaker; Sonos cannot proxy all favourite artwork. Image requests omit the page referrer, and HouseView never adds Home Assistant authentication to an external image URL. Missing, invalid or failed images retain the playlist icon. Artwork URLs are never saved in the dashboard.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| playlist_mode | all/selected | all, or selected when playlists is supplied | Show all discovered favourites or only chosen items |
+| playlists | list of strings | [] | Ordered opaque media keys produced by the native picker; use the editor rather than hand-writing IDs |

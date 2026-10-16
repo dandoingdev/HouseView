@@ -46,6 +46,7 @@ jobs:
       - run: npm run test:overviews:timer
       - run: npm run test:overviews:automatic
       - run: npm run test:overviews:light
+      - run: npm run test:media:library
 
       - name: Production build
         run: npm run build

@@ -7,6 +7,7 @@
 //
 // The ORDER decides which message a broken config gets. A null or non-object entry in `cards:` gets a readable
 // sentence instead of a TypeError.
+import {ATTENTION_KINDS} from '../core/home-attention.js';
 import {SIZES} from '../core/define-widget.js';
 import {validateActionConfigs} from '../core/action-config.js';
 import {CONFIRM_MODES} from '../core/confirm.js';
@@ -85,6 +86,37 @@ function validateOptionalSettings(config) {
     ) {
       throw new Error('home_transport label and icon must be text.');
     }
+  }
+  if (config.home_battery_auto !== undefined && typeof config.home_battery_auto !== 'boolean') {
+    throw new Error('home_battery_auto must be true or false.');
+  }
+  if (config.home_attention !== undefined) {
+    if (
+      !Array.isArray(config.home_attention) ||
+      config.home_attention.some(
+        (rule) =>
+          !isObject(rule) ||
+          !ATTENTION_KINDS.includes(rule.kind) ||
+          !/^[a-z_]+\.[a-z0-9_]+$/.test(rule.entity || '') ||
+          (rule.name !== undefined && typeof rule.name !== 'string') ||
+          (rule.after !== undefined &&
+            (typeof rule.after !== 'number' ||
+              !Number.isFinite(rule.after) ||
+              rule.after < 0 ||
+              rule.after > 10080)) ||
+          (rule.below !== undefined &&
+            (typeof rule.below !== 'number' ||
+              !Number.isFinite(rule.below) ||
+              rule.below < 0 ||
+              rule.below > 100)) ||
+          (rule.kind === 'opening' && !rule.entity.startsWith('binary_sensor.')) ||
+          (rule.kind === 'light' && !rule.entity.startsWith('light.')) ||
+          (rule.kind === 'battery' && !/^(sensor|binary_sensor)\./.test(rule.entity))
+      )
+    )
+      throw new Error(
+        'home_attention must list {entity, kind: opening/battery/light/device, name?, after?: minutes, below?: percent}.'
+      );
   }
   if (config.editor_preview !== undefined && !EDITOR_PREVIEWS.includes(config.editor_preview)) {
     throw new Error(`editor_preview must be ${sentenceList(EDITOR_PREVIEWS)}.`);

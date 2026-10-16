@@ -192,14 +192,105 @@ export default async function ({mount, check, variants}) {
       t.calls.length === 0
   );
 
-  // ---- as a screensaver it renders without buttons ----
+  // Attention also watches selected entities which have no dashboard tile.
+  t = await mount(variants.attention);
+  check(
+    'attention uses rounded information buttons for open windows, zero battery, long-running lights and unknown devices',
+    t.qa('.ov-home-attention-item').length === 4 &&
+      t.text('.ov-home-attention').includes('Battery at 0%') &&
+      t.text('.ov-home-attention').includes('On for 3h') &&
+      t.text('.ov-home-attention').includes('State unknown')
+  );
+  await t.click('info', 'binary_sensor.window');
+  check(
+    'an attention row opens entity details without a device service',
+    t.infos.at(-1) === 'binary_sensor.window' && t.calls.length === 0
+  );
+  const liveStates = structuredClone(t.hass.states);
+  liveStates['binary_sensor.window'].state = 'off';
+  t.el.hass = {...t.hass, states: liveStates};
+  await t.settle();
+  check(
+    'a contact not on the dashboard disappears from attention as soon as it closes',
+    !t.q('.ov-home-attention-item[data-entity="binary_sensor.window"]') &&
+      t.qa('.ov-home-attention-item').length === 3
+  );
+
+  t = await mount(variants.autoBatteries);
+  check(
+    'automatic batteries show a newly discovered low level and suppress a charging device',
+    !!t.q('.ov-home-attention-item[data-entity="sensor.new_device"]') &&
+      !t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]')
+  );
+  const batteryStates = structuredClone(t.hass.states);
+  batteryStates['sensor.added_later'] = {
+    state: '8',
+    attributes: {device_class: 'battery', friendly_name: 'Added later'}
+  };
+  batteryStates['binary_sensor.charging_device'].state = 'off';
+  t.el.hass = {...t.hass, states: batteryStates};
+  await t.settle();
+  check(
+    'new battery and charging changes refresh embedded Home without adding configuration',
+    !!t.q('.ov-home-attention-item[data-entity="sensor.added_later"]') &&
+      !!t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]')
+  );
+
+  t = await mount(variants.autoBatteries, {mode: 'screensaver'});
+  const fullBatteryStates = structuredClone(t.hass.states);
+  fullBatteryStates['sensor.new_device'].state = '80';
+  fullBatteryStates['binary_sensor.charging_device'].state = 'off';
+  t.el.hass = {...t.hass, states: fullBatteryStates};
+  await t.settle();
+  check(
+    'full-screen Home reacts to percentage and charging changes without a saved entity list',
+    !t.q('.ov-home-attention-item[data-entity="sensor.new_device"]') &&
+      !!t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]')
+  );
+  t.el.hass = {
+    ...t.hass,
+    states: fullBatteryStates,
+    entities: {...t.hass.entities, 'sensor.charging_device': {device_id: 'phone', hidden: true}}
+  };
+  await t.settle();
+  check(
+    'hiding a battery entity removes it from full-screen attention immediately',
+    !t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]') && t.calls.length === 0
+  );
+
+  // ---- full-screen Home is an interactive control panel ----
   t = await mount(variants.ok, {
     mode: 'screensaver',
     bare: true,
     cards: [CARDS.light, CARDS.scene]
   });
   check(
-    'the screensaver shows the screen and no buttons',
-    !!t.layer?.querySelector('.ov-home-scene') && !t.layer.querySelector('.ov-home-scene button')
+    'full-screen Home exposes scene controls and the shared labelled close button',
+    !!t.layer?.querySelector('.ov-home-scene button[data-action="run-action"]') &&
+      t.layer.querySelector('[data-action="overview-close"]')?.getAttribute('aria-label') ===
+        'Close' &&
+      !t.layer.querySelector('.ov-dismiss')
+  );
+  await t.click('run-action', 'scene.evening');
+  check(
+    'a scene tap runs the configured scene exactly once and keeps Home open',
+    t.calls.length === 1 &&
+      t.calls[0].d === 'scene' &&
+      t.calls[0].s === 'turn_on' &&
+      t.calls[0].data.entity_id === 'scene.evening' &&
+      t.layerState === 'on'
+  );
+  const overlayScroll = t.q('.ov-home-scroll');
+  overlayScroll.dispatchEvent(new PointerEvent('pointerup', {bubbles: true, composed: true}));
+  overlayScroll.click();
+  await t.settle();
+  check(
+    'a background tap neither dismisses Home nor runs another service',
+    t.layerState === 'on' && t.calls.length === 1
+  );
+  await t.click('overview-close');
+  check(
+    'the close button dismisses Home without a service call',
+    t.layerState === 'leaving' && t.calls.length === 0
   );
 }

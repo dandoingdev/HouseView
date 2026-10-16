@@ -1,5 +1,23 @@
 export default {
   en: {
+    'media_player.browse': 'Browse',
+    'media_player.playlists': 'Playlists & favourites',
+    'media_player.back': 'Back to player',
+    'media_player.refresh': 'Refresh favourites',
+    'media_player.previous_page': 'Previous playlists',
+    'media_player.next_page': 'Next playlists',
+    'media_player.play_playlist': 'Play',
+    'media_player.item_missing': 'No longer available',
+    'media_player.loading': 'Loading favourites…',
+    'media_player.browse_error': 'Could not load favourites. Use Refresh to try again.',
+    'media_player.play_error': 'Could not start playback. Use Refresh to try again.',
+    'media_player.empty':
+      'No playlists to show. Choose favourites in this card’s settings, or save them in your music app.',
+    'media_player.partial': 'Some favourites could not be loaded',
+    'media_player.option.playlist_mode.label': 'Shown playlists',
+    'media_player.option.playlist_mode.value.all': 'All favourites',
+    'media_player.option.playlist_mode.value.selected': 'Selected favourites',
+    'media_player.option.playlists.label': 'Choose and order playlists',
     'media_player.label': 'Music',
     'media_player.description': 'Now playing, transport and volume for a speaker.',
     'media_player.ready': 'Ready to play',

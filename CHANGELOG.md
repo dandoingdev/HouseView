@@ -6,6 +6,29 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-16
+
+### Added
+
+* A full-screen music favourites browser with artwork, six large tiles per page, Refresh, keyboard navigation and left/right swipes that match the dashboard.
+* Media-card settings to select and reorder favourites for each speaker. Browsing and editing never starts playback.
+* A **House needs attention** section in the home summary for open doors and windows, low batteries, lights left on and unavailable devices, with settings in the visual editor.
+* Automatic battery discovery through `home_battery_auto`, using Home Assistant battery device classes and entity visibility rather than a saved list. Charging devices are excluded from percentage warnings; battery problem sensors are supported too.
+
+### Changed
+
+* The home summary has a close button and supports Escape, keeping scenes and other controls usable while it is open.
+* Playlist artwork fills the tile width above its name. Accepted playback closes Browse and returns to the player; failed playback keeps the error visible.
+* The README now explains HouseView's focus on making everyday home controls easy for everyone else.
+
+### Fixed
+
+* Waking the dashboard keeps its layout ready behind the screensaver, avoiding the flash and apparent reload on the first touch, including on tablets using reduced motion or lighter rendering.
+* Swiping the music browser does not accidentally select a playlist when the gesture ends.
+* Home summary scene taps run the scene without dismissing the view.
+* Playlist covers use the original media-browser thumbnails instead of an unsupported Sonos favourite-image proxy; missing or broken images keep the centred playlist icon.
+* Automatically discovered battery warnings refresh when batteries, charging states or entity visibility change.
+
 ## [1.1.0] - 2026-10-16
 
 ### Fixed

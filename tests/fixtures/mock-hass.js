@@ -161,6 +161,8 @@ export function createMockHass(opts = {}) {
   if (opts.config !== null) hass.config = clone(opts.config || DEFAULT_CONFIG);
   if (opts.locale !== null) hass.locale = clone(opts.locale || DEFAULT_LOCALE);
   if (opts.themes) hass.themes = clone(opts.themes);
+  if (opts.entities) hass.entities = clone(opts.entities);
+  if (opts.devices) hass.devices = clone(opts.devices);
   if (opts.origin) hass.hassUrl = (path = '') => new URL(path, opts.origin).href;
   if (opts.formatEntityState) {
     hass.formatEntityState = (stateObj) => `${stateObj?.state} (localized)`;

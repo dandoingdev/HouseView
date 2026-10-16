@@ -188,7 +188,7 @@ const render = (variant, mode = 'card', hassOptions = {}) => {
   return home.render(ctx, mode);
 };
 
-test('the card renders every part from the widgets; the screensaver renders none of the buttons', () => {
+test('embedded and full-screen Home render interactive scene controls; only full-screen Home has a close button', () => {
   const html = render(variants.ok);
   for (const text of [
     '20-22°',
@@ -200,7 +200,10 @@ test('the card renders every part from the widgets; the screensaver renders none
     assert.ok(html.includes(text), text);
   }
   assert.ok(!html.includes('script.good_night'), 'a script is not a scene');
-  assert.ok(!/<button/.test(render(variants.ok, 'screensaver')));
+  const full = render(variants.ok, 'screensaver');
+  assert.ok(full.includes('data-action="run-action"'));
+  assert.ok(full.includes('data-action="overview-close"'));
+  assert.ok(!html.includes('data-action="overview-close"'));
   assert.ok(render(variants.ok, 'screensaver').includes('20-22°'));
   assert.ok(
     /Add lights, climate, locks, cameras or scenes to this dashboard/.test(render(variants.empty))

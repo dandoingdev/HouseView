@@ -5,6 +5,18 @@ export default {
     'home_overview.description':
       'A scrollable home screen made from the dashboard: climate, lights, locks and media chips, cameras and scenes.',
     'home_overview.title': 'Home',
+    'home_overview.close': 'Close',
+    'home_overview.attention.title': 'House needs attention',
+    'home_overview.attention.clear': 'No issues detected in monitored devices',
+    'home_overview.attention.open': 'Open',
+    'home_overview.attention.battery': 'Low battery',
+    'home_overview.attention.battery_value': 'Battery at {value}%',
+    'home_overview.attention.light_hours': 'On for {value}h',
+    'home_overview.attention.light_minutes': 'On for {value} min',
+    'home_overview.attention.unavailable': 'Unavailable · check connection',
+    'home_overview.attention.unknown': 'State unknown',
+    'home_overview.attention.missing': 'Not reporting',
+
     'home_overview.section.cameras': 'Cameras',
     'home_overview.section.scenes': 'Scenes',
     'home_overview.empty': 'Add lights, climate, locks, cameras or scenes to this dashboard',

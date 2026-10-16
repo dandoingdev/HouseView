@@ -1,5 +1,5 @@
 /* @phase overviews */
-/* @owns ov-home-scene ov-home-scroll ov-home-head ov-home-title ov-home-time ov-home-chips ov-home-chip ov-home-chip-value ov-home-bins ov-home-chip-label ov-home-transport ov-home-down ov-home-dim ov-home-playing ov-home-body ov-home-section ov-home-cameras ov-home-scenes ov-home-heading ov-home-heading-text ov-home-ico ov-home-cams ov-home-cam ov-home-cam-icon ov-home-has-picture ov-home-snap ov-home-ago ov-home-cam-name ov-home-tiles ov-home-tile ov-home-tile-icon ov-home-tile-name ov-home-empty */
+/* @owns ov-home-scene ov-home-scroll ov-home-head ov-home-title ov-home-time ov-home-chips ov-home-chip ov-home-chip-value ov-home-bins ov-home-chip-label ov-home-transport ov-home-down ov-home-dim ov-home-playing ov-home-body ov-home-section ov-home-cameras ov-home-scenes ov-home-heading ov-home-heading-text ov-home-ico ov-home-cams ov-home-cam ov-home-cam-icon ov-home-has-picture ov-home-snap ov-home-ago ov-home-cam-name ov-home-tiles ov-home-tile ov-home-tile-icon ov-home-tile-name ov-home-empty ov-home-close ov-home-attention ov-home-attention-list ov-home-attention-item ov-home-attention-text ov-home-attention-arrow ov-home-attention-count ov-home-attention-clear ov-home-attention-name ov-home-attention-detail ov-home-attention-chevron */
 
 /*
  * The home screen: a light, scrollable panel (a dark one under `.dark`). No blur, no filter, no animation and no
@@ -7,11 +7,13 @@
  * 380 px card as well as 1280 x 800 and 800 x 1280.
  */
 .ov-home-scene {
+  --ov-home-attention-amber: #c87500;
   background: #f5f5f7;
   color: #1d1d1f;
   border-radius: inherit;
 }
 .dark .ov-home-scene {
+  --ov-home-attention-amber: #ffb340;
   background: #1c1c1e;
   color: #f5f5f7;
 }
@@ -326,3 +328,41 @@
   line-height: 1.45;
   text-align: center;
 }
+
+/* Full-screen Home uses the same close control as the other interactive overlays. */
+.ov-home-close {
+  --ov-panel-key-size: clamp(52px, 10cqmin, 72px);
+  --ov-panel-key-bg: #e8e8ed;
+  position: absolute;
+  top: 3cqmin;
+  left: 3cqmin;
+  z-index: 3;
+}
+.dark .ov-home-close {
+  --ov-panel-key-bg: #3a3a3c;
+}
+.ov-home-scene[data-mode='screensaver'] .ov-home-head {
+  padding-left: max(60px, 12cqmin);
+}
+
+/* Attention rows share Home's plain rounded surfaces, icon sizing and amber accents. */
+.ov-home-attention { margin-top: 4cqmin; }
+.ov-home-attention .ov-home-heading { justify-content: space-between; }
+.ov-home-attention-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2cqmin; }
+.ov-home-attention-item { display: flex; align-items: center; gap: 2cqmin; width: 100%; padding: 2.5cqmin; border: 0; border-radius: 3cqmin; background: #fff; color: inherit; text-align: left; font: inherit; cursor: pointer; min-height: 64px; }
+.ov-home-attention-item[data-tone='amber'] > .ov-home-ico { color: var(--ov-home-attention-amber); }
+.ov-home-attention-item[data-tone='muted'] > .ov-home-ico { color: #8e8e93; }
+.ov-home-attention-text { min-width: 0; flex: 1; }
+.ov-home-attention-name, .ov-home-attention-detail { display: block; overflow-wrap: anywhere; }
+.ov-home-attention-name { font-size: max(15px, 2.8cqmin); font-weight: 600; }
+.ov-home-attention-detail { margin-top: .6cqmin; font-size: max(13px, 2.3cqmin); opacity: .7; }
+.ov-home-attention-arrow { display: flex; flex: none; width: 24px; }
+.ov-home-attention-chevron { --mdc-icon-size: 24px; margin: 0; }
+.ov-home-attention-count { color: #8e8e93; font-variant-numeric: tabular-nums; }
+.ov-home-attention-clear { display: flex; align-items: center; gap: 2cqmin; color: #64756c; font-size: max(14px, 2.8cqmin); }
+.dark .ov-home-attention-item { background: #2c2c2e; }
+.dark .ov-home-attention-clear { color: #a9beb0; }
+.ov-home-attention-item:focus-visible { outline: 3px solid #007aff; outline-offset: 3px; }
+.ov-home-attention-item:active { background: #e8e8ed; }
+.dark .ov-home-attention-item:active { background: #3a3a3c; }
+@container (width < 600px) { .ov-home-attention-list { grid-template-columns: minmax(0, 1fr); } }

@@ -14,9 +14,8 @@
 .shell[data-covered] > :not(.hv-screensaver) {
   visibility: hidden;
 }
-.shell[data-covered] > .face {
-  content-visibility: hidden;
-}
+/* Keep the face's layout alive: content-visibility:hidden discards its rendering work and can
+ * expose a cold layout/paint on Android when waking. visibility:hidden still suppresses painting. */
 
 /* ---- performance: lite ----------------------------------------------------------------------------------------------- */
 

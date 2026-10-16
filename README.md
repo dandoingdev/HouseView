@@ -1,20 +1,26 @@
 # HouseView
 
-Glass-style dashboard widgets and full-screen views for [Home Assistant](https://www.home-assistant.io/), made for wall
-tablets and kitchen displays.
+An opinionated [Home Assistant](https://www.home-assistant.io/) dashboard that makes everyday home controls easy for
+**everyone else**.
 
 [![HACS custom repository](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml/badge.svg)](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/dandoingdev/HouseView)](https://github.com/dandoingdev/HouseView/releases/latest)
 
-HouseView packs your lights, thermostat, camera, timer, music and more into screen-sized, swipeable pages with big touch
-targets, and can show a full-screen weather scene, a photo frame, the month calendar, the album cover or a countdown when
-nobody has touched the display for a while.
+Home Assistant can do an incredible amount. The people you share your home with should be able to walk up to a screen
+and use it without a tour of your setup. HouseView brings the things they need into a few clear, swipeable pages: lights,
+heating, music, cameras and the kitchen timer.
+
+It makes deliberate choices about layout, touch controls and what belongs on screen. Big buttons, familiar gestures and
+room for the essentials help everyday tasks feel straightforward. Put it on a wall tablet or kitchen display, choose the
+controls that matter in that room, and give everyone a comfortable way to use the home.
+
+When the screen is idle, it can become a weather display, photo frame, calendar, album cover or a clear view of the timer.
 
 ![HouseView kitchen dashboard: clock, date, front door camera and a kitchen timer](docs/images/hero.png)
 
-A real dashboard, one swipeable page at a time (the three pages of [`examples/kitchen.yaml`](examples/kitchen.yaml)):
+A kitchen dashboard, with music and home controls a swipe away. Try the [kitchen example](examples/kitchen.yaml):
 
 | Music page | Home controls page |
 | --- | --- |
@@ -24,12 +30,9 @@ A real dashboard, one swipeable page at a time (the three pages of [`examples/ki
 | --- | --- |
 | ![Bedtime dashboard](docs/images/bedtime.png) | ![Kitchen page, portrait](docs/images/kitchen.png) |
 
-The pictures are rendered from the dashboards in [`examples/`](examples/) with placeholder data and a stand-in for Home
-Assistant's icons.
-
 ### Overviews
 
-Full-screen views, shown here as a screensaver would show them (mock data, frozen clock):
+Give the whole screen to what matters right now: the weather, a running timer, your music or a favourite photo.
 
 | Weather | Timer display | Cover art |
 | --- | --- | --- |
@@ -39,32 +42,30 @@ Full-screen views, shown here as a screensaver would show them (mock data, froze
 | --- | --- | --- |
 | ![Photo frame](docs/images/overview-photo-frame.png) | ![Month calendar](docs/images/overview-calendar.png) | ![Weather widget tile](docs/images/widget-weather-tile.png) |
 
-The [home summary](docs/overviews/home.md) is a page of the dashboard that builds itself from the widgets on the carousel (chips, cameras, scenes), here on a landscape and a portrait tablet:
+The [home summary](docs/overviews/home.md) brings your home together: a quick look at lights and heating, cameras, scenes
+and anything that needs attention. It works in landscape and portrait:
 
 | Home summary (1280 x 800) | Home summary (800 x 1280) |
 | --- | --- |
 | ![Home summary](docs/images/overview-home.png) | ![Home summary, portrait](docs/images/overview-home-portrait.png) |
 
-`npm run screenshots` regenerates every picture from placeholder data; nothing contacts a Home Assistant.
-
 ## Features
 
-* **One card, many pages.** `custom:houseview-card` arranges widgets into bounded pages that fit the screen in any
-  orientation. Swipe, press the page dots or use the arrow keys. Overflow continues on a numbered page, never in a
-  scrolling column.
-* **16 widgets**: clock, date, calendar, camera, thermostat, light, switch, fan, blinds, lock, sensor, weather, music
-  player, timer, alarm panel and an action widget for scenes, scripts and buttons. Each is also a card of its own.
-* **9 overviews**: World Clock, light and thermostat controls, weather scene, photo frame, month calendar, timer display, cover art and a home screen that builds itself from your widgets. Use them as screensavers, as
-  automatic displays, open them by pressing a widget, or place them as cards.
-* **One page layout and several looks**: widgets flow onto bounded pages, sized with `size` and `columns`; `glass`,
-  `soft`, `teal`, `silver` and `champagne` surfaces; light, dark and automatic appearance; a high-contrast option and a bedtime mode with a Dim button.
-* **Home Assistant conventions**: native card picker and visual editor with entity selectors, `tap_action`, `hold_action`
-  and `double_tap_action`, in-card confirmations, optional localised states.
-* **A camera grid** for up to four cameras, a **timer** with presets and a completion alert, and a **tablet mode** that hides
-  Home Assistant's sidebar and header.
-* **Made for weak tablets.** A `performance` option (`auto` by default) switches to opaque glass and no decorative animation on
-  a low-end device; a covering overview stops all work underneath.
-* **No dependencies.** One JavaScript file, no external fonts, images or services.
+* **A few pages, easy to find your way around.** Swipe between screens, tap the page dots or use the arrow keys.
+  Each page fits the display in landscape or portrait.
+* **Everyday controls.** Lights, heating, blinds, locks, fans, switches, cameras, music, timers, weather and more.
+  Use them together or add individual HouseView cards to an existing dashboard.
+* **Space to adjust things comfortably.** Open a light to drag its brightness up or down, set the heating on a full-screen
+  thermostat, or browse your music favourites with artwork and swipeable pages.
+* **A useful home summary.** See the state of your home, run scenes, and check open doors, low batteries, lights left on
+  and devices that need attention. Battery warnings can find the relevant Home Assistant entities automatically.
+* **Useful while idle.** Choose weather, photos, a calendar or another full-screen view. Timers and playing music can
+  bring up their own displays automatically.
+* **A consistent look.** Choose glass, soft, teal, silver or champagne, with light and dark appearances, high contrast
+  and a bedtime mode with a Dim button.
+* **Made for wall tablets.** Large touch targets, a camera grid and an optional tablet mode that hides Home Assistant's
+  sidebar and header. A lighter appearance helps older tablets keep up.
+* **Set it up your way.** Use Home Assistant's visual editor or YAML, with support for scenes, scripts and custom actions.
 
 ## Terminology
 
@@ -106,7 +107,7 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 3. Hard-refresh your browser.
 
 **Caching.** Browsers and wall tablets keep the old file. After an update append a version to the resource URL
-(`/local/houseview/houseview.js?v=1.0.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
+(`/local/houseview/houseview.js?v=1.2.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
 
 **Kiosk mode.** Add `?tablet=1` to the dashboard address (or set `tablet_mode: true`) and HouseView hides Home Assistant's
 sidebar and header so the carousel uses the whole screen. This relies on Home Assistant internals that are not a public API,
@@ -280,14 +281,16 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |
 | `tablet_mode` | The same as `?tablet=1` |
-| `preview_time` | Freeze the clock for screenshots and tests |
+| `home_overview`, `home_title` | Show the home summary button and choose its title |
+| `home_attention` | Choose the doors, lights and devices to watch for attention |
+| `home_battery_auto` | Find low batteries automatically; see [Home summary](docs/overviews/home.md) |
 
 ## Translations
 
 All interface text is English today (widgets, the editor, error messages). Dates, times and numbers follow your Home Assistant
 language and time zone; entity states can be shown in your language with `localized_states: true`; the weather overview also
-ships German text. Strings live in `strings.js` next to each widget and overview, keyed by language, so adding a language is a
-matter of adding a table beside `en`. Translations are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+ships German text. Contributions to help HouseView feel at home in more languages are welcome; see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Troubleshooting and FAQ
 
@@ -362,10 +365,8 @@ keep it going:
 
 ## Security and privacy
 
-* HouseView sends nothing anywhere except to your own Home Assistant. It loads no external scripts, fonts or images.
-* Camera snapshots, album art and photos are loaded only from your Home Assistant's own address (the page origin or the
-  configured base URL) and, for cameras and album art, only from Home Assistant's proxy paths. Anything else an entity names is
-  ignored.
+* HouseView loads no external scripts or fonts. Playlist artwork loads the thumbnail URLs supplied by your configured music services, without a page referrer or added Home Assistant authentication.
+* Camera snapshots, now-playing album art and photo-frame images stay on Home Assistant’s own address and approved proxy paths. Playlist-browser thumbnails use the original media-browser image URLs as described above.
 * Passive overviews are read-only. Interactive views route controls through the widget action dispatcher; service calls
   require explicit control input or a configured action. Entity names and states are escaped before they reach the page.
 * The `url` action only opens `http`, `https`, `mailto` and `tel` links.

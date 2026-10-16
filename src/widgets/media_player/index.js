@@ -4,6 +4,9 @@
 // repeat are new. The progress bar is moved by a 1 s tick (a bare render could not advance it between state changes).
 import {defineWidget} from '../../core/define-widget.js';
 import {artworkHTML} from './artwork.js';
+import library from './library.js';
+import {libraryEditor} from './library-editor.js';
+import {BROWSE_MEDIA} from './library-data.js';
 
 // MediaPlayerEntityFeature bits in `supported_features` (Home Assistant core).
 const VOLUME_SET = 4;
@@ -192,10 +195,22 @@ export default defineWidget({
   cardRows: 6,
   standaloneHeight: 380,
 
+  options: {playlist_mode: {type: 'enum', values: ['all', 'selected']}},
+  editor: libraryEditor,
+  extension: library,
+  validate(widget) {
+    if (
+      widget.playlists !== undefined &&
+      (!Array.isArray(widget.playlists) ||
+        widget.playlists.some((item) => typeof item !== 'string'))
+    )
+      throw new Error('Shown playlists must be a list of saved media IDs.');
+  },
+
   render(ctx) {
     const art = artworkHTML(ctx) || ctx.icon('music-note');
     // The speaker name is only for screen readers; the volume pill is the one control in the top row.
-    const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumePill(ctx)}</div>`;
+    const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumePill(ctx)}${ctx.feature(BROWSE_MEDIA) ? ctx.btn(`media-player-browse-${ctx.index}`, `${ctx.icon('playlist-music')}<span>${ctx.esc(ctx.t('media_player.browse'))}</span>`, 'mc-browse') : ''}</div>`;
     const stage =
       `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>` +
       `<div class="mc-meta"><strong class="mc-title">${ctx.esc(titleText(ctx))}</strong>` +

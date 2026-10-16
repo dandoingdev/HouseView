@@ -15,12 +15,12 @@ import {extensions, getWidget} from './registry.js';
 export const COMPARE_MODES = ['deep', 'reference', 'auto'];
 
 /** Entity ids whose state change must re-render the card, without duplicates. */
-export function watchedIds(config) {
+export function watchedIds(config, hass) {
   if (!config) return [];
   const ids = [];
   for (const widget of config.widgets ?? []) {
     if (widget.entity) ids.push(widget.entity);
-    const extra = getWidget(widget.type)?.watch?.(widget, config);
+    const extra = getWidget(widget.type)?.watch?.(widget, config, hass);
     if (Array.isArray(extra)) ids.push(...extra);
   }
   for (const {extension} of extensions()) ids.push(...(extension.entities?.(config) || []));
@@ -75,7 +75,14 @@ export function sameSignature(a, b) {
  */
 export function hassChanged(card, hass) {
   const config = card._config;
-  const signature = computeSignature(hass, watchedIds(config), resolveMode(config, hass));
+  let signature = computeSignature(hass, watchedIds(config, hass), resolveMode(config, hass));
+  if (config?.home_battery_auto) {
+    const metadata = [hass?.entities, hass?.devices];
+    signature =
+      typeof signature === 'string'
+        ? JSON.stringify([signature, ...metadata])
+        : {...signature, scalars: [...signature.scalars, ...metadata]};
+  }
   if (sameSignature(card._signature, signature)) return false;
   card._signature = signature;
   return true;

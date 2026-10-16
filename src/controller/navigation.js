@@ -2,12 +2,7 @@
 import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 
-// A swipe is a mostly horizontal drag that is far enough and quick enough.
-const SWIPE_MIN_DISTANCE = 60;
-const SWIPE_HORIZONTAL_RATIO = 1.5;
-const SWIPE_MAX_MS = 1400;
-// The click that follows a swipe must not press whatever lies under the finger.
-const SWIPE_CLICK_GUARD_MS = 400;
+import {swipeStep, SWIPE_CLICK_GUARD_MS} from '../core/swipe.js';
 
 const SLIDER_SELECTOR = 'input[type=range],[role=slider],ha-slider,ha-control-slider';
 
@@ -61,13 +56,10 @@ export const navigationMixin = {
     const start = this._gesture;
     this._gesture = null;
     if (!start) return;
-    const dx = e.clientX - start.x;
-    const dy = e.clientY - start.y;
-    const far = Math.abs(dx) > SWIPE_MIN_DISTANCE;
-    const horizontal = Math.abs(dx) > Math.abs(dy) * SWIPE_HORIZONTAL_RATIO;
-    if (far && horizontal && Date.now() - start.time < SWIPE_MAX_MS) {
+    const step = swipeStep(start, e);
+    if (step) {
       this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
-      this._setPage(this._pageIndex + (dx < 0 ? 1 : -1));
+      this._setPage(this._pageIndex + step);
     }
   }
 };

@@ -37,6 +37,7 @@ export class HouseViewWidgetEditor extends HTMLElement {
   // The carousel editor answers this event with `embedded: true`: inside a page stack the card has a size and no
   // standalone appearance fields.
   connectedCallback() {
+    this._loadOptions();
     const detail = {embedded: false};
     this.dispatchEvent(
       new CustomEvent('houseview-editor-context', {detail, bubbles: true, composed: true})
@@ -47,9 +48,16 @@ export class HouseViewWidgetEditor extends HTMLElement {
     }
   }
 
+  disconnectedCallback() {
+    this._optionAbort?.abort();
+    this._optionRevision = (this._optionRevision || 0) + 1;
+    this._optionKey = undefined;
+  }
+
   set hass(value) {
     this._hass = value;
     // Only the forms need the new hass; the DOM is not rebuilt.
+    this._loadOptions();
     if (this._form) this._form.hass = value;
     else if (this._config && hasForm()) this._render();
   }
@@ -59,6 +67,7 @@ export class HouseViewWidgetEditor extends HTMLElement {
     next.widget_type = next.widget_type || kindFromType(next.type) || 'clock';
     if (JSON.stringify(next) === JSON.stringify(this._config)) return;
     this._config = next;
+    this._loadOptions();
     if (this._form && this._formEmbedded === this._embedded) this._refresh();
     else this._render();
   }
@@ -72,8 +81,56 @@ export class HouseViewWidgetEditor extends HTMLElement {
     const data = widgetFormData(this._definition, this._config);
     return {
       data,
-      schema: compileWidgetSchema(this._hass, this._definition, {embedded: !!this._embedded, data})
+      schema:
+        this._definition.editor?.schema?.(
+          this._hass,
+          this._config,
+          compileWidgetSchema(this._hass, this._definition, {embedded: !!this._embedded, data}),
+          this._optionData
+        ) || compileWidgetSchema(this._hass, this._definition, {embedded: !!this._embedded, data})
     };
+  }
+
+  _loadOptions() {
+    if (!this._config || !this._hass) return;
+    const loader = this._definition.editor?.loadOptions;
+    const key = `${this._config.widget_type}:${this._config.entity}`;
+    if (this._optionKey === key && this._optionConnection === this._hass.connection) return;
+    this._optionAbort?.abort();
+    this._optionAbort = new AbortController();
+    const signal = this._optionAbort.signal;
+    const config = this._config;
+    const hass = this._hass;
+    this._optionKey = key;
+    this._optionConnection = this._hass.connection;
+    const revision = (this._optionRevision = (this._optionRevision || 0) + 1);
+    this._optionData = {loading: true};
+    if (!loader || !this._config.entity) {
+      this._optionData = null;
+      return;
+    }
+    Promise.resolve()
+      .then(() => loader(hass, config, signal))
+      .then(
+        (result) => {
+          if (this._optionRevision === revision) {
+            this._optionData = result;
+            if (this._form) {
+              this._form.schema = this._formView().schema;
+              this._form.requestUpdate?.();
+            }
+          }
+        },
+        () => {
+          if (this._optionRevision === revision) {
+            this._optionData = {error: true};
+            if (this._form) {
+              this._form.schema = this._formView().schema;
+              this._form.requestUpdate?.();
+            }
+          }
+        }
+      );
   }
 
   _render() {
@@ -88,7 +145,9 @@ export class HouseViewWidgetEditor extends HTMLElement {
       data,
       schema,
       computeLabel: (item) => widgetLabeller(this._hass, this._definition)(item),
-      computeHelper: (item) => widgetHelper(this._hass, this._definition)(item),
+      computeHelper: (item) =>
+        this._definition.editor?.helper?.(this._config, this._optionData, item) ??
+        widgetHelper(this._hass, this._definition)(item),
       changed: (value) => this._changed(value)
     });
   }
@@ -120,6 +179,7 @@ export class HouseViewWidgetEditor extends HTMLElement {
       if (this._config.type !== WIDGET_CARD) this._config.type = WIDGET_CARD;
       this._definition.editor?.onKindChange?.(this._config);
     }
+    this._loadOptions();
     fireEvent(this, 'config-changed', {config: structuredClone(this._config)});
     if (changedKind) {
       // New kind: new fields, labels and data, but the same <ha-form>.

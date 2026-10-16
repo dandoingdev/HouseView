@@ -22,6 +22,47 @@ Everything reads from the card's widget list and Home Assistant; the overview ne
 | **Cameras** | Up to three `camera` widgets: a large rounded snapshot with a small "2m ago" label (from the entity's `last_updated`, in your language) | Opens the camera gallery when the card has `camera_gallery`, otherwise the camera's more-info dialog. The heading "Cameras" goes to the page of the first camera widget |
 | **Scenes** | Every `action` widget whose entity is a `scene.*` (scripts and buttons are not listed): a tile with the icon and name, two per row | Runs the scene. The heading goes to the page of the first scene widget |
 
+### House needs attention (optional)
+
+Enable **Find low batteries automatically** in **Edit card → Home summary**, or set `home_battery_auto: true` on the
+parent card. Discovery matches Home Assistant Maintenance: visible `sensor` and `binary_sensor` entities with
+`device_class: battery`, including devices without an area. Percentage readings at or below 20% and binary low-battery
+sensors reporting On appear in attention. A related `battery_charging` sensor on the same device suppresses percentage
+warnings while On. Unknown/unavailable readings are not low-battery readings. New devices, visibility changes and
+charging state changes are reflected automatically; no battery entity list is needed. Phones and other personal devices
+are included when their battery entities are visible, just as in Maintenance.
+
+Choose a list under **Edit card → Home summary → House needs attention**, or supply `home_attention` on the parent card.
+This list controls the other checks; automatic battery discovery is enabled separately.
+
+```yaml
+home_attention:
+  - entity: binary_sensor.study_window
+    kind: opening
+    name: Study window
+  - entity: sensor.bedside_button_battery
+    kind: battery
+    below: 20
+  - entity: light.hall
+    kind: light
+    after: 120
+  - entity: climate.bedroom
+    kind: device
+    after: 5
+```
+
+`opening` shows contacts reporting On (open). `battery` shows numeric percentages at or below `below` (20 by default),
+including zero, or a binary low-battery sensor reporting On. `light` shows a light continuously On for `after` minutes
+(120 by default), using its real `last_changed` timestamp. This is a duration check, not an occupancy judgement.
+`device` shows Unavailable or Unknown after `after` minutes (5 by default). Unknown/unavailable monitored contacts,
+batteries and lights also appear after five minutes; missing entities appear as Not reporting. Invalid battery readings
+never become zero; unknown contacts never count as closed. Changes update immediately, and duration thresholds are
+rechecked each minute even when the clock is hidden.
+
+Rows reuse Home's rounded surfaces and amber accents. A press opens the entity's normal details and never sends a device
+service. The same section appears in embedded and full-screen Home, with the existing close button retained. With no
+issues it says “No issues detected in monitored devices”; with no configured checks the section is absent.
+
 ### Bins and transport chips (optional)
 
 Two optional chips are read from the **card** configuration (the same keys work wherever the overview is shown). The card editor's **Home summary** section edits them, with the switch and the title:
@@ -53,7 +94,7 @@ carousel's dark appearance.
 The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It can be a page of the dashboard (the
 chips, cameras and scenes are buttons) or a **screensaver**: choose **Home summary** in the editor's screensaver list
 (or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
-screensaver it is read-only: a press only wakes the dashboard. The screensaver shows the carousel's lights, climate,
+full-screen view it remains interactive: scene tiles run their scenes, and the close button or Escape returns to the dashboard. The screensaver shows the carousel's lights, climate,
 locks, cameras and scenes, so it follows what you add. A page that holds only this overview also takes the overview's
 colour for the whole page background, and the page dots change colour to match.
 

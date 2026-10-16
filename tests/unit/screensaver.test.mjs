@@ -200,7 +200,11 @@ function setup(t, {screensaver, hass = {states: states()}, reduced = false, conn
   };
   Object.defineProperty(globalThis, 'document', {value: fakeDocument, configurable: true});
   Object.defineProperty(globalThis, 'window', {
-    value: {matchMedia: () => ({matches: reduced})},
+    value: {
+      matchMedia: () => ({matches: reduced}),
+      requestAnimationFrame: (callback) => setTimeout(callback, 0),
+      cancelAnimationFrame: (token) => clearTimeout(token)
+    },
     configurable: true
   });
 
@@ -239,6 +243,9 @@ function setup(t, {screensaver, hass = {states: states()}, reduced = false, conn
       }
     },
     wait(ms) {
+      // Flush the two simulated paint frames before advancing fade/guard timers.
+      mock.timers.tick(0);
+      mock.timers.tick(0);
       mock.timers.tick(ms);
     },
     connect() {
@@ -519,13 +526,14 @@ test('focus moves to the dismiss button when the card had focus, and returns aft
   assert.equal(env.shadowRoot.activeElement, tile);
 });
 
-test('focus is left alone when the card holds none, or when the old element is gone', (t) => {
+test('a modal takes focus without an opener and never restores a missing opener', (t) => {
   const env = setup(t, {screensaver: block()});
   env.second(10);
-  assert.equal(env.shadowRoot.activeElement, null);
+  assert.equal(env.shadowRoot.activeElement, env.layer.button);
+  assert.equal(env.host._screensaver.active.focusReturn, null);
   fire(env.layer, 'pointerup');
   env.wait(400);
-  assert.equal(env.shadowRoot.activeElement, null);
+  assert.equal(env.layer, null);
 
   const tile = new FakeElement('button', 'tile');
   let focused = 0;

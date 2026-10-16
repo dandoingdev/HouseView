@@ -1,4 +1,6 @@
 import {defineOverview} from '../../core/define-overview.js';
+import {attentionRules, attentionIds, attentionItems} from '../../core/home-attention.js';
+import {panelKey} from '../_shared/control-panel.js';
 import {cameraUrl} from '../../core/media-url.js';
 import strings from './strings.js';
 import {
@@ -46,8 +48,8 @@ function agoText(ctx, since) {
 }
 
 /**
- * A control in card mode, plain markup in screensaver mode (an interactive overview renders without buttons there:
- * a screensaver press only wakes the dashboard). `attrs` is a string of extra, already escaped attributes.
+ * A Home control in both embedded and full-screen modes.
+ * `attrs` is a string of extra, already escaped attributes.
  */
 function control(live, tag, {action, entity, cls, inner, attrs = '', disabled = false}) {
   if (!live) return `<${tag} class="${cls}"${attrs}>${inner}</${tag}>`;
@@ -185,14 +187,46 @@ function sceneTileHTML(ctx, scene, live) {
   });
 }
 
+function attentionHTML(ctx) {
+  if (!ctx.config?.home_battery_auto && !attentionRules(ctx.config, ctx.hass).length) return '';
+  const rows = attentionItems(ctx.config, ctx.stateOf, ctx.now(), ctx.hass);
+  const heading = ctx.esc(ctx.t('home_overview.attention.title'));
+  const content = rows.length
+    ? `<div class="ov-home-attention-list">${rows
+        .map((row) => {
+          const detail =
+            row.reason === 'battery_value'
+              ? ctx.t('home_overview.attention.battery_value', {value: ctx.formatNumber(row.value)})
+              : row.reason === 'light'
+                ? ctx.t(
+                    row.hours
+                      ? 'home_overview.attention.light_hours'
+                      : 'home_overview.attention.light_minutes',
+                    {value: ctx.formatNumber(row.hours || row.minutes)}
+                  )
+                : ctx.t(`home_overview.attention.${row.reason}`);
+          return control(true, 'div', {
+            action: 'info',
+            entity: ctx.esc(row.entity),
+            cls: 'ov-home-attention-item',
+            attrs: ` data-tone="${row.tone}"`,
+            inner: `${iconBox(ctx, row.icon)}<span class="ov-home-attention-text"><strong class="ov-home-attention-name">${ctx.esc(row.name)}</strong><small class="ov-home-attention-detail">${ctx.esc(detail)}</small></span><span class="ov-home-attention-arrow">${ctx.icon('mdi:chevron-right').replace('<ha-icon', '<ha-icon class="ov-home-attention-chevron"')}</span>`
+          });
+        })
+        .join('')}</div>`
+    : `<p class="ov-home-attention-clear">${iconBox(ctx, 'mdi:check-circle-outline')}${ctx.esc(ctx.t('home_overview.attention.clear'))}</p>`;
+  return `<section class="ov-home-section ov-home-attention"><h3 class="ov-home-heading">${heading}<span class="ov-home-attention-count">${ctx.esc(ctx.formatNumber(rows.length))}</span></h3>${content}</section>`;
+}
+
 function sceneHTML(ctx, mode) {
-  const live = mode === 'card';
+  const live = true;
   const groups = collect(ctx.config?.widgets);
   const row = chips(groups, ctx.stateOf, (n) => ctx.formatNumber(n));
-  const extras = binsChipHTML(ctx, mode === 'card') + transportChipsHTML(ctx, mode === 'card');
+  const extras = binsChipHTML(ctx, live) + transportChipsHTML(ctx, live);
   const cameras = visibleCameras(groups);
   const scenes = groups.scene;
-  const empty = !row.length && !extras && !cameras.length && !scenes.length;
+  const attention = attentionHTML(ctx);
+  const empty = !row.length && !extras && !cameras.length && !scenes.length && !attention;
   const title = ctx.esc(ctx.options.title || ctx.t('home_overview.title'));
   const time = ctx.options.show_time
     ? `<p class="ov-home-time">${ctx.esc(ctx.timeParts(ctx.now()).text)}</p>`
@@ -204,6 +238,7 @@ function sceneHTML(ctx, mode) {
     if (row.length || extras) {
       body += `<div class="ov-home-chips">${row.map((chip) => chipHTML(ctx, chip, live)).join('')}${extras}</div>`;
     }
+    body += attention;
     let main = '';
     if (cameras.length) {
       main +=
@@ -222,7 +257,19 @@ function sceneHTML(ctx, mode) {
   return (
     `<div class="ov-scene ov-home-scene" data-mode="${mode}">` +
     `<div class="ov-home-scroll"><header class="ov-home-head"><h2 class="ov-home-title">${title}</h2>${time}</header>` +
-    `${body}</div></div>`
+    `${body}</div>` +
+    (mode === 'screensaver'
+      ? panelKey(
+          {...ctx, entityId: 'home'},
+          {
+            action: 'overview-close',
+            icon: 'close',
+            label: ctx.t('home_overview.close'),
+            cls: 'ov-home-close'
+          }
+        )
+      : '') +
+    '</div>'
   );
 }
 
@@ -232,7 +279,14 @@ function sceneHTML(ctx, mode) {
  */
 function stampOf(ctx) {
   const cameras = collect(ctx.config?.widgets).camera.length > 0;
-  if (!ctx.options.show_time && !cameras && !binsEntity(ctx.config?.home_bins)) return null;
+  if (
+    !ctx.options.show_time &&
+    !cameras &&
+    !binsEntity(ctx.config?.home_bins) &&
+    !ctx.config?.home_battery_auto &&
+    !attentionRules(ctx.config, ctx.hass).length
+  )
+    return null;
   return `${minuteOf(ctx.now())}|${cameras ? bucketOf(ctx.now()) : 0}`;
 }
 
@@ -251,7 +305,7 @@ function refresh(ctx) {
 }
 
 /** Every entity the home screen reads: the widgets' own, so a light, lock or scene change repaints it. */
-const watched = (config) => {
+const watched = (config, hass) => {
   const groups = collect(config?.widgets);
   return [
     ...groups.climate,
@@ -263,6 +317,7 @@ const watched = (config) => {
   ]
     .map((item) => item.entity)
     .concat(
+      attentionIds(config, hass),
       binsEntity(config?.home_bins) || [],
       transportItems(config?.home_transport).map((item) => item.entity)
     );
@@ -275,9 +330,9 @@ export default defineOverview({
   entity: 'none',
   domains: [],
   strings,
-  // Also offered as a screensaver (the summary instead of, say, the weather): there it is read-only and a press wakes.
-  // Its chips, headings, cameras and scenes are buttons (card mode only).
+  // Full-screen Home keeps its controls; only the shared close button or Escape dismisses it.
   interactive: true,
+  controls: true,
   tap: {card: 'none'},
 
   options: {
@@ -285,7 +340,7 @@ export default defineOverview({
     show_time: {type: 'boolean', default: true}
   },
 
-  watch: (_options, config) => watched(config),
+  watch: (_options, config, hass) => watched(config, hass),
 
   render: (ctx, mode) => sceneHTML(ctx, mode),
 

@@ -41,9 +41,10 @@ These apply whatever `performance` says.
 * **Changes are patched, not rebuilt.** A state change updates only the widgets it touches, in place, so images, focus and
   animations survive. A state change of an entity the card does not show costs a signature comparison.
 * **An overview is cheap.** Once its fade-in has finished the layer is opaque and HouseView hides the carousel under it
-  (`visibility` and `content-visibility`), so the widgets, their blur and the camera picture are not painted. While it covers
+  (`visibility: hidden`, retaining layout), so the widgets, their blur and the camera picture are not painted. While it covers
   the card nothing underneath is updated: no widget repaint, no countdown, no clock hands, **no camera snapshot request**, no
-  hass for native cards. The first thing a wake does is bring all of that up to date.
+  hass for native cards. Wake catches the tiles up behind the opaque overview and waits two animation frames before revealing
+  them. This avoids exposing a cold paint on Android WebView, including in lite and reduced-motion modes.
 * **The weather scene is gradients only.** The clouds are soft radial-gradient puffs (no mask, no blur) that share one layer
   which drifts slowly; at most three animations run at once, they move `transform` or `opacity` only, are promoted to layers
   only while they run, and none runs under `prefers-reduced-motion`.
