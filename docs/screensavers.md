@@ -7,7 +7,7 @@ be used four ways:
 | --- | --- |
 | **Screensaver** | After a while without a touch, from the carousel's `screensaver` option |
 | **Automatic display** | By itself: the [timer display](overviews/timer.md) while a timer runs, the [cover art](overviews/cover_art.md) while music plays |
-| **Opened by pressing a widget** | The month calendar opens from a clock, date or calendar widget; the full weather scene opens from the weather overview's small widget; the photo frame card opens full screen |
+| **Opened by pressing a widget** | The month calendar opens from a date or calendar widget; the full weather scene opens from the weather widget; the thermostat view opens from the thermostat widget; the photo frame card opens full screen |
 | **Card** | Placed on a page or on a dashboard like any widget. The [home summary](overviews/home.md) is only a card: a page that builds itself from the carousel's widgets |
 
 ## The overviews
@@ -18,7 +18,7 @@ be used four ways:
 | [Timer display](overviews/timer.md) | `timer` | event (while the timer is `active`), automatic with `timer_display`, card | `timer.*` | none | Screensaver: closes it. Card: more-info |
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |
 | [Photo frame](overviews/photo_frame.md) | `photo_frame` | idle (screensaver), card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | Card: opens it full screen |
-| [Month calendar](overviews/calendar_month.md) | `calendar_month` | idle (screensaver), opened by pressing a clock, date or calendar widget, card | none | `week_start`, `show_time` | Card: nothing |
+| [Month calendar](overviews/calendar_month.md) | `calendar_month` | idle (screensaver), opened by pressing a date or calendar widget, card | none | `week_start`, `show_time` | Card: nothing |
 | [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
 
 Card types are `custom:houseview-<name>-overview-card` with the name in the table's `type` column, underscores written as
@@ -181,10 +181,15 @@ you flip that switch.
   screen; a tap closes it. Turn this off with `calendar_view: false` on the carousel. An explicit
   `screensaver` entry with `type: calendar_month` (for example with `week_start: sunday`) supplies the options.
 * **Weather scene.** A weather overview card with `display: tile` is a small widget; pressing it opens the full scene.
+* **Thermostat view.** Pressing the number on a thermostat widget opens the [thermostat view](overviews/climate.md):
+  the target in large figures with down and up keys, the room temperature and humidity, and a key for Home Assistant's
+  own thermostat dialog. It is a control panel: its keys work, a press on the background does nothing, and the key top
+  left (or Escape) closes it. Turn this off with `climate_view: false` on the carousel; the number then opens the
+  entity dialog. A `screensaver` entry with `type: climate` written in YAML supplies the options (`show_time`).
 * **Photo frame.** The photo frame card opens full screen when pressed.
 
 These layers are one-off: they never start by themselves, they run even in edit mode, and the first tap on them only closes
-them.
+them (the thermostat view closes with its own key).
 
 ## Tablet, bedtime and motion
 

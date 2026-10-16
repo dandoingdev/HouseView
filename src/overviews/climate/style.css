@@ -1,0 +1,175 @@
+/* @phase overviews */
+/* @owns ov-climate-scene ov-climate-body ov-climate-caption ov-climate-row ov-climate-value ov-climate-long ov-climate-none ov-climate-step ov-climate-down ov-climate-up ov-climate-meta ov-climate-fig ov-climate-fig-text ov-climate-current ov-climate-humidity ov-climate-ico */
+
+/*
+ * The thermostat view: one flat colour for the mood (blue cooling, orange heating, slate idle, grey off), white
+ * text, round translucent keys. No images, gradients, filters or animation; every size is a container query unit of
+ * `.ov`, so the same markup fits 1280 x 800, 800 x 1280, a phone and a 420 x 320 card.
+ */
+.ov-climate-scene {
+  --ov-climate-bg: #5b6b7f;
+  display: flex;
+  flex-direction: column;
+  background: var(--ov-climate-bg);
+  color: #fff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+  border-radius: inherit;
+  /* a picture of a number, not running text: the figures must not be bidi-reordered */
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.ov-climate-scene[data-mood='cooling'] {
+  --ov-climate-bg: #2a94e4;
+}
+.ov-climate-scene[data-mood='heating'] {
+  --ov-climate-bg: #ef7d2c;
+}
+.ov-climate-scene[data-mood='off'] {
+  --ov-climate-bg: #3a3f47;
+}
+.ov-climate-scene[data-mood='unavailable'] {
+  --ov-climate-bg: #2b2f36;
+}
+
+/* an icon in a fixed box: the carousel sizes every ha-icon (42 px, 32 px on a phone) and gives it a bottom margin */
+.ov-climate-ico {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+}
+@media (max-width: 479px) {
+  .ov-climate-ico {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* the face: caption, the number between its keys, the figures beneath */
+.ov-climate-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1cqmin;
+  padding: 0 4cqmin 8cqmin;
+  text-align: center;
+}
+.ov-climate-caption {
+  margin: 0;
+  font-size: max(15px, 6.4cqmin);
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0.95;
+}
+.ov-climate-row {
+  display: grid;
+  grid-template-columns: max(48px, 14cqmin) auto max(48px, 14cqmin);
+  align-items: center;
+  gap: 2cqmin;
+}
+.ov-climate-value {
+  font-family: ui-rounded, 'SF Pro Rounded', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 38cqmin;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: proportional-nums;
+  white-space: nowrap;
+}
+/* four characters ("21.5") are wider than two */
+.ov-climate-long {
+  font-size: 30cqmin;
+}
+/* an em dash at full size is a heavy bar */
+.ov-climate-none {
+  font-size: 20cqmin;
+  opacity: 0.6;
+}
+.ov-climate-scene[data-mood='off'] .ov-climate-value,
+.ov-climate-scene[data-mood='unavailable'] .ov-climate-value {
+  opacity: 0.55;
+}
+
+/* the chevron keys: a large touch target, a thin glyph drawn in CSS (it scales with the view), no background */
+.ov-climate-step {
+  position: relative;
+  box-sizing: border-box;
+  width: max(48px, 14cqmin);
+  height: max(48px, 14cqmin);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ov-climate-step::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  box-sizing: border-box;
+  width: 42%;
+  height: 42%;
+  border: solid currentColor;
+  border-width: 0 0 max(2px, 0.5cqmin) max(2px, 0.5cqmin);
+  border-radius: max(1px, 0.25cqmin);
+}
+.ov-climate-down::before {
+  transform: translate(-50%, -68%) rotate(-45deg);
+}
+.ov-climate-up::before {
+  transform: translate(-50%, -32%) rotate(135deg);
+}
+.ov-climate-step:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* room temperature and humidity */
+.ov-climate-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4cqmin;
+  min-height: 1.3em;
+  margin: 0;
+  font-size: max(14px, 5.6cqmin);
+  font-weight: 500;
+  line-height: 1.2;
+  opacity: 0.95;
+}
+.ov-climate-fig {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+}
+/* on a small card the fixed-size icons would dwarf the figures: the numbers speak for themselves there */
+@container ov (max-height: 420px) {
+  .ov-climate-fig .ov-climate-ico {
+    display: none;
+  }
+}
+
+.ov-climate-step:not(:disabled):active {
+  opacity: 0.6;
+}
+.ov-climate-step:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ov-climate-step {
+    transition: opacity 0.15s ease;
+  }
+}

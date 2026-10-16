@@ -6,6 +6,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-16
+
 ### Fixed
 
 * The date, calendar, music, sensor and weather widgets are now sized from their own tile (container queries) instead of the
@@ -14,6 +16,15 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* **Light view**: full-screen brightness controls with touch and keyboard input, live colour feedback and a power button.
+* **World clock view**: open the clock widget to see the time across configured cities.
+* **Thermostat view** (`climate` overview): pressing the number on a thermostat widget now opens a full-screen thermostat
+  instead of the entity dialog: "Cooling to" / "Heating to" over the target in large figures, down and up keys, the room
+  temperature and humidity, the time, a close key top left and, bottom right, a key that opens Home Assistant's own
+  thermostat dialog. Blue while cooling, orange while heating, slate at rest, grey when off. `climate_view: false` on the
+  carousel keeps the old behaviour. Also a page card and a standalone card (`custom:houseview-climate-overview-card`).
+* Overview API: `controls: true` (with `interactive`) makes an overview's full-page layer a control panel whose buttons
+  stay live, closed by an `overview-close` button or Escape; `actions` lists the widget actions its buttons may run.
 * The home summary can be a screensaver (choose it in the editor's screensaver list), read-only, instead of the weather.
 * A page that holds only the home summary now takes the overview's colour across the whole page, and the page dots change
   colour to stay visible.
@@ -89,3 +100,5 @@ First public release.
 * HouseView is an independent project, not affiliated with Apple, Home Assistant or Nabu Casa.
 
 [1.0.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.0.0
+
+[1.1.0]: https://github.com/dandoingdev/HouseView/releases/tag/v1.1.0

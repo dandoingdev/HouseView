@@ -1,4 +1,4 @@
-/* @owns control */
+/* @owns control control-split control-tap control-icon control-unavailable */
 /*
  * Shared .control tile proportions for the icon-tile family; the class list is generated (family
  * icon-tile).
@@ -13,7 +13,7 @@
     container-type: size;
   }
 
-  .carousel.layout-page .control:is(@family(icon-tile))>ha-icon {
+  .carousel.layout-page .control:is(@family(icon-tile))>:is(ha-icon,.control-icon) {
     --mdc-icon-size: clamp(46px,40cqmin,160px);
     margin: 0 0 clamp(12px,10cqmin,44px);
     flex-shrink: 0;
@@ -42,4 +42,49 @@
   .carousel.layout-page .control:is(@family(icon-tile)) {
     padding: clamp(14px,3vw,24px);
   }
+}
+
+/* @phase reuse @pin 1 */
+/* A separate icon action stays above the full-tile primary button, without nesting interactive elements. */
+.control-split {
+  position: relative;
+}
+.control-tap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+}
+.control-icon {
+  --mdc-icon-size: 42px;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: var(--mdc-icon-size);
+  height: var(--mdc-icon-size);
+  min-width: 44px;
+  min-height: 44px;
+  flex: none;
+  margin: 0 0 10px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+.control-icon > ha-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.control-split > span,
+.control-split > small {
+  pointer-events: none;
+}
+.control-unavailable {
+  opacity: 0.7;
 }

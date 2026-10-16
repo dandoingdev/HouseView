@@ -39,9 +39,13 @@ jobs:
       - run: npm run test:unit
       - run: npm run build:dev
       - run: npm run test:browser
+      - run: npm run test:browser:min
       - run: npm run test:widgets
       - run: npm run test:overviews
       - run: npm run test:overviews:input
+      - run: npm run test:overviews:timer
+      - run: npm run test:overviews:automatic
+      - run: npm run test:overviews:light
 
       - name: Production build
         run: npm run build

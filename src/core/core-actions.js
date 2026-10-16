@@ -77,11 +77,45 @@ function gotoWidget(ctx, id) {
 export const featureActions = freeze({
   'goto-widget': freeze({immediate: true, run: gotoWidget}),
   'calendar-view': freeze({immediate: true, run: openCalendar}),
+  'world-clock-view': freeze({
+    immediate: true,
+    run: (ctx) => {
+      if (ctx.card._config?.world_clock_view === false) return undefined;
+      return ctx.card._screensaverOpenType?.('world_clock');
+    }
+  }),
   'weather-view': freeze({
     immediate: true,
     run: (ctx, id) => ctx.card._screensaverOpenType?.('weather', id ? {entity: id} : {})
   }),
   'overview-open': freeze({immediate: true, run: openOverview}),
+  // The close button of a control panel layer (the thermostat view). Nothing is called on Home Assistant.
+  'overview-close': freeze({immediate: true, run: (ctx) => ctx.card._screensaverClose?.()}),
+  'light-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      if (!ctx.availableOf(id)) return undefined;
+      const widget = ctx.card._config?.widgets?.find((w) => w.type === 'light' && w.entity === id);
+      return ctx.card._screensaverOpenType?.('light', {
+        entity: id,
+        ...(widget?.name ? {name: widget.name} : {}),
+        icon: widget?.icon || 'lightbulb-outline'
+      });
+    }
+  }),
+  // The thermostat widget's number: the full-screen thermostat view, named after the widget when it has a name.
+  'climate-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      const widget = ctx.card._config?.widgets?.find(
+        (w) => w.type === 'climate' && w.entity === id
+      );
+      return ctx.card._screensaverOpenType?.('climate', {
+        ...(id ? {entity: id} : {}),
+        ...(widget?.name ? {name: widget.name} : {})
+      });
+    }
+  }),
   'home-view': freeze({
     immediate: true,
     run: (ctx) =>

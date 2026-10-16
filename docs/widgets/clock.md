@@ -11,7 +11,7 @@ grows to fill its widget, between 48 and 220 px. On the `soft` surface the dial 
 The name is shown under the dial only when you set one. Set `preview_time` on the carousel card to freeze the clock
 for screenshots.
 
-A tap opens the full-screen [month calendar](../overviews/calendar_month.md). Set `calendar_view: false` on the card
+A tap opens [World Clock](../overviews/world_clock.md), with local time and sensors from the Home Assistant Worldclock integration. The calendar and date widgets keep their month-calendar link. Set `world_clock_view: false` on the card
 to turn that off.
 
 | Option | Type | Default | Description |

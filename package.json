@@ -1,6 +1,6 @@
 {
   "name": "houseview",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Glass dashboard cards for Home Assistant: widgets, pages and full-screen overviews.",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run test:unit && npm run build:dev && npm run test:browser && npm run test:browser:min && npm run test:widgets && npm run test:overviews && npm run test:overviews:input && npm run test:overviews:timer && npm run test:overviews:automatic",
+    "test": "npm run test:unit && npm run build:dev && npm run test:browser && npm run test:browser:min && npm run test:widgets && npm run test:overviews && npm run test:overviews:input && npm run test:overviews:timer && npm run test:overviews:automatic && npm run test:overviews:light",
     "test:unit": "node --test \"tests/unit/*.test.mjs\" \"tests/contract/*.test.mjs\" \"tests/overviews/*.test.mjs\"",
     "test:browser": "node tools/run-tests.mjs tests/browser.html --target=dist",
     "test:browser:min": "npm run build:min && node tools/run-tests.mjs tests/browser.html --target=dist-min",
@@ -37,7 +37,8 @@
     "perf": "node tools/perf-bench.mjs",
     "size": "node tools/size-check.mjs",
     "release": "node tools/release.mjs",
-    "deploy": "node tools/deploy.mjs"
+    "deploy": "node tools/deploy.mjs",
+    "test:overviews:light": "node tests/overviews/light-input.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",

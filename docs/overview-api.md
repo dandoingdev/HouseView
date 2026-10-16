@@ -6,7 +6,7 @@ The contract of an overview module. An overview is a full-screen view that House
 | --- | --- |
 | **Idle screensaver** (`activation: 'idle'`, the default) | After `idle_timeout` seconds without a touch, as an entry of the carousel's `screensaver` option |
 | **Event display** (`activation: 'event'`) | The overview's own `autoShow` predicate turns true (a timer starts) |
-| **Opened by pressing a widget** | A clock, date or calendar widget opens the month calendar (`calendar-view`); a weather overview or photo frame card opens its full-screen view (`overview-open`) |
+| **Opened by pressing a widget** | A clock widget opens World Clock (`world-clock-view`); a date or calendar widget opens the month calendar (`calendar-view`); a weather widget opens the weather scene (`weather-view`); a thermostat widget opens the thermostat view (`climate-view`); a weather overview or photo frame card opens its full-screen view (`overview-open`) |
 | **Card** | Placed on a page or on a dashboard as `custom:houseview-<name>-overview-card` |
 
 One module serves all of them: `render(ctx, mode)` is called with `mode` `'screensaver'` or `'card'`. The framework adds
@@ -73,6 +73,8 @@ export default defineOverview({
 | `validate(options)` | none | Cross-field rules; throw `Error('<exact message>')` |
 | `watch(options, config)` | none | Extra entity ids whose change re-renders (weather: the sun entity). The primary entity is always watched. `config` is the card config as the controller holds it: the derived widget's `watch`, the screensaver change signature and the carousel's `hass-signature` all pass it, so an overview built from the dashboard's own widgets (home) can watch every entity of the configured `config.widgets` |
 | `interactive` | `false` | `true` allows `<button data-action data-entity>` in **card** mode (see "Interactive overviews" below). The derived card then has no full-card `ov-tap` overlay |
+| `controls` | `false` | Needs `interactive`. `true` makes the full-page layer a **control panel** (see "Control panels" below): the buttons stay in screensaver mode, a press on one runs its action, a press elsewhere does nothing, and the layer closes through an `overview-close` button or Escape |
+| `actions` | `[]` | `controls` only. Widget action names the buttons may carry besides `INTERACTIVE_ACTIONS` (the thermostat view: `up`, `down`). Each must be an action a widget registers |
 | `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list (the timer display, cover art and the home summary). It can still be written in YAML |
 | `data({hass, options, entityId})` | none | Subscriptions, keyed by the name `render` reads from `ctx.data[name]` (section 6) |
 | `afterRender(hctx)` | none | After a card-mode root is created or patched; idempotent |
@@ -96,19 +98,45 @@ Most overviews are pictures: no buttons, a press on a screensaver only wakes the
 the dashboard in its own right (the home summary) sets `interactive: true` and may render `<button data-action="..."
 data-entity="...">` in **card** mode. The rules (checked by `tests/overviews/overview-contract.test.mjs`):
 
-* Only these actions: `goto-widget`, `camera-grid`, `run-action`, `info` (`INTERACTIVE_ACTIONS` in `src/core/define-overview.js`).
+* Only these actions: `goto-widget`, `camera-grid`, `run-action`, `info`, `overview-close` (`INTERACTIVE_ACTIONS` in `src/core/define-overview.js`).
   Each is an existing action; the card's controller runs it through the ordinary dispatcher (`src/core/dispatch.js`) with its
   own guards. `run-action` still needs an `action` widget for that entity on the carousel, so an overview cannot run anything
   the dashboard does not already offer.
 * Every button is a real `<button>` with a `data-entity`. For `goto-widget` the entity is `widget:<index>`, the index of the
   widget in the card's normalised `config.widgets` list (the number of its `data-widget` attribute).
-* In **screensaver** mode an interactive overview renders without buttons (a screensaver press dismisses it).
+* In **screensaver** mode an interactive overview renders without buttons (a screensaver press dismisses it), unless it
+  is a control panel.
 * Markup stays free of inline handlers and service calls; the rest of the scene contract (one `ov-scene` root, no ids, no
   `<svg>`, own `ov-*` pictures only) is unchanged.
 
 `goto-widget` is a core feature action (`src/core/core-actions.js`): it finds the carousel page whose placements contain the
 widget and calls the controller's `_setPage`. An unknown or malformed id is a no-op; it works only on a page that exists at the
 current size and is ignored while the camera gallery owns the screen.
+
+### Control panels
+
+A screensaver is a picture: the layer swallows every gesture and the first press only wakes. A view that is operated
+rather than looked at (the thermostat view) sets `controls: true` beside `interactive: true`. Then:
+
+* The overview renders its buttons in **both** modes. The layer has no full-area `ov-dismiss` button and carries the
+  class `hv-controls`; a press on a `<button data-action data-entity>` runs that action through the ordinary
+  dispatcher (`card._act`), a press anywhere else does nothing, Tab moves between the buttons, and Escape closes the
+  layer. The layer closes through a button carrying `overview-close` (a core feature action, nothing is called on Home
+  Assistant) and still goes away on `autoWake`, a blocker or a config change like any layer.
+* Besides `INTERACTIVE_ACTIONS` the buttons may carry the names listed in `actions`: widget actions that the dashboard
+  already offers (the thermostat view lists the thermostat widget's `up` and `down`, so one piece of code steps,
+  clamps and rounds the target). The overview itself still has no `call`.
+* Such an overview is normally `selectable: false` (an idle screensaver that only wakes on a press is not what a
+  control panel is for) and is opened by a widget press (`climate-view`).
+* The layer follows the entity like any layer: a hass update re-renders the scene in place (`_screensaverRender`), so
+  the view shows the new target after a press.
+
+Control panels may also render a native `<input type="range" data-value-action="light-brightness-"
+data-entity="light.example">`. The controller delegates its `change` event to the existing prefix-action dispatcher
+(`light-brightness-50` for value 50), serializing writes per entity and retaining the latest queued value. The light
+view uses `afterRender` to paint local pointer changes and emits `change` on release; network calls remain in the
+light widget's action. Its transparent native range retains keyboard and assistive-technology input while the
+surrounding surface captures pointer gestures to avoid competing native touch drags.
 
 Reserved option names: `type`, `widget_type`, `entity`, `name`, `enabled`, `idle_timeout`, `start_in_edit_mode`,
 `preview`, `page`, `size`.
@@ -174,14 +202,19 @@ with the predicate already true. It replaces whatever layer is showing. It is no
 
 ### Manual open
 
-* **`calendar-view`**: a clock, date or calendar widget asks for the overview named `calendar_month`. Skipped when the card
+* **`calendar-view`**: a date or calendar widget asks for the overview named `calendar_month`. Skipped when the card
   has `calendar_view: false`. The options of an explicit `screensaver` entry of that type apply.
+* **`weather-view`**: a weather widget asks for the overview named `weather`. Skipped when the card has
+  `weather_view: false`.
+* **`climate-view`**: a thermostat widget asks for the overview named `climate` with its entity, and its `name` when it
+  has one. Skipped when the card has `climate_view: false` (the widget then renders `info` instead).
 * **`overview-open`**: a card with `display: tile`, or an overview with `tap: {card: 'open'}` (photo frame), opens its own
   overview.
 
 A manual layer is one-off: the entry never starts by itself (`idle_timeout: 0`), runs even in edit mode, is shown whatever
 the priority and eligibility of the entries around it, and is dropped when the layer goes away, so a configured
-rotation keeps its position. It behaves like a screensaver: the first tap only closes it and presses nothing underneath.
+rotation keeps its position. It behaves like a screensaver: the first tap only closes it and presses nothing underneath,
+unless the overview is a control panel (its own buttons work, its close button or Escape closes it).
 
 ### Implicit entries (automatic displays)
 

@@ -12,10 +12,11 @@ const base = {
   fan_modes: ['auto', 'quiet', 'high'],
   fan_mode: 'auto'
 };
-const make = (state, attributes = {}, widget = {}, hass) => ({
+const make = (state, attributes = {}, widget = {}, hass, config) => ({
   widget: {entity, ...widget},
   states: {[entity]: {state, attributes: {...base, ...attributes}}},
-  ...(hass ? {hass} : {})
+  ...(hass ? {hass} : {}),
+  ...(config ? {config} : {})
 });
 // Unavailable entities carry no attributes.
 const bare = (state) => ({widget: {entity}, states: {[entity]: {state, attributes: {}}}});
@@ -59,6 +60,8 @@ export const variants = {
     fahrenheit
   ),
   hostileRoom: make('heat', {}, {room: '<i>"R"</i> & co'}),
+  // the card opts out of the thermostat view: the number opens more-info
+  climateViewOff: make('heat', {}, {}, undefined, {climate_view: false}),
   customName: make('heat', {}, {name: 'Lounge AC', size: 'wide'}),
   // Characters that must be escaped in the name and in the aria labels.
   hostileName: make('heat', {}, {name: '<b>"AC" & co</b>'}),

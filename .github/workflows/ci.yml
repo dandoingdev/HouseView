@@ -67,6 +67,7 @@ jobs:
           npm run test:overviews:input
           npm run test:overviews:timer
           npm run test:overviews:automatic
+          npm run test:overviews:light
 
       - name: Production build
         run: npm run build

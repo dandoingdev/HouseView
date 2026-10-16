@@ -1,0 +1,81 @@
+/* @phase overviews */
+/* @owns ov-panel-head ov-panel-title ov-panel-time ov-panel-key ov-panel-close ov-panel-info ov-panel-icon */
+.ov-panel-head {
+  --ov-panel-key-size: clamp(52px, 10cqmin, 72px);
+  position: relative;
+  z-index: 2;
+  flex: none;
+  display: grid;
+  grid-template-columns: var(--ov-panel-key-size) minmax(0, 1fr) var(--ov-panel-key-size);
+  align-items: center;
+  width: 100%;
+  gap: 1cqmin 2cqmin;
+  padding: 3cqmin;
+  pointer-events: none;
+  direction: ltr;
+}
+.ov-panel-title {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  font-size: clamp(18px, 4cqmin, 34px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.ov-panel-time {
+  grid-column: 2;
+  grid-row: 2;
+  text-align: center;
+  font-size: clamp(13px, 3cqmin, 20px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.ov-panel-key {
+  display: grid;
+  place-items: center;
+  width: var(--ov-panel-key-size, 52px);
+  height: var(--ov-panel-key-size, 52px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ov-panel-key-bg, rgba(255, 255, 255, 0.18));
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.ov-panel-key .ov-panel-icon {
+  --mdc-icon-size: 28px;
+  margin: 0;
+}
+.ov-panel-close {
+  grid-column: 1;
+  grid-row: 1;
+}
+.ov-panel-info {
+  grid-column: 3;
+  grid-row: 1;
+}
+.ov-panel-key:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.ov-panel-key:not(:disabled):active {
+  opacity: 0.6;
+}
+.ov-panel-key:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ov-panel-key {
+    transition: opacity 0.15s ease;
+  }
+}

@@ -54,7 +54,7 @@ The [home summary](docs/overviews/home.md) is a page of the dashboard that build
   scrolling column.
 * **16 widgets**: clock, date, calendar, camera, thermostat, light, switch, fan, blinds, lock, sensor, weather, music
   player, timer, alarm panel and an action widget for scenes, scripts and buttons. Each is also a card of its own.
-* **6 overviews**: weather scene, photo frame, month calendar, timer display, cover art and a home screen that builds itself from your widgets. Use them as screensavers, as
+* **9 overviews**: World Clock, light and thermostat controls, weather scene, photo frame, month calendar, timer display, cover art and a home screen that builds itself from your widgets. Use them as screensavers, as
   automatic displays, open them by pressing a widget, or place them as cards.
 * **One page layout and several looks**: widgets flow onto bounded pages, sized with `size` and `columns`; `glass`,
   `soft`, `teal`, `silver` and `champagne` surfaces; light, dark and automatic appearance; a high-contrast option and a bedtime mode with a Dim button.
@@ -71,7 +71,7 @@ The [home summary](docs/overviews/home.md) is a page of the dashboard that build
 | Term | Meaning |
 | --- | --- |
 | **Widget** | Any element on a page: clock, date, calendar, light, switch, fan, lock, blinds, thermostat, sensor, weather, music player, camera, timer, alarm panel, action |
-| **Overview** | A full-screen view. It can be a screensaver, appear automatically (the running-timer display, the album cover while music plays), open when you press a widget (the month calendar from a clock, date or calendar widget; the weather scene; the photo frame), or be used as a card |
+| **Overview** | A full-screen view. It can be a screensaver, appear automatically (the running-timer display, the album cover while music plays), open when you press a widget (the month calendar from a date or calendar widget; the weather scene; the photo frame), or be used as a card |
 | **Page** | One swipeable screen of widgets |
 | **Carousel** | The `custom:houseview-card` card that holds the pages |
 
@@ -164,12 +164,12 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 
 | Widget | `type` | Entity | Key options | A tap |
 | --- | --- | --- | --- | --- |
-| [Clock](docs/widgets/clock.md) | `clock` | none | `name` | Opens the month calendar |
+| [Clock](docs/widgets/clock.md) | `clock` | none | `name` | Opens World Clock |
 | [Date](docs/widgets/date.md) | `date` | none | | Opens the month calendar |
 | [Calendar](docs/widgets/calendar.md) | `calendar` | `calendar.*` | | Opens the month calendar (or the entity dialog with `calendar_view: false`) |
 | [Camera](docs/widgets/camera.md) | `camera` | `camera.*` | card option `camera_gallery` | Opens the camera grid, or the entity dialog |
-| [Thermostat](docs/widgets/climate.md) | `climate` | `climate.*` | `room` | Chevrons set the target temperature; the number opens the dialog |
-| [Light](docs/widgets/light.md) | `light` | `light.*` | `action` (`toggle`, `off`), `icon` | Toggles, or turns off |
+| [Thermostat](docs/widgets/climate.md) | `climate` | `climate.*` | `room` | Chevrons set the target temperature; the number opens the thermostat view (or the dialog with `climate_view: false`) |
+| [Light](docs/widgets/light.md) | `light` | `light.*` | `action` (`view`, `toggle`, `off`), `icon` | Icon opens brightness; tile toggles, or turns off |
 | [Switch](docs/widgets/switch.md) | `switch` | `switch.*` | `icon` | Toggles |
 | [Fan](docs/widgets/fan.md) | `fan` | `fan.*` | `icon` | Toggles |
 | [Blinds](docs/widgets/cover.md) | `cover` | `cover.*` | | Keys open, stop and close |
@@ -192,8 +192,11 @@ them and how to combine them.
 | [Timer display](docs/overviews/timer.md) | `timer` | Event: while a timer runs (automatic) | `timer.*` | none | `custom:houseview-timer-overview-card` |
 | [Cover art](docs/overviews/cover_art.md) | `cover_art` | Idle, wins over weather while a speaker plays (automatic) | `media_player.*` | none | `custom:houseview-cover-art-overview-card` |
 | [Photo frame](docs/overviews/photo_frame.md) | `photo_frame` | Idle screensaver; opened by pressing the card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | `custom:houseview-photo-frame-overview-card` |
-| [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a clock, date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
-| [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard (card); not a screensaver choice | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
+| [World Clock](docs/overviews/world_clock.md) | `world_clock` | Opened by pressing the clock widget | none | `entities`, `show_local` | `custom:houseview-world-clock-overview-card` |
+| [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
+| [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
+| [Light view](docs/overviews/light.md) | `light` | Control panel opened by pressing a light widget’s icon | `light.*` | `icon` | `custom:houseview-light-overview-card` |
+| [Thermostat view](docs/overviews/climate.md) | `climate` | Control panel opened by pressing the thermostat widget's number; not a screensaver choice | `climate.*` | `show_time` | `custom:houseview-climate-overview-card` |
 
 ```yaml
 type: custom:houseview-card
@@ -212,11 +215,12 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 | --- | --- | --- |
 | `timer_display` | `true` | Every `timer` widget shows the timer display while its timer runs. A tap puts the dashboard back; it returns for the next timer |
 | `music_screensaver` | `true` | When the screensaver would start and a speaker is playing, the album cover is shown instead of the usual screensaver |
-| `calendar_view` | `true` | `false` stops the clock, date and calendar widgets from opening the month calendar |
+| `world_clock_view` | `true` | `false` disables the clock widget’s World Clock overlay |
+| `calendar_view` | `true` | `false` stops the date and calendar widgets from opening the month calendar |
 | `weather_view` | `true` | `false` makes the weather widget open more-info instead of the full-screen weather |
+| `climate_view` | `true` | `false` makes the thermostat widget open more-info instead of the full-screen thermostat view |
 
-Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Overviews only read data: they
-cannot call a service.
+Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Passive overviews only read data. Light and thermostat control panels route explicit button and slider input through the same guarded actions as their widgets.
 
 ## Works with Alarmo
 
@@ -271,7 +275,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |
 | `screensaver` | An overview or a list of them: `type`, `entity`, `idle_timeout`, `enabled`, `preview`, `start_in_edit_mode`, plus the overview's own options |
-| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view` | The automatic displays |
+| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `world_clock_view` | The automatic displays |
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |
@@ -362,8 +366,8 @@ keep it going:
 * Camera snapshots, album art and photos are loaded only from your Home Assistant's own address (the page origin or the
   configured base URL) and, for cameras and album art, only from Home Assistant's proxy paths. Anything else an entity names is
   ignored.
-* Overviews are read-only: their code has no way to call a service. Widgets call a service only when you press a control or
-  configure a `tap_action` that does; names and states from entities are escaped before they reach the page.
+* Passive overviews are read-only. Interactive views route controls through the widget action dispatcher; service calls
+  require explicit control input or a configured action. Entity names and states are escaped before they reach the page.
 * The `url` action only opens `http`, `https`, `mailto` and `tel` links.
 * Files in `/config/www` are public; put only `houseview.js` there.
 

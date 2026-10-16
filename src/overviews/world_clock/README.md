@@ -1,0 +1,44 @@
+---
+type: world_clock
+label: World Clock
+entity: none
+domains: []
+since: 1.1
+---
+
+# World Clock
+
+Press a clock widget to open a dark World Clock view: a yellow title, rounded charcoal city rows, and large times
+aligned on the right. The local time appears first with a yellow location marker. Date and calendar widgets retain
+the month-calendar view. The shared close button is top left; Escape also closes the overlay. The list scrolls when
+there are more cities than fit on screen.
+
+The view automatically discovers enabled `sensor.*` entities belonging to Home Assistant's Worldclock integration
+through the entity registry. Names and displayed remote times come from the sensors, respecting the integration's
+chosen time format. Missing, unavailable and unknown sensors show a dash. Sensor changes appear on the next shared
+tick, within one second; registry changes refresh discovery without polling.
+
+Day labels and offsets use IANA timezones, including daylight saving and fractional-hour offsets. The integration
+does not expose its timezone as a state attribute: the view uses a valid timezone in the integration entry's title,
+a sensor's timezone attribute when provided, or its friendly name when that is a valid timezone. If the timezone
+cannot be identified reliably, the sensor's time is still shown and the offset/day label is omitted.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| name | text | World Clock | View title |
+| show_local | boolean | true | Include local time first |
+| entities | text | automatic | Optional comma-separated sensor entity IDs, in display order |
+
+```yaml
+type: custom:houseview-world-clock-overview-card
+```
+
+For a restricted Home Assistant account that cannot read the registry, or to choose only a few clocks:
+
+```yaml
+type: custom:houseview-world-clock-overview-card
+entities: sensor.singapore, sensor.australia_act
+```
+
+Set `world_clock_view: false` on a carousel to disable its clock widget's overlay link. This does not change the
+calendar links. No lights, climate devices or Home Assistant services are changed by opening this view.

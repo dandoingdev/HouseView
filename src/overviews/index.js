@@ -2,18 +2,24 @@
 
 import {registerOverview} from '../core/overview-registry.js';
 import calendarMonthOverview from './calendar_month/index.js';
+import climateOverview from './climate/index.js';
 import coverArtOverview from './cover_art/index.js';
 import homeOverview from './home/index.js';
+import lightOverview from './light/index.js';
 import photoFrameOverview from './photo_frame/index.js';
 import timerOverview from './timer/index.js';
 import weatherOverview from './weather/index.js';
+import worldClockOverview from './world_clock/index.js';
 
 export const overviews = [
   calendarMonthOverview,
+  climateOverview,
   coverArtOverview,
   homeOverview,
+  lightOverview,
   photoFrameOverview,
   timerOverview,
-  weatherOverview
+  weatherOverview,
+  worldClockOverview
 ];
 for (const definition of overviews) registerOverview(definition);

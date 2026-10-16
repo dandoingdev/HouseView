@@ -1,0 +1,86 @@
+/* @phase overviews */
+/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-light-icon */
+.ov-light-scene {
+  --ov-panel-key-bg: rgba(23, 40, 45, 0.08);
+  background: #dce5e8;
+  color: #17282d;
+}
+.ov-light-head {
+  position: absolute;
+  inset: 0 0 auto;
+}
+.ov-light-control {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: #dce5e8;
+  border: 0;
+  isolation: isolate;
+  touch-action: none;
+  cursor: ns-resize;
+}
+/* Keyboard focus marks the percentage without drawing a frame around the light screen. */
+.ov-light-control:has(:focus-visible) .ov-light-value {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+  text-decoration-thickness: 2px;
+}
+.ov-light-fill {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--brightness);
+  background: var(--light-color, #f2c200);
+  pointer-events: none;
+}
+.ov-light-readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.ov-light-readout .ov-light-icon {
+  --mdc-icon-size: clamp(32px, 10cqmin, 72px);
+  margin: 0 0 2cqmin;
+}
+.ov-light-value {
+  font-size: 20cqmin;
+  line-height: 1;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.ov-light-percent {
+  font-weight: 600;
+  font-size: 6cqmin;
+}
+.ov-light-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  cursor: ns-resize;
+  touch-action: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+.ov-light-input:disabled {
+  cursor: default;
+}
+.ov-light-foot {
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding: 3cqmin;
+  pointer-events: none;
+  min-height: 44px;
+}

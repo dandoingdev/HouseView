@@ -1,4 +1,4 @@
-/* @owns light */
+/* @owns light control-split control-unavailable */
 /*
  * light widget styles.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders

@@ -12,6 +12,7 @@ import {createHost} from '../fixtures/card-host.mjs';
 import {scanHtml, tagHistogram, dangerousAttributes} from '../fixtures/html-scan.mjs';
 import {
   INTERACTIVE_ACTIONS,
+  allowedActions,
   checkOptions,
   contextFor,
   resolveOptions
@@ -68,10 +69,11 @@ const contextOf = (overview, variant, mode, hass = hassFor(variant)) =>
 
 /**
  * exactly one root element, whose first class is ov-scene, with nothing a scene may not carry.
- * Buttons: only an `interactive` overview in card mode may have them, only <button>s whose action is on the allow-list
- * (INTERACTIVE_ACTIONS) and that name an entity. Everything else has no data-action.
+ * Buttons: only an `interactive` overview in card mode (or a control panel in both modes) may have them, only <button>s
+ * whose action is on the allow-list (INTERACTIVE_ACTIONS, plus the overview's own `actions` for a control panel) and
+ * that name an entity. Everything else has no data-action.
  */
-function sceneProblems(html, {interactive = false} = {}) {
+function sceneProblems(html, {interactive = false, actions = INTERACTIVE_ACTIONS} = {}) {
   const problems = [];
   const {elements, roots, problems: scanProblems} = scanHtml(html);
   problems.push(...scanProblems);
@@ -93,7 +95,7 @@ function sceneProblems(html, {interactive = false} = {}) {
     if ('data-action' in element.attrs) {
       if (!interactive) problems.push('a scene has no data-action');
       else if (element.tag !== 'button') problems.push('data-action only on a <button>');
-      else if (!INTERACTIVE_ACTIONS.includes(element.attrs['data-action'])) {
+      else if (!actions.includes(element.attrs['data-action'])) {
         problems.push(`action ${element.attrs['data-action']} is not allowed in an overview`);
       } else if (!element.attrs['data-entity']) problems.push('a button names its entity');
     }
@@ -109,6 +111,8 @@ if (!folders.length) {
   });
 } else {
   const index = await import(pathToFileURL(path.join(OVERVIEWS_DIR, 'index.js')).href);
+  // The widgets register their actions; a control panel's own `actions` must be among them.
+  await import(pathToFileURL(path.join(ROOT, 'src/widgets/index.js')).href);
 
   describe('overview registry', () => {
     it('registers exactly the overview folders (src/overviews/index.js is fresh)', () => {
@@ -174,11 +178,22 @@ if (!folders.length) {
 
       it('declares whether it is interactive (buttons in card mode) and keeps the card free of the tap overlay', () => {
         assert.equal(typeof overview.interactive, 'boolean');
+        assert.equal(typeof overview.controls, 'boolean');
+        if (overview.controls) assert.ok(overview.interactive, 'a control panel is interactive');
+        else
+          assert.deepEqual(
+            [...overview.actions],
+            [],
+            'only a control panel has actions of its own'
+          );
         if (!overview.interactive) return;
         assert.ok(
-          INTERACTIVE_ACTIONS.every((name) => /^[a-z][a-z0-9-]*$/.test(name)),
+          allowedActions(overview).every((name) => /^[a-z][a-z0-9-]*$/.test(name)),
           'the allow-list holds action names'
         );
+        for (const name of overview.actions) {
+          assert.ok(registry.resolveAction(name), `action ${name} is one a widget registers`);
+        }
       });
 
       it('declares how it starts: idle (default) or event with an autoShow predicate', () => {
@@ -275,11 +290,12 @@ if (!folders.length) {
             it(`${name}: renders one ov-scene root in ${mode} mode`, () => {
               const html = overview.render(contextOf(overview, variant, mode), mode);
               assert.equal(typeof html, 'string');
+              const buttons = overview.interactive && (mode === 'card' || overview.controls);
               assert.deepEqual(
-                sceneProblems(html, {interactive: overview.interactive && mode === 'card'}),
+                sceneProblems(html, {interactive: buttons, actions: allowedActions(overview)}),
                 []
               );
-              if (mode === 'screensaver' || !overview.interactive) {
+              if (!buttons) {
                 assert.equal(
                   scanHtml(html).elements.filter(
                     (e) => e.tag === 'button' || 'data-action' in e.attrs

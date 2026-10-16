@@ -1,8 +1,9 @@
 import {defineWidget} from '../../core/define-widget.js';
+import {canDim} from '../../core/light.js';
 import {controlTile} from '../_shared/control-tile.js';
 
-// Light tile: icon + name + state. A tap toggles the light, or (action: off) always turns it off, which is what
-// bedtime buttons want. Reference widget: docs/widget-api.md
+// Light tile: the icon opens brightness and the rest of the tile toggles; explicit toggle/off actions keep
+// direct service behaviour for shortcuts and bedtime buttons. Reference widget: docs/widget-api.md
 export default defineWidget({
   type: 'light',
   label: 'Light',
@@ -14,9 +15,9 @@ export default defineWidget({
     icon: {type: 'icon'},
     action: {
       type: 'enum',
-      values: ['toggle', 'off'],
-      default: 'toggle',
-      error: 'Light action must be off or toggle.'
+      values: ['view', 'toggle', 'off'],
+      default: 'view',
+      error: 'Light action must be view, off or toggle.'
     }
   },
 
@@ -26,18 +27,37 @@ export default defineWidget({
 
   // The editor form shows the same mapping for configs saved before normalisation.
   editor: {
-    toForm: (widget) => ({action: widget.action === false ? 'off' : widget.action || 'toggle'})
+    toForm: (widget) => ({action: widget.action === false ? 'off' : widget.action || 'view'})
   },
 
   render: (ctx) =>
     controlTile(ctx, {
-      action: ctx.widget.action === 'off' ? 'light-off' : 'light',
-      icon: 'lightbulb-outline'
+      action:
+        ctx.widget.action === 'off'
+          ? 'light-off'
+          : ctx.widget.action === 'toggle'
+            ? 'light'
+            : 'light',
+      icon: 'lightbulb-outline',
+      ...(!ctx.widget.action || ctx.widget.action === 'view'
+        ? {
+            iconAction: 'light-view',
+            iconLabel: ctx.t('light.brightness', {name: ctx.rawName})
+          }
+        : {})
     }),
 
   actions: {
     // `ctx.widget` may be undefined (a direct card._act call), so run only uses the entity id it is given.
     // Action names kept un-prefixed for compatibility (docs/widget-api.md).
+    'light-brightness-*': {
+      guard: (ctx, id) =>
+        /^\d{1,3}$/.test(ctx.param) && Number(ctx.param) <= 100 && canDim(ctx.attrsOf(id)),
+      run: (ctx, id) =>
+        Number(ctx.param) === 0
+          ? ctx.call('light', 'turn_off', {entity_id: id})
+          : ctx.call('light', 'turn_on', {entity_id: id, brightness_pct: Number(ctx.param)})
+    },
     light: {run: (ctx, id) => ctx.call('light', 'toggle', {entity_id: id})},
     'light-off': {run: (ctx, id) => ctx.call('light', 'turn_off', {entity_id: id})}
   }

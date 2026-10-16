@@ -3,11 +3,14 @@
 // Each entry lazily imports a widget's browser test; the module default-exports `async (harness) => {}`.
 export const manifest = [
   {type: 'calendar_month', load: () => import('../../src/overviews/calendar_month/test.js')},
+  {type: 'climate', load: () => import('../../src/overviews/climate/test.js')},
   {type: 'cover_art', load: () => import('../../src/overviews/cover_art/test.js')},
   {type: 'home', load: () => import('../../src/overviews/home/test.js')},
+  {type: 'light', load: () => import('../../src/overviews/light/test.js')},
   {type: 'photo_frame', load: () => import('../../src/overviews/photo_frame/test.js')},
   {type: 'timer', load: () => import('../../src/overviews/timer/test.js')},
-  {type: 'weather', load: () => import('../../src/overviews/weather/test.js')}
+  {type: 'weather', load: () => import('../../src/overviews/weather/test.js')},
+  {type: 'world_clock', load: () => import('../../src/overviews/world_clock/test.js')}
 ];
 
 export default manifest;

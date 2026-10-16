@@ -34,6 +34,11 @@ import {esc} from './html.js';
  * @property {(options: Object, config?: Object) => string[]} [watch]  extra entity ids whose changes re-render (sun.sun); the primary entity is always watched. `config` is the card config
  *                                         (the carousel's normalised `widgets` list), so an overview built from the dashboard's widgets (home) can watch their entities
  * @property {boolean} [interactive]   default false. true allows `<button data-action data-entity>` in CARD mode, only with the actions of INTERACTIVE_ACTIONS; in screensaver mode the overview renders no buttons
+ * @property {boolean} [controls]   default false, needs `interactive`. true makes the full-page layer a control panel: the overview keeps its buttons in
+ *                                         screensaver mode too, a press on one runs its action through the card's dispatcher, a press anywhere else does
+ *                                         nothing, and the layer closes through an `overview-close` button, Escape or `autoWake` (the thermostat view)
+ * @property {string[]} [actions]   `controls` only: widget action names its buttons may carry besides INTERACTIVE_ACTIONS (climate: up, down).
+ *                                         They are actions the dashboard already offers (the widget that opens the view owns them)
  *
  * -- data (optional) --
  * @property {(args: {hass: any, options: Object, entityId?: string}) => Record<string, DataSpec>} [data]
@@ -88,8 +93,13 @@ export const INTERACTIVE_ACTIONS = Object.freeze([
   'goto-widget',
   'camera-grid',
   'run-action',
-  'info'
+  'info',
+  'overview-close'
 ]);
+
+/** The actions a scene of `overview` may carry: the allow-list, plus its own `actions` when it is a control panel. */
+export const allowedActions = (overview) =>
+  overview.controls ? [...INTERACTIVE_ACTIONS, ...overview.actions] : INTERACTIVE_ACTIONS;
 
 const isStringList = (value) => Array.isArray(value) && value.every((v) => typeof v === 'string');
 
@@ -209,12 +219,26 @@ export function defineOverview(def) {
     throw new Error(`Overview ${o.type}: interactive must be true or false.`);
   }
   o.interactive = def.interactive ?? false;
+  if (def.controls !== undefined && typeof def.controls !== 'boolean') {
+    throw new Error(`Overview ${o.type}: controls must be true or false.`);
+  }
+  o.controls = def.controls ?? false;
+  if (o.controls && !o.interactive) {
+    throw new Error(`Overview ${o.type}: controls needs interactive: true.`);
+  }
+  if (def.actions !== undefined && !(o.controls && isStringList(def.actions))) {
+    throw new Error(
+      `Overview ${o.type}: actions is a list of action names and needs controls: true.`
+    );
+  }
+  o.actions = def.actions ?? [];
   checkOptionSpecs(o.type, o.options);
 
   const overview = deepFreeze({
     ...o,
     domains: copyData(o.domains),
     options: copyData(o.options),
+    actions: copyData(o.actions),
     tap: copyData(o.tap),
     strings: copyData(o.strings)
   });
@@ -316,13 +340,19 @@ export function contextFor(overview, {hass, config, raw, mode}) {
   });
 }
 
-/** The screensaver layer shell, created once per activation. The scene is patched into `.ov` afterwards. */
+/**
+ * The screensaver layer shell, created once per activation. The scene is patched into `.ov` afterwards. A control
+ * panel (`controls`) has no full-area dismiss button: its own buttons are the controls, and it closes through
+ * `overview-close`.
+ */
 export function layerMarkup(overview, scene, {label, dismiss}) {
+  const close = overview.controls
+    ? ''
+    : `<button type="button" class="ov-dismiss" aria-label="${esc(dismiss)}"></button>`;
   return (
-    `<div class="hv-screensaver" data-screensaver="${esc(overview.type)}" data-state="entering" role="dialog" ` +
-    `aria-modal="true" aria-label="${esc(label)}">` +
-    `<div class="ov ov-${overview.type} ov-mode-screensaver">${scene}</div>` +
-    `<button type="button" class="ov-dismiss" aria-label="${esc(dismiss)}"></button></div>`
+    `<div class="hv-screensaver${overview.controls ? ' hv-controls' : ''}" data-screensaver="${esc(overview.type)}" ` +
+    `data-state="entering" role="dialog" aria-modal="true" aria-label="${esc(label)}">` +
+    `<div class="ov ov-${overview.type} ov-mode-screensaver">${scene}</div>${close}</div>`
   );
 }
 

@@ -12,3 +12,6 @@ An overview fills a whole page. Use it as a [screensaver](../screensavers.md) ov
 | [Photo frame](photo_frame.md) | `photo_frame` | `custom:houseview-photo-frame-overview-card` | none | 1.0 |
 | [Month calendar](calendar_month.md) | `calendar_month` | `custom:houseview-calendar-month-overview-card` | none | 1.0 |
 | [Home summary](home.md) | `home` | `custom:houseview-home-overview-card` | none | 1.1 |
+| [Thermostat view](climate.md) | `climate` | `custom:houseview-climate-overview-card` | required, a `climate` entity | 1.1 |
+| [Light view](light.md) | `light` | `custom:houseview-light-overview-card` | required, a `light` entity | 1.1 |
+| [World Clock](world_clock.md) | `world_clock` | `custom:houseview-world-clock-overview-card` | none | 1.1 |

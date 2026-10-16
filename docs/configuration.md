@@ -50,7 +50,9 @@ screensaver:
 | `timer_display` | `true` | The timer display appears while a timer runs: `true` (every `timer` widget), `false`, or a list of `timer.*` entities. See [automatic displays](screensavers.md#automatic-displays) |
 | `music_screensaver` | `true` | The cover art appears at screensaver time while a speaker plays: `true` (every `media_player` widget), `false`, or a list of `media_player.*` entities |
 | `weather_view` | `true` | `false` makes a press on the weather widget open more-info instead of the full-screen weather |
-| `calendar_view` | `true` | `false` stops the clock, date and calendar widgets from opening the month calendar (the calendar widget opens its dialog instead) |
+| `climate_view` | `true` | `false` makes a press on the thermostat widget's number open more-info instead of the full-screen thermostat view |
+| `world_clock_view` | `true` | `false` disables the clock widget’s World Clock overlay |
+| `calendar_view` | `true` | `false` stops the date and calendar widgets from opening the month calendar (the calendar widget opens its dialog instead) |
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
 | `localized_states` | `false` | Show entity states in your Home Assistant language instead of the raw state value |
 | `state_compare` | `auto` | How state changes are detected: `reference` compares state objects by identity, `deep` compares their content, `auto` picks `reference` in Home Assistant. Leave it alone |
@@ -177,7 +179,7 @@ A broken configuration shows a red error card with one of these messages:
 | `Pages need unique names.` | A page has no name or two pages share one |
 | `Unsupported widget: foo` | The `type` is not a HouseView widget |
 | `light widget needs a light entity.` | `entity` is missing or from the wrong domain |
-| `Light action must be off or toggle.` | A light's `action` has another value |
+| `Light action must be view, off or toggle.` | A light's `action` has another value |
 | `Action widget needs a scene, script, button or input_button entity.` | An `action` widget has another kind of entity |
 | `Widget size must be normal, wide, tall or large.` | A bad `size` |
 | `Camera view needs one to four camera entities.` | `camera_gallery` is empty, longer than four, or lists a non-camera |

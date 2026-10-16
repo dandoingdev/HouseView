@@ -1,5 +1,4 @@
 import {defineWidget} from '../../core/define-widget.js';
-import {calendarTap} from '../_shared/calendar-tap.js';
 import {DIAL_HANDS, dialNumbers, dialTicks, updateDial} from './dial.js';
 
 // Analogue clock widget: a dial with hands and an optional name (the date widget shows the date). It has no entity and is always available.
@@ -30,7 +29,12 @@ export default defineWidget({
       `<div ${ctx.attr} class="tile ${ctx.cls}" role="group" aria-label="${ctx.esc(ctx.t('clock.current_time'))}">` +
       `<div class="dial">${dialTicks()}${dialNumbers()}${DIAL_HANDS}</div>` +
       `<div class="clock-caption"><strong>${name}</strong></div>` +
-      calendarTap(ctx) +
+      (ctx.config?.world_clock_view === false
+        ? ''
+        : ctx.btn('world-clock-view', '', 'tile-tap', true, {
+            entity: '',
+            attrs: `aria-label="${ctx.esc(ctx.t('clock.open_world_clock'))}" `
+          })) +
       `</div>`
     );
   },

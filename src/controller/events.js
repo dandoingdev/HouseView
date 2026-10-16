@@ -1,3 +1,5 @@
+import {bindValueActions} from './value-actions.js';
+
 // DOM event delegation on the card's shadow root: swipe, keyboard, and clicks on `button[data-action]`.
 // One listener per event type for the whole card; tiles carry no handlers of their own.
 //
@@ -14,6 +16,7 @@ const TEXT_ENTRY_TAGS = ['INPUT', 'SELECT', 'TEXTAREA'];
  */
 export function bindEvents(card) {
   const root = card.shadowRoot;
+  bindValueActions(card, root);
 
   root.addEventListener('pointerdown', (event) => {
     card._swipeStart(event);

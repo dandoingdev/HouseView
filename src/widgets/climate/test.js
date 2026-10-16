@@ -75,9 +75,15 @@ export default async function ({mount, check, variants}) {
 
   t = await mount(variants.ok);
   check('rendering never sends a command', t.calls.length === 0);
+  await t.click('climate-view');
+  check(
+    'tapping the temperature opens the thermostat view, no service, no dialog',
+    t.calls.length === 0 && t.infos.length === 0
+  );
+  t = await mount(variants.climateViewOff, {as: 'card'}); // a carousel: the card option applies
   await t.click('info');
   check(
-    'tapping the temperature opens more-info',
+    'with climate_view: false the temperature opens more-info instead',
     t.infos.includes('climate.test') && t.calls.length === 0
   );
 
@@ -118,7 +124,7 @@ export default async function ({mount, check, variants}) {
     'off: "Off" leads the line and the number is dimmed',
     t.text('.cs-sub') === 'Off • Living Room • 20.5°' &&
       t.q('.climate-simple').classList.contains('cs-dim') &&
-      !t.q('[data-action="info"]').disabled
+      !t.q('[data-action="climate-view"]').disabled
   );
   t = await mount(variants.withRoom);
   check('on: the number is not dimmed', !t.q('.climate-simple').classList.contains('cs-dim'));

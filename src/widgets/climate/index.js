@@ -1,7 +1,8 @@
 // Thermostat widget (minimal face): a very large temperature, a down chevron, the name with a "room • current"
-// line, and an up chevron. Nothing else: power, modes and fan live in Home Assistant's more-info dialog, which a tap
-// on the number opens. The step logic of (target_temp_step, clamping, heat_cool, feature bit 1) is unchanged.
-// Reference: docs/widget-api.md
+// line, and an up chevron. Nothing else: a tap on the number opens the full-screen thermostat view
+// (src/overviews/climate), or Home Assistant's more-info dialog when the card says `climate_view: false`. The
+// step logic (target_temp_step, clamping, heat_cool, feature bit 1) is shared with the view, which dispatches the
+// `up` and `down` actions below. Reference: docs/widget-api.md
 import {defineWidget} from '../../core/define-widget.js';
 import {numberFormat} from '../../core/format.js';
 
@@ -111,8 +112,9 @@ export default defineWidget({
 
   render(ctx) {
     const text = temperatureText(ctx);
+    // A press opens the full-screen thermostat view (`climate_view: false` keeps the more-info dialog).
     const number = ctx.btn(
-      'info',
+      ctx.config?.climate_view === false ? 'info' : 'climate-view',
       `<span class="cs-value">${ctx.esc(text)}</span><span class="sr">${ctx.esc(ctx.t('climate.target_info'))}</span>`,
       'cs-number'
     );

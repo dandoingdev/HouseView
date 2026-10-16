@@ -248,11 +248,16 @@ export const screensaverMixin = {
   },
 
   /**
-   * Open an overview by type (a clock, date or calendar widget asking for the month calendar, a weather widget asking for the weather scene). The options of an
+   * Open an overview by type (a clock, date or calendar widget asking for the month calendar, a weather widget asking
+   * for the weather scene, a thermostat widget asking for the thermostat view). The options of an
    * explicit screensaver entry of that type apply; otherwise the defaults.
    */
   _screensaverOpenType(type, extra = {}) {
-    const optOut = {calendar_month: 'calendar_view', weather: 'weather_view'}[type];
+    const optOut = {
+      calendar_month: 'calendar_view',
+      weather: 'weather_view',
+      climate: 'climate_view'
+    }[type];
     if (!this._hass || !getOverview(type) || (optOut && this._config?.[optOut] === false)) return;
     const [entry] = normalizeScreensaver({
       screensaver: {
@@ -529,12 +534,15 @@ export const screensaverMixin = {
   },
 
   _screensaverSession(entry) {
-    return createOverviewSession({
+    const session = createOverviewSession({
       overview: entry.overview,
       options: entry.options,
       getHass: () => this._hass,
       onChange: () => this._screensaverRender(true, entry)
     });
+    // A manually opened data-backed view must load immediately, without waiting for another hass update.
+    session.sync();
+    return session;
   },
 
   _screensaverContext(entry) {
@@ -569,12 +577,18 @@ export const screensaverMixin = {
       dismiss: t(this._hass, 'screensaver.dismiss')
     });
     const layer = template.content.firstElementChild;
-    this._screensaverBind(layer);
+    this._screensaverBind(layer, entry.overview);
     const focusReturn = this.shadowRoot.activeElement;
     shell.append(layer); // an overlay: nothing else in the shell is touched, re-rendered or made inert
     void layer.offsetWidth; // commit the opacity:0 start state, then fade in
     layer.dataset.state = 'on';
-    if (focusReturn) layer.querySelector('.ov-dismiss').focus({preventScroll: true});
+    if (focusReturn) {
+      // the dismiss button, or the close button of a control panel
+      const stop =
+        layer.querySelector('.ov-dismiss') ||
+        layer.querySelector('button[data-action="overview-close"]');
+      stop?.focus({preventScroll: true});
+    }
     ss.active = {
       entry,
       layer,
@@ -589,9 +603,14 @@ export const screensaverMixin = {
     ss.idle.configure({timeout: this._screensaverTimeoutNow()});
   },
 
-  /** The layer swallows every gesture: the first tap only wakes. Nothing reaches the controller's listeners. */
-  _screensaverBind(layer) {
+  /**
+   * The layer swallows every gesture: the first tap only wakes. Nothing reaches the controller's listeners. A control
+   * panel (`controls`, the thermostat view) is the exception: a press on one of its buttons runs that action through
+   * the ordinary dispatcher, a press anywhere else does nothing, and only `overview-close` or Escape closes it.
+   */
+  _screensaverBind(layer, overview) {
     const wake = (reason) => this._screensaver?.idle?.wake(reason);
+    if (overview?.controls) return this._screensaverBindControls(layer, wake);
     // A scrollable overview (the home summary) is dragged, not just tapped: a drag scrolls it (a mouse drag too) and
     // only a press that stayed put wakes.
     const scroller = layer.querySelector('.ov-home-scroll');
@@ -634,6 +653,33 @@ export const screensaverMixin = {
         e.preventDefault(); // the dismiss button is the only stop
       }
     });
+  },
+
+  /** A control panel: buttons dispatch, the background is inert, Escape closes. Nothing reaches the carousel. */
+  _screensaverBindControls(layer, wake) {
+    for (const type of ['pointerdown', 'pointerup', 'pointercancel']) {
+      layer.addEventListener(type, (e) => e.stopPropagation());
+    }
+    layer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const button = e.target.closest?.('button[data-action]');
+      if (!button || button.disabled) return;
+      if (button.dataset.action === 'overview-close') wake('tap');
+      else this._act(button.dataset.action, button.dataset.entity);
+    });
+    layer.addEventListener('keydown', (e) => {
+      e.stopPropagation(); // arrow keys must not turn the page underneath
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        wake('key');
+      }
+    });
+  },
+
+  /** Close the layer that is up (the `overview-close` button of a control panel). */
+  _screensaverClose() {
+    if (this._screensaver?.active) this._screensaver.idle?.wake('tap');
   },
 
   /** idle.onDeactivate: reasons are 'tap' | 'key' | 'blocked' | 'auto' | 'api' | 'hidden' | 'dispose'. */

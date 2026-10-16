@@ -18,9 +18,9 @@ export default async function ({mount, check, variants, advance}) {
       !!t.q('.pin')
   );
   check(
-    'clock needs no entity; its only control shows the month calendar',
+    'clock needs no entity; its only control shows World Clock',
     t.qa('.face button').length === 1 &&
-      t.q('.face button').dataset.action === 'calendar-view' &&
+      t.q('.face button').dataset.action === 'world-clock-view' &&
       t.calls.length === 0
   );
   check(
@@ -60,4 +60,8 @@ export default async function ({mount, check, variants, advance}) {
     rotation(t.q('.hand.hour')) === 'rotate(112.5deg)' &&
       rotation(t.q('.hand.minute')) === 'rotate(270deg)'
   );
+  t = await mount({...variants.ok, config: {calendar_view: false}}, {as: 'card'});
+  check('calendar opt-out does not disable World Clock', !!t.q('[data-action="world-clock-view"]'));
+  t = await mount({...variants.ok, config: {world_clock_view: false}}, {as: 'card'});
+  check('World Clock can be disabled independently', !t.q('[data-action="world-clock-view"]'));
 }

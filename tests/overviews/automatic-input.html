@@ -149,8 +149,8 @@
     const full = {
       pages: [{name: 'Home'}],
       cards: [
-        {type: 'custom:houseview-light-card', entity: 'light.a', page: 'Home'},
-        {type: 'custom:houseview-light-card', entity: 'light.b', page: 'Home'},
+        {type: 'custom:houseview-light-card', entity: 'light.a', action: 'toggle', page: 'Home'},
+        {type: 'custom:houseview-light-card', entity: 'light.b', action: 'toggle', page: 'Home'},
         ...cards.map((name) => ({...CARDS[name], page: 'Home'}))
       ],
       ...config

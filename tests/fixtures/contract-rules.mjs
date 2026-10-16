@@ -26,9 +26,11 @@ export const CORE_ACTIONS = ['info', 'toggle'];
 export const FEATURE_ACTIONS = [
   'dim',
   'overview-open',
+  'overview-close',
   'calendar-view',
   'home-view',
   'weather-view',
+  'climate-view',
   'goto-widget',
   'page-prev',
   'page-next',
