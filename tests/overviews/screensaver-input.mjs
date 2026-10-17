@@ -161,7 +161,9 @@ try {
   );
   await click();
   check('a tap during the fade is swallowed too', (await calls()).length === 0);
-  await sleep(450);
+  await page.waitForFunction(() => !card.shadowRoot.querySelector('.hv-screensaver'), {
+    timeout: 3000
+  });
   check('layer removed after the fade', (await layerState()) === null);
   check(
     'the page under it is untouched',

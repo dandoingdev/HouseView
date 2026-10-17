@@ -214,12 +214,22 @@ export const screenModelMixin = {
       if (nav !== this._navHtml) this._writeNav(nav);
       return;
     }
+    if (this._dragFace || this._outgoingPage) this._clearPageTransition();
     this._layoutKey = key;
     face.style.setProperty('--columns', model.columns);
     face.style.setProperty('--rows', screen.rows);
     face.style.height = `${model.contentHeight}px`;
     shell.style.height = `${model.height}px`;
     if (nav !== this._navHtml) this._writeNav(nav);
+    this._positionPageWidgets(face, screen);
+    // add/remove (not toggle): remove rewrites the class attribute even when the token is absent
+    if (screen.surface === 'soft') shell.classList.add('surface-soft');
+    else shell.classList.remove('surface-soft');
+    shell.classList.toggle('surface-home', isHomePage(screen));
+  },
+
+  /** Shared grid placement for the live page and its inert swipe neighbour. */
+  _positionPageWidgets(face, screen) {
     for (const p of screen.placements) {
       const tile = face.querySelector(`[data-widget="${p.index}"]`);
       if (!tile) continue;
@@ -227,10 +237,6 @@ export const screenModelMixin = {
       tile.style.gridRow = `${p.y + 1} / span ${p.h}`;
     }
     for (const clock of face.querySelectorAll('.clock')) this._sizeDial(clock);
-    // add/remove (not toggle): remove rewrites the class attribute even when the token is absent
-    if (screen.surface === 'soft') shell.classList.add('surface-soft');
-    else shell.classList.remove('surface-soft');
-    shell.classList.toggle('surface-home', isHomePage(screen));
   },
 
   /** Replace the page navigation and remember its markup, so `_layout` can tell when it has changed. */

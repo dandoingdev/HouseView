@@ -22,11 +22,29 @@ function faceData(ctx) {
   };
 }
 
+const BLACK_BACKGROUND_AFTER_MS = 60_000;
+const BACKGROUND_FADE_MS = 2_000;
+
+/** Use the activation age from the host, independently of a pinned display time. */
+function refreshRestingAppearance(ctx, backdrop) {
+  if (ctx.mode !== 'screensaver') return;
+  const elapsed = ctx.elapsedMs || 0;
+  const resting = elapsed >= BLACK_BACKGROUND_AFTER_MS;
+  // Change ink halfway through the fade, when the background is dark enough for light text.
+  const lightInk =
+    resting &&
+    (elapsed >= BLACK_BACKGROUND_AFTER_MS + BACKGROUND_FADE_MS / 2 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (backdrop.dataset.resting !== String(resting)) backdrop.dataset.resting = String(resting);
+  if (backdrop.dataset.restInk !== String(lightInk)) backdrop.dataset.restInk = String(lightInk);
+}
+
 /** The square dial stays centred on tablets; its background fills the entire screen. */
 function refresh(ctx) {
   if (!ctx.el) return;
   const board = ctx.el.querySelector('.ov-clock-board');
   if (!board) return;
+  refreshRestingAppearance(ctx, ctx.el.querySelector('.ov-clock-backdrop'));
   if (!CSS.supports('width', '1cqmin')) {
     const target = ctx.el.closest('.hv-screensaver')?.parentElement || ctx.el;
     const rect = target.getBoundingClientRect();

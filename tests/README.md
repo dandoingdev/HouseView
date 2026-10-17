@@ -8,6 +8,7 @@
 | Browser suite (real Chrome, mock hass) | `tests/browser.html`, `tests/EXPECTED_CHECKS` | `npm run test:browser`, `npm run test:browser:min` (production bundle) |
 | Widget suite: every widget's `fixtures.js` and `test.js` | `tests/widgets/`, `src/widgets/<kind>/{fixtures,test}.js` | `npm run test:widgets` |
 | Overview suite and real-input scripts | `tests/overviews/`, `src/overviews/<kind>/{fixtures,test}.js` | `npm run test:overviews`, `test:overviews:input`, `test:overviews:timer`, `test:overviews:automatic` |
+| Dashboard swipes with real touch input at panel, phone and tablet sizes | `tests/dashboard-swipe-input.mjs` | `npm run test:dashboard:swipe` |
 | Widget and overview linters | `tools/check-widgets.mjs`, `tools/check-overviews.mjs` | `npm run check:widgets`, `npm run check:overviews` |
 
 * `tests/contract/widget-contract.test.mjs` runs every registered widget through the widget contract

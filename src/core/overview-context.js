@@ -36,8 +36,9 @@ import {dateTimeFormatter, numberFormatter} from './intl.js';
  * @property {(ms:number)=>{year:number, month:number, day:number, hour:number, minute:number}} localParts   calendar fields in the display zone
  * @property {(ms:number)=>number} dayOffset              whole days from today to the day containing ms (display zone)
  *
- * @typedef {OverviewContext & {el: Element|null, requestRender: =>void, store: Map<any,any>}} OverviewHookContext
+ * @typedef {OverviewContext & {el: Element|null, requestRender: =>void, store: Map<any,any>, elapsedMs?: number}} OverviewHookContext
  *   `el` is the `.ov` element (screensaver layer content or card-mode root); `store` survives renders.
+ *   `elapsedMs` is the real elapsed display time for a screensaver activation, independent of preview_time.
  */
 
 /** DataSpecs an overview wants for these options (empty when it declares none). */

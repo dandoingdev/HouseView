@@ -35,7 +35,7 @@ export const renderMixin = {
   },
 
   /** Build or reuse the shell and put the current page's widgets into it. */
-  _renderWidgets() {
+  _renderWidgets(preparedPage) {
     this._clearPageTransition();
     this._disposeExtensions('render');
     const config = this._config;
@@ -60,7 +60,16 @@ export const renderMixin = {
     shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}`;
 
     this._syncDashboardHeader(shell);
-    this._fillFace(shell.querySelector('.face'), screen);
+    const face = shell.querySelector('.face');
+    if (preparedPage) {
+      face.replaceChildren(...preparedPage.element.childNodes);
+      face.setAttribute('aria-label', preparedPage.element.getAttribute('aria-label'));
+      this._renderedCards = preparedPage.cards;
+      // Apply state received while the neighbour was being revealed before activating its hooks.
+      for (const element of this._renderedCards.values())
+        if (element.localName === 'houseview-widget-card') element.update();
+      this._forwardHassToNativeCards(this._hass);
+    } else this._fillFace(face, screen);
     this._writeNav();
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, true);
@@ -93,7 +102,7 @@ export const renderMixin = {
   },
 
   /** Replace the face's children with the page's widget cards (or the empty-page hint). */
-  _fillFace(face, screen) {
+  _fillFace(face, screen, cards = this._renderedCards) {
     face.setAttribute('aria-label', t(this._hass, 'page.label', {label: screen.label}));
     face.style.setProperty('--page-direction', this._direction || 0);
     face.replaceChildren();
@@ -112,7 +121,7 @@ export const renderMixin = {
         element.bind(this, placement.widget, placement.index);
       }
       face.append(element);
-      this._renderedCards.set(placement.index, element);
+      cards.set(placement.index, element);
     }
   },
 

@@ -185,3 +185,33 @@
 .ov-clock-backdrop[data-face='digital_stacked'] .ov-clock-digital-separator {
   display: none;
 }
+
+/* The black layer fades using opacity only, including on lite wall panels. */
+.ov-clock-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.ov-clock-backdrop[data-resting='true']::before {
+  opacity: 1;
+}
+.ov-clock-board {
+  z-index: 1;
+}
+.ov-clock-backdrop[data-rest-ink='true'] .ov-clock-board {
+  --clock-hand: #c6c6c6;
+  --clock-second: #999;
+  color: #c6c6c6;
+}
+.ov-clock-backdrop[data-rest-ink='true'] .ov-clock-numeral {
+  color: inherit;
+  text-shadow: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ov-clock-backdrop::before {
+    transition: opacity 2s linear;
+  }
+}

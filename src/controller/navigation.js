@@ -45,21 +45,54 @@ export const navigationMixin = {
 
   /** pointerdown: remember where a possible swipe starts (not on sliders, not with a mouse's other buttons). */
   _swipeStart(e) {
-    if (this._navigationBlocked()) return;
+    this._swipeCancel();
+    if (e.isPrimary === false || this._navigationBlocked()) return;
     if (e.composedPath?.().some((node) => node.matches?.(SLIDER_SELECTOR))) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
-    this._gesture = {x: e.clientX, y: e.clientY, time: Date.now()};
+    this._clearPageTransition();
+    this._gesture = {x: e.clientX, y: e.clientY, time: Date.now(), pointerId: e.pointerId};
   },
 
-  /** pointerup: a quick, long, mostly horizontal drag turns the page. */
+  /** Lock only horizontal movement; vertical scrolling and widget holds keep their own gestures. */
+  _swipeMove(e) {
+    const start = this._gesture;
+    if (!start || start.pointerId !== e.pointerId || this._navigationBlocked()) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (!start.dragging) {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 10) return;
+      if (Math.abs(dx) <= Math.abs(dy) * 1.5) {
+        this._gesture = null;
+        return;
+      }
+      start.dragging = true;
+      this._gesturePointerCancel();
+    }
+    this._dragPage(start, dx);
+  },
+
+  /** Release the page at the finger position, then slide to the nearest destination. */
   _swipeEnd(e) {
     const start = this._gesture;
     this._gesture = null;
-    if (!start) return;
-    const step = swipeStep(start, e);
-    if (step) {
+    if (!start || start.pointerId !== e.pointerId) {
+      this._clearPageTransition();
+      return;
+    }
+    const dx = e.clientX - start.x;
+    const step = start.dragging ? (Math.abs(dx) > 60 ? (dx < 0 ? 1 : -1) : 0) : swipeStep(start, e);
+    if (start.dragging || step) this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+    if (start.face) this._settlePageDrag(start, step);
+    else if (step) this._setPage(this._pageIndex + step);
+  },
+
+  /** A browser cancellation or second finger returns the original page without activating a widget. */
+  _swipeCancel() {
+    const start = this._gesture;
+    this._gesture = null;
+    if (start?.dragging) {
       this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
-      this._setPage(this._pageIndex + step);
+      this._settlePageDrag(start, 0);
     }
   }
 };

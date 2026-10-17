@@ -834,6 +834,35 @@ test('autoWake dismisses with no tap swallow', (t) => {
   assert.equal(env.host._suppressClickUntil, undefined);
 });
 
+test('screensaver hook age survives re-renders independently of preview_time and resets on activation', (t) => {
+  const rendered = [];
+  const ticked = [];
+  registerOverview(
+    defineOverview({
+      type: 'elapsed_probe',
+      label: 'Elapsed probe',
+      order: 995,
+      entity: 'none',
+      strings: strings('elapsed_probe'),
+      render: scene,
+      afterRender: (ctx) => rendered.push(ctx.elapsedMs),
+      tick: {every: 1000, run: (ctx) => ticked.push({elapsed: ctx.elapsedMs, display: ctx.now()})}
+    })
+  );
+  const env = setup(t, {screensaver: {type: 'elapsed_probe', idle_timeout: 5}});
+  env.second(5);
+  assert.equal(rendered.at(-1), 0);
+  env.second(60);
+  assert.equal(ticked.at(-1).elapsed, 60_000);
+  assert.equal(ticked.at(-1).display, Date.parse(env.config.preview_time));
+  env.host._screensaverRender(true);
+  assert.equal(rendered.at(-1), 60_000, 'data and locale re-renders retain the display age');
+  env.host._screensaver.idle.wake('tap');
+  env.wait(FADE_OUT_MS + GUARD_MS);
+  env.second(6);
+  assert.equal(rendered.at(-1), 0, 'a newly activated screensaver gets a fresh timer');
+});
+
 test('the overview tick hook runs on the shared ticker, throttled to its interval', (t) => {
   ticks.length = 0;
   const env = setup(t, {screensaver: {type: 'ticking', entity: 'sensor.a', idle_timeout: 5}});

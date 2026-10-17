@@ -314,6 +314,129 @@ try {
   await page.waitForSelector('houseview-card >>> .ov-clock-board');
   await page.keyboard.press('Escape');
   await page.waitForFunction('!window.card.shadowRoot.querySelector(".hv-screensaver")');
+  // Each activation owns its elapsed timer; preview_time must only pin the displayed time.
+  const restProbe = () =>
+    page.evaluate(() => {
+      const root = window.card.shadowRoot;
+      const backdrop = root.querySelector('.ov-clock-backdrop');
+      const board = root.querySelector('.ov-clock-board');
+      const black = getComputedStyle(backdrop, '::before');
+      return {
+        resting: backdrop.dataset.resting,
+        ink: backdrop.dataset.restInk,
+        black: black.backgroundColor,
+        opacity: Number(black.opacity),
+        duration: black.transitionDuration,
+        board: getComputedStyle(board).color,
+        numeral:
+          root.querySelector('.ov-clock-numeral') &&
+          getComputedStyle(root.querySelector('.ov-clock-numeral')).color,
+        hand:
+          root.querySelector('.ov-clock-hour') &&
+          getComputedStyle(root.querySelector('.ov-clock-hour')).backgroundColor,
+        second: getComputedStyle(
+          root.querySelector('.ov-clock-second,.ov-clock-digital-second')
+        ).getPropertyValue(root.querySelector('.ov-clock-second') ? 'background-color' : 'color')
+      };
+    });
+  for (const face of ['bold', 'sculpted', 'digital', 'digital_stacked']) {
+    await page.evaluate((face) => {
+      window.card.setConfig({
+        ...window.clockConfig,
+        preview_time: '2026-10-15T09:10:00Z',
+        screensaver: {
+          type: 'clock',
+          preview: true,
+          face,
+          background_color: '#e0bcb9',
+          second_color: '#000000'
+        }
+      });
+      window.card.hass = window.clockHass;
+      window.savedRestBoard = window.card.shadowRoot.querySelector('.ov-clock-board');
+    }, face);
+    await page.evaluate(() => window.advance(59));
+    assert.equal(
+      (await restProbe()).resting,
+      'false',
+      `${face}: keep selected colour for 59 seconds`
+    );
+    await page.evaluate(() => {
+      window.card.hass = {...window.clockHass};
+      window.advance(1);
+    });
+    const starting = await restProbe();
+    assert.equal(starting.resting, 'true', `${face}: begin fading at one minute`);
+    assert.equal(starting.duration, '2s');
+    await page.waitForFunction(() => {
+      const b = window.card.shadowRoot.querySelector('.ov-clock-backdrop');
+      const alpha = Number(getComputedStyle(b, '::before').opacity);
+      return alpha > 0 && alpha < 1;
+    });
+    await page.evaluate(() => window.advance(2));
+    await page.waitForFunction(
+      () =>
+        getComputedStyle(window.card.shadowRoot.querySelector('.ov-clock-backdrop'), '::before')
+          .opacity === '1'
+    );
+    const dark = await restProbe();
+    assert.equal(dark.black, 'rgb(0, 0, 0)');
+    assert.equal(dark.opacity, 1);
+    assert.equal(dark.board, 'rgb(198, 198, 198)');
+    assert.equal(
+      dark.second,
+      'rgb(153, 153, 153)',
+      'even a configured black seconds colour becomes visible'
+    );
+    if (dark.numeral)
+      assert.equal(dark.numeral, dark.board, `${face}: sculpted numerals stay readable`);
+    if (dark.hand) assert.equal(dark.hand, dark.board);
+    assert.equal(
+      await page.evaluate(
+        () => window.savedRestBoard === window.card.shadowRoot.querySelector('.ov-clock-board')
+      ),
+      true
+    );
+    await page.screenshot({path: `/tmp/houseview-clock-rest-${face}.png`});
+    await page.touchscreen.tap(240, 240);
+    await page.waitForFunction('!window.card.shadowRoot.querySelector(".hv-screensaver")');
+    await page.evaluate(() => window.advance(6));
+    await page.waitForSelector('houseview-card >>> .ov-clock-board');
+    assert.equal(
+      (await restProbe()).resting,
+      'false',
+      `${face}: wake/re-entry starts a fresh minute`
+    );
+    console.log(
+      `PASS ${face}: one-minute threshold, opacity fade to black, readable ink, DOM identity and reset`
+    );
+  }
+  await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
+  await page.evaluate(() => {
+    window.card.setConfig({...window.clockConfig, screensaver: {type: 'clock', preview: true}});
+    window.card.hass = window.clockHass;
+    window.advance(60);
+  });
+  const reducedRest = await restProbe();
+  assert.equal(reducedRest.opacity, 1);
+  assert.equal(reducedRest.ink, 'true');
+  assert.equal(reducedRest.duration, '0s');
+  await page.emulateMediaFeatures([]);
+  await page.evaluate(() => {
+    window.card.setConfig({
+      tablet_mode: true,
+      widgets: [{type: 'clock_overview', face: 'digital', background_color: '#e0bcb9'}]
+    });
+    window.card.hass = window.clockHass;
+    window.advance(120);
+  });
+  const standalone = await restProbe();
+  assert.equal(standalone.resting, undefined, 'standalone cards retain their selected appearance');
+  assert.equal(standalone.opacity, 0);
+  assert.equal(await page.evaluate(() => window.clockCalls.length), 0);
+  console.log(
+    'PASS reduced motion changes immediately, standalone cards remain coloured, no service calls'
+  );
   await page.evaluate(() => window.card.remove());
   assert.equal(await page.evaluate(() => window.intervals.size), 0);
   assert.deepEqual(errors, []);

@@ -785,7 +785,8 @@ export const screensaverMixin = {
         ...this._screensaverContext(active.entry),
         el: active.layer.querySelector('.ov'),
         requestRender: () => this._screensaverRender(true),
-        store: active.store
+        store: active.store,
+        elapsedMs: Math.max(0, Date.now() - active.shownAt)
       });
     } catch (error) {
       console.error('[houseview] overview afterRender failed', error);
@@ -815,7 +816,8 @@ export const screensaverMixin = {
         ...this._screensaverContext(active.entry),
         el: active.layer.querySelector('.ov'),
         requestRender: () => this._screensaverRender(true),
-        store: active.store
+        store: active.store,
+        elapsedMs: Math.max(0, now - active.shownAt)
       });
     } catch (error) {
       console.error('[houseview] overview tick failed', error);

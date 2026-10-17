@@ -24,7 +24,10 @@ export function bindEvents(card) {
     card._gesturePointerDown(event);
   });
 
-  root.addEventListener('pointermove', (event) => card._gesturePointerMove(event));
+  root.addEventListener('pointermove', (event) => {
+    card._gesturePointerMove(event);
+    card._swipeMove(event);
+  });
 
   root.addEventListener('pointerup', (event) => {
     card._swipeEnd(event);
@@ -32,7 +35,7 @@ export function bindEvents(card) {
   });
 
   root.addEventListener('pointercancel', () => {
-    card._gesture = null;
+    card._swipeCancel();
     card._gesturePointerCancel();
   });
 

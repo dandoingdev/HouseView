@@ -48,6 +48,7 @@ jobs:
       - run: npm run test:overviews:light
       - run: npm run test:media:library
       - run: npm run test:panel
+      - run: npm run test:dashboard:swipe
       - run: npm run test:overviews:clock
       - run: npm run test:overviews:volume
       - run: npm run test:media:seek

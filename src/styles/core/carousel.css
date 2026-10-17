@@ -11,6 +11,8 @@
 .carousel {
   overflow: hidden !important;
   background: #817c70 !important;
+  /* Reserve horizontal gestures for paging, including the header and navigation bar. */
+  touch-action: pan-y;
 }
 
 /* @important overrides an earlier !important rule */
@@ -37,6 +39,7 @@
   gap: 8px;
   color: #fff;
   background: #6e6d64;
+  touch-action: pan-y;
 }
 
 .page-nav button {

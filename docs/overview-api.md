@@ -267,6 +267,7 @@ carry a `role` and `aria-label` where they convey information (the timer display
 
 `render(ctx, mode)`, `eligible`, `autoShow`, `autoWake` and `tile` receive an `OverviewContext`; `afterRender` and
 `tick.run` receive it plus `el` (the `.ov` element), `requestRender()` and `store` (a `Map` that survives renders).
+Screensaver hooks also receive `elapsedMs`: milliseconds since the current layer appeared, independent of `preview_time`. It survives data/locale re-renders and resets on each new activation; card-mode hooks omit it.
 
 | Member | Meaning |
 | --- | --- |

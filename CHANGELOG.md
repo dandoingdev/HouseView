@@ -6,6 +6,19 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-17
+
+### Changed
+
+* Clock screensavers fade their background to black after one visible minute and use soft grey text and hands. Selected colours return on the next activation; standalone clock cards stay unchanged.
+* Dashboard pages follow horizontal drags, reveal the neighbouring page and slide into place on release, including in lite mode. Short or cancelled drags return to the current page, with resistance at either end and reduced-motion support.
+
+### Fixed
+
+* Stabilise render-purity checks across clock-second boundaries and wait for screensaver removal instead of a fixed sleep. CI and release validation now include real touch dashboard swipes.
+* Page transitions keep the outgoing and incoming content aligned below the dashboard header, eliminating the upward jump between screens.
+* Horizontal touch swipes now turn dashboard pages from the header and navigation bar as well as widgets, including on wall panels. Vertical scrolling and slider gestures remain available; secondary touches cannot turn a page.
+
 ## [1.3.0] - 2026-10-16
 
 HouseView 1.3 improves everyday touch controls, adds configurable clock faces and speaker volume controls, and makes editing and updates more reliable on wall panels and tablets.

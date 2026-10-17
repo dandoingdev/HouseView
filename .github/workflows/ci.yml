@@ -70,6 +70,7 @@ jobs:
           npm run test:overviews:light
           npm run test:media:library
           npm run test:panel
+          npm run test:dashboard:swipe
           npm run test:overviews:clock
           npm run test:overviews:volume
           npm run test:media:seek

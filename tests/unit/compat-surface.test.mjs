@@ -843,7 +843,9 @@ describe('navigation', () => {
     const shell = new FakeNode('ha-card');
     const face = new FakeNode('div');
     shell.append(face);
-    face.getBoundingClientRect = () => ({height: 321});
+    face.getBoundingClientRect = () => ({height: 321, width: 480});
+    face.offsetTop = 44;
+    face.offsetLeft = 0;
     face.childNodes.push('child-a', 'child-b');
     face.cloneNode = () => {
       const clone = new FakeNode('div');
@@ -914,6 +916,8 @@ describe('navigation', () => {
     assert.equal(outgoing.getAttribute('aria-hidden'), 'true');
     assert.equal(outgoing.getAttribute('aria-label'), null);
     assert.equal(outgoing.styleValues.get('height'), '321px');
+    assert.equal(outgoing.styleValues.get('top'), '44px');
+    assert.equal(outgoing.styleValues.get('width'), '480px');
     assert.deepEqual(outgoing.moved, ['child-a', 'child-b']);
     assert.equal(outgoing.parentNode, shell);
   });
@@ -1002,6 +1006,18 @@ describe('navigation', () => {
       card._swipeEnd(touch(100, 100));
       assert.equal(card._pageIndex, 0);
       assert.ok(!card._suppressClickUntil);
+    });
+
+    it('cancels multi-touch and ignores a different pointer ending the swipe', () => {
+      const {card} = pagedCard({reduced: true});
+      card._swipeStart({...touch(300, 100), pointerId: 1});
+      card._swipeEnd({...touch(100, 100), pointerId: 2});
+      assert.equal(card._pageIndex, 0);
+      card._swipeStart({...touch(300, 100), pointerId: 1});
+      card._swipeStart({...touch(300, 100), pointerId: 2, isPrimary: false});
+      card._swipeEnd({...touch(100, 100), pointerId: 1});
+      assert.equal(card._pageIndex, 0);
+      assert.equal(card._gesture, null);
     });
 
     it('does not start on a slider, with a mouse side button, or while an overlay is open', () => {

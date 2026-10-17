@@ -19,7 +19,7 @@ to the background brightness. No Home Assistant entity or extra integration is n
 
 All faces use Home Assistant's time-zone preference, including daylight-saving changes; the weekday and date
 use its language. Digital faces follow its 12/24-hour preference, including localised digits and the AM/PM period. Updates reuse the existing hands or digit elements through the shared ticker, once per second. Hiding
-seconds keeps the minute and hour hands still between minutes. A tap or Escape wakes the dashboard.
+seconds keeps the minute and hour hands still between minutes. A tap or Escape wakes the dashboard. After the clock screensaver has been visible for one minute, its background fades to black over two seconds and the numerals, date and hands switch to soft grey. This also works in lite mode; reduced motion makes the change immediate. Waking and showing the clock again restores the selected colours and starts a fresh minute. Standalone clock cards keep their selected background.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

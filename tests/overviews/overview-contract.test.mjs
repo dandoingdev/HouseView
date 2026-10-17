@@ -65,7 +65,16 @@ const hassFor = (variant, extra = {}) =>
   createMockHass({...(variant.hass || {}), ...extra, states: variant.states}).hass;
 
 const contextOf = (overview, variant, mode, hass = hassFor(variant)) =>
-  contextFor(overview, {hass, config: variant.config || {}, raw: variant.options || {}, mode});
+  contextFor(overview, {
+    hass,
+    // Two renders must see the same clock, even when the test crosses a wall-clock second.
+    config: {
+      ...variant.config,
+      preview_time: variant.config?.preview_time ?? '2026-10-15T09:09:00Z'
+    },
+    raw: variant.options || {},
+    mode
+  });
 
 /**
  * exactly one root element, whose first class is ov-scene, with nothing a scene may not carry.
