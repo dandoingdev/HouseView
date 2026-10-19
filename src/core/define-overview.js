@@ -4,7 +4,7 @@ import {defineWidget, OPTION_TYPES} from './define-widget.js';
 export {OPTION_TYPES} from './define-widget.js';
 import {createOverviewContext} from './overview-context.js';
 import {isColour} from './colour.js';
-import {esc} from './html.js';
+import {esc, iconHTML} from './html.js';
 
 /**
  * @typedef {'screensaver'|'card'} OverviewMode
@@ -51,6 +51,7 @@ import {esc} from './html.js';
  * @property {{every: number, align?: 'minute', run: (ctx: OverviewHookContext) => void}} [tick]   shared ticker, throttled to `every` ms; runs while the overview is on screen. `align: 'minute'` runs it when the wall-clock minute changes instead (a clock that shows minutes)
  * @property {(ctx: OverviewContext) => string} [tile]   optional compact summary: the card gets a `display: tile` option and renders this small face instead of the scene; tapping it opens the full overview as a one-off page-sized layer
  * @property {{card?: 'info'|'open'|'none'}} [tap]   card mode only: tap opens more-info of the entity (default), opens the full-screen view ('open', for overviews without an entity) or does nothing. A screensaver tap ALWAYS dismisses.
+ * @property {boolean} [manualClose]   default false. true: a layer opened from a button stays until its close button or Escape. The idle screensaver still dismisses on the first tap.
  * @property {number} [onPageIdle]   idle seconds that apply instead of the screensaver timeout while this overview's implicit entry has its widget on the page that is showing and is eligible (cover art: 5)
  * @property {(ctx: OverviewContext) => boolean} [autoWake]   called on every hass update while the screensaver is up; true dismisses it (no tap swallow)
  *
@@ -233,6 +234,10 @@ export function defineOverview(def) {
     );
   }
   o.actions = def.actions ?? [];
+  if (def.manualClose !== undefined && typeof def.manualClose !== 'boolean') {
+    throw new Error(`Overview ${o.type}: manualClose must be true or false.`);
+  }
+  o.manualClose = def.manualClose ?? false;
   checkOptionSpecs(o.type, o.options);
 
   const overview = deepFreeze({
@@ -347,14 +352,18 @@ export function contextFor(overview, {hass, config, raw, mode}) {
 /**
  * The screensaver layer shell, created once per activation. The scene is patched into `.ov` afterwards. A control
  * panel (`controls`) has no full-area dismiss button: its own buttons are the controls, and it closes through
- * `overview-close`.
+ * `overview-close`. A pinned layer (`manualClose`, opened from a button) is the same: a corner close button, and
+ * the sky itself does not dismiss it.
  */
-export function layerMarkup(overview, scene, {label, dismiss}) {
+export function layerMarkup(overview, scene, {label, dismiss, pinned = false}) {
   const close = overview.controls
     ? ''
-    : `<button type="button" class="ov-dismiss" aria-label="${esc(dismiss)}"></button>`;
+    : pinned
+      ? `<button type="button" class="ov-panel-key ov-panel-close ov-manual-close" data-action="overview-close" aria-label="${esc(dismiss)}">${iconHTML('close').replace('<ha-icon ', '<ha-icon class="ov-panel-icon" ')}</button>`
+      : `<button type="button" class="ov-dismiss" aria-label="${esc(dismiss)}"></button>`;
+  const flags = `${overview.controls ? ' hv-controls' : ''}${pinned ? ' hv-pinned' : ''}`;
   return (
-    `<div class="hv-screensaver${overview.controls ? ' hv-controls' : ''}" data-screensaver="${esc(overview.type)}" ` +
+    `<div class="hv-screensaver${flags}" data-screensaver="${esc(overview.type)}" ` +
     `data-state="entering" role="dialog" aria-modal="true" aria-label="${esc(label)}">` +
     `<div class="ov ov-${overview.type} ov-mode-screensaver">${scene}</div>${close}</div>`
   );

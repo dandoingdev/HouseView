@@ -31,6 +31,8 @@ import switchWidget from './switch/index.js';
 import switchWidgetStrings from './switch/strings.js';
 import timerWidget from './timer/index.js';
 import timerWidgetStrings from './timer/strings.js';
+import vacuumWidget from './vacuum/index.js';
+import vacuumWidgetStrings from './vacuum/strings.js';
 import weatherWidget from './weather/index.js';
 import weatherWidgetStrings from './weather/strings.js';
 
@@ -50,6 +52,7 @@ export const widgets = [
   sensorWidget,
   switchWidget,
   timerWidget,
+  vacuumWidget,
   weatherWidget
 ];
 
@@ -70,6 +73,7 @@ const strings = [
   sensorWidgetStrings,
   switchWidgetStrings,
   timerWidgetStrings,
+  vacuumWidgetStrings,
   weatherWidgetStrings
 ];
 widgets.forEach((definition, i) => registerWidget(definition, strings[i]));

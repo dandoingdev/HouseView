@@ -185,7 +185,8 @@ export const BUILT_IN_KINDS = [
   'media_player',
   'calendar',
   'timer',
-  'alarm_control_panel'
+  'alarm_control_panel',
+  'vacuum'
 ];
 
 export const ALIASES = ['scene', 'script', 'button', 'input_button'];

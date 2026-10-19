@@ -399,7 +399,8 @@ describe('real tree', () => {
       'fan',
       'light',
       'lock',
-      'switch'
+      'switch',
+      'vacuum'
     ]);
   });
 

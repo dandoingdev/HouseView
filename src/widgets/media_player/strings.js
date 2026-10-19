@@ -35,6 +35,8 @@ export default {
     'media_player.shuffle': 'Shuffle',
     'media_player.repeat': 'Repeat',
     'media_player.options': 'Speaker options',
-    'media_player.more_controls': ' · More Sonos controls'
+    'media_player.more_controls': ' · More Sonos controls',
+    'media_player.open_player': 'Open full player',
+    'media_player.close_player': 'Close player'
   }
 };

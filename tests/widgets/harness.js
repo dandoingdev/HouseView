@@ -44,7 +44,10 @@ export function installDeterminism() {
   let nextId = 1000000;
   window.setInterval = (fn, ms = 0, ...args) => {
     if (new Error().stack?.includes('pptr:')) return realSetInterval(fn, ms, ...args);
-    intervals.set(++nextId, {fn: () => fn(...args), ms: Math.max(1, ms), due: ms});
+    const period = Math.max(1, ms);
+    // Due one period from now. A due time of `period` would replay every missed second since the clock
+    // started whenever a card subscribes after an earlier test has called advance().
+    intervals.set(++nextId, {fn: () => fn(...args), ms: period, due: offset + period});
     return nextId;
   };
   window.clearInterval = (id) => {

@@ -20,6 +20,7 @@ export const manifest = [
   {type: 'sensor', load: () => import('../../src/widgets/sensor/test.js')},
   {type: 'switch', load: () => import('../../src/widgets/switch/test.js')},
   {type: 'timer', load: () => import('../../src/widgets/timer/test.js')},
+  {type: 'vacuum', load: () => import('../../src/widgets/vacuum/test.js')},
   {type: 'weather', load: () => import('../../src/widgets/weather/test.js')}
 ];
 

@@ -9,6 +9,7 @@ import homeOverview from './home/index.js';
 import lightOverview from './light/index.js';
 import photoFrameOverview from './photo_frame/index.js';
 import timerOverview from './timer/index.js';
+import vacuumOverview from './vacuum/index.js';
 import volumeOverview from './volume/index.js';
 import weatherOverview from './weather/index.js';
 import worldClockOverview from './world_clock/index.js';
@@ -22,6 +23,7 @@ export const overviews = [
   lightOverview,
   photoFrameOverview,
   timerOverview,
+  vacuumOverview,
   volumeOverview,
   weatherOverview,
   worldClockOverview

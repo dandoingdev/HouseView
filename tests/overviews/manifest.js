@@ -10,6 +10,7 @@ export const manifest = [
   {type: 'light', load: () => import('../../src/overviews/light/test.js')},
   {type: 'photo_frame', load: () => import('../../src/overviews/photo_frame/test.js')},
   {type: 'timer', load: () => import('../../src/overviews/timer/test.js')},
+  {type: 'vacuum', load: () => import('../../src/overviews/vacuum/test.js')},
   {type: 'volume', load: () => import('../../src/overviews/volume/test.js')},
   {type: 'weather', load: () => import('../../src/overviews/weather/test.js')},
   {type: 'world_clock', load: () => import('../../src/overviews/world_clock/test.js')}

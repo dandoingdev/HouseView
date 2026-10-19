@@ -1,7 +1,7 @@
 // Browser behaviour test (docs/widget-api.md). Runs against dist/houseview.js with a recording mock hass.
 const ENTITY = 'media_player.test';
 
-export default async function ({mount, check, variants}) {
+export default async function ({mount, check, variants, advance, settle}) {
   let t = await mount(variants.ok);
   check(
     'music card shows title and artist over the cover, and the speaker name for screen readers',
@@ -245,4 +245,64 @@ export default async function ({mount, check, variants}) {
     t.q('[data-action="media-player-shuffle"]').disabled &&
       t.q('[data-action="media-player-repeat"]').disabled
   );
+
+  // ---- tiny tiles open the full player; a large tile keeps speaker settings on the title ----
+  t = await mount(variants.ok);
+  const tile = t.q('.mc');
+  const tiny = tile.clientWidth > 0 && tile.clientWidth <= 300 && tile.clientHeight <= 260;
+  check(
+    tiny
+      ? 'a tiny tile offers the full player from the track title'
+      : 'a large tile keeps speaker options on the track title',
+    t.q('.face .mc-details').dataset.action === (tiny ? 'media-player-expand-0' : 'info')
+  );
+  await t.act('media-player-expand-9', ENTITY);
+  check(
+    'an unknown player does not open the full player',
+    !t.q('.media-stage') && t.calls.length === 0
+  );
+  await t.act('media-player-expand-0', ENTITY);
+  const stage = t.q('.media-stage');
+  check(
+    'opening the full player shows the controls and calls nothing',
+    !!stage &&
+      t.calls.length === 0 &&
+      t.infos.length === 0 &&
+      stage.getAttribute('aria-label') === 'Open full player' &&
+      !!stage.querySelector('.mc-cover') &&
+      !!stage.querySelector('.mc-play') &&
+      !!stage.querySelector('.ms-close') &&
+      t.card._navigationBlocked()
+  );
+  stage.querySelector('[data-action="media"]').click();
+  await settle();
+  check(
+    'play on the full player pauses the same speaker',
+    t.calls.length === 1 &&
+      t.calls[0].s === 'media_play_pause' &&
+      t.calls[0].data.entity_id === ENTITY
+  );
+  stage.querySelector('[data-action="media-player-volume-view"]').click();
+  await settle();
+  await advance(1500);
+  check(
+    'volume stays open over the full player',
+    !!t.q('.media-stage') && !!t.q('.ov-volume-scene') && t.calls.length === 1
+  );
+  await t.click('overview-close');
+  await settle(400);
+  await advance(400);
+  check(
+    'closing volume returns to the full player',
+    !!t.q('.media-stage') && !t.q('.hv-screensaver')
+  );
+  await t.click('media-player-stage-close');
+  check(
+    'close returns to the tile',
+    !t.q('.media-stage') && t.q('.face .mc-details') && !t.card._navigationBlocked()
+  );
+  await t.act('media-player-expand-0', ENTITY);
+  t.root.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+  await settle();
+  check('escape closes the full player', !t.q('.media-stage'));
 }

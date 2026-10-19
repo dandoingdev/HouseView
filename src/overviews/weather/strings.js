@@ -6,6 +6,7 @@ export default {
     'weather_overview.description':
       'A full-screen sky scene with the temperature, forecast range and key details.',
     'weather_overview.unavailable': 'Weather unavailable',
+    'weather_overview.close': 'Close',
 
     'weather_overview.condition.sunny': 'Sunny',
     'weather_overview.condition.clear-night': 'Clear',
@@ -81,6 +82,7 @@ export default {
     'weather_overview.description':
       'Eine Himmelsszene im Vollbild mit Temperatur, Tagesspanne und wichtigen Details.',
     'weather_overview.unavailable': 'Wetter nicht verfügbar',
+    'weather_overview.close': 'Schließen',
 
     'weather_overview.condition.sunny': 'Sonnig',
     'weather_overview.condition.clear-night': 'Klare Nacht',

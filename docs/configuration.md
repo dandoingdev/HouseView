@@ -52,6 +52,7 @@ screensaver:
 | `music_screensaver` | `true` | The cover art appears at screensaver time while a speaker plays: `true` (every `media_player` widget), `false`, or a list of `media_player.*` entities |
 | `weather_view` | `true` | `false` makes a press on the weather widget open more-info instead of the full-screen weather |
 | `climate_view` | `true` | `false` makes a press on the thermostat widget's number open more-info instead of the full-screen thermostat view |
+| `vacuum_view` | `true` | `false` makes a hold on the vacuum widget open more-info instead of the full-screen cleaning panel |
 | `world_clock_view` | `true` | `false` disables the clock widget’s World Clock overlay |
 | `calendar_view` | `true` | `false` stops the date and calendar widgets from opening the month calendar (the calendar widget opens its dialog instead) |
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
@@ -196,7 +197,8 @@ A broken configuration shows a red error card with one of these messages:
 
 Tap a widget for its everyday action. Hold it for half a second to open its controls or settings:
 lights open the dimmer, thermostats open their full-screen control, and other entity widgets open Home Assistant’s
-entity dialog. Holding the track information or options dots opens speaker settings. Operational keys such as
+entity dialog. On a small panel tile, tap the track title to open the music player full screen. Holding the track
+information or options dots opens speaker settings. Operational keys such as
 volume, playback, Browse and temperature arrows still work with a tap. Moving your finger cancels a hold so swiping
 continues to turn pages. A configured `hold_action` takes precedence, including `action: none`.
 Keyboard users can focus a widget or settings key and press Shift+F10 or the context-menu key.

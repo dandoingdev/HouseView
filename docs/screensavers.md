@@ -182,16 +182,21 @@ you flip that switch.
 * **Month calendar.** Pressing a clock, date or calendar widget opens the [month calendar](overviews/calendar_month.md) full
   screen; a tap closes it. Turn this off with `calendar_view: false` on the carousel. An explicit
   `screensaver` entry with `type: calendar_month` (for example with `week_start: sunday`) supplies the options.
-* **Weather scene.** A weather overview card with `display: tile` is a small widget; pressing it opens the full scene.
+* **Weather scene.** Pressing a weather widget, or a weather overview card with `display: tile`, opens the full scene.
+  It stays until the close button or Escape. A tap on the sky does nothing. The idle screensaver still wakes on the
+  first tap. Turn the widget off with `weather_view: false`; the widget then opens the entity dialog.
 * **Thermostat view.** Pressing the number on a thermostat widget opens the [thermostat view](overviews/climate.md):
   the target in large figures with down and up keys, the room temperature and humidity, and a key for Home Assistant's
   own thermostat dialog. It is a control panel: its keys work, a press on the background does nothing, and the key top
   left (or Escape) closes it. Turn this off with `climate_view: false` on the carousel; the number then opens the
   entity dialog. A `screensaver` entry with `type: climate` written in YAML supplies the options (`show_time`).
+* **Vacuum view.** Tapping a vacuum widget opens the [vacuum view](overviews/vacuum.md): activity, battery, fan
+  speed, and the cleaning commands the vacuum supports. It is a control panel. Turn this off with `vacuum_view: false`
+  on the carousel; a hold on the tile then opens the entity dialog.
 * **Photo frame.** The photo frame card opens full screen when pressed.
 
 These layers are one-off: they never start by themselves, they run even in edit mode, and the first tap on them only closes
-them (the thermostat view closes with its own key).
+them. The weather scene stays until its close button. A control panel (the thermostat view) closes with its own key.
 
 ## Tablet, bedtime and motion
 

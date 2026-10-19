@@ -132,7 +132,43 @@ try {
     await new Promise((resolve) => setTimeout(resolve, 400));
   };
   await assertLayout(480, 480);
+  assert.match(
+    await page.evaluate(
+      () => window.card.shadowRoot.querySelector('.face .mc-details').dataset.action
+    ),
+    /^media-player-expand-/
+  );
   await click('.mc-details');
+  const stage = await page.evaluate(() => {
+    const root = window.card.shadowRoot;
+    const el = root.querySelector('.media-stage');
+    const tile = root.querySelector('.face .mc');
+    if (!el || !tile) return null;
+    const full = el.getBoundingClientRect();
+    const small = tile.getBoundingClientRect();
+    const play = el.querySelector('.mc-play').getBoundingClientRect();
+    const art = getComputedStyle(el.querySelector('.music-art'));
+    const panel = el.querySelector('.mc');
+    return {
+      calls: window.panelCalls.length,
+      infos: window.panelInfos.length,
+      bigger: full.width > small.width + 40 && full.height > small.height + 40,
+      bottom: full.bottom,
+      play: play.width,
+      art: art.display,
+      panel: panel ? Math.round(panel.getBoundingClientRect().height) : 0,
+      close: !!el.querySelector('.ms-close')
+    };
+  });
+  assert.equal(stage.calls, 0);
+  assert.equal(stage.infos, 0);
+  assert.equal(stage.bigger, true);
+  assert.equal(stage.bottom, 480);
+  assert.ok(stage.play >= 64, JSON.stringify(stage));
+  assert.notEqual(stage.art, 'none', JSON.stringify(stage));
+  assert.equal(stage.close, true);
+  await click('.ms-close');
+  await page.waitForFunction('!window.card.shadowRoot.querySelector(".media-stage")');
   assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
   await page.evaluate(() =>
     window.card.shadowRoot
@@ -200,6 +236,8 @@ try {
   await new Promise((r) => setTimeout(r, 100));
   await assertLayout(480, 480);
   await click('.mc-details');
+  await click('.ms-close');
+  await page.waitForFunction('!window.card.shadowRoot.querySelector(".media-stage")');
   await click('.mc-volume');
   await page.waitForSelector('houseview-card >>> .ov-volume-input');
   assert.equal(await page.evaluate(() => window.panelCalls.length), 2);

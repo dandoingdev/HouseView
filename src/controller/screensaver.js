@@ -222,7 +222,8 @@ export const screensaverMixin = {
    * Show the overview of the card tile for `entityId` as a one-off layer, whether or not a screensaver is
    * configured. The entry never auto-starts (idle_timeout 0) and is dropped when the layer is dismissed, so a
    * configured screensaver keeps its own rotation. The layer behaves exactly like the screensaver: the first tap
-   * only wakes and nothing underneath is pressed.
+   * only wakes and nothing underneath is pressed. An overview with `manualClose` (the weather scene) stays until
+   * its close button or Escape.
    */
   _screensaverOpen(entityId) {
     // An id like `overview:3` names a card of an overview without an entity by its position on the card.
@@ -258,7 +259,8 @@ export const screensaverMixin = {
     const optOut = {
       calendar_month: 'calendar_view',
       weather: 'weather_view',
-      climate: 'climate_view'
+      climate: 'climate_view',
+      vacuum: 'vacuum_view'
     }[type];
     if (!this._hass || !getOverview(type) || (optOut && this._config?.[optOut] === false)) return;
     const [entry] = normalizeScreensaver({
@@ -436,11 +438,15 @@ export const screensaverMixin = {
 
   /**
    * The blockers for showing (or keeping) `entry`: the gallery, the timer alarm, a pending service call and edit mode.
-   * An event entry ignores pending calls so starting a timer can trigger it. Active control panels stay open while commands finish.
+   * An extension that owns the screen (the playlist library, the full-screen player) also blocks idle art. A control
+   * panel opened by hand, such as the volume view, stays up over that player. An event entry ignores pending calls so
+   * starting a timer can trigger it. Active control panels stay open while commands finish.
    */
   _screensaverBlockedFor(entry) {
-    if (this._navigationBlocked?.() || this._galleryOpen || this._alarm) return true;
-    const controlling = entry?.overview.controls && this._screensaver?.active?.entry === entry;
+    if (this._galleryOpen || this._alarm) return true;
+    const controlling = !!(entry?.overview?.controls && this._screensaver?.active?.entry === entry);
+    // The full-screen player blocks paging and idle art, and still opens the volume view on top of itself.
+    if (this._navigationBlocked?.() && !(controlling && entry.manual)) return true;
     if (this._pending?.size && !entry?.event && !controlling) return true;
     return !!entry && !entry.startInEditMode && !entry.preview && isEditMode(this);
   },
@@ -574,13 +580,19 @@ export const screensaverMixin = {
     this._screensaverRemoveLayer(ss); // a layer still fading out from the previous dismissal
 
     const scene = entry.overview.render(this._screensaverContext(entry), 'screensaver');
+    // Opened from a button: stay until the close button. The idle screensaver still uses the full-area dismiss.
+    const pinned = !!(entry.manual && entry.overview.manualClose && !entry.overview.controls);
     const template = document.createElement('template');
     template.innerHTML = layerMarkup(entry.overview, scene, {
       label: t(this._hass, `${entry.overview.type}_overview.label`),
-      dismiss: t(this._hass, 'screensaver.dismiss')
+      dismiss: t(
+        this._hass,
+        pinned ? `${entry.overview.type}_overview.close` : 'screensaver.dismiss'
+      ),
+      pinned
     });
     const layer = template.content.firstElementChild;
-    this._screensaverBind(layer, entry.overview);
+    this._screensaverBind(layer, entry.overview, pinned);
     const focusReturn = this.shadowRoot.activeElement;
     shell.append(layer); // an overlay: nothing else in the shell is touched, re-rendered or made inert
     void layer.offsetWidth; // commit the opacity:0 start state, then fade in
@@ -609,10 +621,12 @@ export const screensaverMixin = {
    * The layer swallows every gesture: the first tap only wakes. Nothing reaches the controller's listeners. A control
    * panel (`controls`, the thermostat view) is the exception: a press on one of its buttons runs that action through
    * the ordinary dispatcher, a press anywhere else does nothing, and only `overview-close` or Escape closes it.
+   * A pinned layer (weather opened from a button) is the same, with only the close button.
    */
-  _screensaverBind(layer, overview) {
+  _screensaverBind(layer, overview, pinned = false) {
     const wake = (reason) => this._screensaver?.idle?.wake(reason);
     if (overview?.controls) return this._screensaverBindControls(layer, wake);
+    if (pinned) return this._screensaverBindPinned(layer, wake);
     // A scrollable overview (the home summary) is dragged, not just tapped: a drag scrolls it (a mouse drag too) and
     // only a press that stayed put wakes.
     const scroller = layer.querySelector('.ov-home-scroll');
@@ -653,6 +667,38 @@ export const screensaverMixin = {
         wake('key');
       } else if (e.key === 'Tab') {
         e.preventDefault(); // the dismiss button is the only stop
+      }
+    });
+  },
+
+  /**
+   * A scene opened from a button. The background stays up. Only the close button or Escape dismisses it.
+   * The click that follows the opening press lands on this new layer and must not count as a close.
+   */
+  _screensaverBindPinned(layer, wake) {
+    let pressed = false;
+    for (const type of ['pointerdown', 'pointerup', 'pointercancel']) {
+      layer.addEventListener(type, (e) => {
+        e.stopPropagation();
+        if (type === 'pointerdown') pressed = true;
+        if (type === 'pointercancel') pressed = false;
+      });
+    }
+    layer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const button = e.target.closest?.('button[data-action]');
+      const fromPointer = e.detail > 0;
+      const openingClick = fromPointer && !pressed;
+      if (fromPointer) pressed = false;
+      if (openingClick || !button || button.disabled) return;
+      if (button.dataset.action === 'overview-close') wake('tap');
+    });
+    layer.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        wake('key');
       }
     });
   },

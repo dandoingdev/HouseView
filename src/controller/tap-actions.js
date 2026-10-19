@@ -14,6 +14,10 @@ export function configuredWidgetOf(card, button) {
 
 const SETTINGS_ACTIONS = new Set(['info', 'light-view', 'climate-view']);
 
+/** Settings keys open on hold. A tiny player's track title also opens on tap, and still holds for settings. */
+const holdable = (action) =>
+  SETTINGS_ACTIONS.has(action) || String(action || '').startsWith('media-player-expand-');
+
 function pressTarget(card, target) {
   if (target?.closest?.('.hv-screensaver, .ov-scene')) return null;
   const tile = target?.closest?.('[data-widget]');
@@ -24,7 +28,7 @@ function pressTarget(card, target) {
   const button = target.closest('button');
   if (button?.disabled) return null;
   // Nested operational keys (transport, volume, temperature steps...) remain direct controls.
-  if (button && button !== tile && !SETTINGS_ACTIONS.has(button.dataset.action)) return null;
+  if (button && button !== tile && !holdable(button.dataset.action)) return null;
   const action = settingsAction(card, widget);
   if (!action && widget.hold_action == null && widget.double_tap_action == null) return null;
   return {widget, index, button: button || tile, action};

@@ -1,9 +1,10 @@
-/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close */
 /*
  * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
  * its lower edge, a progress bar, a transport row and a volume pill.
  *
- * Responsive by container queries on the tile itself (`.mc` is a size container), never the screen:
+ * Responsive by container queries on the tile itself (`.mc` is a size container named `player`), never the screen.
+ * The cover is a size container too and is often under 260px, so the compact rules name `player` and follow the tile:
  *   - tall or square tile: one column (pill, cover, progress, controls);
  *   - wide tile: cover on the left, pill / progress / controls on the right (aspect ratio 5:4 or wider);
  *   - short tile (under 260 px high): a compact strip, no cover: title and artist on the left, previous / play / next
@@ -14,6 +15,7 @@
 
 /* @phase lifted */
 .carousel .tile.widget.music-panel.mc {
+  container-name: player;
   container-type: size;
   padding: 0;
   overflow: hidden;
@@ -31,7 +33,7 @@
   padding: clamp(12px, 4cqmin, 36px);
 }
 
-@container (min-aspect-ratio: 5/4) and (min-height: 261px) {
+@container player (min-aspect-ratio: 5/4) and (min-height: 261px) {
   .carousel .mc .mc-body {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
     column-gap: clamp(16px, 3cqw, 56px);
@@ -269,7 +271,7 @@
 }
 
 /* narrow tile: keep volume visible and leave out shuffle and repeat */
-@container (max-width: 260px) {
+@container player (max-width: 260px) {
   .carousel .mc .mc-aux {
     display: none;
   }
@@ -280,7 +282,7 @@
 }
 
 /* short tile: a compact strip without the cover */
-@container (max-height: 260px) {
+@container player (max-height: 260px) {
   .carousel .mc .mc-body {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-rows: 44px minmax(0, 1fr);
@@ -349,7 +351,7 @@
 }
 
 /* short AND narrow tile: title and artist on top, the three controls underneath */
-@container (max-height: 260px) and (max-width: 300px) {
+@container player (max-height: 260px) and (max-width: 300px) {
   .carousel .mc .mc-top { display: none; }
   .carousel .mc .mc-stage { grid-row: 1; }
   .carousel .mc .mc-body {
@@ -380,7 +382,7 @@
 }
 
 /* Square wall panels: keep volume, track and playback in three explicit rows. */
-@container (min-height: 150px) and (max-height: 260px) and (max-width: 300px) {
+@container player (min-height: 150px) and (max-height: 260px) and (max-width: 300px) {
   .carousel .mc .mc-body {
     grid-template-rows: 44px minmax(0, 1fr) 52px;
     row-gap: 2px;
@@ -427,7 +429,7 @@
   }
 }
 
-@container (min-height: 150px) and (max-height: 170px) and (max-width: 300px) {
+@container player (min-height: 150px) and (max-height: 170px) and (max-width: 300px) {
   .carousel .mc .mc-body {
     grid-template-rows: 44px minmax(0, 1fr) 44px;
   }
@@ -649,38 +651,39 @@
   text-align: left;
 }
 
-/* Older panel WebViews have neither container queries nor container-relative units. */
+/* Older panel WebViews have neither container queries nor container-relative units.
+   These rules match the tile only: the full player is not a .tile, so it keeps the large layout. */
 @supports not (container-type: size) {
   @media (max-width: 519px) and (min-height: 350px) {
-    .carousel .mc .mc-body {
+    .carousel .tile .mc-body {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: 44px minmax(0, 1fr) 52px;
       gap: 4px;
       padding: 8px 10px;
     }
-    .carousel .mc .mc-top {
+    .carousel .tile .mc-top {
       display: flex;
       grid-column: 1;
       grid-row: 1;
     }
-    .carousel .mc .mc-volume {
+    .carousel .tile .mc-volume {
       height: 44px;
       padding: 0 10px;
     }
-    .carousel .mc .mc-progress,
-    .carousel .mc .mc-more,
-    .carousel .mc .mc-aux,
-    .carousel .mc .mc-cover .music-art,
-    .carousel .mc .mc-cover::after {
+    .carousel .tile .mc-progress,
+    .carousel .tile .mc-more,
+    .carousel .tile .mc-aux,
+    .carousel .tile .mc-cover .music-art,
+    .carousel .tile .mc-cover::after {
       display: none;
     }
-    .carousel .mc .mc-stage {
+    .carousel .tile .mc-stage {
       grid-column: 1;
       grid-row: 2;
       display: block;
     }
-    .carousel .mc .mc-cover {
+    .carousel .tile .mc-cover {
       position: static;
       width: 100%;
       max-width: 100%;
@@ -690,31 +693,31 @@
       border-radius: 0;
       box-shadow: none;
     }
-    .carousel .mc .mc-meta {
+    .carousel .tile .mc-meta {
       position: static;
     }
-    .carousel .mc .mc-title {
+    .carousel .tile .mc-title {
       font-size: 16px;
       -webkit-line-clamp: 1;
     }
-    .carousel .mc .mc-artist {
+    .carousel .tile .mc-artist {
       font-size: 12px;
     }
-    .carousel .mc .mc-transport {
+    .carousel .tile .mc-transport {
       grid-column: 1;
       grid-row: 3;
       justify-content: center;
       gap: 4px;
     }
-    .carousel .mc .mc-skip {
+    .carousel .tile .mc-skip {
       width: 44px;
       height: 44px;
     }
-    .carousel .mc .mc-play {
+    .carousel .tile .mc-play {
       width: 52px;
       height: 52px;
     }
-    .carousel .mc .mc-play ha-icon {
+    .carousel .tile .mc-play ha-icon {
       --mdc-icon-size: 32px;
     }
     .carousel .mc-browse {
@@ -761,7 +764,7 @@
 }
 
 /* Compact wide tiles put seeking below the track and playback controls. */
-@container (min-height: 150px) and (max-height: 260px) and (min-width: 301px) {
+@container player (min-height: 150px) and (max-height: 260px) and (min-width: 301px) {
   .carousel .mc-has-progress .mc-body {
     grid-template-rows: 44px minmax(0, 1fr) 44px;
   }
@@ -776,7 +779,7 @@
 }
 
 /* Four controls still fit on a 480px panel, including a 44px seek target. */
-@container (min-height: 168px) and (max-height: 260px) and (max-width: 300px) {
+@container player (min-height: 168px) and (max-height: 260px) and (max-width: 300px) {
   .carousel .mc-has-progress .mc-body {
     grid-template-rows: 44px minmax(0, 1fr) 44px 44px;
     row-gap: 2px;
@@ -808,7 +811,7 @@
 }
 
 /* Larger dashboard navigation leaves 170px of content in a 480px panel's media tile. */
-@container (min-height: 168px) and (max-height: 175px) and (max-width: 300px) {
+@container player (min-height: 168px) and (max-height: 175px) and (max-width: 300px) {
   .carousel .mc-has-progress .mc-body {
     padding-top: 2px;
     padding-bottom: 2px;
@@ -818,32 +821,32 @@
 
 @supports not (container-type: size) {
   @media (max-width: 519px) and (min-height: 350px) {
-    .carousel .mc-has-progress .mc-body {
+    .carousel .tile.mc-has-progress .mc-body {
       grid-template-rows: 44px minmax(0, 1fr) 44px 44px;
       padding-top: 4px;
       padding-bottom: 4px;
       gap: 2px;
     }
-    .carousel .mc-has-progress .mc-progress {
+    .carousel .tile.mc-has-progress .mc-progress {
       display: grid;
       grid-column: 1;
       grid-row: 3;
     }
-    .carousel .mc-has-progress .mc-transport {
+    .carousel .tile.mc-has-progress .mc-transport {
       grid-row: 4;
     }
-    .carousel .mc-has-progress .mc-play {
+    .carousel .tile.mc-has-progress .mc-play {
       width: 44px;
       height: 44px;
     }
-    .carousel .mc-has-progress .mc-details {
+    .carousel .tile.mc-has-progress .mc-details {
       min-height: 0;
     }
-    .carousel .mc-has-progress .mc-title {
+    .carousel .tile.mc-has-progress .mc-title {
       font-size: 12px;
       line-height: 1.1;
     }
-    .carousel .mc-has-progress .mc-artist {
+    .carousel .tile.mc-has-progress .mc-artist {
       margin-top: 2px;
       font-size: 10px;
       line-height: 1.1;
@@ -865,4 +868,75 @@
   border-radius: 50%;
   background: #fff;
   transform: translate(-50%, -50%);
+}
+
+/* Full-screen player opened from a tiny panel tile. Above the page, below the volume view and the library. */
+.carousel .media-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 12px 16px 16px;
+  overflow: hidden;
+  color: #f1fffc;
+  background: linear-gradient(145deg, #146d6a, #073f43 70%, #092e38);
+  container-type: size;
+}
+.carousel .ms-head {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+}
+.carousel .ms-title {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(18px, 4cqmin, 34px);
+  font-weight: 600;
+}
+.carousel .ms-close {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 0;
+  border: 1px solid #ffffff35;
+  border-radius: 50%;
+  background: #ffffff16;
+  color: inherit;
+}
+.carousel .ms-close ha-icon {
+  margin: 0;
+  --mdc-icon-size: 28px;
+}
+.carousel .media-stage .mc {
+  container-name: player;
+  container-type: size;
+  width: 100%;
+  height: 100%;
+  min-height: 261px;
+  overflow: hidden;
+}
+.carousel .media-stage .mc-play {
+  width: 88px;
+  height: 88px;
+}
+.carousel .media-stage .mc-skip,
+.carousel .media-stage .mc-aux,
+.carousel .media-stage .mc-more {
+  width: 64px;
+  height: 64px;
+}
+.carousel .media-stage .mc-volume {
+  height: 64px;
 }

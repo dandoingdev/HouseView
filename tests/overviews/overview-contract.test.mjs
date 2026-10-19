@@ -188,6 +188,7 @@ if (!folders.length) {
       it('declares whether it is interactive (buttons in card mode) and keeps the card free of the tap overlay', () => {
         assert.equal(typeof overview.interactive, 'boolean');
         assert.equal(typeof overview.controls, 'boolean');
+        assert.equal(typeof overview.manualClose, 'boolean');
         if (overview.controls) assert.ok(overview.interactive, 'a control panel is interactive');
         else
           assert.deepEqual(

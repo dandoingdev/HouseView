@@ -51,7 +51,7 @@ in Node (tests, CI, linters) it throws.
 | `availability` | `'entity'` | How `ctx.ok` is computed: `'entity'` (exists and not unavailable/unknown), `'always'` (clock, date), `'allow-unknown'` (blinds: `unknown` stays usable) |
 | `unknownOkDomains` | `[]` | Domains whose state `unknown` still counts as available (action: scene, button, input_button) |
 | `layoutRoles` | `[]` | Roles the controller uses to find a widget: `clock`, `camera` and `timer` pick the widgets whose `afterRender` hook refreshes the clock, camera snapshots and countdowns, and `camera` marks the widget whose extension owns the gallery. Page layout does not use them |
-| `family` | `null` | `'icon-tile'` joins the shared icon-widget proportions in CSS (light, switch, fan, lock, action, alarm panel) |
+| `family` | `null` | `'icon-tile'` joins the shared icon-widget proportions in CSS (light, switch, fan, lock, action, alarm panel, vacuum) |
 | `standalone` | `true` | Register `houseview-<type>-card` and a picker entry |
 | `tag` | `houseview-<type>-card` | Element tag override, `^houseview-[a-z0-9]+(-[a-z0-9]+)*-card$`. The default stays legal with underscores (`houseview-media_player-card`) |
 | `preview` | `true` | The picker may preview the card; a render must never call services anyway |

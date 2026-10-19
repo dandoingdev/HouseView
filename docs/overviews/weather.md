@@ -33,7 +33,8 @@ As a screensaver the framework keys apply too (`idle_timeout`, `enabled`, `previ
 ## As a widget
 
 Set `display: tile` on the card for a one-cell widget that looks like a compact weather summary. A tap opens the full
-weather scene over the whole card, like the screensaver: the first tap on the scene only closes it again.
+weather scene over the whole card. That scene stays until its close button or Escape; a tap on the sky does nothing.
+The idle screensaver still wakes on the first tap.
 
 ```yaml
 type: custom:houseview-card

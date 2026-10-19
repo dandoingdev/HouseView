@@ -1,6 +1,6 @@
 // Browser behaviour tests (docs/widget-api.md). `calls` records every hass.callService, `infos` every
 // more-info request.
-export default async function ({mount, check, variants}) {
+export default async function ({mount, check, variants, wait}) {
   let t = await mount(variants.ok);
   check(
     'weather shows temperature, unit, name and condition',
@@ -55,4 +55,48 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.missing);
   check('missing entity renders disabled', t.q('[data-action="weather-view"]').disabled);
   check('weather never calls a service', t.calls.length === 0);
+
+  // A real press opens on pointerup. The click that follows lands on the new layer and must not close it.
+  t = await mount(variants.ok);
+  const button = t.q('[data-action="weather-view"]');
+  const point = {bubbles: true, button: 0, pointerId: 1, isPrimary: true, clientX: 24, clientY: 24};
+  button.dispatchEvent(new PointerEvent('pointerdown', point));
+  button.dispatchEvent(new PointerEvent('pointerup', point));
+  await t.settle();
+  const layer = () => t.root.querySelector('.hv-screensaver');
+  check(
+    'a press opens the weather view with a close button',
+    layer()?.dataset.state === 'on' &&
+      !!layer().querySelector('.ov-weather-scene') &&
+      layer().querySelector('[data-action="overview-close"]')?.getAttribute('aria-label') ===
+        'Close' &&
+      !layer().querySelector('.ov-dismiss')
+  );
+  layer().dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, detail: 1}));
+  await t.settle();
+  check(
+    'the click that follows the press leaves the weather view open',
+    layer()?.dataset.state === 'on'
+  );
+  const scene = layer().querySelector('.ov-weather-scene');
+  scene.dispatchEvent(
+    new PointerEvent('pointerdown', {bubbles: true, button: 0, pointerId: 3, isPrimary: true})
+  );
+  scene.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, detail: 1}));
+  await t.settle();
+  check(
+    'a later tap on the scene leaves it open and calls nothing',
+    layer()?.dataset.state === 'on' && t.calls.length === 0
+  );
+  const close = layer().querySelector('[data-action="overview-close"]');
+  close.dispatchEvent(
+    new PointerEvent('pointerdown', {bubbles: true, button: 0, pointerId: 4, isPrimary: true})
+  );
+  close.dispatchEvent(new MouseEvent('click', {bubbles: true, cancelable: true, detail: 1}));
+  await t.settle();
+  await wait(400);
+  check(
+    'the close button dismisses the weather view and calls no service',
+    !t.root.querySelector('.hv-screensaver') && t.calls.length === 0
+  );
 }

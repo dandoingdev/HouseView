@@ -130,6 +130,18 @@ export const featureActions = freeze({
       });
     }
   }),
+  // The vacuum tile: the full-screen cleaning panel. Nothing is called on Home Assistant.
+  'vacuum-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      if (ctx.card._config?.vacuum_view === false || !ctx.availableOf(id)) return undefined;
+      const widget = ctx.card._config?.widgets?.find((w) => w.type === 'vacuum' && w.entity === id);
+      return ctx.card._screensaverOpenType?.('vacuum', {
+        entity: id,
+        ...(widget?.name ? {name: widget.name} : {})
+      });
+    }
+  }),
   'home-view': freeze({
     immediate: true,
     run: (ctx) =>

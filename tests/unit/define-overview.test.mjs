@@ -361,6 +361,20 @@ test('layer markup is a labelled modal dialog with one dismiss button', () => {
   );
 });
 
+test('a pinned layer has a close button and no full-area dismiss', () => {
+  const html = layerMarkup(demo, '<div class="ov-scene"></div>', {
+    label: 'Weather',
+    dismiss: 'Close',
+    pinned: true
+  });
+  assert.match(html, /class="hv-screensaver hv-pinned"/);
+  assert.match(
+    html,
+    /<button type="button" class="ov-panel-key ov-panel-close ov-manual-close" data-action="overview-close" aria-label="Close"><ha-icon class="ov-panel-icon" icon="mdi:close" aria-hidden="true"><\/ha-icon><\/button><\/div>$/
+  );
+  assert.equal(html.includes('ov-dismiss'), false);
+});
+
 // ---- the derived widget through the real widget engine ----
 
 registerOverview(demo);

@@ -30,12 +30,27 @@ export default async function ({mount, check, variants, wait}) {
   );
   await t.click('overview-open');
   check(
-    'tapping the tile opens the full-page layer and calls no service',
-    !!t.layer && !!t.layer.querySelector('.ov-weather-scene') && t.calls.length === 0
+    'tapping the tile opens the full-page layer with a close button and calls no service',
+    !!t.layer &&
+      !!t.layer.querySelector('.ov-weather-scene') &&
+      t.layer.querySelector('[data-action="overview-close"]')?.getAttribute('aria-label') ===
+        'Close' &&
+      !t.layer.querySelector('.ov-dismiss') &&
+      t.calls.length === 0
   );
-  await t.tap();
+  t.layer.querySelector('.ov-weather-scene').click();
+  await t.settle();
+  check('a tap on the scene leaves the weather view open', !!t.layer && t.layerState === 'on');
+  await t.click('overview-close');
   await wait(400);
-  check('the first tap only dismisses the layer', !t.layer && !!t.q('.ov-mode-tile'));
+  t.advance(1); // the fake clock must pass the tap-swallow window before another open
+  check('the close button dismisses the layer', !t.layer && !!t.q('.ov-mode-tile'));
+  await t.click('overview-open');
+  t.layer
+    .querySelector('[data-action="overview-close"]')
+    .dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));
+  await wait(400);
+  check('Escape dismisses the weather view', !t.layer);
 
   // ---- card mode: the reference look ----
   t = await mount(variants.ok);

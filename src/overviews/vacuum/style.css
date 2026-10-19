@@ -1,0 +1,212 @@
+/* @phase overviews */
+/* @owns ov-vacuum-scene ov-vacuum-body ov-vacuum-mark ov-vacuum-status ov-vacuum-detail ov-vacuum-meta ov-vacuum-fig ov-vacuum-ico ov-vacuum-fig-text ov-vacuum-battery-fig ov-vacuum-fan-fig ov-vacuum-battery ov-vacuum-battery-low ov-vacuum-battery-fill ov-vacuum-foot ov-vacuum-commands ov-vacuum-command ov-vacuum-command-label ov-vacuum-speeds ov-vacuum-speed */
+
+/*
+ * Cleaning panel: one flat colour for what the vacuum is doing, white text, round command keys.
+ * No images, filters or animation. Sizes use container units of .ov, with plain px first.
+ */
+.ov-vacuum-scene {
+  --ov-vacuum-bg: #3e5c5a;
+  display: flex;
+  flex-direction: column;
+  background: var(--ov-vacuum-bg);
+  color: #fff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+  border-radius: inherit;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.ov-vacuum-scene[data-mood='cleaning'] {
+  --ov-vacuum-bg: #0e7c74;
+}
+.ov-vacuum-scene[data-mood='returning'] {
+  --ov-vacuum-bg: #14657f;
+}
+.ov-vacuum-scene[data-mood='paused'] {
+  --ov-vacuum-bg: #5b6b7f;
+}
+.ov-vacuum-scene[data-mood='docked'] {
+  --ov-vacuum-bg: #1c4e52;
+}
+.ov-vacuum-scene[data-mood='error'] {
+  --ov-vacuum-bg: #9d4330;
+}
+.ov-vacuum-scene[data-mood='unavailable'] {
+  --ov-vacuum-bg: #2b2f36;
+}
+
+.ov-vacuum-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  gap: 2cqmin;
+  padding: 0 16px 12px;
+  padding: 0 4cqmin 3cqmin;
+  text-align: center;
+  overflow: hidden;
+}
+.ov-vacuum-mark {
+  --mdc-icon-size: 48px;
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+}
+.ov-vacuum-status {
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 40px;
+  font-size: clamp(32px, 12cqmin, 72px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+.ov-vacuum-detail {
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-size: clamp(14px, 4cqmin, 22px);
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.92;
+}
+.ov-vacuum-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  gap: 4cqmin;
+  margin: 0;
+  font-size: 18px;
+  font-size: clamp(15px, 4.5cqmin, 24px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.ov-vacuum-fig {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ov-vacuum-ico {
+  --mdc-icon-size: 22px;
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  overflow: hidden;
+}
+.ov-vacuum-battery {
+  width: 72%;
+  max-width: 220px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.ov-vacuum-battery-fill {
+  width: var(--battery, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: #fff;
+}
+.ov-vacuum-battery-low .ov-vacuum-battery-fill {
+  background: #ffd2a8;
+}
+
+.ov-vacuum-foot {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  gap: 3cqmin;
+  width: 100%;
+  padding: 0 12px 16px;
+  padding: 0 3cqmin 4cqmin;
+}
+.ov-vacuum-commands,
+.ov-vacuum-speeds {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  gap: 2.4cqmin;
+  width: 100%;
+}
+.ov-vacuum-command {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 72px;
+  height: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  padding: 6px 4px;
+  border-radius: 22px;
+  font: inherit;
+}
+.ov-vacuum-command-label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.ov-vacuum-speed {
+  min-width: 64px;
+  min-height: 64px;
+  max-width: 160px;
+  margin: 0;
+  padding: 0 16px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: inherit;
+  font: inherit;
+  font-size: 16px;
+  font-size: clamp(14px, 3.5cqmin, 18px);
+  font-weight: 600;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ov-vacuum-speed[aria-pressed='true'] {
+  background: rgba(255, 255, 255, 0.42);
+}
+.ov-vacuum-speed:focus-visible,
+.ov-vacuum-command:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.ov-vacuum-speed:active {
+  opacity: 0.6;
+}
+
+@container ov (max-height: 420px) {
+  .ov-vacuum-mark {
+    display: none;
+  }
+}

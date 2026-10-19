@@ -153,5 +153,7 @@ export default defineOverview({
     }
   },
 
-  tap: {card: 'info'}
+  tap: {card: 'info'},
+  // Opened from the weather widget or the tile: stay until the close button. The idle screensaver still wakes on a tap.
+  manualClose: true
 });

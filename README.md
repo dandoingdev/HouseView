@@ -177,9 +177,10 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 | [Lock](docs/widgets/lock.md) | `lock` | `lock.*` | `icon` | Locks or unlocks (asks before unlocking) |
 | [Sensor](docs/widgets/sensor.md) | `sensor` | `sensor.*` | `icon` | Opens the entity dialog |
 | [Weather](docs/widgets/weather.md) | `weather` | `weather.*` | | Opens the entity dialog |
-| [Music](docs/widgets/media_player.md) | `media_player` | `media_player.*` | | Transport, volume, shuffle and repeat keys; the dots open the dialog |
+| [Music](docs/widgets/media_player.md) | `media_player` | `media_player.*` | | Transport, volume, shuffle and repeat keys; a small tile opens the full player; the dots open the dialog |
 | [Timer](docs/widgets/timer.md) | `timer` | `timer.*` | | Presets start the timer; pause, resume, cancel |
 | [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the arming dialog (never arms by itself). Works with any alarm entity, e.g. [Alarmo](#works-with-alarmo) |
+| [Vacuum](docs/widgets/vacuum.md) | `vacuum` | `vacuum.*` | `icon` | Opens the cleaning panel (or the dialog on hold with `vacuum_view: false`) |
 | [Action](docs/widgets/action.md) | `action` | `scene.*`, `script.*`, `button.*`, `input_button.*` | `icon`, `note` | Runs the scene, script or button |
 
 ## Overviews
@@ -200,6 +201,7 @@ them and how to combine them.
 | [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
 | [Light view](docs/overviews/light.md) | `light` | Control panel opened by holding a light widget | `light.*` | `icon` | `custom:houseview-light-overview-card` |
 | [Thermostat view](docs/overviews/climate.md) | `climate` | Control panel opened by pressing the thermostat widget's number; not a screensaver choice | `climate.*` | `show_time` | `custom:houseview-climate-overview-card` |
+| [Vacuum view](docs/overviews/vacuum.md) | `vacuum` | Control panel opened by tapping a vacuum widget; not a screensaver choice | `vacuum.*` | none | `custom:houseview-vacuum-overview-card` |
 
 ```yaml
 type: custom:houseview-card
@@ -222,6 +224,7 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 | `calendar_view` | `true` | `false` stops the date and calendar widgets from opening the month calendar |
 | `weather_view` | `true` | `false` makes the weather widget open more-info instead of the full-screen weather |
 | `climate_view` | `true` | `false` makes the thermostat widget open more-info instead of the full-screen thermostat view |
+| `vacuum_view` | `true` | `false` makes the vacuum widget open more-info on hold instead of the full-screen cleaning panel |
 
 Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Passive overviews only read data. Light and thermostat control panels route explicit button and slider input through the same guarded actions as their widgets.
 
@@ -278,7 +281,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |
 | `screensaver` | An overview or a list of them: `type`, `entity`, `idle_timeout`, `enabled`, `preview`, `start_in_edit_mode`, plus the overview's own options |
-| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `world_clock_view` | The automatic displays |
+| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `vacuum_view`, `world_clock_view` | The automatic displays |
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |

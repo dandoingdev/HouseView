@@ -5,8 +5,9 @@
 Card type `custom:houseview-weather-card`, or `type: weather` in the `cards` list of `custom:houseview-card`. Available since 1.0.
 
 Shows a `weather.*` entity as a small widget: a condition icon, the current temperature with its unit, the name and
-the condition text (`partlycloudy`, `lightning rainy`, ...). The widget is display only: a tap opens the entity's
-more-info dialog. Conditions without a dedicated icon use a partly cloudy icon. The unit is the entity's
+the condition text (`partlycloudy`, `lightning rainy`, ...). A tap opens the full-screen weather scene, which stays
+until its close button or Escape. `weather_view: false` on the carousel keeps the entity dialog instead. Conditions
+without a dedicated icon use a partly cloudy icon. The unit is the entity's
 `temperature_unit`, otherwise the Home Assistant unit system; values are never converted. A missing or non-numeric
 temperature shows a dash, and an unavailable entity is shown disabled.
 

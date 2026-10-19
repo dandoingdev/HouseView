@@ -31,6 +31,7 @@ export const FEATURE_ACTIONS = [
   'home-view',
   'weather-view',
   'climate-view',
+  'vacuum-view',
   'goto-widget',
   'page-prev',
   'page-next',
@@ -94,4 +95,12 @@ export const RENDER_FORBIDDEN = {
 export const RENDER_DATE_EXEMPT = CLOCK_DEPENDENT;
 
 /** The shared tile-proportion family as shipped (docs/widget-api.md `family`). */
-export const ICON_TILE_FAMILY = ['light', 'action', 'switch', 'fan', 'lock', 'alarm_control_panel'];
+export const ICON_TILE_FAMILY = [
+  'light',
+  'action',
+  'switch',
+  'fan',
+  'lock',
+  'alarm_control_panel',
+  'vacuum'
+];

@@ -54,6 +54,7 @@ function validateOptionalSettings(config) {
     'calendar_view',
     'weather_view',
     'climate_view',
+    'vacuum_view',
     'world_clock_view',
     'show_header',
     'tablet_mode'

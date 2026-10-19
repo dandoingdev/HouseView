@@ -8,6 +8,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* **Vacuum widget and cleaning panel.** A `vacuum.*` tile shows activity, the integration's status and battery. Tap it to open a full-screen panel for start, pause, stop, dock, spot, locate and fan speed. Commands follow the vacuum's supported features and current activity. `vacuum_view: false` keeps Home Assistant's own dialog on hold.
+* **Full-screen music player** on small panel tiles. Tap the track title to open the same controls at a comfortable size. Hold still opens speaker settings. Close with X or Escape.
 * **Tablet mode** is a switch in the carousel card editor. It still fills touch displays and leaves Home Assistant’s header and sidebar available on a mouse desktop.
 * **Remove page** in the carousel card editor deletes that page and the cards on it. The last page stays.
 

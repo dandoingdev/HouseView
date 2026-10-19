@@ -13,7 +13,10 @@ button showing the current volume and an options button (hold the dots over the 
   speaker is available.
 * Play / pause sends `media_play_pause` while playing or paused. An idle player advertising PLAY (bit 512) resumes
   its queue with `media_play`. Other inactive players open more-info. Hold the track title or artist to open
-  speaker controls, including on compact tiles.
+  speaker controls, including on compact tiles. On a small panel tile (about 225 × 178, when four controls share a
+  480 × 480 screen), tap the track title to open this same player full screen, with the cover, progress, shuffle,
+  repeat and larger keys. Play, volume and Browse on the tile keep working. Close with X or Escape. Holding the
+  title still opens speaker settings.
 * The volume button opens the [full-screen volume view](../overviews/volume.md). Drag vertically to choose 0–100%;
   release sends one `media_player.volume_set` command. Zero stays silent without stopping playback. Mute/unmute
   appears when supported. Opening the view never starts or pauses music. Shuffle calls `shuffle_set`; repeat steps

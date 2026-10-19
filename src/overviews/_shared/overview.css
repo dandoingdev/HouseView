@@ -1,5 +1,5 @@
 /* @phase overviews */
-/* @owns hv-screensaver ov ov-scene ov-mode-card ov-mode-screensaver ov-dismiss ov-tap */
+/* @owns hv-screensaver hv-pinned ov ov-scene ov-mode-card ov-mode-screensaver ov-dismiss ov-tap ov-manual-close */
 
 /* One overview surface. A size container so every overview scales with cq units, whatever box it lands in. */
 .ov {
@@ -84,4 +84,13 @@
 .ov-tap:focus-visible {
   outline: 3px solid #fff;
   outline-offset: -6px;
+}
+/* A scene opened from a button: the corner close key, above the sky. */
+.hv-screensaver.hv-pinned .ov-manual-close {
+  position: absolute;
+  top: clamp(14px, 5.2cqmin, 56px);
+  left: clamp(16px, 6cqmin, 64px);
+  z-index: 6;
+  color: #fff;
+  --ov-panel-key-size: clamp(64px, 12cqmin, 88px);
 }

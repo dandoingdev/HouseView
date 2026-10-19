@@ -1,6 +1,7 @@
 import {swipeStep, SWIPE_CLICK_GUARD_MS} from '../../core/swipe.js';
 import {buttonHTML} from '../../core/html.js';
 import {BROWSE_MEDIA, PLAY_MEDIA, libraryArtwork, loadLibrary, shownItems} from './library-data.js';
+import {stageMarkup, syncStage, paintStage, openStage, closeStage, stageKeydown} from './player.js';
 
 const PAGE_SIZE = 6;
 const valid = (ctx) => ctx.ext.open && ctx.config?.widgets?.[ctx.ext.index] === ctx.ext.widget;
@@ -103,7 +104,10 @@ function paint(ctx) {
   if (!ext.open) {
     if (ext.returnFocus && !ctx.isPending(ext.entity)) {
       ext.returnFocus = false;
-      ctx.focus(`[data-action="media-player-browse-${ext.index}"]`);
+      const browse = ext.player
+        ? `.media-stage [data-action="media-player-browse-${ext.index}"]`
+        : `[data-action="media-player-browse-${ext.index}"]`;
+      ctx.focus(ctx.q(browse) ? browse : '.media-stage .ms-close');
     }
     return;
   }
@@ -169,40 +173,56 @@ function paint(ctx) {
   if (footer.innerHTML !== footerHTML) footer.innerHTML = footerHTML;
 }
 
-export default {
-  state: () => ({open: false, revision: 0, items: [], page: 0}),
-  overlay: (ctx) => (ctx.ext.open ? markup(ctx) : ''),
-  afterRender: paint,
-  blocksNavigation: (ext) => ext.open,
-  onKeydown(ctx, event) {
-    if (!ctx.ext.open) return false;
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      close(ctx);
-      return true;
-    }
-    if (event.key === 'Tab') {
-      const keys = [...ctx.q('.media-library').querySelectorAll('button:not(:disabled)')];
-      const index = keys.indexOf(ctx.root.activeElement);
-      const next = event.shiftKey
-        ? index <= 0
-          ? keys.length - 1
-          : index - 1
-        : (index + 1) % keys.length;
-      event.preventDefault();
-      keys[next]?.focus();
-      return true;
-    }
+function afterRender(ctx) {
+  paint(ctx);
+  syncStage(ctx);
+}
+
+function libraryKeys(ctx, event) {
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    close(ctx);
     return true;
+  }
+  if (event.key === 'Tab') {
+    const keys = [...ctx.q('.media-library').querySelectorAll('button:not(:disabled)')];
+    const index = keys.indexOf(ctx.root.activeElement);
+    const next = event.shiftKey
+      ? index <= 0
+        ? keys.length - 1
+        : index - 1
+      : (index + 1) % keys.length;
+    event.preventDefault();
+    keys[next]?.focus();
+    return true;
+  }
+  return true;
+}
+
+function dispose(ctx) {
+  if (ctx.reason !== 'disconnect') return;
+  ctx.ext.open = false;
+  ctx.ext.player = null;
+  ctx.ext.playerKey = '';
+  ctx.ext.seekStore = new Map();
+  ctx.ext.abort?.abort();
+  ctx.ext.revision++;
+  ctx.ext.items = [];
+  ctx.ext.signature = '';
+}
+
+export default {
+  state: () => ({open: false, revision: 0, items: [], page: 0, player: null, playerKey: ''}),
+  overlay: (ctx) => `${stageMarkup(ctx)}${ctx.ext.open ? markup(ctx) : ''}`,
+  afterRender,
+  tick: {every: 1000, when: (ext) => !!ext.player, run: paintStage},
+  blocksNavigation: (ext) => !!(ext.open || ext.player),
+  onKeydown(ctx, event) {
+    if (ctx.ext.open) return libraryKeys(ctx, event);
+    if (ctx.ext.player) return stageKeydown(ctx, event);
+    return false;
   },
-  dispose(ctx) {
-    if (ctx.reason !== 'disconnect') return;
-    ctx.ext.open = false;
-    ctx.ext.abort?.abort();
-    ctx.ext.revision++;
-    ctx.ext.items = [];
-    ctx.ext.signature = '';
-  },
+  dispose,
   actions: {
     'media-player-browse-*': {
       immediate: true,
@@ -232,6 +252,8 @@ export default {
         void refresh(ctx);
       }
     },
+    'media-player-expand-*': {immediate: true, run: openStage},
+    'media-player-stage-close': {immediate: true, run: closeStage},
     'media-player-library-close': {immediate: true, run: close},
     'media-player-library-refresh': {
       immediate: true,
