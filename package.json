@@ -1,6 +1,6 @@
 {
   "name": "houseview",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "type": "module",
   "description": "An opinionated Home Assistant dashboard that makes everyday home controls easy for everyone else.",
   "license": "MIT",

@@ -6,6 +6,16 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-10-19
+
+### Fixed
+
+* A device command in flight disables that tile again. State updates were skipping tiles whose entity had not changed, so the pressed control stayed enabled until Home Assistant reported a new state.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.3.3`.
+
 ## [1.3.2] - 2026-10-19
 
 ### Fixed
@@ -23,7 +33,7 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Updating
 
-Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.3.2`.
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.3.3`.
 
 ## [1.3.1] - 2026-10-17
 

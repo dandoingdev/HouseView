@@ -241,4 +241,21 @@ describe('widgetHassChanged', () => {
     assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), false);
     assert.equal(widgetHassChanged(card, 1, widgets[1], mock.hass), true);
   });
+
+  it('repaints a tile when a service call for its entity starts or finishes', () => {
+    const mock = createMockHass({states: {'light.a': {state: 'on'}, 'light.b': {state: 'on'}}});
+    const widgets = [
+      {type: 'light', entity: 'light.a'},
+      {type: 'light', entity: 'light.b'}
+    ];
+    const card = {_config: {widgets}, _pending: new Set()};
+    widgetHassChanged(card, 0, widgets[0], mock.hass);
+    widgetHassChanged(card, 1, widgets[1], mock.hass);
+    card._pending.add('light.a');
+    assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), true);
+    assert.equal(widgetHassChanged(card, 1, widgets[1], mock.hass), false);
+    card._pending.delete('light.a');
+    assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), true);
+    assert.equal(widgetHassChanged(card, 1, widgets[1], mock.hass), false);
+  });
 });

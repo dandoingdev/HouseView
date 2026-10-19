@@ -75,23 +75,32 @@ export function sameSignature(a, b) {
   return sameList(a.refs, b.refs) && sameList(a.scalars, b.scalars);
 }
 
+/** 1 when a service call for that id is in flight. Pending is not part of hass, but it changes the tile. */
+function pendingFlags(card, ids) {
+  const pending = card._pending;
+  return ids.map((id) => (pending?.has(id) ? 1 : 0));
+}
+
 /**
  * Per-tile change check for `_updateWidgets`. Locale/units/dark mode force every tile via
- * `card._scalarsDirty` (set by hassChanged). Ticks still call `element.update()` directly.
- * @returns {boolean} true when this widget's watched state refs (or deep snapshot) changed
+ * `card._scalarsDirty` (set by hassChanged). A pending service call for a watched entity also
+ * counts: the tile must disable and re-enable even though the state object has not changed.
+ * Ticks still call `element.update()` directly.
+ * @returns {boolean} true when this widget's watched state or pending flags changed
  */
 export function widgetHassChanged(card, index, widget, hass) {
   const mode = resolveMode(card._config, hass);
   const ids = widgetWatchIds(widget, card._config, hass);
   const states = ids.map((id) => hass?.states?.[id]);
+  const pending = pendingFlags(card, ids);
   const prev = card._widgetSignatures?.get(index);
   if (!card._widgetSignatures) card._widgetSignatures = new Map();
   if (mode === 'reference') {
-    const same = Array.isArray(prev) && sameList(prev, states);
-    card._widgetSignatures.set(index, states);
+    const same = !!prev && sameList(prev.states, states) && sameList(prev.pending, pending);
+    card._widgetSignatures.set(index, {states, pending});
     return !same;
   }
-  const json = JSON.stringify(states);
+  const json = JSON.stringify([states, pending]);
   card._widgetSignatures.set(index, json);
   return prev !== json;
 }
