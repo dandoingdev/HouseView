@@ -97,13 +97,14 @@ export default async function ({mount, check, variants, wait}) {
     'analogue seconds sweep on the compositor',
     second.hasAttribute('data-sweep') && !!delayBefore
   );
-  t.advance(1);
+  t.advance(4);
   await t.settle();
   check(
     'shared ticker leaves the sweeping hand in place without a transform write',
     t.q('.ov-clock-second') === second &&
       second.hasAttribute('data-sweep') &&
-      !second.style.transform
+      !second.style.transform &&
+      second.style.getPropertyValue('--clock-second-delay') === delayBefore
   );
   check('clock never calls services', t.calls.length === 0);
   t.layer.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));

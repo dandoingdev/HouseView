@@ -77,7 +77,8 @@ function ensureDialObserver(ctx, board) {
 
 /**
  * Align a 60 s linear sweep with the current second (including fractions). Cleared under reduced
- * motion and when seconds are hidden; resynced after wake because the shared ticker fires then.
+ * motion and when seconds are hidden. Changing the delay restarts the animation, so callers do
+ * this only when the dial is new or the sweep was paused.
  */
 function syncSecondHand(ctx, board) {
   const hand = board.querySelector('.ov-clock-second');
@@ -90,9 +91,12 @@ function syncSecondHand(ctx, board) {
   const now = ctx.now();
   const date = new Date(now);
   const sec = date.getUTCSeconds() + date.getUTCMilliseconds() / 1000;
+  const delay = `${-sec}s`;
   hand.dataset.sweep = '';
-  hand.style.setProperty('--clock-second-delay', `${-sec}s`);
-  hand.style.transform = '';
+  // Same delay must not be written again: that restarts the animation and the hand snaps.
+  if (hand.style.getPropertyValue('--clock-second-delay') !== delay)
+    hand.style.setProperty('--clock-second-delay', delay);
+  if (hand.style.transform) hand.style.transform = '';
 }
 
 function refreshInheritedBackground(ctx) {
@@ -113,6 +117,9 @@ function refreshInheritedBackground(ctx) {
     }
   }
 }
+
+/** Longer than one shared tick. The ticker does not run while the document is hidden. */
+const SWEEP_GAP_MS = 1500;
 
 /** True while the screensaver black fade still needs per-second dataset updates. */
 function inRestingFade(ctx) {
@@ -137,6 +144,9 @@ function refresh(ctx) {
   const digital = isDigital(ctx.options.face);
   const compositor = useCompositorSeconds(ctx);
   const now = ctx.now();
+  const previousTick = ctx.store.get('tickAt') || 0;
+  // Stamp every visit, including the early return, so a steady one-second cadence is not a gap.
+  ctx.store.set('tickAt', now);
   const minute = Math.floor(now / 60000);
   const lastMinute = ctx.store.get('minute');
   const minuteChanged = lastMinute !== minute;
@@ -145,9 +155,8 @@ function refresh(ctx) {
   const fade = inRestingFade(ctx);
   // A replaced board (layer re-render) must prime again even though the store survives.
   const first = ctx.store.get('board') !== board;
-  const lastSweep = ctx.store.get('sweepAt') || 0;
-  // The shared ticker skips ticks while the document is hidden; a gap means the sweep is stale.
-  const wakeSweep = compositor && now - lastSweep > 1500;
+  // The shared ticker skips ticks while the document is hidden; that pause is what makes the sweep stale.
+  const wakeSweep = compositor && previousTick > 0 && now - previousTick > SWEEP_GAP_MS;
 
   if (!first && !minuteChanged && !fade && !needsDigitalSeconds && !needsJsSeconds && !wakeSweep) {
     // Wallpaper / theme can change the shell without remounting the dial.
@@ -162,7 +171,6 @@ function refresh(ctx) {
 
   if (wakeSweep && !first && !minuteChanged && !fade && !needsDigitalSeconds && !needsJsSeconds) {
     syncSecondHand(ctx, board);
-    ctx.store.set('sweepAt', now);
     if (inheritsBackground(ctx.options)) refreshInheritedBackground(ctx);
     if (!hasCqmin()) {
       ensureDialObserver(ctx, board);
@@ -184,11 +192,8 @@ function refresh(ctx) {
     if (node && node.style.transform !== transform) node.style.transform = transform;
   }
   if (compositor) {
-    // Resync only when the dial is new, the tab wakes, or the minute rolls: a fade tick must not restart the sweep.
-    if (first || wakeSweep || minuteChanged) {
-      syncSecondHand(ctx, board);
-      ctx.store.set('sweepAt', now);
-    }
+    // A fade tick or a minute roll must not restart the sweep: rewriting the delay snaps the hand.
+    if (first || wakeSweep) syncSecondHand(ctx, board);
   } else {
     const second = board.querySelector('.ov-clock-second');
     if (second) {

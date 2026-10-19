@@ -304,7 +304,7 @@ try {
     };
   });
   assert.equal(before.sweep, true);
-  await page.evaluate(() => window.advance(2));
+  await page.evaluate(() => window.advance(4));
   assert.equal(
     await page.evaluate(
       () => window.savedClockHand === window.card.shadowRoot.querySelector('.ov-clock-second')
@@ -312,6 +312,10 @@ try {
     true
   );
   assert.equal(await page.evaluate(() => window.savedClockHand.hasAttribute('data-sweep')), true);
+  assert.equal(
+    await page.evaluate(() => window.savedClockHand.style.getPropertyValue('--clock-second-delay')),
+    before.delay
+  );
   // The compositor sweep owns the angle; shared ticks must not write an inline transform.
   assert.equal(await page.evaluate(() => window.savedClockHand.style.transform), '');
   await page.touchscreen.tap(240, 240);
