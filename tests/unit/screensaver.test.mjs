@@ -921,6 +921,62 @@ test('once the fade-in is over the layer covers the card; a wake uncovers it and
   assert.equal(resumed, 1, 'the card is caught up exactly once');
 });
 
+/** The card's real `_resumeAfterCover` queues neighbour prefetch. Count those frames beside the shield. */
+function holdPrefetch(env) {
+  const frames = new Map();
+  let id = 0;
+  globalThis.window.requestAnimationFrame = (callback) => {
+    frames.set(++id, callback);
+    return id;
+  };
+  globalThis.window.cancelAnimationFrame = (token) => frames.delete(token);
+  env.host._prefetchFrame = 0;
+  env.host._schedulePrefetch = () => {
+    if (env.host._prefetchFrame) return;
+    env.host._prefetchFrame = globalThis.window.requestAnimationFrame(() => {
+      env.host._prefetchFrame = 0;
+    });
+  };
+  env.host._resumeAfterCover = function () {
+    this._schedulePrefetch();
+  };
+  return frames;
+}
+
+function pump(frames) {
+  const pending = [...frames.values()];
+  frames.clear();
+  for (const callback of pending) callback();
+}
+
+test('a covered wake holds neighbour prefetch until the shield has painted', (t) => {
+  const env = setup(t, {screensaver: block()});
+  const frames = holdPrefetch(env);
+  env.second(11);
+  assert.equal(env.host._screensaverCovered(), true);
+  env.host._screensaverClose();
+  assert.equal(frames.size, 1, 'only the shield frame is pending');
+  assert.equal(env.host._prefetchFrame, 0, 'prefetch is not on the shield frames');
+  pump(frames);
+  assert.equal(frames.size, 1, 'the first shield frame only schedules the reveal');
+  assert.equal(env.host._prefetchFrame, 0, 'the first shield frame still holds prefetch');
+  pump(frames);
+  assert.equal('waking' in env.layer.dataset, false, 'the second frame reveals the page');
+  assert.ok(env.host._prefetchFrame, 'prefetch starts once the page is revealed');
+});
+
+test('disconnect during a covered wake cancels the shield frame and removes the layer', (t) => {
+  const env = setup(t, {screensaver: block()});
+  const frames = holdPrefetch(env);
+  env.second(11);
+  env.host._screensaverClose();
+  assert.equal(frames.size, 1);
+  env.host._screensaverDisconnect();
+  assert.equal(frames.size, 0, 'the pending paint frame is cancelled');
+  assert.equal(env.layer, null, 'the layer is gone');
+  assert.equal(env.host._prefetchFrame, 0, 'prefetch stays unscheduled on a card that is leaving');
+});
+
 test('removing the card while it is covered unhides the shell but catches nothing up', (t) => {
   const env = setup(t, {screensaver: block()});
   let resumed = 0;

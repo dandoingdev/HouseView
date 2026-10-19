@@ -718,6 +718,8 @@ export const screensaverMixin = {
       if (ss.leaving !== leaving) return;
       leaving.wakeFrame = null;
       delete active.layer.dataset.waking;
+      // Neighbour pages are idle work. Build them only after the shield has painted.
+      if (leaving.prefetchAfterWake) this._schedulePrefetch?.();
       leaving.timer = setTimeout(
         () => this._screensaverRemoveLayer(ss, leaving),
         reducedMotion() || this._perf === 'lite' ? GUARD_MS : FADE_OUT_MS + 50
@@ -726,7 +728,14 @@ export const screensaverMixin = {
     if (wasCovered) {
       // Keep the opaque layer over the resumed tiles for a complete paint before fading it away.
       // Android WebView otherwise exposes the first frame while glass/backdrop layers are still rebuilding.
+      // `_resumeAfterCover` queues neighbour prefetch on the next frame. That work must not share the
+      // shield frames, and a disconnect during wake must cancel exactly this one paint frame.
       active.layer.dataset.waking = '';
+      if (this._prefetchFrame) {
+        window.cancelAnimationFrame(this._prefetchFrame);
+        this._prefetchFrame = 0;
+        leaving.prefetchAfterWake = true;
+      }
       leaving.wakeFrame = window.requestAnimationFrame(() => {
         leaving.wakeFrame = window.requestAnimationFrame(reveal);
       });

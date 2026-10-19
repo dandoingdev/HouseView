@@ -1,0 +1,16 @@
+---
+description: Keep the GitHub CI check job green when changing the dashboard, screensaver, or browser tests
+alwaysApply: true
+---
+
+# CI must stay green
+
+`.github/workflows/ci.yml` job `check` is the gate. The release workflow runs the same scripts. A change is not done until the scripts that cover it pass locally.
+
+- Run `npm run test:unit` for logic changes.
+- Run `npm run build:dev` before any browser script. Those suites load `dist/`, not `src/`.
+- Run the browser script that owns the behaviour. Screensaver wake, cover, prefetch, and disconnect: `npm run test:overviews:input`.
+- Update `tests/EXPECTED_CHECKS` in the same change when a browser check count changes.
+- When a browser check fails, log the observed values. A bare `FAIL` name is not enough to fix the next CI run.
+
+A covered screensaver wake paints under an opaque shield for two animation frames, then reveals the page. Neighbour-page prefetch waits until that reveal. Disconnect during the wake cancels that one pending paint frame and removes the layer.

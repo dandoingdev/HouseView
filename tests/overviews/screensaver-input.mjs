@@ -466,15 +466,23 @@ try {
       card._screensaverClose();
       const pending = frames.size;
       card.remove();
-      return (
-        pending === 1 && frames.size === 0 && !card.shadowRoot.querySelector('.hv-screensaver')
-      );
+      return {
+        pending,
+        left: frames.size,
+        layer: !!card.shadowRoot.querySelector('.hv-screensaver')
+      };
     } finally {
       window.requestAnimationFrame = request;
       window.cancelAnimationFrame = cancel;
     }
   });
-  check('disconnect during wake cancels the pending paint and removes the layer', cleanup);
+  const wakeCancelled = cleanup.pending === 1 && cleanup.left === 0 && !cleanup.layer;
+  if (!wakeCancelled) {
+    console.log(
+      `wake disconnect detail: pending=${cleanup.pending} left=${cleanup.left} layer=${cleanup.layer}`
+    );
+  }
+  check('disconnect during wake cancels the pending paint and removes the layer', wakeCancelled);
   // 11 full-screen Home: touch activates scenes; background taps stay put; close/Escape return.
   await page.setViewport({width: 800, height: 600, hasTouch: true});
   await page.goto(`${server.url}/${pagePath}`);
