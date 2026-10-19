@@ -56,6 +56,20 @@
   background: var(--clock-second);
   box-shadow: none;
 }
+/* Functional sweep (not decoration): keeps wall time without a one-second main-thread write. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes ov-clock-second {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .ov-clock-second[data-sweep] {
+    animation: ov-clock-second 60s linear var(--clock-second-delay, 0s) infinite;
+  }
+}
 .ov-clock-second::after {
   content: '';
   position: absolute;

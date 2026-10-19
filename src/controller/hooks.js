@@ -168,6 +168,7 @@ export const hooksMixin = {
     }
     this._tickAt.clear();
     this._tick(Date.now());
+    this._schedulePrefetch?.();
   },
 
   // ---- per-kind refresh methods, kept as thin delegates -------------------------------------------------

@@ -86,6 +86,7 @@ export class HouseViewCard extends HTMLElement {
   disconnectedCallback() {
     this._screensaverDisconnect();
     window.removeEventListener(EDITOR_PREVIEW_EVENT, this._onEditorPreview);
+    this._dropPagePrefetch();
     this._clearPageTransition();
     this._disposeGestures();
     this._disposeExtensions('disconnect');

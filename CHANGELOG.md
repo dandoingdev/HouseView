@@ -6,6 +6,25 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-10-19
+
+### Fixed
+
+* Dashboard pages no longer jump up between swipes on slow devices. The header keeps its height while a page renders, instead of being removed and measured again on every screen.
+* Pages follow the finger when Android or the browser enables reduced motion; release still settles immediately to respect the accessibility preference.
+* Horizontal swipes can start with a small diagonal movement without being discarded as scrolling; clearly vertical gestures still scroll normally.
+
+### Performance
+
+* Analogue screensaver seconds sweep on the compositor instead of a one-second main-thread write. Hour, minute and date still update from the shared ticker; reduced motion keeps the JavaScript write. Lite leaves the sweep on because it is wall time, not decoration.
+* Neighbour dashboard pages are built after layout settles, so a finger drag only translates. Commit still promotes the prepared face and applies state received during the gesture.
+* A Home Assistant state update repaints only the tiles whose watched entities changed. Locale, units, time zone and dark mode still refresh every tile.
+* Automatic battery discovery caches until the entity or device registry object is replaced. The home overview patches its clock, camera snapshots and attention rows in place instead of rebuilding the scene each minute.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.3.2`.
+
 ## [1.3.1] - 2026-10-17
 
 ### Changed

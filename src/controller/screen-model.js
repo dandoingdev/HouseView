@@ -215,6 +215,8 @@ export const screenModelMixin = {
       return;
     }
     if (this._dragFace || this._outgoingPage) this._clearPageTransition();
+    // Geometry changed: neighbour faces baked at the old size are wrong.
+    this._dropPagePrefetch();
     this._layoutKey = key;
     face.style.setProperty('--columns', model.columns);
     face.style.setProperty('--rows', screen.rows);
@@ -226,6 +228,7 @@ export const screenModelMixin = {
     if (screen.surface === 'soft') shell.classList.add('surface-soft');
     else shell.classList.remove('surface-soft');
     shell.classList.toggle('surface-home', isHomePage(screen));
+    this._schedulePrefetch();
   },
 
   /** Shared grid placement for the live page and its inert swipe neighbour. */

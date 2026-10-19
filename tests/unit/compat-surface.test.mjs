@@ -562,9 +562,10 @@ describe('lifecycle', () => {
     );
     assert.match(
       render,
-      /this\._screensaverSync\(\);\s*\n {2}\},\s*\n\s*\/\*\*[^]*?_ensureShell\(\)/,
-      'last statement of _renderWidgets'
+      /this\._screensaverSync\(\);[^]*this\._seedWidgetSignatures\(\);\s*\n {2}\},/,
+      'last statements of _renderWidgets seed per-tile signatures after the screensaver sync'
     );
+    assert.match(render, /_seedWidgetSignatures\(\) \{[^]*_ensureShell\(\)/);
     const shell = fs.readFileSync(
       new URL('../../src/controller/houseview-card.js', import.meta.url),
       'utf8'
@@ -875,9 +876,18 @@ describe('navigation', () => {
       return clone;
     };
     card.shadowRoot.selectors.set('.face', face);
-    card._screens = [{key: 'A:0'}, {key: 'B:0'}, {key: 'C:0'}];
+    card._screens = [
+      {key: 'A:0', placements: [], columns: 2, rows: 2},
+      {key: 'B:0', placements: [], columns: 2, rows: 2},
+      {key: 'C:0', placements: [], columns: 2, rows: 2}
+    ];
     card._pageIndex = 0;
     card._screenKey = 'A:0';
+    // Neighbour builds need a face; the fake DOM has no widget cards to fill.
+    card._fillFace = (element, screen) => {
+      element.setAttribute('aria-label', screen.key);
+    };
+    card._positionPageWidgets = () => {};
     env.win.matchMedia = () => ({matches: reduced});
     return {card, order, animations, face, shell};
   }
@@ -992,6 +1002,25 @@ describe('navigation', () => {
       assert.ok(card._suppressClickUntil > Date.now());
       card._swipeStart(touch(100, 100));
       card._swipeEnd(touch(300, 110));
+      assert.equal(card._pageIndex, 0);
+    });
+
+    it('waits for an ambiguous diagonal start before deciding swipe or scroll', () => {
+      const {card} = pagedCard({reduced: true});
+      card._swipeStart(touch(300, 100));
+      card._swipeMove(touch(288, 109));
+      assert.ok(card._gesture, 'a small diagonal start must not discard the entire swipe');
+      assert.ok(!card._gesture.dragging, 'wait until the direction is clear');
+      card._swipeMove(touch(180, 112));
+      card._swipeEnd(touch(150, 115));
+      assert.equal(card._pageIndex, 1);
+    });
+
+    it('still yields to clearly vertical scrolling', () => {
+      const {card} = pagedCard({reduced: true});
+      card._swipeStart(touch(300, 100));
+      card._swipeMove(touch(294, 124));
+      card._swipeEnd(touch(180, 130));
       assert.equal(card._pageIndex, 0);
     });
 

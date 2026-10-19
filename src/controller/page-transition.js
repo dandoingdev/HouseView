@@ -1,5 +1,6 @@
 // The page glide: the old page slides out while the new one slides in (Web Animations API).
 // Button navigation uses a short glide; direct manipulation uses full-width neighbouring pages.
+// Neighbour pages are built after layout settles so a finger drag only translates.
 
 const INCOMING = {duration: 320, easing: 'cubic-bezier(.22,1,.36,1)'};
 const OUTGOING = {duration: 200, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards'};
@@ -7,6 +8,10 @@ const OUTGOING = {duration: 200, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwar
 export const pageTransitionMixin = {
   /** Cancel running animations and drop the temporary outgoing layer. Idempotent. */
   _clearPageTransition() {
+    const rebuild =
+      !!(this._swipePreview || this._outgoingPage) &&
+      this.isConnected &&
+      !this._screensaverCovered?.();
     for (const animation of this._pageAnimations || []) animation.cancel();
     this._pageAnimations = [];
     this._outgoingPage?.remove();
@@ -17,6 +22,76 @@ export const pageTransitionMixin = {
     this._dragFace?.style.removeProperty('will-change');
     this._dragFace = null;
     this._gesture = null;
+    // A cancelled drag may have consumed a prefetched neighbour: rebuild once the frame is idle.
+    if (rebuild) this._schedulePrefetch();
+  },
+
+  /** Drop prepared neighbours (config, resize, cover, disconnect). */
+  _dropPagePrefetch() {
+    if (this._prefetchFrame) {
+      cancelAnimationFrame(this._prefetchFrame);
+      this._prefetchFrame = 0;
+    }
+    for (const entry of this._pagePrefetch?.values() || []) entry.element.remove();
+    this._pagePrefetch = null;
+  },
+
+  /** One neighbour build on the next frame; coalesces rapid layout and transition clears. */
+  _schedulePrefetch() {
+    if (this._prefetchFrame) return;
+    this._prefetchFrame = requestAnimationFrame(() => {
+      this._prefetchFrame = 0;
+      this._prefetchNeighbours();
+    });
+  },
+
+  /**
+   * Build the previous and next pages into inert faces while the carousel is idle. A drag then only
+   * translates; commit still promotes the face and refreshes state received during the gesture.
+   */
+  _prefetchNeighbours() {
+    if (this._screensaverCovered?.()) {
+      this._dropPagePrefetch();
+      return;
+    }
+    if (this._dragFace || this._outgoingPage || this._gesture || this._swipePreview) return;
+    const face = this.shadowRoot.querySelector('.face');
+    const shell = face?.parentElement;
+    if (!face || !shell || !this._screens?.length) return;
+
+    const next = this._pagePrefetch || (this._pagePrefetch = new Map());
+    for (const direction of [-1, 1]) {
+      const index = this._pageIndex + direction;
+      const screen = this._screens[index];
+      const existing = next.get(direction);
+      if (!screen) {
+        existing?.element.remove();
+        next.delete(direction);
+        continue;
+      }
+      if (existing?.key === screen.key) continue;
+      existing?.element.remove();
+      const built = this._buildNeighbourPage(face, screen);
+      // Measure grid and dials while attached, then detach so the idle carousel paints one page.
+      shell.append(built.element);
+      this._positionPageWidgets(built.element, screen);
+      built.element.remove();
+      next.set(direction, built);
+    }
+  },
+
+  /** Inert neighbour face with widgets rendered; not yet in the document. */
+  _buildNeighbourPage(face, screen) {
+    const element = face.cloneNode(false);
+    element.classList.add('page-outgoing');
+    element.inert = true;
+    element.setAttribute('aria-hidden', 'true');
+    const cards = new Map();
+    this._fillFace(element, screen, cards);
+    this._positionPageLayer(element, face);
+    element.style.setProperty('--columns', screen.columns);
+    element.style.setProperty('--rows', screen.rows);
+    return {element, cards, key: screen.key};
   },
 
   /**
@@ -50,9 +125,10 @@ export const pageTransitionMixin = {
     layer.style.setProperty('right', 'auto', 'important');
   },
 
-  /** Render only the neighbour being revealed. It is inert and has no live widget hooks until committed. */
+  /** Reveal the neighbour under the finger. Prefetched pages are preferred; otherwise build now. */
   _dragPage(start, dx) {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // Direct manipulation follows the finger even with reduced motion. Only the
+    // automatic settling animation below depends on that accessibility preference.
     const face = start.face || this.shadowRoot.querySelector('.face');
     if (!face) return;
     start.face = face;
@@ -66,18 +142,19 @@ export const pageTransitionMixin = {
       this._swipePreview = null;
       start.direction = direction;
       if (screen) {
-        const element = face.cloneNode(false);
-        element.classList.add('page-outgoing');
-        element.inert = true;
-        const cards = new Map();
-        this._fillFace(element, screen, cards);
-        element.setAttribute('aria-hidden', 'true');
-        this._positionPageLayer(element, face);
-        element.style.setProperty('--columns', screen.columns);
-        element.style.setProperty('--rows', screen.rows);
-        face.parentElement.append(element);
-        this._positionPageWidgets(element, screen);
-        this._swipePreview = {element, cards};
+        const prefetched = this._pagePrefetch?.get(direction);
+        let preview;
+        if (prefetched) {
+          this._pagePrefetch.delete(direction);
+          // Face geometry may have changed since the idle build (header, soft keyboard).
+          this._positionPageLayer(prefetched.element, face);
+          preview = prefetched;
+        } else {
+          preview = this._buildNeighbourPage(face, screen);
+          this._positionPageWidgets(preview.element, screen);
+        }
+        face.parentElement.append(preview.element);
+        this._swipePreview = preview;
       }
     }
     // Resist pulling past the ends; otherwise the page tracks the finger one-for-one.

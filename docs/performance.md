@@ -58,6 +58,16 @@ These apply whatever `performance` says.
 * **Timers that cannot be seen do not run.** The one shared one-second ticker stops while the page is hidden; the page
   listeners and the resize observer are removed when a card is disconnected.
 * **Camera pictures decode off the main thread** (`decoding="async"`).
+* **Analogue screensaver seconds sweep on the compositor** (a 60 s CSS animation). Hour, minute and date still
+  update from the shared ticker; reduced motion keeps the one-second JavaScript write. Lite leaves that sweep on
+  (it is wall time, not decoration).
+* **Neighbour pages are built after layout settles**, so a finger drag only translates. Commit still promotes the
+  prepared face and applies state received during the gesture.
+* **A hass update repaints only the tiles whose watched entities changed.** Locale, units, time zone and dark mode
+  still refresh every tile.
+* **Automatic battery discovery caches** until the entity or device registry object is replaced, and the home
+  overview patches its clock, camera snapshots and attention rows in place instead of rebuilding the scene each
+  minute.
 * **The production bundle is fully minified** (local names too; the source map is a separate file).
 
 ## Tips for a slow tablet

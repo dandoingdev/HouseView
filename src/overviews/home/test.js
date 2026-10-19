@@ -231,9 +231,19 @@ export default async function ({mount, check, variants}) {
   t.el.hass = {...t.hass, states: batteryStates};
   await t.settle();
   check(
-    'new battery and charging changes refresh embedded Home without adding configuration',
-    !!t.q('.ov-home-attention-item[data-entity="sensor.added_later"]') &&
-      !!t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]')
+    'charging changes on an already-discovered battery refresh without a registry update',
+    !!t.q('.ov-home-attention-item[data-entity="sensor.charging_device"]') &&
+      !t.q('.ov-home-attention-item[data-entity="sensor.added_later"]')
+  );
+  t.el.hass = {
+    ...t.hass,
+    states: batteryStates,
+    entities: {...(t.hass.entities || {})}
+  };
+  await t.settle();
+  check(
+    'a registry identity change discovers a new battery without adding configuration',
+    !!t.q('.ov-home-attention-item[data-entity="sensor.added_later"]')
   );
 
   t = await mount(variants.autoBatteries, {mode: 'screensaver'});

@@ -73,6 +73,12 @@ export class FakeNode {
     this.attributes.delete(name);
   }
 
+  replaceChildren(...nodes) {
+    for (const child of [...this.children]) child.remove?.();
+    this.children = [];
+    if (nodes.length) this.append(...nodes);
+  }
+
   append(...nodes) {
     for (const node of nodes) {
       node.remove?.();

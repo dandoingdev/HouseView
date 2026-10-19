@@ -92,12 +92,18 @@ export default async function ({mount, check, variants, wait}) {
   t = await mount(variants.ok, {mode: 'screensaver', freeze: false});
   await t.settle();
   const second = t.q('.ov-clock-second');
-  const before = second.style.transform;
+  const delayBefore = second.style.getPropertyValue('--clock-second-delay');
+  check(
+    'analogue seconds sweep on the compositor',
+    second.hasAttribute('data-sweep') && !!delayBefore
+  );
   t.advance(1);
   await t.settle();
   check(
-    'shared ticker moves the existing hand in place',
-    t.q('.ov-clock-second') === second && second.style.transform !== before
+    'shared ticker leaves the sweeping hand in place without a transform write',
+    t.q('.ov-clock-second') === second &&
+      second.hasAttribute('data-sweep') &&
+      !second.style.transform
   );
   check('clock never calls services', t.calls.length === 0);
   t.layer.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));

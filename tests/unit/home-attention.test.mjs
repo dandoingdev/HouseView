@@ -1,7 +1,13 @@
 import test from 'node:test';
 import {validateConfig} from '../../src/config/validate.js';
 import assert from 'node:assert/strict';
-import {attentionItems, attentionIds, discoveredBatteries} from '../../src/core/home-attention.js';
+import {
+  attentionItems,
+  attentionIds,
+  discoveredBatteries,
+  discoveredBatteryIds,
+  _resetBatteryCache
+} from '../../src/core/home-attention.js';
 import home from '../../src/overviews/home/index.js';
 import {contextFor} from '../../src/core/define-overview.js';
 import {registerStrings} from '../../src/core/i18n.js';
@@ -150,7 +156,31 @@ test('config rejects malformed attention categories, entity domains, labels and 
   );
 });
 
+test('discovered batteries are cached until the entity or device registry identity changes', () => {
+  _resetBatteryCache();
+  const entities = {'sensor.a': {}};
+  const devices = {};
+  const hass = {
+    states: {'sensor.a': state('10', 10, {device_class: 'battery'})},
+    entities,
+    devices
+  };
+  const first = discoveredBatteries(hass);
+  assert.equal(discoveredBatteries(hass), first);
+  hass.states['sensor.b'] = state('5', 10, {device_class: 'battery'});
+  assert.equal(discoveredBatteries(hass), first, 'state-only changes keep the cached list');
+  assert.deepEqual(discoveredBatteryIds(hass), ['sensor.a']);
+  const next = {...hass, entities: {...entities}};
+  assert.notEqual(discoveredBatteries(next), first);
+  assert.deepEqual(
+    discoveredBatteries(next).map((r) => r.entity),
+    ['sensor.a', 'sensor.b']
+  );
+  _resetBatteryCache();
+});
+
 test('automatic discovery follows battery device class and visibility, including unassigned binary sensors', () => {
+  _resetBatteryCache();
   const hass = {
     states: {
       'sensor.unrelated_name': state('10', 10, {device_class: 'battery'}),
@@ -177,6 +207,7 @@ test('automatic discovery follows battery device class and visibility, including
   );
 });
 test('percentage warnings are suppressed while charging; binary low-battery sensors keep their reported semantics', () => {
+  _resetBatteryCache();
   const hass = {
     states: {
       'sensor.battery': state('5', 10, {device_class: 'battery'}),
@@ -207,10 +238,14 @@ test('percentage warnings are suppressed while charging; binary low-battery sens
   }
 });
 test('new batteries and charging sensors enter Home watch lists without adding rules', () => {
+  _resetBatteryCache();
   const config = {home_battery_auto: true, widgets: []};
   const hass = {states: {'sensor.a': state('20', 10, {device_class: 'battery'})}, entities: {}};
   assert(home.watch({}, config, hass).includes('sensor.a'));
+  // A new battery in states alone stays cached out until the registry object is replaced.
   hass.states['sensor.new'] = state('1', 10, {device_class: 'battery'});
+  assert(!home.watch({}, config, hass).includes('sensor.new'));
+  hass.entities = {};
   assert(home.watch({}, config, hass).includes('sensor.new'));
   assert.throws(() => validateConfig({cards: [], home_battery_auto: 'yes'}), /home_battery_auto/);
 });

@@ -20,6 +20,7 @@
 // `priority` of the ELIGIBLE ones (`_screensaverPick`), equal priorities by the round robin cursor.
 import {DEFAULT_IDLE_SECONDS, createIdleManager} from '../core/idle.js';
 import {contextFor, layerMarkup, resolveOptions} from '../core/define-overview.js';
+import {discoveredBatteryIds} from '../core/home-attention.js';
 import {createOverviewSession} from '../core/overview-session.js';
 import {getOverview, normalizeScreensaver, pickEntry} from '../core/overview-registry.js';
 import {getWidget} from '../core/registry.js';
@@ -69,7 +70,7 @@ function signatureOf(hass, entry, config) {
   const read = (id) => (hass.connection ? hass.states?.[id] : JSON.stringify(hass.states?.[id]));
   return [
     ...ids.map(read),
-    ...(config?.home_battery_auto ? [hass.entities, hass.devices] : []),
+    ...(config?.home_battery_auto ? [discoveredBatteryIds(hass).join('\0')] : []),
     hass.locale?.language,
     hass.locale?.time_format,
     hass.locale?.time_zone,
@@ -835,6 +836,8 @@ export const screensaverMixin = {
     if (!shell || active.layer.parentNode !== shell) return;
     active.covered = true;
     shell.dataset.covered = '';
+    // Neighbour pages under the cover are never swiped to: drop them so wake does not pay for stale DOM.
+    this._dropPagePrefetch();
   },
 
   /** Wake: show the carousel again and catch it up with what it missed (`_resumeAfterCover`, controller/hooks.js). */

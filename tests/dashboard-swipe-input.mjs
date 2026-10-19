@@ -62,6 +62,24 @@ try {
     await page.waitForFunction('!window.card._pageAnimations?.length');
   };
   const index = () => page.evaluate(() => window.card._pageIndex);
+  // A finger rarely starts perfectly horizontally: don't reject an ambiguous first few pixels.
+  for (const [type, x, y] of [
+    ['touchStart', 320, 445],
+    ['touchMove', 308, 454],
+    ['touchMove', 200, 457],
+    ['touchEnd', 200, 457]
+  ]) {
+    await client.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: type === 'touchEnd' ? [] : [{x, y}]
+    });
+    await page.evaluate(() => new Promise(window.requestAnimationFrame));
+  }
+  await page.waitForFunction('!window.card._pageAnimations?.length');
+  assert.equal(await index(), 1, 'a diagonal start can resolve into a horizontal touch swipe');
+  await swipe('.page-nav', 100);
+  console.log('PASS a natural diagonal start resolves into horizontal paging');
+
   for (const [width, height] of [
     [480, 480],
     [360, 640],
@@ -216,13 +234,90 @@ try {
   );
   await settled();
   await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
-  await swipe('.page-nav', 100);
+  await touch('touchStart', 160);
+  await touch('touchMove', 280);
+  const reducedDrag = await dragState();
+  assert.equal(reducedDrag.page, 1, 'reduced motion waits for release before changing pages');
+  assert.equal(reducedDrag.face.x, 120, 'reduced motion still follows the finger');
+  assert.equal(reducedDrag.neighbour.x, -360);
+  assert.equal(reducedDrag.neighbour.y, before.face.y);
+  await touch('touchEnd');
   assert.equal(await index(), 0, 'reduced motion still permits swipe navigation');
+  assert.equal(await page.evaluate(() => window.card._pageAnimations.length), 0);
   assert.equal((await dragState()).face.x, 0);
   assert.equal((await dragState()).neighbour, null);
   await page.emulateMediaFeatures([]);
   assert.deepEqual(await page.evaluate(() => window.calls()), []);
-  console.log('PASS button glide has no upward jump; reduced motion remains immediate');
+  console.log(
+    'PASS button glide has no upward jump; reduced motion tracks the finger and settles immediately'
+  );
+
+  // Page renders replace the shell class. Forcing layout in that window must not collapse the header:
+  // that is the upward jump on slow panels, where the flush happens before the header is synced.
+  const headerDuringRender = async (label) => {
+    const sample = await page.evaluate(() => {
+      const card = window.card;
+      const shell = card.shadowRoot.querySelector('.shell');
+      const face = card.shadowRoot.querySelector('.face');
+      const box = (element) => {
+        const r = element.getBoundingClientRect();
+        return {y: r.y, h: r.height};
+      };
+      const before = box(face);
+      const orig = card._syncDashboardHeader;
+      let mid = null;
+      card._syncDashboardHeader = function (...args) {
+        const header = shell.querySelector('.dashboard-header');
+        mid = {
+          has: shell.classList.contains('has-header'),
+          inline: shell.style.getPropertyValue('--hv-header-height'),
+          headerH: header ? header.getBoundingClientRect().height : 0,
+          ...box(face)
+        };
+        return orig.apply(this, args);
+      };
+      try {
+        card._setPage(card._pageIndex === 0 ? 1 : 0);
+      } finally {
+        card._syncDashboardHeader = orig;
+      }
+      shell.classList.remove('has-header');
+      const stripped = {
+        ...box(face),
+        headerH: shell.querySelector('.dashboard-header').getBoundingClientRect().height
+      };
+      return {before, mid, after: box(face), stripped};
+    });
+    assert.equal(sample.mid.has, true, `${label}: header class survives the shell class rewrite`);
+    assert.equal(sample.mid.inline, '44px', `${label}: header height stays pinned`);
+    assert.equal(sample.mid.headerH, 44, `${label}: header box stays 44px while rendering`);
+    assert.equal(sample.mid.y, sample.before.y, `${label}: page does not jump during render`);
+    assert.equal(sample.mid.h, sample.before.h, `${label}: page height stays put during render`);
+    assert.equal(
+      sample.stripped.y,
+      sample.before.y,
+      `${label}: losing the class cannot collapse the header`
+    );
+    assert.equal(
+      sample.stripped.headerH,
+      44,
+      `${label}: pinned height does not depend on the class`
+    );
+    assert.equal(sample.after.y, sample.before.y, `${label}: page is back in place`);
+    console.log(`PASS header stays pinned during page render (${label})`);
+  };
+  await headerDuringRender('tablet');
+  await page.setViewport({width: 390, height: 640, hasTouch: true});
+  await page.evaluate(() => {
+    window.card.setConfig({...window.card._config, tablet_mode: false, performance: 'lite'});
+    window.card.hass = window.mock.hass;
+  });
+  await page.waitForFunction(
+    () =>
+      window.card.shadowRoot.querySelector('.dashboard-header')?.getBoundingClientRect().height ===
+      44
+  );
+  await headerDuringRender('small dashboard');
   await page.screenshot({path: '/tmp/houseview-dashboard-swipe.png'});
   assert.deepEqual(errors, []);
 } finally {

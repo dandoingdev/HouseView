@@ -1,17 +1,34 @@
 // Household checks plus optional metadata-based battery discovery. No device services.
 export const ATTENTION_KINDS = ['opening', 'battery', 'light', 'device'];
-/** Match Maintenance: visible sensor/binary_sensor states with device_class battery, including unassigned devices. */
+
+/** Cached until `hass.entities` / `hass.devices` identity changes (registry updates). */
+let batteryCache = {entities: undefined, devices: undefined, list: null};
+
+/** Test seam: drop the discovered-battery cache. */
+export function _resetBatteryCache() {
+  batteryCache = {entities: undefined, devices: undefined, list: null};
+}
+
+/**
+ * Match Maintenance: visible sensor/binary_sensor states with device_class battery, including
+ * unassigned devices. Rescans only when the entity/device registries are replaced.
+ */
 export function discoveredBatteries(hass) {
+  const entities = hass?.entities;
+  const devices = hass?.devices;
+  if (batteryCache.list && batteryCache.entities === entities && batteryCache.devices === devices) {
+    return batteryCache.list;
+  }
   const states = Object.entries(hass?.states || {});
   const charging = new Map();
   for (const [entity, state] of states) {
-    const device = hass?.entities?.[entity]?.device_id;
+    const device = entities?.[entity]?.device_id;
     if (device && state.attributes?.device_class === 'battery_charging' && !charging.has(device)) {
       charging.set(device, entity);
     }
   }
-  return Object.entries(hass?.states || {}).flatMap(([entity, state]) => {
-    const metadata = hass?.entities?.[entity];
+  const list = states.flatMap(([entity, state]) => {
+    const metadata = entities?.[entity];
     if (
       !/^(sensor|binary_sensor)\./.test(entity) ||
       state.attributes?.device_class !== 'battery' ||
@@ -25,6 +42,16 @@ export function discoveredBatteries(hass) {
       {entity, kind: 'battery', automatic: true, charging: charging.get(metadata?.device_id)}
     ];
   });
+  batteryCache = {entities, devices, list};
+  return list;
+}
+
+/** Stable id list for signatures: same batteries after a registry swap that did not change them. */
+export function discoveredBatteryIds(hass) {
+  return discoveredBatteries(hass)
+    .flatMap((rule) => [rule.entity, rule.charging])
+    .filter(Boolean)
+    .sort();
 }
 
 export function attentionRules(config, hass) {

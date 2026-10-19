@@ -26,9 +26,10 @@
   backdrop-filter: none !important;
 }
 
-/* No decorative motion or fades (the page glide is switched off in JS). */
+/* No decorative motion or fades (the page glide is switched off in JS).
+ * The analogue seconds hand is functional wall time: keep its compositor sweep under lite. */
 .perf-lite,
-.perf-lite * {
+.perf-lite *:not(.ov-clock-second) {
   transition: none !important;
   animation: none !important;
 }

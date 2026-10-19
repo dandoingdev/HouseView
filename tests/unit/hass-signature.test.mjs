@@ -8,7 +8,9 @@ import {
   hassChanged,
   resolveMode,
   sameSignature,
-  watchedIds
+  watchedIds,
+  widgetHassChanged,
+  widgetWatchIds
 } from '../../src/core/hass-signature.js';
 import {_resetRegistry, registerWidget} from '../../src/core/registry.js';
 
@@ -196,5 +198,47 @@ describe('hassChanged(card, hass)', () => {
     card._config = {...card._config, state_compare: 'deep'};
     assert.equal(hassChanged(card, mock.hass), true);
     assert.equal(hassChanged(card, mock.hass), false);
+  });
+
+  it('marks scalarsDirty when language or dark mode changes', () => {
+    const mock = createMockHass({connection: true, states: {'light.a': {state: 'on'}}});
+    const card = {_config: {widgets: [{type: 'light', entity: 'light.a'}]}};
+    hassChanged(card, mock.hass);
+    assert.equal(card._scalarsDirty, true);
+    hassChanged(card, mock.hass);
+    mock.hass.locale = {...mock.hass.locale, language: 'de'};
+    assert.equal(hassChanged(card, mock.hass), true);
+    assert.equal(card._scalarsDirty, true);
+  });
+});
+
+describe('widgetHassChanged', () => {
+  it('lists entity plus watch ids', () => {
+    assert.deepEqual(
+      widgetWatchIds(
+        {type: 'climate', entity: 'climate.a', outdoor_sensor: 'sensor.out'},
+        {},
+        undefined
+      ),
+      ['climate.a', 'sensor.out', 'sun.sun']
+    );
+  });
+
+  it('skips a tile whose watched refs are unchanged while another tile changes', () => {
+    const mock = createMockHass({
+      connection: true,
+      states: {'light.a': {state: 'on'}, 'light.b': {state: 'on'}}
+    });
+    const widgets = [
+      {type: 'light', entity: 'light.a'},
+      {type: 'light', entity: 'light.b'}
+    ];
+    const card = {_config: {widgets}};
+    assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), true);
+    assert.equal(widgetHassChanged(card, 1, widgets[1], mock.hass), true);
+    assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), false);
+    mock.replaceState('light.b', {state: 'off'});
+    assert.equal(widgetHassChanged(card, 0, widgets[0], mock.hass), false);
+    assert.equal(widgetHassChanged(card, 1, widgets[1], mock.hass), true);
   });
 });

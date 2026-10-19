@@ -302,41 +302,74 @@ test('goto-widget: jumps to the page that holds the widget; unknown input does n
   assert.deepEqual(pages, [2, 0, 1]);
 });
 
-test('the tick re-renders only when the minute (clock, "2m ago") or the 30 s snapshot bucket changes', () => {
+test('the tick patches time and cameras in place when the minute or snapshot bucket changes', () => {
   const minute = Date.UTC(2026, 9, 15, 10, 0, 0);
+  const camera = {type: 'camera', entity: 'camera.c'};
   const run = (widgets, options, steps) => {
     let now = minute;
     let renders = 0;
     const store = new Map();
+    const timeNode = {textContent: '10:00'};
+    const img = {getAttribute: () => '', setAttribute() {}, remove() {}, after() {}};
+    const cam = {
+      dataset: {entity: 'camera.c'},
+      classList: {add() {}, remove() {}},
+      querySelector: (sel) => (sel === '.ov-home-snap' ? img : sel === '.ov-home-ago' ? null : null)
+    };
+    const el = {
+      querySelector: (sel) => {
+        if (sel === '.ov-home-time') return timeNode;
+        if (sel === '.ov-home-attention') return null;
+        return null;
+      },
+      querySelectorAll: (sel) => (sel.startsWith('.ov-home-cam') ? [cam] : [])
+    };
     const ctx = () => ({
-      el: {},
+      el,
       config: {widgets},
       options,
       store,
+      hass: {states: {}},
+      stateOf: () => ({state: 'idle', attributes: {}, last_updated: new Date(now).toISOString()}),
+      attrsOf: () => ({}),
       now: () => now,
+      timeParts: () => ({text: `t${Math.floor(now / 60000)}`}),
+      lang: () => 'en',
+      formatNumber: (n) => String(n),
+      t: (key) => key,
+      esc: (s) => s,
+      icon: () => '',
       requestRender: () => renders++
     });
     home.afterRender(ctx());
     return steps.map((seconds) => {
       now = minute + seconds * 1000;
       home.tick.run(ctx());
-      return renders;
+      return {renders, stamp: store.get('stamp'), time: timeNode.textContent};
     });
   };
-  const camera = {type: 'camera', entity: 'camera.c'};
-  // with a camera: 30 s and 60 s each change something
-  assert.deepEqual(
-    run([camera], {show_time: true}, [1, 29, 30, 31, 59, 60, 61]),
-    [0, 0, 1, 1, 1, 2, 2]
+  // Clock + camera: bucket (30s) and minute (60s) update the stamp; no full re-render.
+  const withCam = run([camera], {show_time: true}, [1, 30, 60]);
+  assert.equal(withCam[0].renders, 0);
+  assert.notEqual(withCam[1].stamp, withCam[0].stamp);
+  assert.notEqual(withCam[2].stamp, withCam[1].stamp);
+  assert.equal(
+    withCam.every((step) => step.renders === 0),
+    true
   );
-  // a clock only: once a minute
-  assert.deepEqual(run([], {show_time: true}, [1, 30, 59, 60, 90, 120]), [0, 0, 0, 1, 1, 2]);
-  // a camera and no clock: the label and the picture still move
-  assert.deepEqual(run([camera], {show_time: false}, [10, 30, 60]), [0, 1, 2]);
-  // nothing depends on time: nothing happens
-  assert.deepEqual(run([], {show_time: false}, [30, 60, 600]), [0, 0, 0]);
-  assert.deepEqual(run([{type: 'light', entity: 'light.a'}], {show_time: false}, [60]), [0]);
-  // not mounted (no element): nothing
+  assert.equal(withCam[2].time, `t${Math.floor((minute + 60000) / 60000)}`);
+  // Clock only: stamp advances once a minute, still no requestRender.
+  const clockOnly = run([], {show_time: true}, [1, 59, 60, 120]);
+  assert.deepEqual(
+    clockOnly.map((step) => step.renders),
+    [0, 0, 0, 0]
+  );
+  assert.notEqual(clockOnly[2].stamp, clockOnly[1].stamp);
+  // Nothing depends on time: stamp stays null after afterRender.
+  const idle = run([], {show_time: false}, [30, 60]);
+  assert.equal(idle[0].stamp, null);
+  assert.equal(idle[1].renders, 0);
+  // Not mounted: nothing
   let renders = 0;
   home.tick.run({
     el: null,

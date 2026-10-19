@@ -284,16 +284,112 @@ function stampOf(ctx) {
 
 function remember(ctx) {
   ctx.store.set('stamp', stampOf(ctx));
+  ctx.store.set('attentionKey', attentionKey(ctx));
 }
 
-/** Once a second: one comparison, and a re-render only when the minute or the snapshot bucket has changed. */
+function rememberStamp(ctx) {
+  ctx.store.set('stamp', stampOf(ctx));
+}
+
+/** Rows that the attention section shows; rebuilt only when this key changes. */
+function attentionKey(ctx) {
+  return JSON.stringify(
+    attentionItems(ctx.config, ctx.stateOf, ctx.now(), ctx.hass).map((row) => [
+      row.entity,
+      row.reason,
+      row.value,
+      row.hours,
+      row.minutes,
+      row.tone
+    ])
+  );
+}
+
+function patchTime(ctx) {
+  if (!ctx.options.show_time) return;
+  const node = ctx.el.querySelector('.ov-home-time');
+  if (!node) return;
+  const text = ctx.timeParts(ctx.now()).text;
+  if (node.textContent !== text) node.textContent = text;
+}
+
+/** Refresh snapshot URLs and "2m ago" labels without rebuilding the home scene. */
+function patchCameras(ctx) {
+  for (const cam of ctx.el.querySelectorAll('.ov-home-cam[data-entity]')) {
+    const entity = cam.dataset.entity;
+    const state = ctx.stateOf(entity);
+    const url = cameraOk(state) ? cameraUrl(ctx.attrsOf(entity).entity_picture, ctx.hass) : null;
+    let img = cam.querySelector('.ov-home-snap');
+    if (url) {
+      url.searchParams.set('hv_refresh', String(bucketOf(ctx.now())));
+      if (!img) {
+        ctx.requestRender();
+        return false;
+      }
+      if (img.getAttribute('src') !== url.href) img.setAttribute('src', url.href);
+      cam.classList.add('ov-home-has-picture');
+    } else {
+      img?.remove();
+      cam.classList.remove('ov-home-has-picture');
+      img = null;
+    }
+    const since = agoText(ctx, parseTime(state?.last_updated));
+    let agoEl = cam.querySelector('.ov-home-ago');
+    if (since && img) {
+      if (!agoEl) {
+        agoEl = document.createElement('span');
+        agoEl.className = 'ov-home-ago';
+        img.after(agoEl);
+      }
+      if (agoEl.textContent !== since) agoEl.textContent = since;
+    } else {
+      agoEl?.remove();
+    }
+  }
+  return true;
+}
+
+/** Replace the attention block when its rows change; otherwise leave the scene alone. */
+function patchAttention(ctx) {
+  const key = attentionKey(ctx);
+  if (ctx.store.get('attentionKey') === key) return true;
+  ctx.store.set('attentionKey', key);
+  const html = attentionHTML(ctx);
+  const section = ctx.el.querySelector('.ov-home-attention');
+  if (!html) {
+    section?.remove();
+    return true;
+  }
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const next = template.content.firstElementChild;
+  if (!next) return true;
+  if (section) {
+    section.replaceWith(next);
+    return true;
+  }
+  // First appearance of the section: geometry depends on siblings; rebuild once.
+  ctx.requestRender();
+  return false;
+}
+
+/**
+ * Once a second: one comparison. When the minute or snapshot bucket changes, patch the clock,
+ * camera pictures and attention rows in place instead of rebuilding the whole home scene.
+ */
 function refresh(ctx) {
   if (!ctx.el) return;
   const stamp = stampOf(ctx);
   if (stamp === null || ctx.store.get('stamp') === stamp) return;
   const first = !ctx.store.has('stamp');
-  remember(ctx);
-  if (!first) ctx.requestRender();
+  rememberStamp(ctx);
+  if (first) {
+    ctx.store.set('attentionKey', attentionKey(ctx));
+    return;
+  }
+  patchTime(ctx);
+  if (!patchCameras(ctx)) return;
+  patchAttention(ctx);
 }
 
 /** Every entity the home screen reads: the widgets' own, so a light, lock or scene change repaints it. */

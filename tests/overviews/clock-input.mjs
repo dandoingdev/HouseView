@@ -58,6 +58,8 @@ try {
         hour: r.querySelector('.ov-clock-hour').style.transform,
         minute: r.querySelector('.ov-clock-minute').style.transform,
         second: r.querySelector('.ov-clock-second').style.transform,
+        sweep: r.querySelector('.ov-clock-second').hasAttribute('data-sweep'),
+        delay: r.querySelector('.ov-clock-second').style.getPropertyValue('--clock-second-delay'),
         background: getComputedStyle(r.querySelector('.ov-clock-backdrop')).backgroundColor
       };
     });
@@ -67,7 +69,9 @@ try {
   assert.equal(s.date, 'WED 1');
   assert.equal(s.hour, 'rotate(304.75deg)');
   assert.equal(s.minute, 'rotate(57deg)');
-  assert.equal(s.second, 'rotate(180deg)');
+  assert.equal(s.sweep, true);
+  assert.equal(s.second, '');
+  assert.equal(s.delay, '-30s');
   for (const [wallpaper, expected] of [
     ['teal', 'rgb(12, 85, 85)'],
     ['silver', 'rgb(129, 133, 132)'],
@@ -294,8 +298,12 @@ try {
   await page.waitForSelector('houseview-card >>> .ov-clock-board');
   const before = await page.evaluate(() => {
     window.savedClockHand = window.card.shadowRoot.querySelector('.ov-clock-second');
-    return window.savedClockHand.style.transform;
+    return {
+      sweep: window.savedClockHand.hasAttribute('data-sweep'),
+      delay: window.savedClockHand.style.getPropertyValue('--clock-second-delay')
+    };
   });
+  assert.equal(before.sweep, true);
   await page.evaluate(() => window.advance(2));
   assert.equal(
     await page.evaluate(
@@ -303,7 +311,9 @@ try {
     ),
     true
   );
-  assert.notEqual(await page.evaluate(() => window.savedClockHand.style.transform), before);
+  assert.equal(await page.evaluate(() => window.savedClockHand.hasAttribute('data-sweep')), true);
+  // The compositor sweep owns the angle; shared ticks must not write an inline transform.
+  assert.equal(await page.evaluate(() => window.savedClockHand.style.transform), '');
   await page.touchscreen.tap(240, 240);
   await page.waitForFunction('!window.card.shadowRoot.querySelector(".hv-screensaver")');
   assert.equal(await page.evaluate(() => window.clockCalls.length), 0);

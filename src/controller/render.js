@@ -7,6 +7,7 @@
 import {createRenderContext} from '../core/context.js';
 import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
+import {widgetHassChanged} from '../core/hass-signature.js';
 import {getWidget} from '../core/registry.js';
 
 /** A page that holds the home summary alone: the whole page takes the overview's colour (no wallpaper around it). */
@@ -36,6 +37,7 @@ export const renderMixin = {
 
   /** Build or reuse the shell and put the current page's widgets into it. */
   _renderWidgets(preparedPage) {
+    this._dropPagePrefetch();
     this._clearPageTransition();
     this._disposeExtensions('render');
     const config = this._config;
@@ -51,13 +53,18 @@ export const renderMixin = {
       ? config.wallpaper
       : screen.surface || 'glass';
     this._renderedCards = new Map();
+    this._widgetSignatures = new Map();
     this._renderedIndices = screen.placements.map((p) => p.index).join(',');
     this._layoutKey = null; // the face is rebuilt below: the next layout pass must write everything
     this._ensureStyles();
 
     const shell = this._ensureShell();
     const extra = this._extensionShellClasses().join(' ');
-    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}`;
+    // Pin before the class replacement, and keep `has-header` in the new class. The replacement used to drop the
+    // header until the sync below; slow panels lay that gap out and the page jumps up between swipes.
+    const headerOn = this._headerHeight() > 0;
+    this._reserveHeaderSpace(shell);
+    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}${headerOn ? ' has-header' : ''}`;
 
     this._syncDashboardHeader(shell);
     const face = shell.querySelector('.face');
@@ -76,6 +83,7 @@ export const renderMixin = {
     this._syncDimButton(shell);
     this._syncHomeButton(shell);
     this._layout(model);
+    this._schedulePrefetch();
     this._runAfterRender();
     if (this._focus) {
       const target = [...this.shadowRoot.querySelectorAll('button[data-action]')].find(
@@ -88,6 +96,18 @@ export const renderMixin = {
     }
     this._syncEditorPreview();
     this._screensaverSync();
+    // Seed per-tile signatures so the next hass update only repaints tiles whose entities changed.
+    this._seedWidgetSignatures();
+  },
+
+  /** Remember each visible tile's watched state refs after a structural rebuild. */
+  _seedWidgetSignatures() {
+    const widgets = this._config?.widgets || [];
+    this._widgetSignatures = new Map();
+    if (!this._hass) return;
+    for (const index of this._renderedCards?.keys() || []) {
+      widgetHassChanged(this, index, widgets[index], this._hass);
+    }
   },
 
   /** The carousel shell; created on first use (a stale shell, if any, is removed first). */
@@ -135,8 +155,14 @@ export const renderMixin = {
     const face = this.shadowRoot.querySelector('.face');
     const shell = face?.parentElement;
     if (!face) return this._render();
-    for (const element of this._renderedCards?.values() || []) {
-      if (element.localName === 'houseview-widget-card') element.update();
+    const widgets = this._config?.widgets || [];
+    const allTiles = this._scalarsDirty;
+    this._scalarsDirty = false;
+    for (const [index, element] of this._renderedCards?.entries() || []) {
+      if (element.localName !== 'houseview-widget-card') continue;
+      if (!allTiles && !widgetHassChanged(this, index, widgets[index], this._hass)) continue;
+      if (allTiles) widgetHassChanged(this, index, widgets[index], this._hass);
+      element.update();
     }
     this._syncDashboardHeader(shell);
     shell.classList.toggle('dark', !!this._isDark());

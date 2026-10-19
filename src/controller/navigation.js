@@ -62,7 +62,8 @@ export const navigationMixin = {
     if (!start.dragging) {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 10) return;
       if (Math.abs(dx) <= Math.abs(dy) * 1.5) {
-        this._gesture = null;
+        // Diagonal finger jitter is undecided, not a vertical scroll. Wait for a clear direction.
+        if (Math.abs(dy) > Math.abs(dx) * 1.5) this._gesture = null;
         return;
       }
       start.dragging = true;
