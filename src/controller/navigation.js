@@ -2,7 +2,7 @@
 import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 
-import {swipeStep, SWIPE_CLICK_GUARD_MS} from '../core/swipe.js';
+import {swipeAxis, swipeStep, SWIPE_CLICK_GUARD_MS} from '../core/swipe.js';
 
 const SLIDER_SELECTOR = 'input[type=range],[role=slider],ha-slider,ha-control-slider';
 
@@ -60,14 +60,20 @@ export const navigationMixin = {
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
     if (!start.dragging) {
-      if (Math.max(Math.abs(dx), Math.abs(dy)) < 10) return;
-      if (Math.abs(dx) <= Math.abs(dy) * 1.5) {
-        // Diagonal finger jitter is undecided, not a vertical scroll. Wait for a clear direction.
-        if (Math.abs(dy) > Math.abs(dx) * 1.5) this._gesture = null;
+      const axis = swipeAxis(dx, dy);
+      if (axis === 'pending') return;
+      if (axis === 'vertical') {
+        this._gesture = null;
         return;
       }
       start.dragging = true;
       this._gesturePointerCancel();
+      // Follow the finger even when it slides off the tile that received the press.
+      try {
+        e.target?.setPointerCapture?.(e.pointerId);
+      } catch {
+        // The pointer can already have been released.
+      }
     }
     this._dragPage(start, dx);
   },

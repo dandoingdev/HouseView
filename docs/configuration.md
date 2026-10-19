@@ -57,7 +57,7 @@ screensaver:
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
 | `localized_states` | `false` | Show entity states in your Home Assistant language instead of the raw state value |
 | `state_compare` | `auto` | How state changes are detected: `reference` compares state objects by identity, `deep` compares their content, `auto` picks `reference` in Home Assistant. Leave it alone |
-| `tablet_mode` | `false` | Fill touch displays; keep Home Assistant navigation/editing controls on mouse desktops. `?tablet=1` explicitly forces full-screen outside editing. See [tablet mode](tablet.md) |
+| `tablet_mode` | `false` | Fill touch displays; keep Home Assistant navigation/editing controls on mouse desktops. `?tablet=1` explicitly forces full-screen outside editing. Available as **Tablet mode** in the visual editor. See [tablet mode](tablet.md) |
 | `preview_time` | now | An ISO date and time (`2026-10-15T10:10:00`) that the clock, date, calendar and overviews show instead of the real time. For screenshots and testing |
 
 A wrong value in an option that is checked is reported when the card loads (see [errors](#errors)).
@@ -152,7 +152,7 @@ In addition to the widget's options, standalone cards accept:
 | `performance` | `auto` | As in the carousel (YAML only: the settings form does not show it) |
 | `tap_action`, `hold_action`, `double_tap_action` | built-in behaviour | As above |
 
-The other carousel options (`confirm_mode`, `localized_states`, `tablet_mode`, `preview_time`, ...) belong to the
+The other carousel options (`confirm_mode`, `localized_states`, `preview_time`, ...) belong to the
 carousel and are not read by a standalone card. Standalone cards appear in the Home Assistant card picker as
 **HouseView · Light**, **HouseView · Thermostat** and so on, with a settings form instead of YAML. A standalone timer or
 music widget never takes over the screen with an automatic display.
@@ -160,9 +160,11 @@ music widget never takes over the screen with an automatic display.
 ## The visual editor
 
 The carousel and every widget card have a visual editor (**Edit dashboard**, then **Edit** on the card). The
-carousel editor has an **Appearance** section (appearance, wallpaper, palette, bedtime, high contrast, performance), one
-section per page with Home Assistant's own card editor for the widgets on it (add, reorder, delete, change a widget's
-settings in a form), a **Screensaver** section, an **Automatic displays** section and a **Camera grid** section. Anything
+carousel editor has an **Appearance** section (the date and time header, tablet mode, appearance, wallpaper,
+palette, bedtime, high contrast, performance) and one section per page. A page section uses Home Assistant's own
+card editor for the widgets on it (add, reorder, delete, change a widget's settings in a form) and shows
+**Remove page** when more than one page exists. Removing a page deletes the cards on it; the last page stays.
+The editor also has a **Screensaver** section, an **Automatic displays** section and a **Camera grid** section. Anything
 the forms do not cover (a list of screensavers, `confirm_mode`, `tap_action`, `preview_time`) is edited in the YAML
 editor; the forms keep keys they do not know.
 

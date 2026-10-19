@@ -56,7 +56,7 @@ HouseView's carousel is designed to fill the whole screen, so put it in a **pane
 and gives it the full width). Create a new dashboard or view, set its type to **Panel (1 card)**, open the **Raw
 configuration editor** and paste an example from the [examples folder](../examples/), for instance
 [`minimal.yaml`](../examples/minimal.yaml). Replace the entity ids with your own, save, and swipe or press the dots to move
-between pages. The visual editor on the carousel card can then add pages, set their background and add widgets.
+between pages. The visual editor on the carousel card can then add and remove pages, set their background and add widgets.
 
 ```yaml
 title: Home

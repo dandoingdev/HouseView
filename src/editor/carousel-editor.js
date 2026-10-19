@@ -37,7 +37,8 @@ const APPEARANCE_DEFAULTS = {
   palette: 'stone',
   performance: 'auto',
   editor_preview: 'landscape',
-  show_header: false
+  show_header: false,
+  tablet_mode: false
 };
 const SURFACES = ['glass', 'soft', 'teal', 'silver', 'champagne'];
 
@@ -64,6 +65,22 @@ export function editorConfig(config) {
 export const cardsOfPage = (config, page) =>
   config.cards.filter((card) => (fromCard(card).page || config.pages[0].name) === page.name);
 
+/**
+ * Drop one page and the cards that belong to it. The last page stays, so the card always has a page to edit.
+ * Returns the same config when `index` cannot be removed.
+ */
+export function withoutPage(config, index) {
+  const pages = config.pages;
+  if (!pages || pages.length < 2 || index < 0 || index >= pages.length) return config;
+  const removed = pages[index].name;
+  const first = pages[0].name;
+  return {
+    ...config,
+    pages: pages.filter((_, i) => i !== index),
+    cards: config.cards.filter((card) => (fromCard(card).page || first) !== removed)
+  };
+}
+
 export const appearanceData = (config) =>
   Object.fromEntries(
     [
@@ -74,12 +91,14 @@ export const appearanceData = (config) =>
       'high_contrast',
       'performance',
       'editor_preview',
-      'show_header'
+      'show_header',
+      'tablet_mode'
     ].map((key) => [key, config[key] ?? APPEARANCE_DEFAULTS[key]])
   );
 
 export const appearanceSchema = (hass) => [
   field('show_header', {boolean: {}}),
+  field('tablet_mode', {boolean: {}}),
   field('appearance', select(hass, ['auto', 'light', 'dark'])),
   field('wallpaper', select(hass, ['page', 'teal', 'silver', 'champagne'])),
   field('palette', select(hass, ['stone', 'forest'])),
@@ -434,6 +453,12 @@ export class HouseViewEditor extends HTMLElement {
       computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
       changed: (value) => this._pageChanged(index, value)
     });
+    if (this._config.pages.length > 1) {
+      const remove = document.createElement('ha-button');
+      remove.textContent = text(this._hass, 'editor.remove_page');
+      remove.addEventListener('click', () => this._removePage(index));
+      section.append(remove);
+    }
     const pageView = {panel: el, form};
     view.pages.push(pageView);
     if (!hasStackEditor()) {
@@ -465,6 +490,15 @@ export class HouseViewEditor extends HTMLElement {
     if (value.columns) page.columns = value.columns;
     else delete page.columns;
     this._emit();
+  }
+
+  /** Remove one page and the cards on it, then rebuild. The last page has no remove button. */
+  _removePage(index) {
+    const next = withoutPage(this._config, index);
+    if (next === this._config) return;
+    this._config = next;
+    this._emit();
+    this._render();
   }
 
   // The stack editor reports the page's whole card list and, when the title field was edited, a page name.

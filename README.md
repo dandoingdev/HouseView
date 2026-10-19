@@ -282,7 +282,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |
-| `tablet_mode` | The same as `?tablet=1` |
+| `tablet_mode` | The same as `?tablet=1`. Also the **Tablet mode** switch in the card editor |
 | `show_header` | Show the date on the left and time centred above every page |
 | `home_overview`, `home_title` | Show the home summary button and choose its title |
 | `home_attention` | Choose the doors, lights and devices to watch for attention |

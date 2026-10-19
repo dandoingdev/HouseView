@@ -1016,11 +1016,37 @@ describe('navigation', () => {
       assert.equal(card._pageIndex, 1);
     });
 
+    it('follows a diagonal swipe instead of leaving it in a dead zone', () => {
+      const {card} = pagedCard({reduced: true});
+      card._swipeStart(touch(300, 100));
+      card._swipeMove(touch(265, 125)); // 35 px across, 25 down: still undecided
+      assert.ok(card._gesture);
+      assert.ok(!card._gesture.dragging);
+      card._swipeMove(touch(160, 200)); // 140 across, 100 down
+      assert.ok(card._gesture.dragging, 'a longer diagonal drag tracks the finger');
+      card._swipeEnd(touch(160, 200));
+      assert.equal(card._pageIndex, 1);
+    });
+
+    it('keeps a swipe that starts with a short downward drift', () => {
+      const {card} = pagedCard({reduced: true});
+      card._swipeStart(touch(300, 100));
+      card._swipeMove(touch(290, 116)); // 10 across, 16 down
+      assert.ok(card._gesture, 'a short dip is not a vertical scroll');
+      card._swipeMove(touch(140, 130));
+      card._swipeEnd(touch(140, 130));
+      assert.equal(card._pageIndex, 1);
+    });
+
     it('still yields to clearly vertical scrolling', () => {
       const {card} = pagedCard({reduced: true});
       card._swipeStart(touch(300, 100));
       card._swipeMove(touch(294, 124));
       card._swipeEnd(touch(180, 130));
+      assert.equal(card._pageIndex, 0);
+      card._swipeStart(touch(300, 100));
+      card._swipeMove(touch(270, 150)); // more down than across, past the scroll lock
+      card._swipeEnd(touch(120, 160));
       assert.equal(card._pageIndex, 0);
     });
 

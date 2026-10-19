@@ -18,8 +18,9 @@ http://homeassistant.example:8123/dashboard-wall/home?tablet=1
 ```
 
 With that parameter HouseView hides the sidebar and the header and uses the whole window. Remove the parameter, or navigate
-away, and Home Assistant looks normal again; HouseView puts back everything it hid. You can also set `tablet_mode: true` in
-the card configuration to fill touch displays without the parameter. On a desktop with a mouse, this saved setting
+away, and Home Assistant looks normal again; HouseView puts back everything it hid. You can also turn on **Tablet mode**
+in the carousel card editor, or set `tablet_mode: true` in the card configuration, to fill touch displays without the
+parameter. On a desktop with a mouse, this saved setting
 leaves Home Assistant’s header and sidebar visible, so its dashboard menu and **Edit dashboard** remain available.
 This uses the primary input type, not the window size: a small desktop window is still editable and a large touch
 display can still fill its screen. The explicit `?tablet=1` parameter remains available for a desktop kiosk.

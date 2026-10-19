@@ -80,6 +80,44 @@ try {
   await swipe('.page-nav', 100);
   console.log('PASS a natural diagonal start resolves into horizontal paging');
 
+  const gesture = async (points) => {
+    await page.evaluate(() => window.card._setPage(0));
+    await page.waitForFunction('!window.card._pageAnimations?.length');
+    for (const [type, x, y] of points) {
+      await client.send('Input.dispatchTouchEvent', {
+        type,
+        touchPoints: type === 'touchEnd' ? [] : [{x, y}]
+      });
+      await page.evaluate(() => new Promise(window.requestAnimationFrame));
+    }
+    await page.waitForFunction('!window.card._pageAnimations?.length');
+  };
+  await gesture([
+    ['touchStart', 320, 240],
+    ['touchMove', 285, 265],
+    ['touchMove', 250, 290]
+  ]);
+  const diagonal = await page.evaluate(() => {
+    const face = window.card.shadowRoot.querySelector('.face').getBoundingClientRect();
+    return {dragging: !!window.card._gesture?.dragging, x: face.x, page: window.card._pageIndex};
+  });
+  assert.equal(diagonal.page, 0, 'the page changes on release, not at the first diagonal sample');
+  assert.equal(diagonal.dragging, true, 'a diagonal drag follows the finger');
+  assert.ok(diagonal.x < -60, 'the current page tracks the diagonal travel');
+  await client.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
+  await page.waitForFunction('!window.card._pageAnimations?.length');
+  assert.equal(await index(), 1, 'a diagonal swipe turns the page');
+  await gesture([
+    ['touchStart', 320, 240],
+    ['touchMove', 310, 256],
+    ['touchMove', 160, 270],
+    ['touchEnd', 160, 270]
+  ]);
+  assert.equal(await index(), 1, 'a short downward start does not cancel the sideways swipe');
+  await page.evaluate(() => window.card._setPage(0));
+  await page.waitForFunction('!window.card._pageAnimations?.length');
+  console.log('PASS diagonal travel and a dipped start still page');
+
   for (const [width, height] of [
     [480, 480],
     [360, 640],

@@ -8,6 +8,9 @@ export default {
     'editor.show_header': 'Show time and date header',
     'editor.helper.show_header':
       'Date on the left, time centred above every page. Uses your Home Assistant language, time format and time zone.',
+    'editor.tablet_mode': 'Tablet mode',
+    'editor.helper.tablet_mode':
+      'Hide Home Assistant’s sidebar and header on a touch panel. A desktop with a mouse keeps them so you can still edit.',
     'editor.appearance': 'Appearance',
     'editor.palette': 'Palette',
     'editor.wallpaper': 'Background',
@@ -55,6 +58,7 @@ export default {
     'editor.camera_slot.2': 'Bottom left camera',
     'editor.camera_slot.3': 'Bottom right camera',
     'editor.add_page': 'Add page',
+    'editor.remove_page': 'Remove page',
     'editor.stream': 'Use camera stream',
     'editor.height': 'Standalone height (pixels)',
     // shared field names (core also defines widget_type, entity, name, size and icon)

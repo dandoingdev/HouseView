@@ -6,6 +6,11 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* **Tablet mode** is a switch in the carousel card editor. It still fills touch displays and leaves Home Assistant’s header and sidebar available on a mouse desktop.
+* **Remove page** in the carousel card editor deletes that page and the cards on it. The last page stays.
+
 ## [1.3.3] - 2026-10-19
 
 ### Fixed

@@ -11,7 +11,7 @@
 .carousel {
   overflow: hidden !important;
   background: #817c70 !important;
-  /* Reserve horizontal gestures for paging, including the header and navigation bar. */
+  /* Vertical pans stay available for the home overview. Other pages opt out below. */
   touch-action: pan-y;
 }
 
@@ -24,6 +24,15 @@
   gap: 14px;
   box-sizing: border-box;
   touch-action: pan-y;
+}
+
+/* A slightly diagonal finger is still a page turn. pan-y lets the browser cancel that
+   gesture once it dips, so paging surfaces claim the touch. The home overview is the
+   exception: its list scrolls vertically, and the header and navigation still page. */
+.carousel:not(.surface-home) .face,
+.carousel .dashboard-header,
+.carousel .page-nav {
+  touch-action: none;
 }
 
 .carousel .widget {
@@ -39,7 +48,6 @@
   gap: 8px;
   color: #fff;
   background: #6e6d64;
-  touch-action: pan-y;
 }
 
 .page-nav button {

@@ -496,3 +496,12 @@ it('the optional dashboard header accepts booleans and rejects other values', ()
     assert.equal(messageOf({cards: [], show_header}), 'show_header must be true or false.');
   }
 });
+
+it('tablet mode accepts booleans and rejects other values', () => {
+  for (const tablet_mode of [undefined, true, false]) {
+    assert.equal(validateConfig({cards: [], tablet_mode}).tablet_mode, tablet_mode);
+  }
+  for (const tablet_mode of ['true', 1, null, {}]) {
+    assert.equal(messageOf({cards: [], tablet_mode}), 'tablet_mode must be true or false.');
+  }
+});

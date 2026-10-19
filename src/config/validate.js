@@ -55,7 +55,8 @@ function validateOptionalSettings(config) {
     'weather_view',
     'climate_view',
     'world_clock_view',
-    'show_header'
+    'show_header',
+    'tablet_mode'
   ]) {
     if (config[key] !== undefined && typeof config[key] !== 'boolean') {
       throw new Error(`${key} must be true or false.`);

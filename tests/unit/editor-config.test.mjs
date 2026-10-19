@@ -8,6 +8,7 @@ const {registerStrings} = await import('../../src/core/i18n.js');
 const {
   editorConfig,
   cardsOfPage,
+  withoutPage,
   appearanceData,
   appearanceSchema,
   appearanceHelper,
@@ -87,12 +88,45 @@ test('form data defaults', () => {
     high_contrast: undefined,
     performance: 'auto',
     editor_preview: 'landscape',
-    show_header: false
+    show_header: false,
+    tablet_mode: false
   });
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
   assert.equal(appearanceData({wallpaper: 'silver', bedtime: false}).wallpaper, 'silver');
   assert.equal(appearanceData({bedtime: false}).bedtime, false);
   assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', columns: undefined});
+});
+
+test('withoutPage drops that page and its cards, and keeps the last page', () => {
+  const config = editorConfig({
+    pages: [
+      {name: 'A', surface: 'teal'},
+      {name: 'B', surface: 'glass'}
+    ],
+    cards: [
+      {type: 'custom:houseview-clock-card'},
+      {type: 'custom:houseview-light-card', entity: 'light.a', page: 'B'},
+      {type: 'entities', entities: [], view_layout: {houseview_page: 'B'}}
+    ]
+  });
+  const dropped = withoutPage(config, 1);
+  assert.deepEqual(
+    dropped.pages.map((page) => page.name),
+    ['A']
+  );
+  assert.equal(dropped.pages[0].surface, 'teal');
+  assert.deepEqual(
+    dropped.cards.map((card) => card.type),
+    ['custom:houseview-clock-card']
+  );
+  assert.equal(withoutPage(dropped, 0), dropped);
+  const droppedFirst = withoutPage(config, 0);
+  assert.deepEqual(
+    droppedFirst.pages.map((page) => page.name),
+    ['B']
+  );
+  assert.equal(droppedFirst.cards.length, 2);
+  assert.equal(withoutPage(config, 4), config);
 });
 
 test('the page form has a surface and landscape columns, and no layout', () => {
@@ -175,4 +209,9 @@ test('the appearance form has a performance select with helper text', () => {
   assert.match(helper({name: 'performance'}), /Lite/);
   assert.equal(helper({name: 'palette'}), undefined, 'no helper for the other fields');
   assert.equal(strings.en['editor.performance'], 'Performance');
+  const tablet = appearanceSchema(hass).find((item) => item.name === 'tablet_mode');
+  assert.deepEqual(tablet.selector, {boolean: {}});
+  assert.equal(strings.en['editor.tablet_mode'], 'Tablet mode');
+  assert.match(helper({name: 'tablet_mode'}), /touch panel/);
+  assert.equal(appearanceData({tablet_mode: true}).tablet_mode, true);
 });
