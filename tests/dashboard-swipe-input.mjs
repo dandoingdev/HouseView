@@ -165,7 +165,11 @@ try {
       return {
         page: window.card._pageIndex,
         face: rect('.face'),
-        neighbour: rect('.page-outgoing'),
+        neighbour: (() => {
+          const el = window.card._swipePreview?.element || root.querySelector('.page-outgoing');
+          const r = el?.getBoundingClientRect();
+          return r ? {x: r.x, y: r.y, w: r.width, h: r.height} : null;
+        })(),
         header: rect('.dashboard-header'),
         nav: rect('.page-nav')
       };

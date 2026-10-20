@@ -9,7 +9,7 @@ export const pageTransitionMixin = {
   /** Cancel running animations and drop the temporary outgoing layer. Idempotent. */
   _clearPageTransition() {
     const rebuild =
-      !!(this._swipePreview || this._outgoingPage) &&
+      !!(this._swipePreview || this._swipeSpare || this._outgoingPage) &&
       this.isConnected &&
       !this._screensaverCovered?.();
     for (const animation of this._pageAnimations || []) animation.cancel();
@@ -18,6 +18,9 @@ export const pageTransitionMixin = {
     this._outgoingPage = null;
     this._swipePreview?.element.remove();
     this._swipePreview = null;
+    this._swipeSpare?.element.remove();
+    this._swipeSpare = null;
+    if (this._gesture?.raf) cancelAnimationFrame(this._gesture.raf);
     this._dragFace?.style.removeProperty('transform');
     this._dragFace?.style.removeProperty('will-change');
     this._dragFace = null;
@@ -54,7 +57,14 @@ export const pageTransitionMixin = {
       this._dropPagePrefetch();
       return;
     }
-    if (this._dragFace || this._outgoingPage || this._gesture || this._swipePreview) return;
+    if (
+      this._dragFace ||
+      this._outgoingPage ||
+      this._gesture ||
+      this._swipePreview ||
+      this._swipeSpare
+    )
+      return;
     const face = this.shadowRoot.querySelector('.face');
     const shell = face?.parentElement;
     if (!face || !shell || !this._screens?.length) return;
@@ -125,51 +135,83 @@ export const pageTransitionMixin = {
     layer.style.setProperty('right', 'auto', 'important');
   },
 
-  /** Reveal the neighbour under the finger. Prefetched pages are preferred; otherwise build now. */
+  /** Take a neighbour for the drag: the idle prefetch when present, otherwise build it now. */
+  _takeNeighbour(face, direction) {
+    const screen = this._screens[this._pageIndex + direction];
+    if (!screen) return null;
+    const prefetched = this._pagePrefetch?.get(direction);
+    let entry;
+    if (prefetched) {
+      this._pagePrefetch.delete(direction);
+      // Face geometry may have changed since the idle build (header, soft keyboard).
+      this._positionPageLayer(prefetched.element, face);
+      entry = prefetched;
+    } else {
+      entry = this._buildNeighbourPage(face, screen);
+      this._positionPageWidgets(entry.element, screen);
+    }
+    entry.element.style.willChange = 'transform';
+    entry.element.style.transform = `translate3d(${direction * 100000}px,0,0)`;
+    face.parentElement.append(entry.element);
+    return entry;
+  },
+
+  /**
+   * Reveal the neighbour under the finger. Both neighbours stay mounted (off screen) for the whole
+   * gesture, so reversing direction only changes which one moves: nothing is rebuilt mid-drag.
+   */
   _dragPage(start, dx) {
     // Direct manipulation follows the finger even with reduced motion. Only the
     // automatic settling animation below depends on that accessibility preference.
     const face = start.face || this.shadowRoot.querySelector('.face');
     if (!face) return;
-    start.face = face;
-    this._dragFace = face;
-    start.width ||= face.offsetWidth;
-    const direction = dx < 0 ? 1 : -1;
-    const next = this._pageIndex + direction;
-    const screen = this._screens[next];
-    if (start.direction !== direction) {
-      this._swipePreview?.element.remove();
-      this._swipePreview = null;
-      start.direction = direction;
-      if (screen) {
-        const prefetched = this._pagePrefetch?.get(direction);
-        let preview;
-        if (prefetched) {
-          this._pagePrefetch.delete(direction);
-          // Face geometry may have changed since the idle build (header, soft keyboard).
-          this._positionPageLayer(prefetched.element, face);
-          preview = prefetched;
-        } else {
-          preview = this._buildNeighbourPage(face, screen);
-          this._positionPageWidgets(preview.element, screen);
-        }
-        face.parentElement.append(preview.element);
-        this._swipePreview = preview;
-      }
+    if (!start.face) {
+      start.face = face;
+      start.width = face.offsetWidth;
+      face.style.willChange = 'transform';
+      start.previews = {1: this._takeNeighbour(face, 1), '-1': this._takeNeighbour(face, -1)};
     }
+    this._dragFace = face;
+    const direction = dx < 0 ? 1 : -1;
+    start.direction = direction;
+    const active = start.previews[direction];
+    const spare = start.previews[-direction];
+    this._swipePreview = active;
+    this._swipeSpare = spare;
+    const width = start.width;
     // Resist pulling past the ends; otherwise the page tracks the finger one-for-one.
-    start.dx = screen ? Math.max(-start.width, Math.min(start.width, dx)) : dx * 0.25;
-    face.style.willChange = 'transform';
-    face.style.transform = `translateX(${start.dx}px)`;
-    if (this._swipePreview)
-      this._swipePreview.element.style.transform = `translateX(${start.dx + direction * start.width}px)`;
+    start.dx = active ? Math.max(-width, Math.min(width, dx)) : dx * 0.25;
+    face.style.transform = `translate3d(${start.dx}px,0,0)`;
+    if (active)
+      active.element.style.transform = `translate3d(${start.dx + direction * width}px,0,0)`;
+    if (spare) spare.element.style.transform = `translate3d(${-direction * width * 2}px,0,0)`;
+  },
+
+  /** Coalesce pointer moves to one layout-free transform write per frame. */
+  _queueDrag(start, dx) {
+    start.pendingDx = dx;
+    if (start.raf) return;
+    start.raf = requestAnimationFrame(() => {
+      start.raf = 0;
+      if (this._gesture === start) this._dragPage(start, start.pendingDx);
+    });
+  },
+
+  /** Apply the last pointer position now (release / cancel) so the settle starts where the finger was. */
+  _flushDrag(start, dx) {
+    if (start.raf) cancelAnimationFrame(start.raf);
+    start.raf = 0;
+    if (start.dragging) this._dragPage(start, dx ?? start.pendingDx ?? 0);
   },
 
   /** Complete a drag without jumping back to its starting position. Short/cancelled drags spring back. */
-  _settlePageDrag(start, step) {
+  _settlePageDrag(start, step, velocity = 0) {
     if (!start.face) return;
     const {face, width, dx, direction} = start;
     const preview = this._swipePreview;
+    const spare = this._swipeSpare;
+    this._swipeSpare = null;
+    spare?.element.remove();
     const commit = step === direction && !!preview && !this._navigationBlocked();
     if (commit) {
       // Keep both sets of real elements. Moving the preview into place avoids a second paint of its widgets.
@@ -181,28 +223,40 @@ export const pageTransitionMixin = {
       preview.element.remove();
       face.parentElement.append(outgoing);
       this._outgoingPage = outgoing;
-      this._animatePageDrag([
-        [face, dx + direction * width, 0],
-        [outgoing, dx, -direction * width]
-      ]);
+      this._animatePageDrag(
+        [
+          [face, dx + direction * width, 0],
+          [outgoing, dx, -direction * width]
+        ],
+        Math.abs(dx + direction * width),
+        velocity
+      );
     } else {
       const layers = [[face, dx, 0]];
       if (preview) layers.push([preview.element, dx + direction * width, direction * width]);
-      this._animatePageDrag(layers);
+      this._animatePageDrag(layers, Math.abs(dx), velocity);
     }
   },
 
-  _animatePageDrag(layers) {
+  /** Finish in proportion to the distance left, faster for a flick (px/ms), 120-260 ms. */
+  _animatePageDrag(layers, remaining = 0, velocity = 0) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !layers[0][0].animate) {
       this._clearPageTransition();
       return;
     }
+    const byDistance = 120 + Math.min(1, remaining / Math.max(1, layers[0][0].offsetWidth)) * 120;
+    const duration = Math.round(
+      velocity > 0.3 ? Math.max(120, Math.min(byDistance, remaining / velocity)) : byDistance
+    );
     const animations = layers.map(([element, from, to]) =>
-      element.animate([{transform: `translateX(${from}px)`}, {transform: `translateX(${to}px)`}], {
-        duration: 220,
-        easing: 'cubic-bezier(.22,1,.36,1)',
-        fill: 'both'
-      })
+      element.animate(
+        [{transform: `translate3d(${from}px,0,0)`}, {transform: `translate3d(${to}px,0,0)`}],
+        {
+          duration,
+          easing: 'cubic-bezier(.22,1,.36,1)',
+          fill: 'both'
+        }
+      )
     );
     this._pageAnimations = animations;
     animations[0].finished.then(

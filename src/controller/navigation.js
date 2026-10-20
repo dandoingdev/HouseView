@@ -119,8 +119,26 @@ export const navigationMixin = {
       this._gesturePointerCancel();
       // Follow the finger even when it slides off the tile that received the press.
       capturePointer(e);
+      // The first frame builds and mounts the neighbours; later moves only write transforms.
+      this._dragPage(start, dx);
     }
-    this._dragPage(start, dx);
+    this._trackVelocity(start, e);
+    this._queueDrag(start, dx);
+  },
+
+  /** Recent horizontal speed in px/ms (negative = towards the next page), from the last ~100 ms. */
+  _trackVelocity(start, e) {
+    const samples = (start.samples ||= []);
+    const t = e.timeStamp;
+    samples.push({x: e.clientX, t});
+    while (samples.length > 2 && t - samples[0].t > 100) samples.shift();
+  },
+
+  _releaseVelocity(start) {
+    const s = start.samples;
+    if (!s || s.length < 2) return 0;
+    const dt = s[s.length - 1].t - s[0].t;
+    return dt > 0 ? (s[s.length - 1].x - s[0].x) / dt : 0;
   },
 
   /** Release the page at the finger position, then slide to the nearest destination. */
@@ -139,9 +157,15 @@ export const navigationMixin = {
       return;
     }
     const dx = e.clientX - start.x;
-    const step = start.dragging ? (Math.abs(dx) > 60 ? (dx < 0 ? 1 : -1) : 0) : swipeStep(start, e);
+    this._flushDrag(start, dx);
+    const v = start.dragging ? this._releaseVelocity(start) : 0;
+    // Past 60 px, or a quick flick (>0.4 px/ms) past 24 px in the same direction.
+    const far =
+      Math.abs(dx) > 60 ||
+      (Math.abs(dx) > 24 && Math.abs(v) > 0.4 && Math.sign(v) === Math.sign(dx));
+    const step = start.dragging ? (far ? (dx < 0 ? 1 : -1) : 0) : swipeStep(start, e);
     if (start.dragging || step) this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
-    if (start.face) this._settlePageDrag(start, step);
+    if (start.face) this._settlePageDrag(start, step, Math.abs(v));
     else if (step) this._setPage(this._pageIndex + step);
   },
 
@@ -152,6 +176,7 @@ export const navigationMixin = {
     if (start?.homePull) this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
     if (start?.dragging) {
       this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+      this._flushDrag(start);
       this._settlePageDrag(start, 0);
     }
   }
