@@ -10,6 +10,7 @@ export const manifest = [
   {type: 'climate', load: () => import('../../src/overviews/climate/test.js')},
   {type: 'clock', load: () => import('../../src/overviews/clock/test.js')},
   {type: 'cover_art', load: () => import('../../src/overviews/cover_art/test.js')},
+  {type: 'doorbell', load: () => import('../../src/overviews/doorbell/test.js')},
   {type: 'home', load: () => import('../../src/overviews/home/test.js')},
   {type: 'light', load: () => import('../../src/overviews/light/test.js')},
   {type: 'photo_frame', load: () => import('../../src/overviews/photo_frame/test.js')},

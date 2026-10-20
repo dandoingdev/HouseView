@@ -1,0 +1,41 @@
+---
+type: doorbell
+label: Doorbell camera
+entity: required
+domains: [binary_sensor, event, button, input_button, input_boolean]
+since: 1.7
+---
+
+# Doorbell camera
+
+A full-screen camera stream that appears over the dashboard **by itself** when the doorbell rings, and goes away after
+a set time. A tap on it closes it sooner and returns to the view you were on; it stays closed until the doorbell has
+rung again. Like the timer display it is an **event** overview. It also works as a page card
+(`custom:houseview-doorbell-overview-card`; a tap opens the stream full screen).
+
+It is an extra feature of the card, not a screensaver: set it in the editor's **Doorbell camera** section or with the
+`doorbell` option, and it is not offered in the screensaver list.
+
+```yaml
+type: custom:houseview-card
+cards:
+  - type: custom:houseview-clock-card
+doorbell:
+  entity: binary_sensor.front_doorbell
+  camera: camera.front_door
+  duration: 30
+```
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| entity | entity | required | The doorbell: a `binary_sensor`, `input_boolean`, `event`, `button` or `input_button` |
+| camera | entity | none | The `camera.*` entity to show |
+| duration | number | 30 | Seconds the stream stays up (5 to 600) |
+| name | text | camera name | Used for the title bar and the screen reader label (YAML only) |
+
+The doorbell **rings** when a `binary_sensor` or `input_boolean` is `on`, or when an `event`, `button` or
+`input_button` was pressed less than `duration` seconds ago (their state is the time of the last press). A
+`binary_sensor` that turns off again ends the display early.
+
+The picture is the camera's `camera_proxy_stream` (MJPEG) from your own Home Assistant. A stream that fails is retried
+every ten seconds while the display is up.

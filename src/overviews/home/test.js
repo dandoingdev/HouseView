@@ -63,19 +63,19 @@ export default async function ({mount, check, variants}) {
     page(t) === 2 && t.calls.length === 0,
     `page ${page(t)}`
   );
-  t.q('[data-action="page-select"][data-page="0"]').click();
+  t.card._setPage(0);
   await t.settle();
   await t.click('goto-widget', 'widget:1');
   check('the climate chip goes to the climate page', page(t) === 1);
-  t.q('[data-action="page-select"][data-page="0"]').click();
+  t.card._setPage(0);
   await t.settle();
   await t.click('goto-widget', 'widget:5');
   check('the media chip goes to the media player page', page(t) === 5);
-  t.q('[data-action="page-select"][data-page="0"]').click();
+  t.card._setPage(0);
   await t.settle();
   await t.click('goto-widget', 'widget:6');
   check('the Cameras heading goes to the first camera page', page(t) === 6);
-  t.q('[data-action="page-select"][data-page="0"]').click();
+  t.card._setPage(0);
   await t.settle();
   t.card._act('goto-widget', 'widget:99');
   await t.settle();

@@ -17,6 +17,7 @@ import {
   automaticSchema,
   showAutomatic
 } from './automatic-displays-form.js';
+import {applyDoorbell, doorbellData, doorbellSchema, showDoorbell} from './doorbell-form.js';
 import {applyHome, homeData, homeSchema, showHome} from './home-form.js';
 import {CAMERA_SLOTS, applySlot, slotData, slotHeadingKey, slotSchema} from './camera-forms.js';
 import {STYLES, createForm, field, select, text, textOrNone} from './form.js';
@@ -133,7 +134,8 @@ const structureKey = (config) =>
     config.pages.map((page) => page.name),
     showScreensaver(config),
     showAutomatic(config),
-    showHome(config)
+    showHome(config),
+    showDoorbell(config)
   ]);
 
 const panel = (parent, header) => {
@@ -209,6 +211,7 @@ export class HouseViewEditor extends HTMLElement {
     this._renderCameras(parent, view);
     if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
     if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
+    if (showDoorbell(this._config)) this._renderDoorbell(parent, view);
     this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
     this._renderAddPage(parent);
     if (!hasStackEditor()) this._upgradeWhenReady();
@@ -330,6 +333,24 @@ export class HouseViewEditor extends HTMLElement {
           Object.keys(value).find((key) => value[key] !== automaticData(this._config)[key]) ||
           this._automaticPreviewKey;
         this._config = applyAutomatic(this._config, value);
+        this._emit();
+      }
+    });
+  }
+
+  _renderDoorbell(parent, view) {
+    const {el, section} = panel(parent, text(this._hass, 'editor.doorbell_section'));
+    this._followPreview(el, () => ({
+      kind: 'overview',
+      type: 'doorbell',
+      options: {entity: this._config.doorbell?.entity, camera: this._config.doorbell?.camera}
+    }));
+    view.doorbell = this._form(section, {
+      data: doorbellData(this._config),
+      schema: doorbellSchema(),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
+      changed: (value) => {
+        this._config = applyDoorbell(this._config, value);
         this._emit();
       }
     });
@@ -527,16 +548,51 @@ export class HouseViewEditor extends HTMLElement {
     const page = pages[index];
     const first = pages[0].name;
     const old = page.name;
-    const name = (stackConfig.title ?? old).trim();
+    const pageView = this._view.pages[index];
+    // Cards apply at once under the current name; a rename waits until typing pauses so the preview does not
+    // jump to a half-typed page name on every keystroke.
+    const others = this._config.cards.filter((card) => (fromCard(card).page || first) !== old);
+    this._config.cards = others.concat(cards.map((card) => onPage(card, old)));
+    clearTimeout(pageView.renameTimer);
+    const title = stackConfig.title ?? old;
+    if (title.trim() === old) {
+      this._status('');
+    } else {
+      pageView.renameTimer = setTimeout(() => this._renamePage(index, title), 800);
+      if (!pageView.renameBound) {
+        pageView.renameBound = true;
+        pageView.stack.addEventListener('focusout', () => this._flushRename(index));
+      }
+      pageView.pendingTitle = title;
+    }
+    pageView.stackKey = JSON.stringify({...this._stackConfig(index), title});
+    this._emit();
+  }
+
+  _flushRename(index) {
+    const pageView = this._view?.pages[index];
+    if (!pageView?.renameTimer) return;
+    clearTimeout(pageView.renameTimer);
+    this._renamePage(index, pageView.pendingTitle);
+  }
+
+  _renamePage(index, title) {
+    const pageView = this._view.pages[index];
+    pageView.renameTimer = undefined;
+    const {pages} = this._config;
+    const page = pages[index];
+    const first = pages[0].name;
+    const old = page.name;
+    const name = title.trim();
     if (!name || pages.some((other, i) => i !== index && other.name === name)) {
       return this._status(text(this._hass, 'editor.page_name_invalid'));
     }
-    const others = this._config.cards.filter((card) => (fromCard(card).page || first) !== old);
+    if (name === old) return;
+    this._config.cards = this._config.cards.map((card) =>
+      (fromCard(card).page || first) === old ? onPage(card, name) : card
+    );
     page.name = name;
-    this._config.cards = others.concat(cards.map((card) => onPage(card, name)));
-    const pageView = this._view.pages[index];
     pageView.panel.header = name;
-    // What the stack editor now shows is what it reported; remember it so a later echo is not pushed back in.
     pageView.stackKey = JSON.stringify(this._stackConfig(index));
     this._view.key = structureKey(this._config);
     this._status('');
@@ -571,6 +627,7 @@ export class HouseViewEditor extends HTMLElement {
     });
     if (view.automatic) view.automatic.data = automaticData(config);
     if (view.home) view.home.data = homeData(config);
+    if (view.doorbell) view.doorbell.data = doorbellData(config);
     if (view.screensaver) {
       const data = screensaverData(config);
       view.screensaver.form.schema = screensaverSchema(this._hass, data);

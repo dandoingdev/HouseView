@@ -21,8 +21,11 @@ const holdable = (action) =>
 /** Full-screen player opened from a compact music tile, or null. */
 function expandPress(button) {
   const direct = button?.dataset?.action || '';
-  if (direct.startsWith('media-player-expand-')) return {action: direct, entity: button.dataset.entity};
-  const tile = button?.classList?.contains('mc-compact') ? button : button?.closest?.('.mc-compact');
+  if (direct.startsWith('media-player-expand-'))
+    return {action: direct, entity: button.dataset.entity};
+  const tile = button?.classList?.contains('mc-compact')
+    ? button
+    : button?.closest?.('.mc-compact');
   const details = tile?.querySelector?.('.mc-details');
   const action = details?.dataset?.action || '';
   if (!action.startsWith('media-player-expand-')) return null;

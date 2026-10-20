@@ -108,6 +108,18 @@ function eventStates(entries, previous) {
   );
 }
 
+/** An interrupting event (the doorbell) clears what is in its way: the page and scene menus, the camera grid, the dim. */
+function clearForInterrupt(card) {
+  card._closePageMenu?.();
+  if (card._galleryOpen) {
+    card._galleryOpen = false;
+    card._galleryCamera = null;
+    card._stopGallery?.();
+    card._render?.();
+  }
+  if (card._dim) card._toggleDim?.();
+}
+
 export const screensaverMixin = {
   // ---- integration point 1: setConfig (after validation and after this._config is assigned) ----
   _screensaverSetConfig(config) {
@@ -434,7 +446,7 @@ export const screensaverMixin = {
     const ss = this._screensaver;
     if (!this._hass || !this.isConnected || !ss) return true;
     // While a layer is up it is the entry that matters (its pending-call and edit-mode rules), not the next idle one.
-    return this._screensaverBlockedFor(ss.active?.entry ?? this._screensaverLead());
+    return this._screensaverBlockedFor(ss.forced ?? ss.active?.entry ?? this._screensaverLead());
   },
 
   /**
@@ -444,6 +456,7 @@ export const screensaverMixin = {
    * starting a timer can trigger it. Active control panels stay open while commands finish.
    */
   _screensaverBlockedFor(entry) {
+    if (entry?.overview?.interrupt && entry.event) return false;
     if (this._galleryOpen || this._alarm) return true;
     const controlling = !!(entry?.overview?.controls && this._screensaver?.active?.entry === entry);
     // The full-screen player blocks paging and idle art, and still opens the volume view on top of itself.
@@ -528,6 +541,7 @@ export const screensaverMixin = {
   /** Show `entry` through the idle manager, bypassing its timing and the round-robin cursor. */
   _screensaverEventShow(entry) {
     const ss = this._screensaver;
+    if (entry.overview.interrupt) clearForInterrupt(this);
     const replaced = ss.active?.entry;
     // An event layer that gives way is not dismissed: park it, so it comes back when this one is gone.
     if (replaced?.event && replaced !== entry) ss.events.get(replaced).parked = true;

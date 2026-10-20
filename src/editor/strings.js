@@ -23,6 +23,15 @@ export default {
     'editor.helper.editor_preview':
       'How this preview is drawn while you edit: as a landscape tablet (default), a portrait tablet, or auto (the box as it is). Only affects the editor.',
     'editor.automatic_displays': 'Automatic displays',
+    'editor.doorbell_section': 'Doorbell camera',
+    'editor.doorbell_entity': 'Doorbell',
+    'editor.doorbell_camera': 'Camera',
+    'editor.doorbell_duration': 'Show for (seconds)',
+    'editor.helper.doorbell_entity':
+      'A binary sensor, event, button or input boolean that goes on when the doorbell is pressed.',
+    'editor.helper.doorbell_camera': 'The camera shown full screen when the doorbell rings.',
+    'editor.helper.doorbell_duration':
+      'How long the camera stays up. A tap on the screen closes it sooner. Default 30.',
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
     'editor.home_section': 'Home summary',

@@ -1,0 +1,59 @@
+/* @phase overviews */
+/* @owns ov-doorbell-scene ov-doorbell-img ov-doorbell-note ov-doorbell-bar ov-doorbell-name ov-doorbell-hint */
+
+/*
+ * The doorbell camera: the stream fills the screen on black, a name bar sits over the bottom edge. No filters,
+ * blur or animation: the picture is an MJPEG stream the browser decodes itself.
+ */
+.ov-doorbell-scene {
+  background: #000;
+  color: #fff;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, system-ui, sans-serif;
+}
+.ov-doorbell-scene[data-mode='card'] {
+  background: transparent;
+}
+.ov-doorbell-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  opacity: 0;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+.ov-doorbell-scene[data-state='ready'] .ov-doorbell-img {
+  opacity: 1;
+}
+.ov-doorbell-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-size: 4cqmin;
+  color: rgba(255, 255, 255, 0.7);
+}
+.ov-doorbell-scene[data-state='ready'] .ov-doorbell-note {
+  display: none;
+}
+.ov-doorbell-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 3cqmin 4cqmin;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 4cqmin;
+}
+.ov-doorbell-hint {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 3cqmin;
+}

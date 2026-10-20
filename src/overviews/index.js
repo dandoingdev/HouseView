@@ -6,6 +6,7 @@ import calendarMonthOverview from './calendar_month/index.js';
 import climateOverview from './climate/index.js';
 import clockOverview from './clock/index.js';
 import coverArtOverview from './cover_art/index.js';
+import doorbellOverview from './doorbell/index.js';
 import homeOverview from './home/index.js';
 import lightOverview from './light/index.js';
 import photoFrameOverview from './photo_frame/index.js';
@@ -21,6 +22,7 @@ export const overviews = [
   climateOverview,
   clockOverview,
   coverArtOverview,
+  doorbellOverview,
   homeOverview,
   lightOverview,
   photoFrameOverview,

@@ -81,6 +81,17 @@ function validateAutomaticDisplays(config) {
   }
 }
 
+/** `doorbell`: {entity, camera, duration}, an extra feature rather than a screensaver. Checked with the doorbell overview's own rules. */
+function validateDoorbell(config) {
+  const raw = config.doorbell;
+  if (raw === undefined) return;
+  const overview = overviews.get('doorbell');
+  if (!overview) return;
+  if (!isObject(raw)) throw new Error('doorbell must be an object with an entity and a camera.');
+  checkEntity(overview, raw.entity, 'doorbell');
+  checkOptions(overview, resolveOptions(overview, raw));
+}
+
 /**
  * Validate `config.screensaver` (an object or a list) and the automatic display options. Throws the exact messages
  * listed in docs/overview-api.md. Runs LAST in setConfig, after every other check, so the precedence of existing error
@@ -90,6 +101,7 @@ function validateAutomaticDisplays(config) {
 export function validateScreensaver(config) {
   validateScreensaverBlock(config);
   validateAutomaticDisplays(config);
+  validateDoorbell(config);
 }
 
 function validateScreensaverBlock(config) {
@@ -196,6 +208,23 @@ function implicitEntries(config, explicit) {
         options: resolveOptions(overview, {entity: id})
       });
     }
+  }
+  const doorbell = config.doorbell;
+  const ring = overviews.get('doorbell');
+  if (ring && doorbell?.entity && doorbell.enabled !== false) {
+    entries.push({
+      index: index++,
+      type: ring.type,
+      overview: ring,
+      enabled: true,
+      idleTimeout: DEFAULT_IDLE_SECONDS,
+      startInEditMode: false,
+      preview: false,
+      event: true,
+      priority: ring.priority ?? 0,
+      implicit: true,
+      options: resolveOptions(ring, doorbell)
+    });
   }
   return entries;
 }

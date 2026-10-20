@@ -10,6 +10,9 @@ import {bindValueActions} from './value-actions.js';
 /** Typing in a form control must not turn pages. */
 const TEXT_ENTRY_TAGS = ['INPUT', 'SELECT', 'TEXTAREA'];
 
+/** Holding the previous / next arrow this long jumps to the first / last page. */
+const NAV_HOLD_MS = 500;
+
 /**
  * Attach the card's listeners to its shadow root.
  * @param {any} card  a HouseViewCard
@@ -18,23 +21,44 @@ export function bindEvents(card) {
   const root = card.shadowRoot;
   bindValueActions(card, root);
 
+  let navHold = null;
+  const clearNavHold = () => {
+    clearTimeout(navHold);
+    navHold = null;
+  };
+
   root.addEventListener('pointerdown', (event) => {
+    clearNavHold();
+    const arrow = event.target.closest?.(
+      'button[data-action="page-prev"],button[data-action="page-next"]'
+    );
+    if (arrow && !arrow.disabled && event.isPrimary !== false) {
+      const first = arrow.dataset.action === 'page-prev';
+      navHold = setTimeout(() => {
+        navHold = null;
+        card._suppressClickUntil = Date.now() + 600;
+        card._setPage(first ? 0 : Infinity);
+      }, NAV_HOLD_MS);
+    }
     card._swipeStart(event);
     card._extensionPointerDown(event);
     card._gesturePointerDown(event);
   });
 
   root.addEventListener('pointermove', (event) => {
+    if (navHold && card._gesture?.dragging) clearNavHold();
     card._gesturePointerMove(event);
     card._swipeMove(event);
   });
 
   root.addEventListener('pointerup', (event) => {
+    clearNavHold();
     card._swipeEnd(event);
     card._gesturePointerUp(event);
   });
 
   root.addEventListener('pointercancel', () => {
+    clearNavHold();
     card._swipeCancel();
     card._gesturePointerCancel();
   });
@@ -50,7 +74,13 @@ export function bindEvents(card) {
     {passive: false}
   );
 
-  root.addEventListener('contextmenu', (event) => card._gestureContextMenu(event));
+  root.addEventListener('contextmenu', (event) => {
+    if (event.target.closest?.('button[data-action="page-prev"],button[data-action="page-next"]')) {
+      event.preventDefault();
+      return;
+    }
+    card._gestureContextMenu(event);
+  });
 
   root.addEventListener('keydown', (event) => {
     if (TEXT_ENTRY_TAGS.includes(event.target.tagName)) return;
@@ -96,7 +126,6 @@ export function bindEvents(card) {
     } else if (button.dataset.action === 'page-goto') {
       card._closePageMenu();
       card._setPage(Number(button.dataset.page));
-    }
-    else if (!card._runTapAction(button)) card._act(button.dataset.action, button.dataset.entity);
+    } else if (!card._runTapAction(button)) card._act(button.dataset.action, button.dataset.entity);
   });
 }

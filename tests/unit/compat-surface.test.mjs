@@ -1172,7 +1172,10 @@ describe('navigation', () => {
     const html = card._pageMarkup();
     assert.match(html, /data-action="page-prev" aria-label="Previous page" disabled>/);
     assert.match(html, /data-action="page-next" aria-label="Next page" >/);
-    assert.match(html, /data-action="page-menu" class="page-dot selected" aria-label="Show all pages" aria-haspopup="dialog" aria-current="page"/);
+    assert.match(
+      html,
+      /data-action="page-menu" data-page="0" class="page-dot selected" aria-label="Show all pages" aria-haspopup="dialog" aria-current="page"/
+    );
     card._pageIndex = 1;
     assert.match(card._pageMarkup(), /data-action="page-next" aria-label="Next page" disabled>/);
   });

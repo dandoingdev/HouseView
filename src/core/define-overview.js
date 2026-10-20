@@ -56,6 +56,7 @@ import {esc, iconHTML} from './html.js';
  * @property {(ctx: OverviewContext) => boolean} [autoWake]   called on every hass update while the screensaver is up; true dismisses it (no tap swallow)
  *
  * -- precedence among idle overviews (optional, `activation: 'idle'` only) --
+ * @property {boolean} [interrupt]   default false, `activation: 'event'` only. true: nothing blocks it (camera grid, timer alarm, a full-screen view, a pending call, edit mode, bedtime dim): it closes what is in the way and shows (a doorbell)
  * @property {boolean} [selectable]   default true. false = an automatic display: it works from its widget, is not offered in the editor's screensaver list, but can still be written in YAML
  * @property {number} [priority]   integer, default 0 (weather 0, cover art 10). When idle time starts a screensaver, the highest
  *                                         priority among the ELIGIBLE enabled idle entries wins; equal priorities take turns (round robin).
@@ -238,6 +239,10 @@ export function defineOverview(def) {
     throw new Error(`Overview ${o.type}: manualClose must be true or false.`);
   }
   o.manualClose = def.manualClose ?? false;
+  if (def.interrupt !== undefined && typeof def.interrupt !== 'boolean') {
+    throw new Error(`Overview ${o.type}: interrupt must be true or false.`);
+  }
+  o.interrupt = def.interrupt ?? false;
   checkOptionSpecs(o.type, o.options);
 
   const overview = deepFreeze({
