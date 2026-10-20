@@ -29,7 +29,7 @@ export const navigationMixin = {
     const dots = this._screens
       .map(
         (screen, i) =>
-          `<button data-action="page-menu" data-page="${i}" class="page-dot ${i === this._pageIndex ? 'selected' : ''}" aria-label="${esc(t(hass, 'nav.show_all', {label: screen.label}))}" aria-haspopup="dialog" aria-current="${i === this._pageIndex ? 'page' : 'false'}"><span></span></button>`
+          `<button data-action="page-select" data-page="${i}" class="page-dot ${i === this._pageIndex ? 'selected' : ''}" aria-label="${esc(screen.label)}" aria-current="${i === this._pageIndex ? 'page' : 'false'}"><span></span></button>`
       )
       .join('');
     return `<button data-action="page-prev" aria-label="${esc(t(hass, 'nav.previous'))}" ${this._pageIndex === 0 ? 'disabled' : ''}>${this._icon('chevron-left')}</button><div class="page-indicators">${dots}</div><button data-action="page-next" aria-label="${esc(t(hass, 'nav.next'))}" ${this._pageIndex === last ? 'disabled' : ''}>${this._icon('chevron-right')}</button>`;

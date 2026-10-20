@@ -1200,7 +1200,7 @@ describe('navigation', () => {
     assert.match(html, /data-action="page-next" aria-label="Next page" >/);
     assert.match(
       html,
-      /data-action="page-menu" data-page="0" class="page-dot selected" aria-label="Show all pages" aria-haspopup="dialog" aria-current="page"/
+      /data-action="page-select" data-page="0" class="page-dot selected" aria-label="One" aria-current="page"/
     );
     card._pageIndex = 1;
     assert.match(card._pageMarkup(), /data-action="page-next" aria-label="Next page" disabled>/);

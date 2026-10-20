@@ -10,7 +10,7 @@ import {bindValueActions} from './value-actions.js';
 /** Typing in a form control must not turn pages. */
 const TEXT_ENTRY_TAGS = ['INPUT', 'SELECT', 'TEXTAREA'];
 
-/** Holding the previous / next arrow this long jumps to the first / last page. */
+/** Holding the previous / next arrow this long jumps to the first / last page; holding a page dot opens the page menu. */
 const NAV_HOLD_MS = 500;
 
 /**
@@ -38,6 +38,15 @@ export function bindEvents(card) {
         navHold = null;
         card._suppressClickUntil = Date.now() + 600;
         card._setPage(first ? 0 : Infinity);
+      }, NAV_HOLD_MS);
+    }
+    const dot = event.target.closest?.('button.page-dot');
+    if (dot && !dot.disabled && event.isPrimary !== false) {
+      navHold = setTimeout(() => {
+        navHold = null;
+        card._swipeCancel();
+        card._suppressClickUntil = Date.now() + 300;
+        card._openPageMenu();
       }, NAV_HOLD_MS);
     }
     card._swipeStart(event);
@@ -77,6 +86,11 @@ export function bindEvents(card) {
   root.addEventListener('contextmenu', (event) => {
     if (event.target.closest?.('button[data-action="page-prev"],button[data-action="page-next"]')) {
       event.preventDefault();
+      return;
+    }
+    if (event.target.closest?.('button.page-dot')) {
+      event.preventDefault();
+      card._openPageMenu();
       return;
     }
     card._gestureContextMenu(event);

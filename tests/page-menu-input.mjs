@@ -5,7 +5,11 @@ import {startServer} from '../tools/serve.mjs';
 import {CHROME} from '../tools/run-tests.mjs';
 
 const server = await startServer({root: process.cwd(), port: 0});
-const browser = await puppeteer.launch({executablePath: CHROME, headless: true, args: ['--no-sandbox']});
+const browser = await puppeteer.launch({
+  executablePath: CHROME,
+  headless: true,
+  args: ['--no-sandbox']
+});
 try {
   const page = await browser.newPage();
   const errors = [];
@@ -34,8 +38,35 @@ try {
     }, selector);
   for (const target of [1, 0]) {
     const dot = await point('.page-dot');
-    await page.mouse.click(dot.x, dot.y);
-    assert.ok(await page.evaluate(() => !!window.card.shadowRoot.querySelector('.page-menu')), 'menu opens');
+    // a tap goes straight to that page; a hold opens the menu
+    const dots = await page.evaluate(
+      () => window.card.shadowRoot.querySelectorAll('.page-dot').length
+    );
+    const tapPage = (target + 1) % dots;
+    const other = await page.evaluate((i) => {
+      const r = window.card.shadowRoot.querySelectorAll('.page-dot')[i].getBoundingClientRect();
+      return {x: r.x + r.width / 2, y: r.y + r.height / 2};
+    }, tapPage);
+    await page.mouse.click(other.x, other.y);
+    assert.equal(
+      await page.evaluate(() => !!window.card.shadowRoot.querySelector('.page-menu')),
+      false,
+      'tap does not open the menu'
+    );
+    assert.equal(
+      await page.evaluate(() => window.card._pageIndex),
+      tapPage,
+      'tap goes to that page'
+    );
+    await page.mouse.move(dot.x, dot.y);
+    await page.mouse.down();
+    await page.evaluate(() => new Promise((r) => setTimeout(r, 700)));
+    await page.mouse.up();
+    await page.evaluate(() => window.advance(1)); // the page's clock is fake: let the click guard lapse
+    assert.ok(
+      await page.evaluate(() => !!window.card.shadowRoot.querySelector('.page-menu')),
+      'menu opens'
+    );
     const item = await point(`.page-menu-item[data-page="${target}"]`);
     await page.mouse.click(item.x, item.y);
     await page.evaluate(() => new Promise((r) => setTimeout(r, 400)));
@@ -51,7 +82,10 @@ try {
     const hass = window.mock.hass;
     window.card.setConfig({
       tablet_mode: true,
-      widgets: [{type: 'action', entity: 'scene.k1'}, {type: 'action', entity: 'scene.b1'}]
+      widgets: [
+        {type: 'action', entity: 'scene.k1'},
+        {type: 'action', entity: 'scene.b1'}
+      ]
     });
     window.card.hass = {
       ...hass,
