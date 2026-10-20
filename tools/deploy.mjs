@@ -25,6 +25,11 @@ function main() {
     console.error('deploy: dist/houseview.js not found; run `npm run build` first');
     return 2;
   }
+  // `npm run build:dev` (and the test scripts that call it) overwrite dist/ with the unminified bundle.
+  if (fs.readFileSync(path.join(dist, 'houseview.js'), 'utf8').includes('sourceMappingURL=data:')) {
+    console.error('deploy: dist/houseview.js is the development bundle; run `npm run build` first');
+    return 2;
+  }
   const dry = args.includes('--dry-run');
   if (!dry) fs.mkdirSync(dest, {recursive: true});
   for (const f of files) {

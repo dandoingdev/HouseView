@@ -122,7 +122,6 @@ describe('core English strings', () => {
     assert.equal(core('common.off'), 'Off');
     assert.equal(t({}, 'error.action', {reason: 'x'}), 'Could not complete action: x');
     assert.equal(core('error.try_again'), 'please try again');
-    assert.equal(t({}, 'nav.go_to', {label: 'Kitchen'}), 'Go to Kitchen');
     assert.equal(core('nav.previous'), 'Previous page');
     assert.equal(core('nav.next'), 'Next page');
     assert.equal(core('nav.label'), 'HouseView pages');

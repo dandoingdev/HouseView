@@ -285,6 +285,20 @@ export function closeStage(ctx) {
   if (index != null) ctx.focus(`[data-widget="${index}"] .mc-details`);
 }
 
+/** Tab and Shift+Tab cycle through the enabled controls of `container` instead of leaving it. */
+export function trapTab(ctx, event, container, selector) {
+  const keys = [...ctx.q(container).querySelectorAll(selector)];
+  if (!keys.length) return;
+  const index = keys.indexOf(ctx.root.activeElement);
+  const next = event.shiftKey
+    ? index <= 0
+      ? keys.length - 1
+      : index - 1
+    : (index + 1) % keys.length;
+  event.preventDefault();
+  keys[next]?.focus();
+}
+
 /** Escape closes the stage. Tab stays inside it. Every other key stays off the page controls. */
 export function stageKeydown(ctx, event) {
   if (event.key === 'Escape') {
@@ -292,19 +306,7 @@ export function stageKeydown(ctx, event) {
     closeStage(ctx);
     return true;
   }
-  if (event.key === 'Tab') {
-    const keys = [
-      ...ctx.q('.media-stage').querySelectorAll('button:not(:disabled), input:not(:disabled)')
-    ];
-    if (!keys.length) return true;
-    const index = keys.indexOf(ctx.root.activeElement);
-    const next = event.shiftKey
-      ? index <= 0
-        ? keys.length - 1
-        : index - 1
-      : (index + 1) % keys.length;
-    event.preventDefault();
-    keys[next]?.focus();
-  }
+  if (event.key === 'Tab')
+    trapTab(ctx, event, '.media-stage', 'button:not(:disabled), input:not(:disabled)');
   return true;
 }

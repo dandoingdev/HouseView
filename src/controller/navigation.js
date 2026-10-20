@@ -50,28 +50,60 @@ export const navigationMixin = {
     );
   },
 
-  /** Held scene tile: every other scene on the dashboard, each one tap to activate. */
-  _openSceneMenu(entity) {
-    const seen = new Set([entity]);
-    const items = [];
-    for (const widget of this._config?.widgets || []) {
-      const id = widget.entity;
-      if (typeof id !== 'string' || !id.startsWith('scene.') || seen.has(id)) continue;
-      seen.add(id);
-      const attrs = this._hass?.states?.[id]?.attributes || {};
-      items.push({
+  /** Area (room) id of an entity: its own, else its device's. */
+  _areaOf(id) {
+    const hass = this._hass;
+    const entry = hass?.entities?.[id];
+    return entry?.area_id || hass?.devices?.[entry?.device_id]?.area_id || null;
+  },
+
+  /**
+   * Held scene tile: every other scene on the dashboard, each one tap to activate. The "All Scenes" chip swaps
+   * in every scene of the held scene's room (all scenes when it has none), the held one included.
+   */
+  _openSceneMenu(entity, all = false) {
+    const hass = this._hass;
+    const item = (id, widget = {}) => {
+      const attrs = hass?.states?.[id]?.attributes || {};
+      return {
         action: 'scene-activate',
         attrs: `data-entity="${esc(id)}"`,
         icon: widget.icon || attrs.icon || 'mdi:weather-sunny',
-        label: widget.name || attrs.friendly_name || id
-      });
+        label: widget.name || attrs.friendly_name || id,
+        selected: all && id === entity
+      };
+    };
+    const seen = new Set(all ? [] : [entity]);
+    const items = [];
+    if (all) {
+      const area = this._areaOf(entity);
+      const widgets = new Map((this._config?.widgets || []).map((w) => [w.entity, w]));
+      for (const id of Object.keys(hass?.states || {})) {
+        if (!id.startsWith('scene.') || (area && this._areaOf(id) !== area)) continue;
+        seen.add(id);
+        items.push(item(id, widgets.get(id)));
+      }
+      items.sort((x, y) => x.label.localeCompare(y.label));
+    } else {
+      for (const widget of this._config?.widgets || []) {
+        const id = widget.entity;
+        if (typeof id !== 'string' || !id.startsWith('scene.') || seen.has(id)) continue;
+        seen.add(id);
+        items.push(item(id, widget));
+      }
     }
-    if (!items.length) return this._info(entity);
-    this._openMenu(t(this._hass, 'scene.menu'), items);
+    const chip = {
+      action: 'scene-all',
+      attrs: `data-entity="${esc(entity)}" data-all="${all ? '' : '1'}"`,
+      label: t(hass, 'scene.all'),
+      selected: all
+    };
+    if (!items.length && !all) return this._info(entity);
+    this._openMenu(t(hass, 'scene.menu'), items, {chip, closeLeft: true});
   },
 
-  /** The shared full-screen menu: `items` are {action, attrs, icon, label, selected}. */
-  _openMenu(label, items) {
+  /** The shared full-screen menu: `items` are {action, attrs, icon, label, selected}; `chip` is a pill centred at the top. */
+  _openMenu(label, items, {chip = null, closeLeft = false} = {}) {
     this._closePageMenu();
     const shell = this.shadowRoot.querySelector('.shell');
     if (!shell) return;
@@ -82,11 +114,14 @@ export const navigationMixin = {
         return `<button data-action="${item.action}" ${item.attrs} class="page-menu-item ${item.selected ? 'selected' : ''}">${icon}<span>${esc(item.label)}</span></button>`;
       })
       .join('');
+    const chipMarkup = chip
+      ? `<button data-action="${chip.action}" ${chip.attrs} class="page-menu-chip ${chip.selected ? 'selected' : ''}" aria-pressed="${!!chip.selected}">${esc(chip.label)}</button>`
+      : '';
     const menu = document.createElement('div');
-    menu.className = 'page-menu';
+    menu.className = `page-menu${closeLeft ? ' close-left' : ''}`;
     menu.setAttribute('role', 'dialog');
     menu.setAttribute('aria-label', label);
-    menu.innerHTML = `<div class="page-menu-grid">${buttons}</div><button data-action="page-menu-close" class="page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
+    menu.innerHTML = `${chipMarkup}<div class="page-menu-grid">${buttons}</div><button data-action="page-menu-close" class="page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
     shell.append(menu);
     menu.querySelector('.selected')?.focus?.();
   },

@@ -74,8 +74,3 @@ export const stylesMixin = {
     root.prepend(link);
   }
 };
-
-/** Test seam: forget the shared blob so the next card creates a new one. */
-export function _resetStyles() {
-  blobUrl = undefined;
-}

@@ -23,6 +23,7 @@ touches Home Assistant: the mock `hass` never calls a real service, and the serv
 | `overview-shots.mjs`, `overview-shots.html` | `npm run overview-shots`: weather overview pictures into `.tmp/overview-shots/`. |
 | `release.mjs` | `npm run release`: verify the version, changelog and bundle, and stage the release assets. |
 | `deploy.mjs` | `npm run deploy -- --dest <dir> [--dry-run]`: copy the release files from `dist/` to a directory. |
+| `test-all.mjs` | `npm test` / `npm run test:release`: unit tests, one dev build, then every browser suite in parallel (the touch-driven swipe suite runs alone at the end, because it slows down badly when other Chromes compete). `--jobs=N`, `--only=text`. |
 | `bump-cache.mjs` | `npm run bump-cache -- --file <houseview.js> --storage <lovelace_resources>`: set the HouseView resource `?v=` to `<version>-<sha256 prefix>` so browsers fetch the new file. |
 
 `--target=dist` runs the development bundle (`npm run build:dev`); `--target=dist-min` runs the minified production

@@ -33,7 +33,8 @@ git clone https://github.com/dandoingdev/HouseView.git
 cd houseview
 npm install
 npm run build:dev      # dist/houseview.js, unminified; the browser tests run against it
-npm test               # unit, browser, widget and overview suites
+npm test               # unit, browser, widget and overview suites, the browser ones in parallel
+npm run test:release   # the same, plus the browser suite against the minified bundle
 ```
 
 `npm run dev` runs a watch build and a static server on `http://127.0.0.1:8765`; open `/tests/preview.html` for a playground
@@ -67,7 +68,9 @@ servers listen on `127.0.0.1` only.
 | `npm run test:unit` | Node unit and contract tests |
 | `npm run test:browser`, `npm run test:widgets`, `npm run test:overviews` | Browser suites against `dist/` (run `npm run build:dev` first) |
 | `npm run test:overviews:input`, `:timer`, `:automatic` | Scripts that drive a real browser with real touch and keyboard events |
-| `npm test` | Everything above, in order |
+| `npm test` | Everything above: unit tests and the dev build first, then the browser suites in parallel (`tools/test-all.mjs`; `--jobs=N`, `--only=text`) |
+| `npm run test:release` | `npm test` plus the browser suite against the minified bundle |
+| `npm run test:serial` | Everything, one after another: for a failure that only shows under load |
 | `npm run size` | The size budget of the production bundle |
 | `npm run perf` | The performance bench; see [docs/performance.md](docs/performance.md) |
 | `npm run screenshots`, `npm run overview-shots` | Redraw `docs/images/*.png` and overview pictures from the examples and a mock `hass`. NSPanel pictures include a mock panel frame |

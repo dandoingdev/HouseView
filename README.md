@@ -350,7 +350,8 @@ Needs Node 24 or newer and Google Chrome for the browser tests. Useful commands:
 | `npm run gen-docs` | Regenerates `docs/widgets` and `docs/overviews` from the READMEs next to the code |
 | `npm run lint`, `npm run format:check` | ESLint and Prettier |
 | `npm run check:widgets`, `npm run check:overviews` | The widget and overview contract linters |
-| `npm test` | Unit, browser, widget and overview suites |
+| `npm test` | Unit, browser, widget and overview suites (browser suites in parallel) |
+| `npm run test:release` | `npm test` plus the minified bundle |
 | `npm run new:widget`, `npm run new:overview` | Scaffold a new widget or overview |
 
 To add a widget or an overview read [CONTRIBUTING.md](CONTRIBUTING.md), the [widget API](docs/widget-api.md) and the

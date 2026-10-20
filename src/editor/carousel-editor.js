@@ -639,6 +639,8 @@ export class HouseViewEditor extends HTMLElement {
       pageView.form.data = pageData(page);
       if (!pageView.stack) return;
       const stackConfig = this._stackConfig(index);
+      // A rename still waiting for typing to pause: keep what the user typed.
+      if (pageView.renameTimer) stackConfig.title = pageView.pendingTitle;
       const key = JSON.stringify(stackConfig);
       if (key === pageView.stackKey) return;
       pageView.stackKey = key;

@@ -1,7 +1,15 @@
 import {swipeStep, SWIPE_CLICK_GUARD_MS} from '../../core/swipe.js';
 import {buttonHTML} from '../../core/html.js';
 import {BROWSE_MEDIA, PLAY_MEDIA, libraryArtwork, loadLibrary, shownItems} from './library-data.js';
-import {stageMarkup, syncStage, paintStage, openStage, closeStage, stageKeydown} from './player.js';
+import {
+  stageMarkup,
+  syncStage,
+  paintStage,
+  openStage,
+  closeStage,
+  stageKeydown,
+  trapTab
+} from './player.js';
 
 const PAGE_SIZE = 6;
 const valid = (ctx) => ctx.ext.open && ctx.config?.widgets?.[ctx.ext.index] === ctx.ext.widget;
@@ -184,18 +192,7 @@ function libraryKeys(ctx, event) {
     close(ctx);
     return true;
   }
-  if (event.key === 'Tab') {
-    const keys = [...ctx.q('.media-library').querySelectorAll('button:not(:disabled)')];
-    const index = keys.indexOf(ctx.root.activeElement);
-    const next = event.shiftKey
-      ? index <= 0
-        ? keys.length - 1
-        : index - 1
-      : (index + 1) % keys.length;
-    event.preventDefault();
-    keys[next]?.focus();
-    return true;
-  }
+  if (event.key === 'Tab') trapTab(ctx, event, '.media-library', 'button:not(:disabled)');
   return true;
 }
 
