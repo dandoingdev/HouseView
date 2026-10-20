@@ -6,9 +6,15 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-20
+
 ### Added
 
 * The home summary opens with a downward swipe from the top of the display, as well as the home button. On a short panel the top band is taller, so the summary is in reach without using the button that sits in the navigation.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.5.0`.
 
 ## [1.4.0] - 2026-10-20
 
