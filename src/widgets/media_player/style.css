@@ -1,4 +1,4 @@
-/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close ms-info */
 /*
  * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
  * its lower edge, a progress bar, a transport row and a volume pill.
@@ -651,8 +651,24 @@
       grid-row: 1;
     }
     .carousel .tile .mc-volume,
+    .carousel .tile .mc-browse,
+    .carousel .tile .mc-skip,
+    .carousel .tile .mc-play,
+    .carousel .tile .mc-aux,
+    .carousel .tile .mc-aux.is-on {
+      background: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .carousel .tile .mc-volume,
     .carousel .tile .mc-browse {
       height: 44px;
+      padding-inline: 12px;
+    }
+    .carousel .tile .mc-volume ha-icon,
+    .carousel .tile .mc-browse ha-icon,
+    .carousel .tile .mc-skip ha-icon {
+      --mdc-icon-size: 22px;
     }
     .carousel .tile .mc-progress,
     .carousel .tile .mc-more,
@@ -802,6 +818,53 @@
   }
 }
 
+/* A small tile keeps the touch size and drops the circular fill, so the glyph sits inside the control. */
+@container player (max-width: 300px) and (max-height: 260px) {
+  .carousel .mc .mc-volume,
+  .carousel .mc .mc-browse,
+  .carousel .mc .mc-skip,
+  .carousel .mc .mc-play,
+  .carousel .mc .mc-aux,
+  .carousel .mc .mc-aux.is-on {
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .carousel .mc .mc-body {
+    padding-inline: 14px;
+  }
+  .carousel .mc .mc-volume,
+  .carousel .mc .mc-browse {
+    padding-inline: 12px;
+  }
+  .carousel .mc .mc-volume ha-icon,
+  .carousel .mc .mc-browse ha-icon,
+  .carousel .mc .mc-skip ha-icon {
+    --mdc-icon-size: 22px;
+  }
+  .carousel .mc .mc-play ha-icon {
+    --mdc-icon-size: 26px;
+  }
+}
+
+/* The page-filling player on a square wall panel is the same idea: no disc behind the icons. */
+@media (max-width: 560px) and (max-height: 560px) {
+  .carousel .tile .mc-volume,
+  .carousel .tile .mc-browse,
+  .carousel .tile .mc-skip,
+  .carousel .tile .mc-play,
+  .carousel .tile .mc-more,
+  .carousel .tile .mc-aux,
+  .carousel .tile .mc-aux.is-on {
+    background: none;
+    box-shadow: none;
+  }
+  .carousel .tile .mc-more {
+    right: max(16px, 8cqmin);
+    bottom: max(16px, 10cqmin);
+  }
+}
+
 @supports not (container-type: size) {
   @media (max-width: 519px) and (min-height: 350px) {
     .carousel .tile.mc-has-progress .mc-body {
@@ -885,7 +948,8 @@
   font-size: clamp(18px, 4cqmin, 34px);
   font-weight: 600;
 }
-.carousel .ms-close {
+.carousel .ms-close,
+.carousel .ms-info {
   display: grid;
   place-items: center;
   width: 64px;
@@ -898,7 +962,14 @@
   background: #ffffff16;
   color: inherit;
 }
-.carousel .ms-close ha-icon {
+.carousel .ms-info {
+  justify-self: end;
+}
+.carousel .ms-info:disabled {
+  opacity: 0.35;
+}
+.carousel .ms-close ha-icon,
+.carousel .ms-info ha-icon {
   margin: 0;
   --mdc-icon-size: 28px;
 }

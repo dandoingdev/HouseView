@@ -214,7 +214,15 @@ const compactButtons=[...compactRoot.querySelectorAll('.mc button')].filter(b=>b
 check('Square-panel music keeps volume, Browse and playback controls inside the tile',compactButtons.length===6&&compactButtons.every(b=>{const r=b.getBoundingClientRect();return r.left>=compactBounds.left&&r.right<=compactBounds.right&&r.top>=compactBounds.top&&r.bottom<=compactBounds.bottom;}));
 check('Square-panel music buttons have at least 44px touch targets',compactButtons.every(b=>{const r=b.getBoundingClientRect();return r.width>=44&&r.height>=44;}));
 check('Icon-only compact Browse keeps its accessible name',compactRoot.querySelector('.mc-browse').getAttribute('aria-label')==='Browse');
-check('Narrow music tiles keep the volume button icons visible',getComputedStyle(compactRoot.querySelector('.mc-volume ha-icon')).display!=='none');compactMusic.remove();
+check('Narrow music tiles keep the volume button icons visible',getComputedStyle(compactRoot.querySelector('.mc-volume ha-icon')).display!=='none');
+const compactVolume=getComputedStyle(compactRoot.querySelector('.mc-volume')),compactBrowse=getComputedStyle(compactRoot.querySelector('.mc-browse')),compactPlay=getComputedStyle(compactRoot.querySelector('.mc-play'));
+const plain=bg=>bg==='rgba(0, 0, 0, 0)'||bg==='transparent';
+if(!plain(compactVolume.backgroundColor)||!plain(compactBrowse.backgroundColor)||!plain(compactPlay.backgroundColor))console.error('compact icon backgrounds',compactVolume.backgroundColor,compactBrowse.backgroundColor,compactPlay.backgroundColor);
+check('Small-panel music icons have no round background',plain(compactVolume.backgroundColor)&&plain(compactBrowse.backgroundColor)&&plain(compactPlay.backgroundColor)&&compactVolume.borderRadius==='0px'&&compactBrowse.borderRadius==='0px');
+const compactTileBox=compactTile.getBoundingClientRect(),volumeIconBox=compactRoot.querySelector('.mc-volume ha-icon').getBoundingClientRect(),browseIconBox=compactRoot.querySelector('.mc-browse ha-icon').getBoundingClientRect(),playIconBox=compactRoot.querySelector('.mc-play ha-icon').getBoundingClientRect();
+const iconInset=volumeIconBox.left-compactTileBox.left>=12&&compactTileBox.right-browseIconBox.right>=12&&volumeIconBox.top-compactTileBox.top>=8&&compactTileBox.bottom-playIconBox.bottom>=8;
+if(!iconInset)console.error('compact icon inset',JSON.stringify({left:volumeIconBox.left-compactTileBox.left,right:compactTileBox.right-browseIconBox.right,top:volumeIconBox.top-compactTileBox.top,bottom:compactTileBox.bottom-playIconBox.bottom}));
+check('Small-panel music icons sit clear of the tile edge',iconInset);compactMusic.remove();
 const wideMusic=document.createElement('houseview-media_player-card');wideMusic.style.cssText='display:block;width:480px;height:320px';document.body.append(wideMusic);
 wideMusic.setConfig({entity:'media_player.wide',height:320,performance:'lite'});wideMusic.hass={...hass,states:{...hass.states,'media_player.wide':{state:'playing',attributes:{media_title:'Blue in Green',media_artist:'Miles Davis',volume_level:.4,supported_features:131124}}}};
 await new Promise(r=>setTimeout(r,150));const wideRoot=wideMusic.shadowRoot.querySelector('houseview-card').shadowRoot;

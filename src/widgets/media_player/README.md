@@ -17,8 +17,9 @@ button showing the current volume and an options button (hold the dots over the 
   its queue with `media_play`. Other inactive players open more-info. On a large tile, hold the track title or
   artist to open speaker controls. On a small panel tile (about 225 × 178, when four controls share a 480 × 480
   screen), a tap or a long press on the track title opens this same player full screen first, with the cover,
-  progress, shuffle, repeat and larger keys. Play, volume and Browse on the tile keep working. Close with X or
-  Escape. Speaker settings are the dots, or a hold on the title once that full player is open.
+  progress, shuffle, repeat and larger keys. Play, volume and Browse on the tile keep working, as plain icons set in
+  from the tile edge. Close with X or Escape. The three-dot button at the top right opens the Home Assistant
+  more-info dialog, and a hold on the title still opens speaker settings.
 * The volume button opens the [full-screen volume view](../overviews/volume.md). Drag vertically to choose 0–100%;
   release sends one `media_player.volume_set` command. Zero stays silent without stopping playback. Mute/unmute
   appears when supported. Opening the view never starts or pauses music. Shuffle calls `shuffle_set`; repeat steps
@@ -31,7 +32,7 @@ button showing the current volume and an options button (hold the dots over the 
 * While a speaker plays and nobody touches the screen, the [cover art](../overviews/cover_art.md) overview can take
   the whole screen (see the `music_screensaver` card option).
 
-On compact square-panel tiles, the volume and Browse buttons, track information and playback controls occupy separate rows. Buttons keep
+On compact square-panel tiles, the volume and Browse buttons, track information and playback controls occupy separate rows. Those icons have no circular background. Buttons keep
 at least 44-pixel touch targets at a 225 × 178 tile size, including seeking for tracks with a known duration, so four tiles can share a 480 × 480 screen with the header enabled.
 Older panel browsers without container queries use a compact layout with fixed pixel sizes.
 

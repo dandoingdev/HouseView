@@ -274,6 +274,34 @@ export default async function ({mount, check, variants, advance, settle}) {
       !!stage.querySelector('.ms-close') &&
       t.card._navigationBlocked()
   );
+  const details = stage.querySelector('.ms-info');
+  const stageBox = stage.getBoundingClientRect();
+  const detailsBox = details.getBoundingClientRect();
+  const detailsPlaced =
+    details?.querySelector('ha-icon')?.getAttribute('icon') === 'mdi:dots-horizontal' &&
+    details.dataset.action === 'info' &&
+    details.dataset.entity === ENTITY &&
+    detailsBox.width >= 44 &&
+    detailsBox.left > stageBox.left + stageBox.width / 2 &&
+    detailsBox.top < stageBox.top + stageBox.height / 4;
+  if (!detailsPlaced) {
+    console.error(
+      'full player details',
+      JSON.stringify({
+        icon: details?.querySelector('ha-icon')?.getAttribute('icon'),
+        action: details?.dataset.action,
+        box: detailsBox,
+        stage: stageBox
+      })
+    );
+  }
+  check('the full player details button is the three dots at the top right', detailsPlaced);
+  details.click();
+  await settle();
+  check(
+    'the full player details button opens more-info',
+    t.infos.at(-1) === ENTITY && t.calls.length === 0
+  );
   stage.querySelector('[data-action="media"]').click();
   await settle();
   check(

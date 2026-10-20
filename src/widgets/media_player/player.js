@@ -221,9 +221,16 @@ export function stageMarkup(ctx) {
     'ms-close',
     true
   );
+  const details = buttonHTML(
+    'info',
+    view.entityId,
+    `${ctx.icon('dots-horizontal')}<span class="sr">${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}</span>`,
+    'ms-info',
+    view.ok
+  );
   return (
     `<section class="media-stage" role="dialog" aria-modal="true" aria-label="${ctx.esc(ctx.t('media_player.open_player'))}" tabindex="-1">` +
-    `<header class="ms-head">${close}<h2 class="ms-title">${ctx.esc(view.rawName)}</h2><span></span></header>` +
+    `<header class="ms-head">${close}<h2 class="ms-title">${ctx.esc(view.rawName)}</h2>${details}</header>` +
     `<section class="music-panel mc${progressOf(view) ? ' mc-has-progress' : ''}" data-widget="${view.index}"><div class="mc-body">${playerInner(view)}</div></section></section>`
   );
 }
@@ -245,6 +252,8 @@ export function syncStage(ctx) {
     panel.classList.toggle('mc-has-progress', !!progressOf(view));
     const title = root.querySelector('.ms-title');
     if (title && title.textContent !== view.rawName) title.textContent = view.rawName;
+    const details = root.querySelector('.ms-info');
+    if (details) details.disabled = !view.ok;
     bindProgress(view);
   }
 }
