@@ -90,7 +90,10 @@ export function bindEvents(card) {
     if (button.dataset.action === 'page-select') card._setPage(Number(button.dataset.page));
     else if (button.dataset.action === 'page-menu') card._openPageMenu();
     else if (button.dataset.action === 'page-menu-close') card._closePageMenu();
-    else if (button.dataset.action === 'page-goto') {
+    else if (button.dataset.action === 'scene-activate') {
+      card._closePageMenu();
+      card._act('scene', button.dataset.entity);
+    } else if (button.dataset.action === 'page-goto') {
       card._closePageMenu();
       card._setPage(Number(button.dataset.page));
     }

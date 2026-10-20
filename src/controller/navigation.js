@@ -38,20 +38,54 @@ export const navigationMixin = {
   /** Full-screen list of every page: a button per page with its icon and name. */
   _openPageMenu() {
     if (!this._screens?.length || this._navigationBlocked()) return;
+    this._openMenu(
+      t(this._hass, 'nav.label'),
+      this._screens.map((screen, i) => ({
+        action: 'page-goto',
+        attrs: `data-page="${i}"`,
+        icon: screen.icon,
+        label: screen.label,
+        selected: i === this._pageIndex
+      }))
+    );
+  },
+
+  /** Held scene tile: every other scene on the dashboard, each one tap to activate. */
+  _openSceneMenu(entity) {
+    const seen = new Set([entity]);
+    const items = [];
+    for (const widget of this._config?.widgets || []) {
+      const id = widget.entity;
+      if (typeof id !== 'string' || !id.startsWith('scene.') || seen.has(id)) continue;
+      seen.add(id);
+      const attrs = this._hass?.states?.[id]?.attributes || {};
+      items.push({
+        action: 'scene-activate',
+        attrs: `data-entity="${esc(id)}"`,
+        icon: widget.icon || attrs.icon || 'mdi:weather-sunny',
+        label: widget.name || attrs.friendly_name || id
+      });
+    }
+    if (!items.length) return this._info(entity);
+    this._openMenu(t(this._hass, 'scene.menu'), items);
+  },
+
+  /** The shared full-screen menu: `items` are {action, attrs, icon, label, selected}. */
+  _openMenu(label, items) {
     this._closePageMenu();
     const shell = this.shadowRoot.querySelector('.shell');
     if (!shell) return;
     const hass = this._hass;
-    const buttons = this._screens
-      .map((screen, i) => {
-        const icon = screen.icon ? this._icon(screen.icon) : '';
-        return `<button data-action="page-goto" data-page="${i}" class="page-menu-item ${i === this._pageIndex ? 'selected' : ''}" aria-current="${i === this._pageIndex ? 'page' : 'false'}">${icon}<span>${esc(screen.label)}</span></button>`;
+    const buttons = items
+      .map((item) => {
+        const icon = item.icon ? this._icon(item.icon) : '';
+        return `<button data-action="${item.action}" ${item.attrs} class="page-menu-item ${item.selected ? 'selected' : ''}">${icon}<span>${esc(item.label)}</span></button>`;
       })
       .join('');
     const menu = document.createElement('div');
     menu.className = 'page-menu';
     menu.setAttribute('role', 'dialog');
-    menu.setAttribute('aria-label', t(hass, 'nav.label'));
+    menu.setAttribute('aria-label', label);
     menu.innerHTML = `<div class="page-menu-grid">${buttons}</div><button data-action="page-menu-close" class="page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
     shell.append(menu);
     menu.querySelector('.selected')?.focus?.();

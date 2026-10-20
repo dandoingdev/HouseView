@@ -165,6 +165,8 @@ export const featureActions = freeze({
       )
   }),
   dim: freeze({immediate: true, run: toggleDim}),
+  // Holding a scene tile: a full-screen list of the dashboard's other scenes.
+  'scene-menu': freeze({immediate: true, run: (ctx, id) => ctx.card._openSceneMenu(id)}),
   'page-next': freeze({
     immediate: true,
     run: (ctx) => setPage(ctx, (ctx.card._pageIndex || 0) + 1)
