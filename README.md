@@ -107,7 +107,7 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 3. Hard-refresh your browser.
 
 **Caching.** Browsers and wall tablets keep the old file. After an update append a version to the resource URL
-(`/local/houseview/houseview.js?v=1.3.3`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
+(`/local/houseview/houseview.js?v=1.4.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
 
 **Kiosk mode.** Add `?tablet=1` to the dashboard address (or set `tablet_mode: true`) and HouseView hides Home Assistant's
 sidebar and header so the carousel uses the whole screen. This relies on Home Assistant internals that are not a public API,
