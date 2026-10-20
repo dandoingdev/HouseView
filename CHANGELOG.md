@@ -6,6 +6,25 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-21
+
+### Added
+
+* **Plants.** A plants tile shows each plant as a humidity ring with its temperature and a colour for too dry, too wet, too cold or too warm. Tap a plant for its humidity sensor. Hold the tile for the full-screen plants view, with comfort bars, battery and when it last reported.
+* **Doorbell camera.** A doorbell opens a full-screen camera by itself when it rings, then closes after a set time or on a tap. Set it under Doorbell camera in the editor, or with the `doorbell` option. It is not a screensaver.
+
+### Changed
+
+* Tap a page dot to jump to that page. Hold a page dot to open a list of every page. Hold the previous or next arrow to jump to the first or last page.
+* Hold a scene tile to activate another scene on the dashboard. All Scenes lists every scene in that room.
+* One wallpaper covers the whole carousel. An older per-page background is kept as that wallpaper.
+* On a small music tile the playback icons sit on the tile without round backgrounds. In the full-screen player, the menu button opens speaker details.
+* The screensaver editor no longer has a separate "show it now" control; the editor already shows the screensaver while you edit.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.7.0`.
+
 ## [1.6.0] - 2026-10-20
 
 ### Added
