@@ -5,10 +5,11 @@
 # the page of the first light, climate, lock or media player widget; the camera card opens the camera gallery (set below); a
 # scene tile runs the scene. Add or remove a widget and the home screen follows.
 type: custom:houseview-card
+wallpaper: teal
 pages:
-  - {name: Home, surface: glass}
-  - {name: Rooms, surface: teal}
-  - {name: Music, surface: teal}
+  - {name: Home}
+  - {name: Rooms}
+  - {name: Music}
 # Optional chips: the bins going out this week (a waste_collection_schedule sensor) and next departures (the London TfL
 # integration). A line with no departure turns amber.
 home_bins: sensor.bins

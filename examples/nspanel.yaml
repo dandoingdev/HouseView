@@ -21,9 +21,9 @@ views:
         performance: lite
         wallpaper: teal
         pages:
-          - {name: Room, surface: teal}
-          - {name: Scenes, surface: teal}
-          - {name: Music, surface: teal}
+          - {name: Room}
+          - {name: Scenes}
+          - {name: Music}
         cards:
           - {type: custom:houseview-light-card, entity: light.living_room, name: Living room, page: Room}
           - {type: custom:houseview-light-card, entity: light.kitchen, name: Kitchen, page: Room}

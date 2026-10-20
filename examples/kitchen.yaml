@@ -11,11 +11,12 @@ views:
     type: panel
     cards:
       - type: custom:houseview-card
+        wallpaper: teal
         # performance: lite # auto (the default) already picks lite on a weak tablet; see docs/performance.md
         pages:
-          - {name: Kitchen, surface: teal, columns: 4}
-          - {name: Music, surface: teal}
-          - {name: Home, surface: glass}
+          - {name: Kitchen, columns: 4}
+          - {name: Music}
+          - {name: Home}
         cards:
           # Kitchen
           - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen, size: large}

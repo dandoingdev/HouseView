@@ -123,6 +123,8 @@ export const navigationMixin = {
     menu.setAttribute('aria-label', label);
     menu.innerHTML = `${chipMarkup}<div class="page-menu-grid">${buttons}</div><button type="button" data-action="page-menu-close" class="ov-panel-key page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
     shell.append(menu);
+    // The hold that opened this menu already started a swipe. Drop it before the pointer slides onto the menu.
+    this._swipeCancel();
     menu.querySelector('.selected')?.focus?.();
   },
 
@@ -168,11 +170,28 @@ export const navigationMixin = {
     return {top: rect.top || 0, height: rect.height};
   },
 
+  /**
+   * A covering layer (a full-screen view, the page menu, a confirm sheet) owns the pointer. The press that
+   * opened it must not keep paging the carousel after the layer closes.
+   */
+  _swipeCovered() {
+    const root = this.shadowRoot;
+    if (!root?.querySelector) return false;
+    return [
+      '.page-menu',
+      '.hv-screensaver',
+      '.hv-confirm',
+      '.media-stage',
+      '.media-library',
+      '.camera-gallery'
+    ].some((selector) => root.querySelector(selector));
+  },
+
   /** pointerdown: remember where a possible swipe starts (not on sliders, not with a mouse's other buttons). */
   _swipeStart(e) {
     this._swipeCancel();
     if (e.isPrimary === false || this._navigationBlocked()) return;
-    if (this.shadowRoot.querySelector('.page-menu')) return;
+    if (this._swipeCovered()) return;
     if (e.composedPath?.().some((node) => node.matches?.(SLIDER_SELECTOR))) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     this._clearPageTransition();
@@ -194,7 +213,13 @@ export const navigationMixin = {
   /** Lock horizontal paging, or a downward pull from the top edge. Other vertical movement keeps scrolling. */
   _swipeMove(e) {
     const start = this._gesture;
-    if (!start || start.pointerId !== e.pointerId || this._navigationBlocked()) return;
+    if (!start || start.pointerId !== e.pointerId) return;
+    // The button came up on a dialog, or a view is covering the page. A desktop mouse keeps sending
+    // pointermove after that; those moves are not a drag.
+    if (e.buttons === 0 || this._navigationBlocked() || this._swipeCovered()) {
+      this._swipeCancel();
+      return;
+    }
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
     if (start.homePull) return;

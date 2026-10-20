@@ -18,6 +18,8 @@ export const stateMixin = {
 
   /** Open Home Assistant's more-info dialog for an entity. */
   _info(id) {
+    // The dialog sits outside the card and takes the release, which would otherwise leave a swipe armed.
+    this._swipeCancel?.();
     moreInfo(this, id);
   },
 

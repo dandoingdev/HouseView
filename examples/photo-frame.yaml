@@ -6,6 +6,7 @@
 
 # 1. A screensaver. After two minutes without a touch the photos take over the screen; the first tap only wakes it.
 type: custom:houseview-card
+wallpaper: teal
 cards:
   - {type: custom:houseview-clock-card}
   - {type: custom:houseview-date-card}
@@ -21,8 +22,8 @@ screensaver:
 # 2. A page of its own. Pressing the card opens the photos full screen.
 type: custom:houseview-card
 pages:
-  - {name: Home, surface: teal}
-  - {name: Photos, surface: glass}
+  - {name: Home}
+  - {name: Photos}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - type: custom:houseview-photo-frame-overview-card

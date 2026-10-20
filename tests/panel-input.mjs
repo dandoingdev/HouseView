@@ -56,7 +56,8 @@ try {
       tablet_mode: true,
       show_header: true,
       performance: 'lite',
-      pages: [{name: 'Sound', columns: 2, surface: 'teal'}],
+      wallpaper: 'teal',
+      pages: [{name: 'Sound', columns: 2}],
       widgets: [
         {type: 'media_player', entity: 'media_player.test'},
         ...['a', 'b', 'c'].map((id) => ({type: 'switch', entity: `switch.${id}`}))

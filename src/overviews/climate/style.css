@@ -165,8 +165,8 @@
   opacity: 0.6;
 }
 .ov-climate-step:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: var(--hv-focus-offset, 2px);
 }
 @media (prefers-reduced-motion: no-preference) {
   .ov-climate-step {

@@ -1,6 +1,7 @@
 // The screen model (which widgets go on which carousel page, at which size) and the layout pass that
 // positions the current page. Ported from the original; the maths is unchanged.
 import {editorPreviewFor} from '../core/editor-preview.js';
+import {resolveWallpaper} from '../core/surfaces.js';
 import {buildScreens} from '../layout/index.js';
 import {isHomePage} from './render.js';
 
@@ -157,7 +158,6 @@ export const screenModelMixin = {
     const screen = {
       key: 'Widget:0',
       label: 'Widget',
-      surface: 'teal',
       columns: 1,
       rows: 1,
       placements: [{widget: config.widgets[0], index: 0, x: 0, y: 0, w: 1, h: 1}]
@@ -198,13 +198,14 @@ export const screenModelMixin = {
       this._renderWidgets();
       return;
     }
+    const soft = resolveWallpaper(this._config) === 'soft';
     const key = [
       model.width,
       model.height,
       model.contentHeight,
       model.columns,
       screen.rows,
-      screen.surface === 'soft',
+      soft,
       indices
     ].join('|');
     const shell = this.shadowRoot.querySelector('.shell');
@@ -225,7 +226,7 @@ export const screenModelMixin = {
     if (nav !== this._navHtml) this._writeNav(nav);
     this._positionPageWidgets(face, screen);
     // add/remove (not toggle): remove rewrites the class attribute even when the token is absent
-    if (screen.surface === 'soft') shell.classList.add('surface-soft');
+    if (soft) shell.classList.add('surface-soft');
     else shell.classList.remove('surface-soft');
     shell.classList.toggle('surface-home', isHomePage(screen));
     this._schedulePrefetch();

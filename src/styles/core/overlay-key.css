@@ -2,12 +2,15 @@
 /*
  * Round overlay keys: close, back, details, and matching panel chrome.
  * Size scales with a size container when cqmin is available; otherwise 64px.
+ * Focus recipe: 3px currentColor, offset 2px (not the inset tile focus).
  */
 
 /* @phase base */
 :host {
   --ov-panel-key-size: 64px;
   --ov-panel-key-bg: rgba(255, 255, 255, 0.18);
+  --hv-focus-ring: 3px solid currentColor;
+  --hv-focus-offset: 2px;
 }
 
 .ov-panel-key {
@@ -48,8 +51,8 @@
 }
 
 .ov-panel-key:focus-visible {
-  outline: 3px solid currentColor;
-  outline-offset: 2px;
+  outline: var(--hv-focus-ring);
+  outline-offset: var(--hv-focus-offset);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -67,4 +70,29 @@
   .hv-screensaver.hv-pinned {
     --ov-panel-key-size: clamp(64px, 12cqmin, 88px);
   }
+}
+
+/* Wins over `.carousel button:focus-visible` inset blue for overlay keys. */
+.carousel .ov-panel-key:focus-visible,
+.media-library .ov-panel-key:focus-visible,
+.media-library button:focus-visible,
+.mc-browse:focus-visible {
+  outline: var(--hv-focus-ring);
+  outline-offset: var(--hv-focus-offset);
+}
+
+/* @phase night */
+/* Page menu and bedtime chrome: same outward focus as overlay keys. */
+.page-menu button:focus-visible,
+.dim-screen:focus-visible,
+.home-button:focus-visible {
+  outline: var(--hv-focus-ring);
+  outline-offset: var(--hv-focus-offset);
+}
+
+/* @phase gallery */
+.camera-gallery .ov-panel-key:focus-visible,
+.camera-gallery .gallery-camera:focus-visible {
+  outline: var(--hv-focus-ring);
+  outline-offset: var(--hv-focus-offset);
 }

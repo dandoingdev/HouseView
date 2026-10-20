@@ -4,8 +4,9 @@
 # Differences worth knowing: each entry uses `type: <widget>` instead of a card type, and the types `scene`, `script`,
 # `button` and `input_button` are accepted as the `action` widget.
 type: custom:houseview-card
+wallpaper: teal
 pages:
-  - {name: Home, surface: teal}
+  - {name: Home}
 widgets:
   - {type: climate, entity: climate.living_room, size: large}
   - {type: clock}

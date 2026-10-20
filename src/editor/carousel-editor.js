@@ -10,7 +10,7 @@ import {fromCard, onPage, toCards} from '../config/convert.js';
 import {fireEvent} from '../core/events.js';
 import {AUTOMATIC_DISPLAYS, overviewList} from '../core/overview-registry.js';
 import {PERFORMANCE_MODES} from '../core/performance.js';
-import {PAGE_SURFACES, WALLPAPER_SURFACES} from '../core/surfaces.js';
+import {PAGE_SURFACES, resolveWallpaper} from '../core/surfaces.js';
 import {
   applyAutomatic,
   automaticData,
@@ -35,27 +35,28 @@ const TOP_LEVEL_KEYS = ['climate', 'clock', 'camera', 'scene', 'lock', 'secondar
 
 const APPEARANCE_DEFAULTS = {
   appearance: 'auto',
-  wallpaper: 'page',
+  wallpaper: 'teal',
   palette: 'stone',
   performance: 'auto',
   editor_preview: 'landscape',
   show_header: false,
   tablet_mode: false
 };
-const SURFACES = PAGE_SURFACES;
 
-const newPage = (name, surface = 'glass') => ({name, surface});
+const newPage = (name) => ({name});
 
 /**
  * The config the editor works on: cards instead of widgets, no top-level keys of the removed single-climate shape, and a page for the
- * first card and for every page name a card refers to.
+ * first card and for every page name a card refers to. One `wallpaper` for every page; legacy per-page `surface` is folded in.
  */
 export function editorConfig(config) {
   const next = structuredClone(config);
   next.cards = toCards(next);
   delete next.widgets;
   for (const key of TOP_LEVEL_KEYS) delete next[key];
+  next.wallpaper = resolveWallpaper(next);
   next.pages = next.pages?.length ? next.pages : [newPage('Home')];
+  next.pages = next.pages.map(({surface, layout, ...page}) => page);
   for (const card of next.cards) {
     const page = fromCard(card).page;
     if (page && !next.pages.some((p) => p.name === page)) next.pages.push(newPage(page));
@@ -102,7 +103,7 @@ export const appearanceSchema = (hass) => [
   field('show_header', {boolean: {}}),
   field('tablet_mode', {boolean: {}}),
   field('appearance', select(hass, ['auto', 'light', 'dark'])),
-  field('wallpaper', select(hass, ['page', ...WALLPAPER_SURFACES])),
+  field('wallpaper', select(hass, PAGE_SURFACES)),
   field('palette', select(hass, ['stone', 'forest'])),
   field('bedtime', {boolean: {}}),
   field('high_contrast', {boolean: {}}),
@@ -114,13 +115,11 @@ export const appearanceSchema = (hass) => [
 export const appearanceHelper = (hass) => (item) => textOrNone(hass, `editor.helper.${item.name}`);
 
 export const pageData = (page) => ({
-  surface: page.surface || 'glass',
   columns: page.columns,
   icon: page.icon
 });
 
-export const pageSchema = (hass) => [
-  field('surface', select(hass, SURFACES)),
+export const pageSchema = () => [
   field('columns', {number: {min: 2, max: 5, step: 1, mode: 'box'}}),
   field('icon', {icon: {}})
 ];
@@ -522,7 +521,7 @@ export class HouseViewEditor extends HTMLElement {
 
   _pageChanged(index, value) {
     const page = this._config.pages[index];
-    page.surface = value.surface || 'glass';
+    delete page.surface;
     delete page.layout;
     if (value.columns) page.columns = value.columns;
     else delete page.columns;
@@ -555,6 +554,11 @@ export class HouseViewEditor extends HTMLElement {
     this._config.cards = others.concat(cards.map((card) => onPage(card, old)));
     clearTimeout(pageView.renameTimer);
     const title = stackConfig.title ?? old;
+    // HA's stack editor keeps the title it was last given and never takes the one its own field emitted, so every
+    // later card edit would report the old name and queue a rename back to it. Hand the typed title back.
+    if (pageView.stack && title !== pageView.stack._config?.title) {
+      pageView.stack.setConfig({...stackConfig, title});
+    }
     if (title.trim() === old) {
       this._status('');
     } else {
@@ -605,7 +609,7 @@ export class HouseViewEditor extends HTMLElement {
     add.addEventListener('click', () => {
       let n = 2;
       while (this._config.pages.some((page) => page.name === `Page ${n}`)) n++;
-      this._config.pages.push(newPage(`Page ${n}`, 'teal'));
+      this._config.pages.push(newPage(`Page ${n}`));
       this._emit();
       this._render();
       const added = this._view.pages.at(-1).panel;

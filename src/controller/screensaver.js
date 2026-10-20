@@ -610,6 +610,8 @@ export const screensaverMixin = {
     this._screensaverBind(layer, entry.overview, pinned);
     const focusReturn = this.shadowRoot.activeElement;
     shell.append(layer); // an overlay: nothing else in the shell is touched, re-rendered or made inert
+    // The press that opened this view must not drag the page once the view closes.
+    this._swipeCancel?.();
     void layer.offsetWidth; // commit the opacity:0 start state, then fade in
     layer.dataset.state = 'on';
     // Focus the dismiss/close control even when touch or an API opened the view without a focused opener.
@@ -653,6 +655,7 @@ export const screensaverMixin = {
       down = scroller ? {x: e.clientX, y: e.clientY, top: scroller.scrollTop} : null;
     });
     layer.addEventListener('pointermove', (e) => {
+      e.stopPropagation(); // a mouse move over the view must not drag the page underneath
       if (!down || !(e.buttons & 1)) return;
       const dy = e.clientY - down.y;
       if (!moved && Math.abs(dy) + Math.abs(e.clientX - down.x) < 8) return;
@@ -692,7 +695,7 @@ export const screensaverMixin = {
    */
   _screensaverBindPinned(layer, wake) {
     let pressed = false;
-    for (const type of ['pointerdown', 'pointerup', 'pointercancel']) {
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
       layer.addEventListener(type, (e) => {
         e.stopPropagation();
         if (type === 'pointerdown') pressed = true;
@@ -720,7 +723,7 @@ export const screensaverMixin = {
 
   /** A control panel: buttons dispatch, the background is inert, Escape closes. Nothing reaches the carousel. */
   _screensaverBindControls(layer, wake) {
-    for (const type of ['pointerdown', 'pointerup', 'pointercancel']) {
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
       layer.addEventListener(type, (e) => e.stopPropagation());
     }
     layer.addEventListener('click', (e) => {

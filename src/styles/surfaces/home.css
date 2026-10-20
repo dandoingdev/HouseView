@@ -37,7 +37,8 @@
 }
 /* The bedtime Dim button, on the light page */
 .shell.carousel.surface-home.surface-home .dim-screen {
-  background: #0000001a;
-  border-color: #0000001f;
+  --ov-panel-key-bg: rgba(0, 0, 0, 0.08);
+  background: var(--ov-panel-key-bg);
+  border: 0;
   color: inherit;
 }

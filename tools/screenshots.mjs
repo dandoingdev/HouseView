@@ -605,7 +605,8 @@ async function shoot(browser, base, shot) {
     const config = {
       type: 'custom:houseview-card',
       wallpaper: 'teal',
-      pages: [{name: 'Home', surface: 'teal'}],
+      wallpaper: 'teal',
+      pages: [{name: 'Home'}],
       cards: shot.cards || [{type: 'custom:houseview-clock-card'}],
       ...(panel ? {tablet_mode: true, performance: 'lite'} : {}),
       ...(shot.screensaver ? {screensaver: {...shot.screensaver, preview: true}} : {})

@@ -196,10 +196,9 @@
 .ov-vacuum-speed[aria-pressed='true'] {
   background: rgba(255, 255, 255, 0.42);
 }
-.ov-vacuum-speed:focus-visible,
-.ov-vacuum-command:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
+.ov-vacuum-speed:focus-visible {
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: var(--hv-focus-offset, 2px);
 }
 .ov-vacuum-speed:active {
   opacity: 0.6;

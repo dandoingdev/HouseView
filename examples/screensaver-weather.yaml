@@ -5,9 +5,10 @@
 
 # 1. One screensaver. It starts after two minutes without a touch; the first tap only wakes it.
 type: custom:houseview-card
+wallpaper: teal
 pages:
-  - {name: Home, surface: teal}
-  - {name: Lights, surface: glass}
+  - {name: Home}
+  - {name: Lights}
 cards:
   - {type: custom:houseview-clock-card, page: Home}
   - {type: custom:houseview-light-card, entity: light.living_room, page: Lights}

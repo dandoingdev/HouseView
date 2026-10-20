@@ -10,11 +10,12 @@ views:
     type: panel
     cards:
       - type: custom:houseview-card
+        wallpaper: glass
         bedtime: true
         appearance: dark
         palette: forest
         pages:
-          - {name: Bedtime, surface: glass}
+          - {name: Bedtime}
         cards:
           - type: custom:houseview-action-card
             entity: script.good_night

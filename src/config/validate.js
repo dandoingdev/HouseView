@@ -14,6 +14,7 @@ import {CONFIRM_MODES} from '../core/confirm.js';
 import {COMPARE_MODES} from '../core/hass-signature.js';
 import {PERFORMANCE_MODES} from '../core/performance.js';
 import {extensions, getWidget, knownTypes} from '../core/registry.js';
+import {PAGE_SURFACES, resolveWallpaper} from '../core/surfaces.js';
 import {fromCard} from './convert.js';
 import {validateScreensaver} from '../core/overview-registry.js';
 
@@ -186,13 +187,38 @@ function validatePages(pages) {
   ) {
     throw new Error('Pages need unique names.');
   }
-  // `layout` was a page option once; older configs may still carry it and it is ignored
+  // `layout` and `surface` were page options once; older configs may still carry them and they are ignored
   for (const page of pages) {
     const {columns} = page;
     if (columns != null && !(Number.isInteger(columns) && columns >= 2 && columns <= 5)) {
       throw new Error('Page columns must be a whole number from 2 to 5.');
     }
   }
+}
+
+/** One carousel background; fold a legacy per-page `surface` into `wallpaper` and drop page surfaces. */
+function normalizeWallpaper(config) {
+  const wallpaper = resolveWallpaper(config);
+  if (
+    config.wallpaper !== undefined &&
+    !PAGE_SURFACES.includes(config.wallpaper) &&
+    config.wallpaper !== 'page'
+  ) {
+    throw new Error(`wallpaper must be ${sentenceList(PAGE_SURFACES)}.`);
+  }
+  let pages = config.pages;
+  let pagesChanged = false;
+  if (pages) {
+    const next = pages.map((page) => {
+      if (page.surface === undefined && page.layout === undefined) return page;
+      pagesChanged = true;
+      const {surface, layout, ...rest} = page;
+      return rest;
+    });
+    if (pagesChanged) pages = next;
+  }
+  if (config.wallpaper === wallpaper && !pagesChanged) return config;
+  return pagesChanged ? {...config, wallpaper, pages} : {...config, wallpaper};
 }
 
 /** The widgets shape (also what `cards:` becomes). Returns the config the card keeps. */
@@ -220,7 +246,7 @@ export function validateConfig(input) {
   for (const {extension} of extensions()) extension.validateConfig?.(config);
   validateOptionalSettings(config);
   if (!config.widgets) throw new Error('HouseView needs a list of cards.');
-  const validated = validateWidgetsConfig(config);
+  const validated = normalizeWallpaper(validateWidgetsConfig(config));
   validateScreensaver(validated);
   return validated;
 }

@@ -15,14 +15,15 @@ views:
     type: panel
     cards:
       - type: custom:houseview-card
+        wallpaper: teal
         tablet_mode: true
         bedtime: true
         confirm_mode: inline
         performance: auto
         pages:
-          - {name: Kitchen, surface: teal, columns: 4}
-          - {name: Music, surface: teal}
-          - {name: Home, surface: glass, columns: 4}
+          - {name: Kitchen, columns: 4}
+          - {name: Music}
+          - {name: Home, columns: 4}
         cards:
           - {type: custom:houseview-camera-card, entity: camera.front_door, name: Front door, page: Kitchen, size: large}
           - {type: custom:houseview-clock-card, page: Kitchen}

@@ -579,8 +579,8 @@
 }
 .media-library button:focus-visible,
 .mc-browse:focus-visible {
-  outline: 3px solid #d8fff3;
-  outline-offset: 2px;
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: var(--hv-focus-offset, 2px);
 }
 @container (aspect-ratio < 1) {
   .ml-grid {

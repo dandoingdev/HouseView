@@ -9,13 +9,11 @@ import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 import {widgetHassChanged} from '../core/hass-signature.js';
 import {getWidget} from '../core/registry.js';
-import {SATIN_SURFACES, WALLPAPER_SURFACES} from '../core/surfaces.js';
+import {SATIN_SURFACES, resolveWallpaper} from '../core/surfaces.js';
 
 /** A page that holds the home summary alone: the whole page takes the overview's colour (no wallpaper around it). */
 export const isHomePage = (screen) =>
   screen?.placements?.length === 1 && screen.placements[0].widget?.type === 'home_overview';
-
-const SURFACES_WITH_WALLPAPER = WALLPAPER_SURFACES;
 
 export const renderMixin = {
   /** Dark when asked for, or when "auto" and Home Assistant is in dark mode. */
@@ -50,9 +48,7 @@ export const renderMixin = {
     const dark = this._isDark();
     const model = this._screenModel();
     const screen = model.screen;
-    const surface = SURFACES_WITH_WALLPAPER.includes(config.wallpaper)
-      ? config.wallpaper
-      : screen.surface || 'glass';
+    const surface = resolveWallpaper(config);
     this._renderedCards = new Map();
     this._widgetSignatures = new Map();
     this._renderedIndices = screen.placements.map((p) => p.index).join(',');

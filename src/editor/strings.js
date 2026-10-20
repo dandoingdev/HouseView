@@ -57,7 +57,6 @@ export default {
     'editor.helper.music_screensaver':
       'Every media player widget on the dashboard can show its album cover when the screensaver would start and it is playing. Your screensaver stays the default when nothing plays. A list of media players in YAML replaces the widgets.',
     'editor.page_name': 'Page name',
-    'editor.surface': 'Page background',
     'editor.columns': 'Landscape columns (optional)',
     'editor.helper.columns':
       'Maximum columns on a wide landscape screen, 2 to 5. Phones and portrait tablets always use 2.',
@@ -84,7 +83,6 @@ export default {
     'editor.value.auto': 'Automatic',
     'editor.value.full': 'Full',
     'editor.value.lite': 'Lite (no blur, no animation)',
-    'editor.value.page': 'Use page backgrounds',
     // messages
     'editor.select_camera': 'Select a camera entity.',
     'editor.camera_duplicate': 'That camera is already selected in another position.',

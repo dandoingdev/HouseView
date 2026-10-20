@@ -110,7 +110,8 @@ function askInline(card, message) {
       resolve(answer);
     };
     // The sheet owns its events: nothing may reach the card's swipe and click handlers underneath.
-    for (const type of ['pointerdown', 'pointerup', 'click']) {
+    card._swipeCancel?.();
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'click']) {
       sheet.addEventListener(type, (event) => event.stopPropagation());
     }
     sheet.addEventListener('click', (event) => {

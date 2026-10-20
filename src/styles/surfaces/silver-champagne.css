@@ -90,9 +90,9 @@
 
 .carousel.surface-satin .dim-screen,
 .carousel.surface-satin .home-button {
-  background: #39404b45;
+  background: var(--ov-panel-key-bg, rgba(255, 255, 255, 0.18));
+  border: 0;
   color: inherit;
-  border-color: #fff5;
 }
 
 /* @important overrides an earlier !important rule */

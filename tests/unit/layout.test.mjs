@@ -170,7 +170,7 @@ describe('controlPages', () => {
 describe('buildScreens', () => {
   it('names screens "Page", "Page · 2" and builds keys', () => {
     const widgets = Array.from({length: 5}, () => ({type: 'light'}));
-    const screens = buildScreens(widgets, [{name: 'Home', surface: 'teal'}], 2, 2);
+    const screens = buildScreens(widgets, [{name: 'Home'}], 2, 2);
     assert.deepEqual(
       screens.map((s) => [s.key, s.label]),
       [
@@ -178,7 +178,7 @@ describe('buildScreens', () => {
         ['Home:1', 'Home · 2']
       ]
     );
-    assert.equal(screens[0].surface, 'teal');
+    assert.equal(screens[0].surface, undefined);
   });
 
   it('defaults to one page called Home, and adds pages that widgets name', () => {
@@ -194,7 +194,7 @@ describe('buildScreens', () => {
     );
     assert.deepEqual(
       screens.map((s) => s.surface),
-      ['glass', 'glass']
+      [undefined, undefined]
     );
   });
 

@@ -147,7 +147,8 @@ export class HouseViewCard extends HTMLElement {
 
   static getStubConfig() {
     return {
-      pages: [{name: 'Home', surface: 'teal'}],
+      wallpaper: 'teal',
+      pages: [{name: 'Home'}],
       cards: [{type: 'custom:houseview-clock-card', page: 'Home'}]
     };
   }

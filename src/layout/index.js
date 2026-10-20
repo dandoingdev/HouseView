@@ -5,15 +5,16 @@ import {controlPages, expand, pack, span} from './pack.js';
 
 export {span, pack, expand, controlPages};
 
-const DEFAULT_PAGE = {name: 'Home', surface: 'glass'};
+const DEFAULT_PAGE = {name: 'Home'};
 
 /** Page definitions: the configured ones, plus a default for each `page` a widget names that has none. */
 function pageDefinitions(widgets, definitions) {
-  // `layout` was a page option once: older configs may still carry it, and it does nothing
+  // `layout` and `surface` were page options once: older configs may still carry them, and they do nothing
   const defs = definitions?.length
     ? definitions.map((d) => {
         const copy = {...d};
         delete copy.layout;
+        delete copy.surface;
         return copy;
       })
     : [{...DEFAULT_PAGE}];
@@ -39,7 +40,7 @@ export function pageColumns(def, columns) {
 /**
  * Split widgets into screens (carousel pages).
  * @param {Object[]} widgets
- * @param {{name:string, surface?:string, columns?:number}[]|undefined} definitions
+ * @param {{name:string, columns?:number}[]|undefined} definitions
  * @param {number} columns   columns the viewport offers (2, 3 or 5)
  * @param {number} maxRows   rows that fit
  * @returns {{key:string, label:string, placements:Object[], rows:number, columns:number}[]}

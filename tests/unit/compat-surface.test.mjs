@@ -100,7 +100,8 @@ describe('private member names', () => {
   it('keeps the statics Home Assistant calls', () => {
     assert.equal(typeof HouseViewCard.getConfigElement, 'function');
     assert.deepEqual(HouseViewCard.getStubConfig(), {
-      pages: [{name: 'Home', surface: 'teal'}],
+      wallpaper: 'teal',
+      pages: [{name: 'Home'}],
       cards: [{type: 'custom:houseview-clock-card', page: 'Home'}]
     });
   });
@@ -1145,6 +1146,31 @@ describe('navigation', () => {
       card._swipeEnd({...touch(100, 100), pointerId: 1});
       assert.equal(card._pageIndex, 0);
       assert.equal(card._gesture, null);
+    });
+
+    it('does not drag after a mouse button was released or while a view covers the page', () => {
+      const {card} = pagedCard({reduced: true});
+      const mouse = (x, buttons) => ({
+        clientX: x,
+        clientY: 100,
+        pointerType: 'mouse',
+        pointerId: 1,
+        button: 0,
+        buttons
+      });
+      card._swipeStart(mouse(300, 1));
+      card._swipeMove(mouse(120, 0));
+      assert.equal(card._gesture ?? null, null, 'a hover after the release is not a drag');
+      assert.equal(card._pageIndex, 0);
+      card._swipeStart(mouse(300, 1));
+      card.shadowRoot.selectors.set('.hv-screensaver', {});
+      card._swipeMove(mouse(120, 1));
+      assert.equal(card._gesture ?? null, null, 'moving over an open view drops the swipe');
+      assert.equal(card._pageIndex, 0);
+      card.shadowRoot.selectors.delete('.hv-screensaver');
+      card._swipeStart(mouse(300, 1));
+      card._swipeMove(mouse(120, 1));
+      assert.equal(card._gesture?.dragging, true);
     });
 
     it('does not start on a slider, with a mouse side button, or while an overlay is open', () => {

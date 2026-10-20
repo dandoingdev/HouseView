@@ -45,7 +45,6 @@ export default {
   'editor.high_contrast': 'High contrast',
   'editor.name': 'Label',
   'editor.page_name': 'Page name',
-  'editor.surface': 'Page background',
   'editor.columns': 'Landscape columns (optional)',
   'editor.widget_type': 'Widget type',
   'editor.entity': 'Entity',

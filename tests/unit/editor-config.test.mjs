@@ -32,10 +32,11 @@ test('editorConfig: widgets become cards, a default page appears, input is not m
     config.cards.map((c) => c.widget_type),
     ['clock', 'action']
   );
-  assert.deepEqual(config.pages, [{name: 'Home', surface: 'glass'}]);
+  assert.deepEqual(config.pages, [{name: 'Home'}]);
+  assert.equal(config.wallpaper, 'teal');
 });
 
-test('editorConfig: pages named by cards are added; existing pages keep their settings', () => {
+test('editorConfig: pages named by cards are added; page surface folds into wallpaper', () => {
   const config = editorConfig({
     pages: [{name: 'Main', surface: 'teal', columns: 4}],
     cards: [
@@ -48,8 +49,9 @@ test('editorConfig: pages named by cards are added; existing pages keep their se
     config.pages.map((p) => p.name),
     ['Main', 'Upstairs', 'Garden']
   );
-  assert.deepEqual(config.pages[0], {name: 'Main', surface: 'teal', columns: 4});
-  assert.deepEqual(config.pages[1], {name: 'Upstairs', surface: 'glass'});
+  assert.deepEqual(config.pages[0], {name: 'Main', columns: 4});
+  assert.deepEqual(config.pages[1], {name: 'Upstairs'});
+  assert.equal(config.wallpaper, 'teal');
 });
 
 test('editorConfig: a config without cards or widgets gets an empty list of cards', () => {
@@ -82,7 +84,7 @@ test('cards belong to the page they name, cards without a page to the first page
 test('form data defaults', () => {
   assert.deepEqual(appearanceData({}), {
     appearance: 'auto',
-    wallpaper: 'page',
+    wallpaper: 'teal',
     palette: 'stone',
     bedtime: undefined,
     high_contrast: undefined,
@@ -94,15 +96,13 @@ test('form data defaults', () => {
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
   assert.equal(appearanceData({wallpaper: 'silver', bedtime: false}).wallpaper, 'silver');
   assert.equal(appearanceData({bedtime: false}).bedtime, false);
-  assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', columns: undefined, icon: undefined});
+  assert.deepEqual(pageData({name: 'x'}), {columns: undefined, icon: undefined});
 });
 
 test('withoutPage drops that page and its cards, and keeps the last page', () => {
   const config = editorConfig({
-    pages: [
-      {name: 'A', surface: 'teal'},
-      {name: 'B', surface: 'glass'}
-    ],
+    wallpaper: 'teal',
+    pages: [{name: 'A'}, {name: 'B'}],
     cards: [
       {type: 'custom:houseview-clock-card'},
       {type: 'custom:houseview-light-card', entity: 'light.a', page: 'B'},
@@ -114,7 +114,7 @@ test('withoutPage drops that page and its cards, and keeps the last page', () =>
     dropped.pages.map((page) => page.name),
     ['A']
   );
-  assert.equal(dropped.pages[0].surface, 'teal');
+  assert.equal(dropped.wallpaper, 'teal');
   assert.deepEqual(
     dropped.cards.map((card) => card.type),
     ['custom:houseview-clock-card']
@@ -129,20 +129,20 @@ test('withoutPage drops that page and its cards, and keeps the last page', () =>
   assert.equal(withoutPage(config, 4), config);
 });
 
-test('the page form has a surface and landscape columns, and no layout', () => {
+test('the page form has landscape columns and icon, and no surface or layout', () => {
   const schema = pageSchema({localize: () => ''});
   assert.deepEqual(
     schema.map((item) => item.name),
-    ['surface', 'columns', 'icon']
+    ['columns', 'icon']
   );
-  assert.deepEqual(schema[1].selector, {number: {min: 2, max: 5, step: 1, mode: 'box'}});
+  assert.deepEqual(schema[0].selector, {number: {min: 2, max: 5, step: 1, mode: 'box'}});
   assert.equal(
     strings.en['editor.helper.columns'],
     'Maximum columns on a wide landscape screen, 2 to 5. Phones and portrait tablets always use 2.'
   );
   assert.equal(strings.en['editor.layout'], undefined);
+  assert.equal(strings.en['editor.surface'], undefined);
   assert.deepEqual(Object.keys(pageData({name: 'x', layout: 'kitchen', surface: 'teal'})), [
-    'surface',
     'columns',
     'icon'
   ]);
@@ -217,20 +217,16 @@ test('the appearance form has a performance select with helper text', () => {
   assert.equal(appearanceData({tablet_mode: true}).tablet_mode, true);
 });
 
-test('background menus offer the satin colourways', () => {
+test('background menu offers glass, soft and the satin colourways for every page', () => {
   const hass = {};
   const wallpaper = appearanceSchema(hass).find((item) => item.name === 'wallpaper');
   assert.deepEqual(
     wallpaper.selector.select.options.map((option) => option.value),
-    ['page', 'teal', 'silver', 'champagne', 'sage', 'slate', 'dusk', 'blush']
+    ['glass', 'soft', 'teal', 'silver', 'champagne', 'sage', 'slate', 'dusk', 'blush']
   );
   assert.deepEqual(
     wallpaper.selector.select.options.map((option) => option.label),
-    ['Use page backgrounds', 'Teal', 'Silver', 'Champagne', 'Sage', 'Slate', 'Dusk', 'Blush']
+    ['Glass', 'Soft', 'Teal', 'Silver', 'Champagne', 'Sage', 'Slate', 'Dusk', 'Blush']
   );
-  const surface = pageSchema(hass).find((item) => item.name === 'surface');
-  assert.deepEqual(
-    surface.selector.select.options.map((option) => option.value),
-    ['glass', 'soft', 'teal', 'silver', 'champagne', 'sage', 'slate', 'dusk', 'blush']
-  );
+  assert.equal(pageSchema(hass).find((item) => item.name === 'surface'), undefined);
 });

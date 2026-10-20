@@ -9,9 +9,10 @@ views:
     type: panel
     cards:
       - type: custom:houseview-card
+        wallpaper: glass
         pages:
-          - {name: Home, surface: glass}
-          - {name: Details, surface: soft}
+          - {name: Home}
+          - {name: Details}
         cards:
           - {type: custom:houseview-clock-card, page: Home}
           - {type: custom:houseview-light-card, entity: light.living_room, page: Home}

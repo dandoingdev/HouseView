@@ -82,7 +82,7 @@
 }
 .ov-dismiss:focus-visible,
 .ov-tap:focus-visible {
-  outline: 3px solid #fff;
+  outline: var(--hv-focus-ring, 3px solid currentColor);
   outline-offset: -6px;
 }
 /* Screensaver only. Carousel tiles and their buttons keep their borders and focus rings. */
