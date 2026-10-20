@@ -1,0 +1,240 @@
+/* @owns plants-card plants-head plants-title plants-summary plants-grid plants-pod plants-ring plants-value plants-name plants-meta plants-temp plants-none plants-battery */
+/*
+ * Plants tile. The root is a size container: ring, text and gaps scale from its width (cqi), so the same markup fits
+ * a wide strip of five plants and a narrow card (which stacks the plants as rows). Rings are a conic-gradient arc
+ * (270 degrees, open at the bottom) cut to a stroke with a mask: no SVG, no filter, no animation, cheap on a weak GPU.
+ * `--p` is the humidity percent, `--plant` the status colour (set per pod from data-state).
+ */
+
+/* @phase carousel-widgets */
+.plants-card {
+  position: relative;
+  container: plants / size;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: clamp(6px, 2.6cqi, 14px);
+  padding: clamp(10px, 3.2cqi, 20px);
+  overflow: hidden;
+  text-align: left;
+}
+
+.plants-head {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-width: 0;
+}
+
+.plants-title {
+  display: inline-grid;
+  place-items: center;
+}
+
+/* The same large, centred icon as every other tile. */
+.plants-title ha-icon {
+  --mdc-icon-size: clamp(40px, min(12cqh, 11cqi), 72px);
+  margin: 0;
+  opacity: 0.95;
+}
+
+.plants-summary {
+  position: absolute;
+  top: clamp(10px, 3cqi, 18px);
+  right: clamp(10px, 3cqi, 18px);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(121, 224, 166, 0.16);
+  color: #9ff0c0;
+  font-size: clamp(11px, 2.3cqi, 13px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.plants-summary[data-tone='care'] {
+  background: rgba(255, 180, 84, 0.2);
+  color: #ffc77a;
+}
+
+.plants-grid {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(84px, 19cqi, 132px), 1fr));
+  align-content: center;
+  gap: clamp(6px, 1.8cqi, 12px);
+  /* Every plant in a row gets the same height. */
+  grid-auto-rows: auto;
+}
+
+.plants-pod {
+  /* Rings grow when there are few plants (--n) and shrink with the tile's height. */
+  --ring: clamp(58px, min(calc(88cqi / (var(--n, 3) + 0.6)), 36cqh), 150px);
+  --plant: #79e0a6;
+  --plant-glow: rgba(121, 224, 166, 0.2);
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  justify-items: center;
+  align-content: center;
+  gap: 5px;
+  padding: clamp(8px, 1.8cqi, 12px) 6px;
+  border: 0;
+  border-radius: 22px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.plants-pod:focus-visible {
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: 2px;
+}
+
+.plants-pod[data-state='dry'] {
+  --plant: #ffb454;
+  --plant-glow: rgba(255, 180, 84, 0.24);
+}
+
+.plants-pod[data-state='wet'] {
+  --plant: #62b7ff;
+  --plant-glow: rgba(98, 183, 255, 0.24);
+}
+
+.plants-pod[data-state='cold'] {
+  --plant: #8db8ff;
+  --plant-glow: rgba(141, 184, 255, 0.22);
+}
+
+.plants-pod[data-state='hot'] {
+  --plant: #ff8f6b;
+  --plant-glow: rgba(255, 143, 107, 0.24);
+}
+
+.plants-pod[data-state='offline'] {
+  --plant: #8b9490;
+  --plant-glow: rgba(139, 148, 144, 0.1);
+  opacity: 0.62;
+}
+
+.plants-ring {
+  position: relative;
+  display: grid;
+  width: var(--ring);
+  height: var(--ring);
+  place-items: center;
+}
+
+.plants-ring::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 225deg,
+    var(--plant) 0,
+    var(--plant) calc(var(--p) * 2.7deg),
+    rgba(255, 255, 255, 0.14) calc(var(--p) * 2.7deg),
+    rgba(255, 255, 255, 0.14) 270deg,
+    transparent 270deg
+  );
+  content: '';
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 6px));
+}
+
+.plants-value {
+  position: relative;
+  font-size: calc(var(--ring) * 0.34);
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.plants-value sup {
+  margin-left: 1px;
+  font-size: 0.42em;
+  letter-spacing: 0;
+  vertical-align: top;
+  opacity: 0.7;
+}
+
+.plants-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(12px, 2.7cqi, 15px);
+  font-weight: 600;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plants-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: clamp(11px, 2.4cqi, 14px);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.86;
+}
+
+.plants-meta[data-temp='cold'] {
+  color: #9cc4ff;
+  opacity: 1;
+}
+
+.plants-meta[data-temp='hot'] {
+  color: #ffab8a;
+  opacity: 1;
+}
+
+.plants-meta ha-icon {
+  --mdc-icon-size: 1.25em;
+  margin: 0;
+}
+
+.plants-battery {
+  display: inline-flex;
+  color: #ffb454;
+}
+
+/* A narrow card: the plants stack as rows, ring on the left. */
+@container plants (max-width: 250px) {
+  .plants-grid {
+    grid-template-columns: 1fr;
+    align-content: start;
+  }
+
+  .plants-pod {
+    --ring: 52px;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'ring name'
+      'ring meta';
+    justify-items: start;
+    column-gap: 12px;
+    padding: 8px 12px 8px 10px;
+    text-align: left;
+  }
+
+  .plants-ring {
+    grid-area: ring;
+  }
+
+  .plants-name {
+    grid-area: name;
+    align-self: end;
+  }
+
+  .plants-meta {
+    grid-area: meta;
+    align-self: start;
+    justify-content: flex-start;
+  }
+}

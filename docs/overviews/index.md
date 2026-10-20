@@ -20,3 +20,4 @@ An overview fills a whole page. Use it as a [screensaver](../screensavers.md) ov
 | [Vacuum view](vacuum.md) | `vacuum` | `custom:houseview-vacuum-overview-card` | required, a `vacuum` entity | 1.4 |
 | [Alarm view](alarm_control_panel.md) | `alarm_control_panel` | `custom:houseview-alarm-control-panel-overview-card` | required, a `alarm_control_panel` entity | 1.6 |
 | [Doorbell camera](doorbell.md) | `doorbell` | `custom:houseview-doorbell-overview-card` | required, a `binary_sensor` or `event` or `button` or `input_button` or `input_boolean` entity | 1.7 |
+| [Plants view](plants.md) | `plants` | `custom:houseview-plants-overview-card` | optional, a `sensor` entity | 1.7 |

@@ -13,10 +13,7 @@ export default {
     'screensaver.field.enabled': 'Enabled',
     'screensaver.field.entity': 'Entity',
     'screensaver.field.idle_timeout': 'Start after (seconds without a touch)',
-    'screensaver.field.preview': 'Show it now (preview)',
     'screensaver.field.start_in_edit_mode': 'Also run while editing the dashboard',
-    'screensaver.helper.idle_timeout': '0 turns the automatic start off. 5 to 86400 seconds.',
-    'screensaver.helper.preview':
-      'Keeps it on for testing; it comes back 5 seconds after each dismissal.'
+    'screensaver.helper.idle_timeout': '0 turns the automatic start off. 5 to 86400 seconds.'
   }
 };

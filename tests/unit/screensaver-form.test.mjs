@@ -44,7 +44,6 @@ test('schema: type only until one is chosen, then framework fields, options, adv
     'picks',
     'peer',
     'note',
-    'preview',
     'start_in_edit_mode'
   ]);
   const entity = schema.find((f) => f.name === 'entity');
@@ -85,7 +84,6 @@ test('labels: framework keys from screensaver.*, options from <type>_overview.op
   assert.equal(computeHelper({name: 'level'}), 'How much.');
   assert.equal(computeLabel({name: 'flag'}), 'flag'); // no string yet: falls back to the key, never throws
   assert.equal(computeHelper({name: 'flag'}), '');
-  assert.equal(computeHelper({name: 'preview'}).includes('5 seconds'), true);
   assert.equal(screensaverLabels(hass, undefined).computeLabel({name: 'x'}), 'x'); // no type chosen yet
 });
 

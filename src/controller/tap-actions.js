@@ -12,11 +12,19 @@ export function configuredWidgetOf(card, button) {
   return widget && hasActionConfig(widget) ? {widget, index} : null;
 }
 
-const SETTINGS_ACTIONS = new Set(['info', 'light-view', 'climate-view', 'scene-menu']);
+const SETTINGS_ACTIONS = new Set([
+  'info',
+  'light-view',
+  'climate-view',
+  'scene-menu',
+  'plants-view'
+]);
 
 /** Settings keys open on hold. A tiny player's track title opens the full player on hold as well as tap. */
 const holdable = (action) =>
-  SETTINGS_ACTIONS.has(action) || String(action || '').startsWith('media-player-expand-');
+  SETTINGS_ACTIONS.has(action) ||
+  String(action || '').startsWith('media-player-expand-') ||
+  String(action || '').startsWith('plants-');
 
 /** Full-screen player opened from a compact music tile, or null. */
 function expandPress(button) {

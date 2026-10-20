@@ -1,0 +1,20 @@
+---
+type: plants
+label: Plants view
+entity: optional
+domains: [sensor]
+since: 1.7
+---
+# Plants view
+
+The full-screen view of a [Plants widget](../widgets/plants.md), opened by holding the tile. A close key sits top left,
+with the title and a count of the plants that need care. Each plant is a glass card with a large humidity ring, its
+temperature, comfort bars showing the care range and where the plant is within it, the battery and when it last
+reported. A card opens the more-info dialog of the plant's humidity sensor. The list scrolls when the cards do not fit.
+
+The view reads the plants from the Plants widget on the dashboard, so there is nothing to configure twice. It is not
+offered as a screensaver.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| entity | entity | first plant | The humidity sensor of the first plant of the widget to show (set when the tile is held) |

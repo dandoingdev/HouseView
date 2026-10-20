@@ -156,6 +156,17 @@ export const featureActions = freeze({
       });
     }
   }),
+  // Holding the plants tile: the full-screen plants view for that tile. Nothing is called on Home Assistant.
+  'plants-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      const widget = ctx.card._config?.widgets?.find((w) => w.type === 'plants' && w.entity === id);
+      return ctx.card._screensaverOpenType?.('plants', {
+        ...(id ? {entity: id} : {}),
+        ...(widget?.name ? {name: widget.name} : {})
+      });
+    }
+  }),
   'home-view': freeze({
     immediate: true,
     run: (ctx) =>

@@ -23,5 +23,6 @@ Every widget works in two ways. Put it in the `cards` list of a [`custom:housevi
 | [Timer](timer.md) | `timer` | `custom:houseview-timer-card` | required | 1.0 |
 | [Alarm panel](alarm_control_panel.md) | `alarm_control_panel` | `custom:houseview-alarm_control_panel-card` | required | 1.0 |
 | [Vacuum](vacuum.md) | `vacuum` | `custom:houseview-vacuum-card` | required | 1.4 |
+| [Plants](plants.md) | `plants` | `custom:houseview-plants-card` | none | 1.7 |
 
 Besides the widgets above, [overview cards](../screensavers.md) paint a whole page, for example the [weather overview](../overviews/weather.md).

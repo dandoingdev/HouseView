@@ -14,6 +14,7 @@ export const manifest = [
   {type: 'home', load: () => import('../../src/overviews/home/test.js')},
   {type: 'light', load: () => import('../../src/overviews/light/test.js')},
   {type: 'photo_frame', load: () => import('../../src/overviews/photo_frame/test.js')},
+  {type: 'plants', load: () => import('../../src/overviews/plants/test.js')},
   {type: 'timer', load: () => import('../../src/overviews/timer/test.js')},
   {type: 'vacuum', load: () => import('../../src/overviews/vacuum/test.js')},
   {type: 'volume', load: () => import('../../src/overviews/volume/test.js')},

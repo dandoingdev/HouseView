@@ -17,6 +17,7 @@ export const manifest = [
   {type: 'light', load: () => import('../../src/widgets/light/test.js')},
   {type: 'lock', load: () => import('../../src/widgets/lock/test.js')},
   {type: 'media_player', load: () => import('../../src/widgets/media_player/test.js')},
+  {type: 'plants', load: () => import('../../src/widgets/plants/test.js')},
   {type: 'sensor', load: () => import('../../src/widgets/sensor/test.js')},
   {type: 'switch', load: () => import('../../src/widgets/switch/test.js')},
   {type: 'timer', load: () => import('../../src/widgets/timer/test.js')},

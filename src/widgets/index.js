@@ -25,6 +25,8 @@ import lockWidget from './lock/index.js';
 import lockWidgetStrings from './lock/strings.js';
 import mediaPlayerWidget from './media_player/index.js';
 import mediaPlayerWidgetStrings from './media_player/strings.js';
+import plantsWidget from './plants/index.js';
+import plantsWidgetStrings from './plants/strings.js';
 import sensorWidget from './sensor/index.js';
 import sensorWidgetStrings from './sensor/strings.js';
 import switchWidget from './switch/index.js';
@@ -49,6 +51,7 @@ export const widgets = [
   lightWidget,
   lockWidget,
   mediaPlayerWidget,
+  plantsWidget,
   sensorWidget,
   switchWidget,
   timerWidget,
@@ -70,6 +73,7 @@ const strings = [
   lightWidgetStrings,
   lockWidgetStrings,
   mediaPlayerWidgetStrings,
+  plantsWidgetStrings,
   sensorWidgetStrings,
   switchWidgetStrings,
   timerWidgetStrings,

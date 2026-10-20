@@ -1,0 +1,307 @@
+/* @phase overviews */
+/* @owns ov-plants-ico ov-plants-unit ov-plants-scene ov-plants-head ov-plants-title ov-plants-summary ov-plants-close ov-plants-body ov-plants-grid ov-plants-card ov-plants-top ov-plants-badge ov-plants-name ov-plants-pill ov-plants-main ov-plants-ring ov-plants-value ov-plants-cap ov-plants-side ov-plants-temp ov-plants-bar ov-plants-tempbar ov-plants-humbar ov-plants-band ov-plants-marker ov-plants-foot ov-plants-foot-item ov-plants-empty */
+/*
+ * The plants view. Everything is sized in cqmin of the `.ov` container, so it fits a 1280 x 800 tablet, a phone and a
+ * 380 px card. The scene is a deep green-teal wash with two soft static glows; each plant is a glass card whose glow
+ * and ring take the plant's status colour (--plant). Rings are a conic-gradient arc cut with a mask (no SVG, no filter,
+ * no animation), so the view stays cheap on a weak GPU. The body scrolls when the cards do not fit.
+ */
+.ov-plants-scene {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, #0b2925 0%, #0f3639 46%, #0b2130 100%);
+}
+
+.ov-plants-scene::before {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 46% at 88% 0%, rgba(121, 224, 166, 0.17), transparent 72%),
+    radial-gradient(56% 42% at 0% 100%, rgba(98, 183, 255, 0.13), transparent 72%);
+  content: '';
+  pointer-events: none;
+}
+
+.ov-plants-head {
+  padding-bottom: 1cqmin;
+}
+
+.ov-plants-summary {
+  color: #9ff0c0;
+}
+
+.ov-plants-summary[data-tone='care'] {
+  color: #ffc77a;
+}
+
+.ov-plants-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  padding: 1cqmin 3cqmin 3cqmin;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ov-plants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(44cqmin, 300px)), 1fr));
+  gap: 2.6cqmin;
+  align-content: start;
+}
+
+.ov-plants-card {
+  --plant: #79e0a6;
+  --plant-glow: rgba(121, 224, 166, 0.2);
+  --ring: clamp(96px, 23cqmin, 170px);
+  display: grid;
+  min-width: 0;
+  gap: 2.2cqmin;
+  padding: 2.8cqmin;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: clamp(20px, 3.4cqmin, 32px);
+  background:
+    radial-gradient(90% 70% at 15% 0%, var(--plant-glow), transparent 70%),
+    rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ov-plants-card:focus-visible {
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: 3px;
+}
+
+.ov-plants-card[data-state='dry'] {
+  --plant: #ffb454;
+  --plant-glow: rgba(255, 180, 84, 0.24);
+}
+
+.ov-plants-card[data-state='wet'] {
+  --plant: #62b7ff;
+  --plant-glow: rgba(98, 183, 255, 0.24);
+}
+
+.ov-plants-card[data-state='cold'] {
+  --plant: #8db8ff;
+  --plant-glow: rgba(141, 184, 255, 0.22);
+}
+
+.ov-plants-card[data-state='hot'] {
+  --plant: #ff8f6b;
+  --plant-glow: rgba(255, 143, 107, 0.24);
+}
+
+.ov-plants-card[data-state='offline'] {
+  --plant: #8b9490;
+  --plant-glow: rgba(139, 148, 144, 0.1);
+  opacity: 0.7;
+}
+
+.ov-plants-top {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 1.6cqmin;
+}
+
+.ov-plants-badge {
+  display: grid;
+  flex: none;
+  width: clamp(34px, 6cqmin, 48px);
+  height: clamp(34px, 6cqmin, 48px);
+  place-items: center;
+  border-radius: 50%;
+  background: var(--plant-glow);
+  color: var(--plant);
+}
+
+.ov-plants-badge .ov-plants-ico {
+  --mdc-icon-size: clamp(20px, 3.6cqmin, 28px);
+  margin: 0;
+}
+
+.ov-plants-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: clamp(17px, 3.2cqmin, 26px);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ov-plants-pill {
+  flex: none;
+  padding: 0.5cqmin 1.8cqmin;
+  border-radius: 999px;
+  background: var(--plant-glow);
+  color: var(--plant);
+  font-size: clamp(12px, 2.1cqmin, 16px);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ov-plants-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 3cqmin;
+}
+
+.ov-plants-ring {
+  position: relative;
+  display: grid;
+  width: var(--ring);
+  height: var(--ring);
+  place-items: center;
+  align-content: center;
+}
+
+.ov-plants-ring::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 225deg,
+    var(--plant) 0,
+    var(--plant) calc(var(--p) * 2.7deg),
+    rgba(255, 255, 255, 0.14) calc(var(--p) * 2.7deg),
+    rgba(255, 255, 255, 0.14) 270deg,
+    transparent 270deg
+  );
+  content: '';
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #000 calc(100% - 11px));
+}
+
+.ov-plants-value {
+  position: relative;
+  font-size: calc(var(--ring) * 0.34);
+  font-variant-numeric: tabular-nums;
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.ov-plants-unit {
+  margin-left: 2px;
+  font-size: 0.4em;
+  letter-spacing: 0;
+  vertical-align: top;
+  opacity: 0.7;
+}
+
+.ov-plants-ring .ov-plants-cap {
+  position: relative;
+  margin-top: 4px;
+  font-size: clamp(11px, 1.9cqmin, 14px);
+  opacity: 0.62;
+}
+
+.ov-plants-side {
+  display: grid;
+  min-width: 0;
+  gap: 0.9cqmin;
+}
+
+.ov-plants-temp {
+  display: inline-flex;
+  align-items: center;
+  gap: 1cqmin;
+  font-size: clamp(18px, 3.6cqmin, 30px);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.ov-plants-temp[data-temp='cold'] {
+  color: #9cc4ff;
+}
+
+.ov-plants-temp[data-temp='hot'] {
+  color: #ffab8a;
+}
+
+.ov-plants-temp .ov-plants-ico {
+  --mdc-icon-size: 1.1em;
+  margin: 0;
+  opacity: 0.85;
+}
+
+.ov-plants-bar {
+  position: relative;
+  display: block;
+  height: 8px;
+  margin-top: 0.8cqmin;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.ov-plants-band {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.ov-plants-marker {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 3px solid #0d2f31;
+  border-radius: 50%;
+  background: var(--plant);
+}
+
+.ov-plants-side .ov-plants-cap {
+  font-size: clamp(11px, 1.9cqmin, 14px);
+  opacity: 0.62;
+}
+
+.ov-plants-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6cqmin 2.4cqmin;
+  font-size: clamp(12px, 2.1cqmin, 15px);
+  opacity: 0.78;
+}
+
+.ov-plants-foot-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6cqmin;
+}
+
+.ov-plants-foot-item[data-low='true'] {
+  color: #ffb454;
+  opacity: 1;
+}
+
+.ov-plants-foot-item .ov-plants-ico {
+  --mdc-icon-size: 1.25em;
+  margin: 0;
+}
+
+.ov-plants-empty {
+  margin: 12cqmin 0 0;
+  text-align: center;
+  font-size: clamp(15px, 3cqmin, 22px);
+  opacity: 0.7;
+}
+
+/* A narrow or short layer: the ring shrinks and the side column drops under it. */
+@container ov (max-width: 520px) {
+  .ov-plants-card {
+    --ring: clamp(84px, 30cqmin, 120px);
+  }
+}

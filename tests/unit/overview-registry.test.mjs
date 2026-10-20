@@ -32,7 +32,7 @@ test('registry registers the overview, its derived widget and its strings', () =
   assert.deepEqual(overviewLabels(), {demo: 'Demo overview'});
   assert.equal(t({}, 'demo_overview.description'), 'A demo.');
   assert.equal(t({}, 'screensaver.dismiss'), 'Dismiss screensaver');
-  assert.ok(hasString('screensaver.helper.preview'));
+  assert.ok(hasString('screensaver.helper.idle_timeout'));
 });
 
 test('a duplicate type or order is refused', () => {

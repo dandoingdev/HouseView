@@ -9,7 +9,6 @@ const FRAMEWORK_FIELDS = [
   'enabled',
   'entity',
   'idle_timeout',
-  'preview',
   'start_in_edit_mode'
 ];
 
@@ -83,10 +82,8 @@ export function screensaverSchema(hass, data) {
     if (spec.when && !spec.when(data)) continue;
     schema.push({name: key, selector: selectorFor(hass, overview, key, spec)});
   }
-  schema.push(
-    {name: 'preview', selector: {boolean: {}}},
-    {name: 'start_in_edit_mode', selector: {boolean: {}}}
-  );
+  // The editor preview already shows the screensaver while you edit, so there is no "show it now" field.
+  schema.push({name: 'start_in_edit_mode', selector: {boolean: {}}});
   return schema;
 }
 

@@ -1,0 +1,48 @@
+---
+type: plants
+label: Plants
+entity: none
+since: 1.7
+---
+# Plants
+
+A compact shelf of plants. Each plant is a ring gauge for its humidity, with its temperature beneath and a status
+colour: green when the plant is in its comfortable range, amber when it needs water, blue when it is too wet, and cool
+blue or warm orange when the room is too cold or too warm. A low battery gets a small marker. A header counts the plants
+that need care.
+
+Tap a plant to open the more-info dialog of its humidity sensor. **Hold** anywhere on the tile for the full-screen
+plants view: a large card per plant with the humidity ring, the temperature, comfort bars, the battery and when the
+plant last reported.
+
+The widget has no entity of its own. List the plants under `plants`; each needs a `name` and a `humidity` sensor and may
+add `temperature` and `battery` sensors, an `icon`, and its own care range.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| plants | list | required | Up to 12 plants (YAML). Each: `name`, `humidity`, optional `temperature`, `battery`, `icon`, `humidity_low`, `humidity_high`, `temperature_low`, `temperature_high` |
+| name | string | Plants | Heading of the tile and the plants view |
+| size | normal/wide/tall/large | wide | Tile size on carousel pages |
+| icon | icon | mdi:leaf | Icon in the heading |
+| humidity_low | number | 30 | Below this percentage a plant needs water |
+| humidity_high | number | 70 | Above this percentage a plant is too wet |
+| temperature_low | number | 15 | Below this temperature (°C) a plant is too cold |
+| temperature_high | number | 28 | Above this temperature (°C) a plant is too warm |
+
+A plant's own `humidity_low`, `humidity_high`, `temperature_low` and `temperature_high` win over the widget's. A sensor
+reporting in °F is compared against the °C range after conversion.
+
+```yaml
+type: custom:houseview-plants-card
+name: Plants
+plants:
+  - name: Fiddle leaf fig
+    humidity: sensor.fiddle_leaf_fig_humidity
+    temperature: sensor.fiddle_leaf_fig_temperature
+    battery: sensor.fiddle_leaf_fig_battery
+  - name: Cactus
+    humidity: sensor.cactus_humidity
+    temperature: sensor.cactus_temperature
+    humidity_low: 10
+    humidity_high: 40
+```

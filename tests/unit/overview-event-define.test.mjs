@@ -184,7 +184,8 @@ test('the editor hides idle_timeout for an event overview and keeps it for an id
   const event = names({type: 'bell'});
   assert.equal(event.includes('idle_timeout'), false);
   assert.deepEqual(event.slice(0, 3), ['type', 'enabled', 'entity']);
-  assert.deepEqual(event.slice(-2), ['preview', 'start_in_edit_mode']);
+  assert.equal(event.at(-1), 'start_in_edit_mode');
+  assert.equal(event.includes('preview'), false);
 });
 
 test('an idle_timeout already in the YAML of an event entry survives an edit in the form', () => {

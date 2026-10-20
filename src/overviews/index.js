@@ -10,6 +10,7 @@ import doorbellOverview from './doorbell/index.js';
 import homeOverview from './home/index.js';
 import lightOverview from './light/index.js';
 import photoFrameOverview from './photo_frame/index.js';
+import plantsOverview from './plants/index.js';
 import timerOverview from './timer/index.js';
 import vacuumOverview from './vacuum/index.js';
 import volumeOverview from './volume/index.js';
@@ -26,6 +27,7 @@ export const overviews = [
   homeOverview,
   lightOverview,
   photoFrameOverview,
+  plantsOverview,
   timerOverview,
   vacuumOverview,
   volumeOverview,
