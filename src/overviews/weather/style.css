@@ -577,7 +577,7 @@
 }
 /* The corner close key occupies the header's left side when the scene was opened from a button. */
 .hv-screensaver.hv-pinned .ov-top {
-  padding-left: calc(clamp(64px, 12cqmin, 88px) + 2cqmin);
+  padding-left: calc(var(--ov-panel-key-size, 64px) + 2cqmin);
 }
 .ov-cond {
   display: grid;

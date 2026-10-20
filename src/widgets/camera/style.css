@@ -107,42 +107,33 @@
 
 /* @phase gallery */
 /* Four camera faces, edge-to-edge inside the tablet canvas. */
+.camera-gallery {
+  container-type: size;
+}
+
 .camera-gallery header {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--ov-panel-key-size, 64px) minmax(0, 1fr) var(--ov-panel-key-size, 64px);
   align-items: center;
-  justify-content: center;
-  min-height: 48px;
+  min-height: var(--ov-panel-key-size, 64px);
   flex-shrink: 0;
 }
 
 .camera-gallery header>strong {
+  grid-column: 2;
+  margin: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 20px;
   font-weight: 600;
   letter-spacing: -.03em;
 }
 
 .gallery-back {
-  position: absolute;
-  left: 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 48px;
-  padding: 0 16px 0 8px;
-  border: 1px solid #e9fff63d;
-  border-radius: 999px;
-  background: #b8ffed22;
-  color: inherit;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.gallery-back ha-icon {
-  --mdc-icon-size: 28px;
-  margin: 0;
+  grid-column: 1;
 }
 
 .camera-gallery-grid {
@@ -215,7 +206,6 @@
   pointer-events: none;
 }
 
-.gallery-back:focus-visible,
 .gallery-camera:focus-visible {
   outline: 2px solid #effffa;
   outline-offset: -3px;

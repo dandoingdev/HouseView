@@ -116,24 +116,11 @@
   background: #0b4a4d99;
 }
 .page-menu-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 1px solid #cce8d822;
-  border-radius: 50%;
-  background: #072f3166;
-  color: #e2eddb;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.page-menu.close-left .page-menu-close {
   position: fixed;
-  right: auto;
+  top: 12px;
   left: 12px;
+  z-index: 1;
+  color: #e2eddb;
 }
 .page-menu-chip {
   position: fixed;

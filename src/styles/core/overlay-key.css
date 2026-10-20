@@ -1,0 +1,70 @@
+/* @owns ov-panel-key ov-panel-icon */
+/*
+ * Round overlay keys: close, back, details, and matching panel chrome.
+ * Size scales with a size container when cqmin is available; otherwise 64px.
+ */
+
+/* @phase base */
+:host {
+  --ov-panel-key-size: 64px;
+  --ov-panel-key-bg: rgba(255, 255, 255, 0.18);
+}
+
+.ov-panel-key {
+  display: grid;
+  place-items: center;
+  width: var(--ov-panel-key-size, 64px);
+  height: var(--ov-panel-key-size, 64px);
+  min-width: 64px;
+  min-height: 64px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  line-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ov-panel-key-bg, rgba(255, 255, 255, 0.18));
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ov-panel-key ha-icon,
+.ov-panel-key .ov-panel-icon {
+  --mdc-icon-size: 28px;
+  margin: 0;
+}
+
+.ov-panel-key:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ov-panel-key:not(:disabled):active {
+  opacity: 0.6;
+}
+
+.ov-panel-key:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ov-panel-key {
+    transition: opacity 0.15s ease;
+  }
+}
+
+/* @phase carousel */
+@supports (width: 1cqmin) {
+  .ov-scene,
+  .media-stage,
+  .media-library,
+  .camera-gallery,
+  .hv-screensaver.hv-pinned {
+    --ov-panel-key-size: clamp(64px, 12cqmin, 88px);
+  }
+}

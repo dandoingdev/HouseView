@@ -218,14 +218,14 @@ export function stageMarkup(ctx) {
     'media-player-stage-close',
     view.entityId,
     `${ctx.icon('close')}<span class="sr">${ctx.esc(ctx.t('media_player.close_player'))}</span>`,
-    'ms-close',
+    'ov-panel-key ms-close',
     true
   );
   const details = buttonHTML(
     'info',
     view.entityId,
     `${ctx.icon('dots-horizontal')}<span class="sr">${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}</span>`,
-    'ms-info',
+    'ov-panel-key ms-info',
     view.ok
   );
   return (

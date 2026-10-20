@@ -1,4 +1,4 @@
-/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close ms-info */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-info */
 /*
  * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
  * its lower edge, a progress bar, a transport row and a volume pill.
@@ -443,7 +443,7 @@
   }
 }
 
-/* @owns mc-browse media-library ml-header ml-key ml-content ml-grid ml-item ml-art ml-empty ml-footer */
+/* @owns mc-browse media-library ml-header ml-content ml-grid ml-item ml-art ml-empty ml-footer */
 .media-library {
   position: absolute;
   inset: 0;
@@ -451,7 +451,7 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 12px;
-  padding: clamp(12px, 2vw, 28px);
+  padding: 3cqmin;
   box-sizing: border-box;
   overflow: hidden;
   color: #f1fffc;
@@ -460,10 +460,10 @@
   container-type: size;
 }
 .ml-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: var(--ov-panel-key-size, 64px) minmax(0, 1fr) var(--ov-panel-key-size, 64px);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 1cqmin 2cqmin;
 }
 .ml-header div {
   min-width: 0;
@@ -471,29 +471,12 @@
 }
 .ml-header h2 {
   margin: 4px 0;
-  font-size: clamp(22px, 3vw, 36px);
+  font-size: clamp(18px, 4cqmin, 34px);
   letter-spacing: -0.035em;
 }
 .ml-header small {
   opacity: 0.7;
   font-size: 14px;
-}
-.ml-key {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
-  min-height: 64px;
-  padding: 0;
-  border-radius: 50%;
-  border: 1px solid #ffffff35;
-  background: #ffffff16;
-  color: inherit;
-}
-.ml-key ha-icon {
-  --mdc-icon-size: 28px;
 }
 .ml-content {
   touch-action: pan-y;
@@ -620,7 +603,6 @@
 }
 
 /* Overlay icons are centred controls, so they do not use the tiles’ caption spacing. */
-.media-library .ml-key ha-icon,
 .media-library .ml-art ha-icon {
   margin: 0;
   display: block;
@@ -925,7 +907,7 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: 8px;
   box-sizing: border-box;
-  padding: 12px 16px 16px;
+  padding: 3cqmin;
   overflow: hidden;
   color: #f1fffc;
   background: linear-gradient(145deg, #146d6a, #073f43 70%, #092e38);
@@ -933,10 +915,10 @@
 }
 .carousel .ms-head {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  grid-template-columns: var(--ov-panel-key-size, 64px) minmax(0, 1fr) var(--ov-panel-key-size, 64px);
   align-items: center;
-  gap: 8px;
-  min-height: 64px;
+  gap: 1cqmin 2cqmin;
+  min-height: var(--ov-panel-key-size, 64px);
 }
 .carousel .ms-title {
   min-width: 0;
@@ -948,30 +930,8 @@
   font-size: clamp(18px, 4cqmin, 34px);
   font-weight: 600;
 }
-.carousel .ms-close,
-.carousel .ms-info {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  min-width: 64px;
-  min-height: 64px;
-  padding: 0;
-  border: 1px solid #ffffff35;
-  border-radius: 50%;
-  background: #ffffff16;
-  color: inherit;
-}
 .carousel .ms-info {
   justify-self: end;
-}
-.carousel .ms-info:disabled {
-  opacity: 0.35;
-}
-.carousel .ms-close ha-icon,
-.carousel .ms-info ha-icon {
-  margin: 0;
-  --mdc-icon-size: 28px;
 }
 .carousel .media-stage .mc {
   container-name: player;

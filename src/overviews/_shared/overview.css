@@ -89,12 +89,14 @@
 .hv-screensaver:has(.ov-clock) .ov-dismiss {
   outline: none;
 }
-/* A scene opened from a button: the corner close key, above the sky. */
+/* A scene opened from a button: the same corner close key as control panels. */
 .hv-screensaver.hv-pinned .ov-manual-close {
   position: absolute;
-  top: clamp(14px, 5.2cqmin, 56px);
-  left: clamp(16px, 6cqmin, 64px);
+  top: 3cqmin;
+  left: 3cqmin;
   z-index: 6;
   color: #fff;
-  --ov-panel-key-size: clamp(64px, 12cqmin, 88px);
+}
+.hv-screensaver.hv-pinned .ov-content {
+  padding: 3cqmin;
 }

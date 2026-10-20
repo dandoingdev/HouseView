@@ -329,20 +329,19 @@
   text-align: center;
 }
 
-/* Full-screen Home uses the same close control as the other interactive overlays. */
+/* Full-screen Home: shared .ov-panel-key, opaque-friendly fill on the light panel. */
 .ov-home-close {
-  --ov-panel-key-size: clamp(52px, 10cqmin, 72px);
-  --ov-panel-key-bg: #e8e8ed;
+  --ov-panel-key-bg: rgba(0, 0, 0, 0.08);
   position: absolute;
   top: 3cqmin;
   left: 3cqmin;
   z-index: 3;
 }
 .dark .ov-home-close {
-  --ov-panel-key-bg: #3a3a3c;
+  --ov-panel-key-bg: rgba(255, 255, 255, 0.18);
 }
 .ov-home-scene[data-mode='screensaver'] .ov-home-head {
-  padding-left: max(60px, 12cqmin);
+  padding-left: calc(var(--ov-panel-key-size, 64px) + 2cqmin);
 }
 
 /* Attention rows share Home's plain rounded surfaces, icon sizing and amber accents. */

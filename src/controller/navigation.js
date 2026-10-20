@@ -99,11 +99,11 @@ export const navigationMixin = {
       selected: all
     };
     if (!items.length && !all) return this._info(entity);
-    this._openMenu(t(hass, 'scene.menu'), items, {chip, closeLeft: true});
+    this._openMenu(t(hass, 'scene.menu'), items, {chip});
   },
 
   /** The shared full-screen menu: `items` are {action, attrs, icon, label, selected}; `chip` is a pill centred at the top. */
-  _openMenu(label, items, {chip = null, closeLeft = false} = {}) {
+  _openMenu(label, items, {chip = null} = {}) {
     this._closePageMenu();
     const shell = this.shadowRoot.querySelector('.shell');
     if (!shell) return;
@@ -118,10 +118,10 @@ export const navigationMixin = {
       ? `<button data-action="${chip.action}" ${chip.attrs} class="page-menu-chip ${chip.selected ? 'selected' : ''}" aria-pressed="${!!chip.selected}">${esc(chip.label)}</button>`
       : '';
     const menu = document.createElement('div');
-    menu.className = `page-menu${closeLeft ? ' close-left' : ''}`;
+    menu.className = 'page-menu';
     menu.setAttribute('role', 'dialog');
     menu.setAttribute('aria-label', label);
-    menu.innerHTML = `${chipMarkup}<div class="page-menu-grid">${buttons}</div><button data-action="page-menu-close" class="page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
+    menu.innerHTML = `${chipMarkup}<div class="page-menu-grid">${buttons}</div><button type="button" data-action="page-menu-close" class="ov-panel-key page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
     shell.append(menu);
     menu.querySelector('.selected')?.focus?.();
   },

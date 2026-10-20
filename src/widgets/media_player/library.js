@@ -18,7 +18,7 @@ const button = (ctx, action, icon, label, enabled = true) =>
     action,
     ctx.ext.entity,
     `${ctx.icon(icon)}<span class="sr">${ctx.esc(label)}</span>`,
-    'ml-key',
+    'ov-panel-key ml-key',
     enabled
   );
 

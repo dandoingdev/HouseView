@@ -85,8 +85,8 @@ export function galleryMarkup(ctx) {
   const back = buttonHTML(
     'camera-back',
     '',
-    `${iconHTML('chevron-left')}<span>${esc(backLabel)}</span>`,
-    'gallery-back',
+    `${iconHTML('chevron-left')}<span class="sr">${esc(backLabel)}</span>`,
+    'ov-panel-key gallery-back',
     true
   );
   const heading = ext.camera
