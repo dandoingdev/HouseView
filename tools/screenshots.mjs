@@ -5,8 +5,11 @@
 //   node tools/screenshots.mjs --only=hero     one picture (name without .png)
 //   node tools/screenshots.mjs --root=<dir>    use <dir>/dist/houseview.js and <dir>/tools (a scratch build)
 //   node tools/screenshots.mjs --out=<dir>     write somewhere else
+//   node tools/screenshots.mjs --only=a,b     a comma-separated list of picture names
 //
 // Needs `npm run build:dev` (or `npm run build`) first, Google Chrome (CHROME_PATH to override) and puppeteer-core.
+// Pictures with `frame: 'nspanel'` are the 480 × 480 panel, drawn inside a mock of an NSPanel Pro 86
+// (86 mm plate, 3.95 inch square screen). The mock is proportions and a dim-gray glass face, not a product photo.
 //
 // Nothing here touches a real Home Assistant, and nothing is read from outside this repository:
 //   * the entities are the placeholder ids of examples/*.yaml, and their states are made up below;
@@ -69,6 +72,62 @@ const SHOTS = [
     size: [800, 1280]
   },
   {name: 'widgets', example: 'single-cards.yaml', kind: 'grid', size: [1280, 900], columns: 3},
+  // NSPanel Pro 86: a 480 × 480 screen inside a mock of the panel. See examples/nspanel.yaml.
+  {
+    name: 'panel-room',
+    example: 'nspanel.yaml',
+    kind: 'carousel',
+    page: 0,
+    size: [480, 480],
+    frame: 'nspanel'
+  },
+  {
+    name: 'panel-scenes',
+    example: 'nspanel.yaml',
+    kind: 'carousel',
+    page: 1,
+    size: [480, 480],
+    frame: 'nspanel'
+  },
+  {
+    name: 'panel-music',
+    example: 'nspanel.yaml',
+    kind: 'carousel',
+    page: 2,
+    size: [480, 480],
+    frame: 'nspanel'
+  },
+  {
+    name: 'panel-light',
+    example: 'nspanel.yaml',
+    kind: 'carousel',
+    page: 0,
+    size: [480, 480],
+    frame: 'nspanel',
+    open: {action: 'light-view', entity: 'light.living_room'}
+  },
+  {
+    name: 'panel-climate',
+    example: 'nspanel.yaml',
+    kind: 'carousel',
+    page: 0,
+    size: [480, 480],
+    frame: 'nspanel',
+    open: {action: 'climate-view', entity: 'climate.living_room'}
+  },
+  {
+    name: 'panel-clock',
+    kind: 'overview',
+    size: [480, 480],
+    frame: 'nspanel',
+    screensaver: {
+      type: 'clock',
+      face: 'bold',
+      background_color: '#3b925f',
+      show_date: true,
+      show_seconds: true
+    }
+  },
   // Full-screen overviews, shown the way a screensaver shows them (`preview: true` starts it at once).
   {
     name: 'overview-weather',
@@ -273,13 +332,17 @@ const G = [
   [/lock-open/, '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.6-1.7"/>'],
   [/lock/, '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'],
   [/blinds|shutter|window/, '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 8h16M4 12h16M4 16h16"/>'],
+  [/close|^window-close/, '<path d="M7 7l10 10M17 7L7 17"/>'],
+  [/dots-horizontal/, '<circle cx="6" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="18" cy="12" r="1.3" fill="currentColor"/>'],
+  [/shuffle/, '<path d="M4 7h3l10 10h3M14 7h6M4 17h3l4-4"/><path d="M16 7l4 0 0 4M16 17l4 0 0-4"/>'],
+  [/repeat/, '<path d="M7 7h9a3 3 0 0 1 3 3v3M17 17H8a3 3 0 0 1-3-3v-3"/><path d="M16 5l3 2-3 2M8 19l-3-2 3-2"/>'],
   [/chevron-up/, '<path d="M6 15l6-6 6 6"/>'],
   [/chevron-down/, '<path d="M6 9l6 6 6-6"/>'],
   [/chevron-left/, '<path d="M15 6l-6 6 6 6"/>'],
   [/chevron-right/, '<path d="M9 6l6 6-6 6"/>'],
   [/^stop/, '<rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor"/>'],
-  [/skip-next/, '<path d="M6 6l9 6-9 6z M17 6v12" fill="currentColor"/>'],
-  [/skip-previous/, '<path d="M18 6l-9 6 9 6z M7 6v12" fill="currentColor"/>'],
+  [/fast-forward|skip-next/, '<path d="M6 6l9 6-9 6z M17 6v12" fill="currentColor"/>'],
+  [/rewind|skip-previous/, '<path d="M18 6l-9 6 9 6z M7 6v12" fill="currentColor"/>'],
   [/pause/, '<path d="M8 5v14M16 5v14" stroke-width="3"/>'],
   [/play/, '<path d="M8 5l11 7-11 7z" fill="currentColor"/>'],
   [/^plus/, '<path d="M12 5v14M5 12h14"/>'],
@@ -295,7 +358,8 @@ const G = [
   [/weather|cloud/, '<path d="M7 18a4.5 4.5 0 1 1 1-8.9A6 6 0 0 1 19 11a3.5 3.5 0 0 1 0 7z"/>'],
   [/calendar/, '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>'],
   [/clock|timer|alarm|bell/, '<circle cx="12" cy="13" r="8"/><path d="M12 8v5l3 2M9 2h6"/>'],
-  [/script|play-circle|palette|scene|sofa/, '<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z" fill="currentColor"/>'],
+  [/sofa/, '<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 11h18v6H3zM7 17v2M17 17v2"/>'],
+  [/script|play-circle|palette|scene/, '<circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z" fill="currentColor"/>'],
   [/water/, '<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z"/>'],
   [/eye/, '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'],
   [/brightness|night/, '<circle cx="12" cy="12" r="4"/>']
@@ -303,7 +367,7 @@ const G = [
 const glyph = (name) => (G.find(([re]) => re.test(name)) || [0, '<circle cx="12" cy="12" r="8"/>'])[1];
 `;
 
-const PAGE = (width, realTimers = false) => `<!doctype html>
+const PAGE = (width, realTimers = false, panel = false) => `<!doctype html>
 <html lang="en-GB"><meta charset="utf-8"><title>HouseView screenshots</title>
 <style>
   :root{--primary-text-color:#212121;--secondary-text-color:#727272;--card-background-color:#fff;--divider-color:#e0e0e0;
@@ -315,6 +379,22 @@ const PAGE = (width, realTimers = false) => `<!doctype html>
 </style>
 <body><div id="stage"></div>
 <script>
+${
+  panel
+    ? `// The screenshot browser is a desktop. An NSPanel Pro is a touchscreen, and tablet mode follows that.
+(() => {
+  const orig = window.matchMedia.bind(window);
+  window.matchMedia = (query) => {
+    const text = String(query);
+    if (text.includes('hover') && text.includes('pointer')) {
+      return {matches: false, media: text, onchange: null, addListener() {}, removeListener() {},
+        addEventListener() {}, removeEventListener() {}, dispatchEvent() { return false; }};
+    }
+    return orig(query);
+  };
+})();`
+    : ''
+}
 // A frozen clock and no free-running timers: the pictures must be reproducible.
 (() => {
   const FIXED = ${NOW};
@@ -487,9 +567,15 @@ async function shoot(browser, base, shot) {
   page.on('pageerror', (e) => problems.push(`uncaught: ${e.message}`));
   page.on('console', (m) => m.type() === 'error' && problems.push(`console.error: ${m.text()}`));
   // Outside tablet mode the carousel leaves 56 px of room for Home Assistant's header, so give it that much more
-  // window and cut the picture to the size asked for.
-  const extra = shot.kind === 'grid' ? 0 : HEADER_ALLOWANCE;
-  await page.setViewport({width, height: height + extra, deviceScaleFactor: 1});
+  // window and cut the picture to the size asked for. A panel picture is already in tablet mode and fills the window.
+  const panel = shot.frame === 'nspanel';
+  const extra = shot.kind === 'grid' || panel ? 0 : HEADER_ALLOWANCE;
+  await page.setViewport({
+    width,
+    height: height + extra,
+    deviceScaleFactor: panel ? 2 : 1,
+    hasTouch: panel
+  });
   await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
   await page.emulateTimezone('Europe/London');
   await page.setRequestInterception(true);
@@ -500,7 +586,7 @@ async function shoot(browser, base, shot) {
       req.respond({
         status: 200,
         contentType: 'text/html; charset=utf-8',
-        body: PAGE(width, shot.kind === 'overview')
+        body: PAGE(width, shot.kind === 'overview', panel)
       });
     } else if (url.pathname.startsWith('/camera_proxy/')) {
       svg(cameraSvg(url.pathname));
@@ -521,6 +607,7 @@ async function shoot(browser, base, shot) {
       wallpaper: 'teal',
       pages: [{name: 'Home', surface: 'teal'}],
       cards: shot.cards || [{type: 'custom:houseview-clock-card'}],
+      ...(panel ? {tablet_mode: true, performance: 'lite'} : {}),
       ...(shot.screensaver ? {screensaver: {...shot.screensaver, preview: true}} : {})
     };
     await page.evaluate((c, s2) => window.mountOverview(c, s2), config, states);
@@ -530,6 +617,19 @@ async function shoot(browser, base, shot) {
     // dashboard itself.
     Object.assign(card, {timer_display: false, music_screensaver: false});
     await page.evaluate((c, s, p) => window.mountCarousel(c, s, p), card, states, shot.page);
+    if (shot.open) {
+      const opened = await page.evaluate(
+        async (action, entity) => {
+          const cardEl = document.querySelector('houseview-card');
+          await cardEl._act(action, entity);
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          return Boolean(cardEl.shadowRoot.querySelector('.hv-screensaver'));
+        },
+        shot.open.action,
+        shot.open.entity
+      );
+      if (!opened) problems.push(`did not open ${shot.open.action}`);
+    }
   } else {
     const cards = findAll(
       doc,
@@ -539,6 +639,17 @@ async function shoot(browser, base, shot) {
   }
   await page.evaluate(() => document.fonts.ready);
   await new Promise((r) => setTimeout(r, 300));
+  if (panel) {
+    // Opening a view focuses its close button, and a screensaver focuses its dismiss control. A focus ring is not
+    // part of the picture.
+    await page.evaluate(() => {
+      const walk = (node) => {
+        node.activeElement?.blur?.();
+        for (const el of node.querySelectorAll?.('*') || []) if (el.shadowRoot) walk(el.shadowRoot);
+      };
+      walk(document);
+    });
+  }
 
   const file = path.join(OUT, `${shot.name}.png`);
   fs.mkdirSync(OUT, {recursive: true});
@@ -548,6 +659,13 @@ async function shoot(browser, base, shot) {
       return {x: 0, y: 0, width: Math.ceil(r.width), height: Math.ceil(r.height)};
     });
     await page.screenshot({path: file, clip: box});
+  } else if (panel) {
+    const screen = await page.screenshot({
+      clip: {x: 0, y: 0, width, height},
+      encoding: 'base64',
+      type: 'png'
+    });
+    await frameNspanel(browser, screen, file, width);
   } else {
     await page.screenshot({path: file, clip: {x: 0, y: 0, width, height}});
   }
@@ -555,15 +673,65 @@ async function shoot(browser, base, shot) {
   return problems;
 }
 
+/**
+ * Draw a 480-class screen inside a mock NSPanel Pro 86.
+ * The plate is 86 mm and the 3.95 inch square screen is about 70.9 mm, so the bezel is about a tenth of the
+ * screen on each side. Corner radius follows an 11 mm glass corner. Dim gray is the NSPanel86PB face.
+ */
+async function frameNspanel(browser, base64, file, screen) {
+  const bezel = Math.round(screen * (7.53 / 70.94));
+  const outer = screen + bezel * 2;
+  const pad = Math.round(screen * 0.16);
+  const canvas = outer + pad * 2;
+  const radius = Math.round(outer * (11 / 86));
+  const screenRadius = Math.max(16, Math.round(screen * ((11 - 7.53) / 70.94)));
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({width: canvas, height: canvas, deviceScaleFactor: 1});
+    await page.setContent(
+      `<!doctype html><meta charset="utf-8"><style>
+        html,body{margin:0;width:${canvas}px;height:${canvas}px;background:#e7e1d6}
+        body{display:grid;place-items:center;
+          background:
+            radial-gradient(ellipse at 50% 42%, #f4f0e8 0%, #e7e1d6 58%, #ddd6c8 100%)}
+        .plate{
+          width:${outer}px;height:${outer}px;box-sizing:border-box;padding:${bezel}px;border-radius:${radius}px;
+          background:
+            linear-gradient(155deg, #5a5a5e 0%, #3a3a3e 18%, #2a2a2e 46%, #1a1a1d 100%);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,.34),
+            inset 0 -10px 18px rgba(0,0,0,.28),
+            0 1px 0 rgba(255,255,255,.35),
+            0 18px 36px rgba(62,52,38,.28),
+            0 2px 6px rgba(62,52,38,.16);
+          position:relative}
+        .plate::after{
+          content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+          background:linear-gradient(180deg, rgba(255,255,255,.14), transparent 22%)}
+        .glass{
+          width:${screen}px;height:${screen}px;border-radius:${screenRadius}px;overflow:hidden;
+          box-shadow:0 0 0 1px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.06);
+          background:#111}
+        .glass img{display:block;width:${screen}px;height:${screen}px}
+      </style>
+      <div class="plate"><div class="glass"><img alt="" src="data:image/png;base64,${base64}"></div></div>`,
+      {waitUntil: 'load'}
+    );
+    await page.screenshot({path: file, type: 'png'});
+  } finally {
+    await page.close();
+  }
+}
+
 async function main() {
   if (!fs.existsSync(path.join(ROOT, 'dist', 'houseview.js'))) {
     console.error(`${path.join(ROOT, 'dist/houseview.js')} is missing. Run: npm run build:dev`);
     process.exit(2);
   }
-  const only = typeof opt.only === 'string' ? opt.only : null;
-  const shots = SHOTS.filter((s) => !only || s.name === only);
+  const only = typeof opt.only === 'string' ? new Set(opt.only.split(',')) : null;
+  const shots = SHOTS.filter((s) => !only || only.has(s.name));
   if (!shots.length) {
-    console.error(`no picture named "${only}" (${SHOTS.map((s) => s.name).join(', ')})`);
+    console.error(`no picture named "${opt.only}" (${SHOTS.map((s) => s.name).join(', ')})`);
     process.exit(2);
   }
   const server = await startServer({root: ROOT, port: 0});

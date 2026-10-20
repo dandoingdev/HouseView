@@ -13,8 +13,8 @@ and use it without a tour of your setup. HouseView brings the things they need i
 heating, music, cameras and the kitchen timer.
 
 It makes deliberate choices about layout, touch controls and what belongs on screen. Big buttons, familiar gestures and
-room for the essentials help everyday tasks feel straightforward. Put it on a wall tablet or kitchen display, choose the
-controls that matter in that room, and give everyone a comfortable way to use the home.
+room for the essentials help everyday tasks feel straightforward. Put it on a wall tablet, a kitchen display or an
+NSPanel Pro, choose the controls that matter in that room, and give everyone a comfortable way to use the home.
 
 When the screen is idle, it can become a weather display, photo frame, calendar, album cover or a clear view of the timer.
 
@@ -29,6 +29,21 @@ A kitchen dashboard, with music and home controls a swipe away. Try the [kitchen
 | Bedtime dashboard | Kitchen page on a portrait tablet |
 | --- | --- |
 | ![Bedtime dashboard](docs/images/bedtime.png) | ![Kitchen page, portrait](docs/images/kitchen.png) |
+
+### NSPanel Pro
+
+The same dashboard on a square wall panel. An NSPanel Pro 86 is a 480 × 480 touchscreen, and each page holds four
+controls. Hold a light to set its brightness, press the thermostat number to set the heating, and leave it idle for the
+clock. These pictures are that resolution inside a mock of the panel. Setup is in [NSPanel Pro](docs/nspanel.md), and
+the dashboard is the [panel example](examples/nspanel.yaml).
+
+| Room | Scenes | Music |
+| --- | --- | --- |
+| ![Room page on an NSPanel Pro: living room and kitchen lights, a thermostat and the front door](docs/images/panel-room.png) | ![Scenes page on an NSPanel Pro: Morning, Relax, Good night and Lights out](docs/images/panel-scenes.png) | ![Music page on an NSPanel Pro: album art, progress and playback controls](docs/images/panel-music.png) |
+
+| Brightness | Thermostat | Clock |
+| --- | --- | --- |
+| ![Brightness view on an NSPanel Pro, living room light at 75 percent](docs/images/panel-light.png) | ![Thermostat view on an NSPanel Pro, heating set to 21 degrees](docs/images/panel-climate.png) | ![Clock screensaver on an NSPanel Pro, ten past ten](docs/images/panel-clock.png) |
 
 ### Overviews
 
@@ -64,8 +79,9 @@ and anything that needs attention. It works in landscape and portrait:
   bring up their own displays automatically.
 * **A consistent look.** Choose glass, soft, teal, silver or champagne, with light and dark appearances, high contrast
   and a bedtime mode with a Dim button.
-* **Made for wall tablets.** Large touch targets, a camera grid and an optional tablet mode that hides Home Assistant's
-  sidebar and header. A lighter appearance helps older tablets keep up.
+* **Made for wall tablets and square panels.** Large touch targets, a camera grid and an optional tablet mode that hides
+  Home Assistant's sidebar and header. A lighter appearance helps older tablets and an NSPanel Pro keep up. On a
+  480 × 480 panel, four controls fill a page.
 * **Set it up your way.** Use Home Assistant's visual editor or YAML, with support for scenes, scripts and custom actions.
 
 ## Terminology
@@ -88,6 +104,8 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 * For a wall tablet: a device that keeps its screen on, a panel view dashboard, and ideally a kiosk browser or the companion
   app. HouseView was tuned for 1280 x 800 landscape and 800 x 1280 portrait; it adapts to phones and larger screens. See
   [tablet mode](docs/tablet.md) and [performance](docs/performance.md).
+* For an NSPanel Pro 86: the panel's 480 × 480 screen and a browser based on Chrome 105 or newer. See
+  [NSPanel Pro](docs/nspanel.md).
 
 ## Installation
 
@@ -149,7 +167,7 @@ views:
 
 Replace the entity ids with your own. The card has a visual editor (**Edit dashboard**, then **Edit** on the card). More
 dashboards are in [`examples/`](examples/): [minimal](examples/minimal.yaml), [kitchen tablet](examples/kitchen.yaml),
-[tablet kiosk](examples/tablet-kiosk.yaml), [bedtime](examples/bedtime.yaml), [single cards](examples/single-cards.yaml),
+[tablet kiosk](examples/tablet-kiosk.yaml), [NSPanel Pro](examples/nspanel.yaml), [bedtime](examples/bedtime.yaml), [single cards](examples/single-cards.yaml),
 [camera grid](examples/camera-gallery.yaml), [native cards](examples/native-cards.yaml),
 [weather screensavers](examples/screensaver-weather.yaml), [weather overview](examples/weather-overview-card.yaml),
 [photo frame](examples/photo-frame.yaml), [month calendar](examples/month-calendar.yaml),
@@ -348,6 +366,7 @@ To add a widget or an overview read [CONTRIBUTING.md](CONTRIBUTING.md), the [wid
 | [Actions](docs/actions.md) | What each widget does, `tap_action`, `hold_action`, `double_tap_action` |
 | [Theming](docs/theming.md) | Surfaces, palettes, appearance, the Home Assistant theme |
 | [Tablet mode](docs/tablet.md) | Wall displays, `?tablet=1`, kiosk setups |
+| [NSPanel Pro](docs/nspanel.md) | 480 × 480 wall panels, four controls a page |
 | [Cameras](docs/cameras.md) | The snapshot widget and the camera grid |
 | [Performance](docs/performance.md) | `performance`, weak tablets, measuring |
 | [Architecture](docs/architecture.md), [Widget API](docs/widget-api.md), [Overview API](docs/overview-api.md) | For contributors |
@@ -388,8 +407,9 @@ To report a vulnerability see [SECURITY.md](SECURITY.md).
 ## Disclaimer
 
 HouseView is an independent community project. It is **not affiliated with, endorsed by or sponsored by Apple Inc., Home
-Assistant or Nabu Casa**. "Home Assistant" is a trademark of its owners. HouseView's visual style is original; it uses no
-third-party fonts or images. Most icons come from the Material Design Icons set that Home Assistant itself provides, which
+Assistant, Nabu Casa or Shenzhen Sonoff Technologies Co., Ltd.** "Home Assistant" and "NSPanel Pro" are trademarks of
+their owners. The panel frames in this README are a mock of that panel's proportions. HouseView's visual style is
+original; it uses no third-party fonts or images. Most icons come from the Material Design Icons set that Home Assistant itself provides, which
 HouseView does not bundle; a few glyphs and the wallpapers are drawn by HouseView.
 
 ## Acknowledgements

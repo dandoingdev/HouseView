@@ -10,7 +10,10 @@ const scopeOf = (host) => {
 };
 
 export function selectEditorPreview(owner, target) {
-  selection = {owner, target};
+  const key = JSON.stringify(target);
+  // Focus and pointer events re-select constantly; only a real change wakes the cards.
+  if (selection?.owner === owner && selection.key === key) return;
+  selection = {owner, target, key};
   window.dispatchEvent(new CustomEvent(EDITOR_PREVIEW_EVENT));
 }
 

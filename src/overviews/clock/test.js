@@ -91,6 +91,18 @@ export default async function ({mount, check, variants, wait}) {
 
   t = await mount(variants.ok, {mode: 'screensaver', freeze: false});
   await t.settle();
+  const dismiss = t.layer.querySelector('.ov-dismiss');
+  dismiss.focus({focusVisible: true});
+  const dismissStyle = getComputedStyle(dismiss);
+  check(
+    'clock screensaver has no border while focused',
+    dismiss.matches(':focus-visible') &&
+      dismissStyle.outlineStyle === 'none' &&
+      dismissStyle.borderTopWidth === '0px' &&
+      dismissStyle.borderRightWidth === '0px' &&
+      dismissStyle.borderBottomWidth === '0px' &&
+      dismissStyle.borderLeftWidth === '0px'
+  );
   const second = t.q('.ov-clock-second');
   const delayBefore = second.style.getPropertyValue('--clock-second-delay');
   check(

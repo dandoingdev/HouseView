@@ -70,7 +70,7 @@ servers listen on `127.0.0.1` only.
 | `npm test` | Everything above, in order |
 | `npm run size` | The size budget of the production bundle |
 | `npm run perf` | The performance bench; see [docs/performance.md](docs/performance.md) |
-| `npm run screenshots`, `npm run overview-shots` | Redraw `docs/images/*.png` and overview pictures from the examples and a mock `hass` |
+| `npm run screenshots`, `npm run overview-shots` | Redraw `docs/images/*.png` and overview pictures from the examples and a mock `hass`. NSPanel pictures include a mock panel frame |
 | `npm run new:widget`, `npm run new:overview` | Scaffold a new widget or overview |
 
 Before opening a pull request run `npm run gen`, `npm run lint`, `npm run format:check`, `npm run check:widgets`,

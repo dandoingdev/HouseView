@@ -2,6 +2,23 @@ import {editorPreviewFor} from '../core/editor-preview.js';
 import {inCardPreview} from './screen-model.js';
 
 export const editorPreviewMixin = {
+  /** True when the screen `target` asks for is already the one on display. */
+  _editorPreviewShowing(target) {
+    const active = this._screensaver?.active;
+    switch (target?.kind) {
+      case 'page':
+        return (
+          !active && !this._galleryOpen && this._screens?.[this._pageIndex]?.name === target.name
+        );
+      case 'overview':
+        return !!active?.entry?.manual && active.entry.type === target.type;
+      case 'cameras':
+        return !!this._galleryOpen && !active;
+      default:
+        return false;
+    }
+  },
+
   _syncEditorPreview(force = false) {
     if (
       !this._config ||
@@ -14,10 +31,10 @@ export const editorPreviewMixin = {
     const target = editorPreviewFor(this);
     if (!target && !this._editorPreviewKey) return;
     const key = JSON.stringify(target);
-    if (!force && key === this._editorPreviewKey && this._editorPreviewConfig === this._config)
-      return;
+    // Every config edit re-enters here with a fresh config: only rebuild when the target changed or the
+    // screen it needs is no longer the one showing (setConfig drops overlays), never per keystroke.
+    if (!force && key === this._editorPreviewKey && this._editorPreviewShowing(target)) return;
     this._editorPreviewKey = key;
-    this._editorPreviewConfig = this._config;
     this._syncingEditorPreview = true;
     try {
       // Replace immediately: the previous screen must never cover the one being edited.

@@ -104,13 +104,8 @@
   min-width: 84px;
   padding: 0 10px;
   background: #ffffff24;
-  border: 1px solid #ffffff30;
+  border: 0;
   border-radius: 999px;
-}
-.carousel .mc .mc-volume ha-icon {
-  --mdc-icon-size: 24px;
-  opacity: 0.85;
-  margin: 0;
 }
 .carousel .mc .mc-volume-value {
   min-width: 2.6em;

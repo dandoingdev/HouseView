@@ -87,7 +87,8 @@ http://homeassistant.example:8123/dashboard-wall/home?tablet=1
 Remove the parameter and everything returns. `tablet_mode: true` on the card does the same without the parameter. This
 reaches into Home Assistant internals that are not a public API, so it can stop working after a Home Assistant update; the
 [tablet page](tablet.md) has kiosk alternatives, orientation, dimming and sound. See also
-[`tablet-kiosk.yaml`](../examples/tablet-kiosk.yaml).
+[`tablet-kiosk.yaml`](../examples/tablet-kiosk.yaml). An NSPanel Pro 86 is a 480 × 480 panel and uses the same full-screen
+setup; see [NSPanel Pro](nspanel.md) and [`nspanel.yaml`](../examples/nspanel.yaml).
 
 ## Optional: the HouseView theme
 

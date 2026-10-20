@@ -85,6 +85,10 @@
   outline: 3px solid #fff;
   outline-offset: -6px;
 }
+/* Screensaver only. Carousel tiles and their buttons keep their borders and focus rings. */
+.hv-screensaver:has(.ov-clock) .ov-dismiss {
+  outline: none;
+}
 /* A scene opened from a button: the corner close key, above the sky. */
 .hv-screensaver.hv-pinned .ov-manual-close {
   position: absolute;

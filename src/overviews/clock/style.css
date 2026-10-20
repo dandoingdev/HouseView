@@ -60,13 +60,16 @@
 @media (prefers-reduced-motion: no-preference) {
   @keyframes ov-clock-second {
     from {
-      transform: rotate(0deg);
+      transform: rotate3d(0, 0, 1, 0deg);
     }
     to {
-      transform: rotate(360deg);
+      transform: rotate3d(0, 0, 1, 360deg);
     }
   }
+  /* Own GPU layer: the hand is composited every frame without repainting the face behind it. */
   .ov-clock-second[data-sweep] {
+    will-change: transform;
+    backface-visibility: hidden;
     animation: ov-clock-second 60s linear var(--clock-second-delay, 0s) infinite;
   }
 }

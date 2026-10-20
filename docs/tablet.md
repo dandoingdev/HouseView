@@ -42,7 +42,8 @@ keeps its login.
 
 The layout follows the window: a landscape screen uses 3 columns (a page's `columns` option sets 2 to 5), a portrait
 tablet or phone-sized window uses 2. 1280 x 800 landscape and 800 x 1280 portrait are the sizes it is tuned for.
-Wallpapers cover every edge. See [page layout](configuration.md#page-layout).
+A square NSPanel Pro (480 × 480) also uses 2 columns and fits four controls on a page. Wallpapers cover every edge.
+See [page layout](configuration.md#page-layout) and [NSPanel Pro](nspanel.md).
 
 ## Navigation
 

@@ -1,5 +1,5 @@
 # Exact browser check counts: fail if a suite silently stops early.
-tests/browser.html: 206
+tests/browser.html: 207
 tests/widgets/index.html: 831
-tests/overviews/index.html: 736
+tests/overviews/index.html: 737
 tests/media-library.html: 23

@@ -1,0 +1,43 @@
+# A square wall panel: the SONOFF NSPanel Pro 86 (480 × 480). Four controls on each page, a date and
+# time header, and the lighter rendering that panel picks for itself.
+#
+# The view must be a panel view. `tablet_mode: true` hides Home Assistant's sidebar and header on a
+# touch display (the same as opening the panel's start address with ?tablet=1). `confirm_mode: inline`
+# asks for confirmation inside the card, which works in kiosk browsers that block dialogs.
+# `performance: lite` is what this panel uses; `auto` selects it too (2 GB of memory, 4 cores).
+# See docs/nspanel.md.
+#
+# Replace the entity ids with your own. The frames in the README are a mock of this panel's proportions.
+title: Panel
+views:
+  - title: Panel
+    path: panel
+    type: panel
+    cards:
+      - type: custom:houseview-card
+        tablet_mode: true
+        show_header: true
+        confirm_mode: inline
+        performance: lite
+        wallpaper: teal
+        pages:
+          - {name: Room, surface: teal}
+          - {name: Scenes, surface: teal}
+          - {name: Music, surface: teal}
+        cards:
+          - {type: custom:houseview-light-card, entity: light.living_room, name: Living room, page: Room}
+          - {type: custom:houseview-light-card, entity: light.kitchen, name: Kitchen, page: Room}
+          - {type: custom:houseview-climate-card, entity: climate.living_room, name: Thermostat, size: normal, page: Room}
+          - {type: custom:houseview-lock-card, entity: lock.front_door, name: Front door, page: Room}
+          - {type: custom:houseview-action-card, entity: scene.morning, name: Morning, icon: mdi:weather-sunny, page: Scenes}
+          - {type: custom:houseview-action-card, entity: scene.relax, name: Relax, icon: mdi:sofa, page: Scenes}
+          - {type: custom:houseview-action-card, entity: script.good_night, name: Good night, icon: mdi:weather-night, page: Scenes}
+          - {type: custom:houseview-action-card, entity: scene.lights_out, name: Lights out, icon: mdi:lightbulb, page: Scenes}
+          - {type: custom:houseview-media_player-card, entity: media_player.kitchen_speaker, name: Kitchen, page: Music, size: large}
+        screensaver:
+          type: clock
+          idle_timeout: 60
+          face: bold
+          background_color: "#3b925f"
+          show_date: true
+          show_seconds: true

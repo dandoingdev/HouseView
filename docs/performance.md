@@ -28,6 +28,9 @@ Nothing else decides: browsers do not report GPU strength. Desktop browsers and 
 keep `full`. If `auto` guesses wrong for your tablet, set `performance: lite` or `performance: full`. The visual editor has
 the same choice under **Appearance > Performance**.
 
+An NSPanel Pro 86 reports 2 GB of memory and 4 cores, so `auto` selects `lite` there. That is the look to use on a panel
+that stays on. See [NSPanel Pro](nspanel.md).
+
 `lite` changes paint only. It is the same page, so a screenshot of a `lite` card is the `full` card with flat glass.
 
 ## What HouseView does on every device

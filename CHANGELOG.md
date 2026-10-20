@@ -6,6 +6,10 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* Documentation and an example dashboard for an NSPanel Pro 86 (480 × 480), with screenshots in a mock of the panel.
+
 ## [1.5.0] - 2026-10-20
 
 ### Added

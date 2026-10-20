@@ -19,7 +19,7 @@ touches Home Assistant: the mock `hass` never calls a real service, and the serv
 | `size-check.mjs` | `npm run size`: bundle size budget (a warning by default, `--strict` fails). |
 | `perf-bench.mjs`, `perf-bench.html` | `npm run perf`: performance bench for low-end tablets (CDP throttling, mock hass). `--write-budgets` records `tools/perf-budgets.json`, which later runs check; without it nothing is enforced. See `docs/performance.md`. |
 | `lite-glass.mjs`, `lite-glass.html` | Calibrates the opaque tint of `performance: lite` against the full glass (`--check` fails above a difference of 6). |
-| `screenshots.mjs`, `mini-yaml.mjs` | `npm run screenshots`: redraws `docs/images/*.png` from `examples/*.yaml` and a mock `hass`. `--out=<dir>` writes elsewhere. |
+| `screenshots.mjs`, `mini-yaml.mjs` | `npm run screenshots`: redraws `docs/images/*.png` from `examples/*.yaml` and a mock `hass`. `--only=a,b` draws named pictures. `--out=<dir>` writes elsewhere. Pictures marked `frame: 'nspanel'` are the 480 × 480 panel inside a mock NSPanel Pro. |
 | `overview-shots.mjs`, `overview-shots.html` | `npm run overview-shots`: weather overview pictures into `.tmp/overview-shots/`. |
 | `release.mjs` | `npm run release`: verify the version, changelog and bundle, and stage the release assets. |
 | `deploy.mjs` | `npm run deploy -- --dest <dir> [--dry-run]`: copy the release files from `dist/` to a directory. |

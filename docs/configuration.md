@@ -81,8 +81,10 @@ Older configurations may still contain a `layout:` key on a page. It is ignored:
 Every page is laid out the same way. Widgets flow in the order they are listed onto a page that fits the screen, so a
 page is never a long scrolling column.
 
-* **Columns.** A phone or a portrait tablet uses 2 columns. A wide landscape screen uses 3, or the page's `columns`
-  (2 to 5). The number of rows comes from the height of the screen.
+* **Columns.** A phone, a portrait tablet or a square panel such as an NSPanel Pro (480 × 480) uses 2 columns. On that
+  panel, with the header and the page navigation, two rows fit, so four normal widgets fill the page. See
+  [NSPanel Pro](nspanel.md). A wide landscape screen uses 3, or the page's `columns` (2 to 5). The number of rows comes
+  from the height of the screen.
 * **One cell each.** A widget takes one cell. When no widget on the page sets a `size`, the page is balanced into rows
   and the last row is stretched across the page width, so there are no holes.
 * **Sizes.** Once a widget on the page sets a `size` (`wide`: two cells across, `tall`: two cells down, `large`: both),

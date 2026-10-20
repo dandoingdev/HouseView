@@ -193,6 +193,7 @@ export class HouseViewEditor extends HTMLElement {
     if (!this._config) return;
     clearEditorPreview(this);
     this._previewTarget = undefined;
+    this._followed = [];
     this._view = null;
     this.shadowRoot.innerHTML =
       STYLES + '<div class="editor"><ha-alert class="status" alert-type="error"></ha-alert></div>';
@@ -351,17 +352,29 @@ export class HouseViewEditor extends HTMLElement {
 
   // Expansion, pointer input and keyboard focus all select the section, including nested HA editors.
   _followPreview(el, target) {
+    const entry = {el, target};
+    (this._followed ||= []).push(entry);
     const select = () => {
       this._previewPanel = el;
       this._previewTarget = target;
+      // Most recently used last: it takes over again when a later section is closed.
+      this._followed = this._followed.filter((other) => other !== entry).concat(entry);
       this._refreshPreview();
     };
     el.addEventListener('expanded-changed', (event) => {
       if (event.target !== el) return;
       if (el.expanded) select();
       else if (this._previewPanel === el) {
-        this._previewTarget = undefined;
-        clearEditorPreview(this);
+        // Closing the section being previewed hands the preview to the newest section still open.
+        const next = this._followed.findLast((other) => other.el.expanded);
+        if (next) {
+          this._previewPanel = next.el;
+          this._previewTarget = next.target;
+          this._refreshPreview();
+        } else {
+          this._previewTarget = undefined;
+          clearEditorPreview(this);
+        }
       }
     });
     el.addEventListener('houseview-editor-context', () => {

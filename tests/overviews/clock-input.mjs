@@ -42,6 +42,40 @@ try {
   });
   await page.waitForSelector('houseview-card >>> .ov-clock-board');
   await new Promise((r) => setTimeout(r, 450));
+  const frame = await page.evaluate(() => {
+    const root = window.card.shadowRoot;
+    const dismiss = root.querySelector('.hv-screensaver .ov-dismiss');
+    const layer = root.querySelector('.hv-screensaver');
+    const shell = root.querySelector('.shell');
+    dismiss.focus({focusVisible: true});
+    const box = (style) => ({
+      outline: style.outlineStyle,
+      border: [
+        style.borderTopWidth,
+        style.borderRightWidth,
+        style.borderBottomWidth,
+        style.borderLeftWidth
+      ].join(' ')
+    });
+    return {
+      focusVisible: dismiss.matches(':focus-visible'),
+      dismiss: box(getComputedStyle(dismiss)),
+      layer: box(getComputedStyle(layer)),
+      shell: box(getComputedStyle(shell))
+    };
+  });
+  assert.equal(
+    frame.focusVisible &&
+      frame.dismiss.outline === 'none' &&
+      frame.dismiss.border === '0px 0px 0px 0px' &&
+      frame.layer.outline === 'none' &&
+      frame.layer.border === '0px 0px 0px 0px' &&
+      frame.shell.outline === 'none' &&
+      frame.shell.border === '0px 0px 0px 0px',
+    true,
+    `clock screensaver border: ${JSON.stringify(frame)}`
+  );
+  console.log('PASS clock screensaver has no border while focused');
   const probe = () =>
     page.evaluate(() => {
       const r = window.card.shadowRoot,
