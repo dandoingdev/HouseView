@@ -28,3 +28,28 @@
 - GitHub CI (`.github/workflows/ci.yml`, job `check`) is the gate, and the release workflow runs the same scripts. Finish a change only after the scripts that cover it pass. Run `npm run build:dev` before any browser script: those suites load `dist/`, not `src/`. Screensaver wake, cover, prefetch, and disconnect are owned by `npm run test:overviews:input`.
 - A covered screensaver wake paints under an opaque shield for two animation frames, then reveals the page. Neighbour-page prefetch waits until that reveal. Disconnect during the wake cancels that one pending paint frame and removes the layer. When a browser check fails, log the observed values next to the `FAIL` line.
 - Prefer focused refactors over broad rewrites. Preserve config validation order, error messages, availability policies, locale fallbacks and supported WebView compatibility.
+
+## Commit and release
+
+This directory is the git repo. The parent workspace is not. Do not read workflows, `tools/release.mjs`, `CONTRIBUTING.md`, or search the tree for the version.
+
+When asked to commit and release:
+
+1. In `repo/`: `git status -sb`, `git log -1 --oneline`, and `git tag -l 'v*' --sort=-v:refname | head -1`. Read only the `## [Unreleased]` block in `CHANGELOG.md`; stop at the next `##`.
+2. If the worktree is dirty, commit that work alone first (imperative subject, why in the body). Do not mix it with the version bump.
+3. If `HEAD` is already `v<package.json version>` and Unreleased has no bullets, stop. That release already exists.
+4. Next version from Unreleased: patch when every bullet is Fixed; minor when any bullet is Added or Changed. Ask before a major. Changelog date is today.
+5. `npm version <x.y.z> --no-git-tag-version` updates `package.json` and `package-lock.json` only.
+6. Move the Unreleased bullets under `## [x.y.z] - YYYY-MM-DD`. Leave `## [Unreleased]` empty. Add:
+
+```
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=x.y.z`.
+```
+
+7. In `README.md`, change only the cache-bust example (`/local/houseview/houseview.js?v=`) to the new version. Do not replace other version strings. `package-lock.json` contains unrelated dependency versions.
+8. Commit: `Release HouseView x.y.z with <shortest user-facing phrase>.` One sentence in the body on why it matters.
+9. `git tag -a vx.y.z -m "HouseView x.y.z"` on that commit. Never move an existing tag.
+10. `git push origin main` and `git push origin vx.y.z`. The tag push runs `.github/workflows/release.yml`, which checks, builds, and publishes the GitHub release. Do not run `gh release create`. Do not run the local test suite for a version-only commit. Do not deploy to Home Assistant or edit the parent `RELEASE-STATUS.md`.
+11. Reply with the version, the commit, and `https://github.com/dandoingdev/HouseView/releases/tag/vx.y.z`.
