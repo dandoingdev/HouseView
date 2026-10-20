@@ -1,3 +1,5 @@
+import {clientYForPercent, levelEdge} from '../_shared/vertical-level.js';
+
 export default async function ({mount, check, variants, wait}) {
   const entity = 'light.test';
   let t = await mount(variants.ok);
@@ -14,7 +16,10 @@ export default async function ({mount, check, variants, wait}) {
         pointerType,
         button: 0,
         clientX: rect.left + rect.width / 2,
-        clientY: rect.bottom - (rect.height * percent) / 100
+        clientY:
+          percent < 0 || percent > 100
+            ? rect.bottom - (rect.height * percent) / 100
+            : clientYForPercent(rect, percent)
       })
     );
   };
@@ -115,6 +120,39 @@ export default async function ({mount, check, variants, wait}) {
   check(
     'dragging below the control clamps to zero and turns off',
     q('.ov-light-value').textContent === '0' && t.calls[0]?.s === 'turn_off'
+  );
+
+  t = await mount(variants.ok);
+  capture();
+  const bandRect = q('.ov-light-input').getBoundingClientRect();
+  const edge = levelEdge(bandRect.height);
+  const at = (type, clientY) => {
+    q('.ov-light-input').dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'touch',
+        button: 0,
+        clientX: bandRect.left + bandRect.width / 2,
+        clientY
+      })
+    );
+  };
+  at('pointerdown', bandRect.top + Math.min(8, edge / 2));
+  const full = q('.ov-light-value').textContent;
+  at('pointerup', bandRect.top + Math.min(8, edge / 2));
+  await t.settle();
+  at('pointerdown', bandRect.bottom - Math.min(8, edge / 2));
+  const zero = q('.ov-light-value').textContent;
+  at('pointerup', bandRect.bottom - Math.min(8, edge / 2));
+  await t.settle();
+  check(
+    `a fingertip inside either edge selects that end (top ${full}, bottom ${zero}, edge ${edge}px)`,
+    full === '100' &&
+      zero === '0' &&
+      t.calls[0]?.data.brightness_pct === 100 &&
+      t.calls[1]?.s === 'turn_off'
   );
 
   t = await mount(variants.ok);

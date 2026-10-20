@@ -6,6 +6,10 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* The home summary opens with a downward swipe from the top of the display, as well as the home button. On a short panel the top band is taller, so the summary is in reach without using the button that sits in the navigation.
+
 ## [1.4.0] - 2026-10-20
 
 ### Added

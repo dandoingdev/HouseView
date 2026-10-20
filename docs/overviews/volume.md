@@ -5,7 +5,8 @@
 > Overview type `volume` (since 1.3). Entity: required, a `media_player` entity. Card type `custom:houseview-volume-overview-card` (widget type `volume_overview`), screensaver `type: volume`.
 
 Press the volume button on a music widget to open a full-screen speaker volume control. Drag up or down across
-the view, just like the light dimmer. The fill and percentage follow immediately; release sends one
+the view, just like the light dimmer, including the fingertip bands that select full and zero volume on an
+edge-to-edge screen. The fill and percentage follow immediately; release sends one
 `media_player.volume_set` command with the final level. Zero sets silent volume and does not stop playback.
 A cancelled drag restores the starting value without changing the speaker.
 

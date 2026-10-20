@@ -1,3 +1,31 @@
+/**
+ * Fingertip of travel at each end of a vertical level. On edge-to-edge glass the contact point cannot
+ * sit on the physical edge, so that band selects 0% or 100%. Capped so a short control keeps a live span.
+ */
+export const LEVEL_EDGE_PX = 64;
+
+export function levelEdge(height) {
+  if (!(height > 0)) return 0;
+  return Math.min(LEVEL_EDGE_PX, height / 5);
+}
+
+/** 0–100 from a pointer on a full-height level. The end bands both select the extreme. */
+export function percentFromPointer(rect, clientY) {
+  const edge = levelEdge(rect.height);
+  const span = rect.height - edge * 2;
+  if (!(span > 0)) return 0;
+  const ratio = (rect.bottom - clientY - edge) / span;
+  return Math.round(Math.min(100, Math.max(0, ratio * 100)));
+}
+
+/** clientY that selects `percent` inside the live span (the bands beyond it are the extremes). */
+export function clientYForPercent(rect, percent) {
+  const edge = levelEdge(rect.height);
+  const span = rect.height - edge * 2;
+  const clamped = Math.min(100, Math.max(0, percent));
+  return rect.bottom - edge - (clamped / 100) * span;
+}
+
 /** Shared light/volume gesture: local feedback while dragging, one native value action on release. */
 export function bindVerticalLevel(ctx, {prefix, readValue, storeKey, property}) {
   const input = ctx.el?.querySelector(`.ov-${prefix}-input`);
@@ -14,9 +42,7 @@ export function bindVerticalLevel(ctx, {prefix, readValue, storeKey, property}) 
     const update = (e) => {
       const rect = input.getBoundingClientRect();
       if (!rect.height) return;
-      input.value = String(
-        Math.round(Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height)) * 100)
-      );
+      input.value = String(percentFromPointer(rect, e.clientY));
       local.value = Number(input.value);
       paint();
     };

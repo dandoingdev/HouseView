@@ -42,7 +42,7 @@ export default {
     'editor.helper.home_transport':
       'Departure sensors (for example from the London TfL integration). Each shows your label, the icon and the next time, and turns amber when nothing is running.',
     'editor.helper.home_overview':
-      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. A small home button at the bottom left opens it full screen.',
+      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. Open it from the home button at the bottom left, or by swiping down from the top of the display.',
     'editor.helper.timer_display':
       'Every timer widget on the dashboard gets a full-screen countdown while it runs. It replaces the screensaver and returns control when the timer ends. A list of timer entities in YAML replaces the widgets.',
     'editor.helper.music_screensaver':

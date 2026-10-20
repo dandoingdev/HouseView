@@ -21,7 +21,7 @@ be used four ways:
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |
 | [Photo frame](overviews/photo_frame.md) | `photo_frame` | idle (screensaver), card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | Card: opens it full screen |
 | [Month calendar](overviews/calendar_month.md) | `calendar_month` | idle (screensaver), opened by pressing a date or calendar widget, card | none | `week_start`, `show_time` | Card: nothing |
-| [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
+| [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button or a swipe down from the top | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
 
 Card types are `custom:houseview-<name>-overview-card` with the name in the table's `type` column, underscores written as
 hyphens: `custom:houseview-weather-overview-card`, `custom:houseview-timer-overview-card`,

@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import puppeteer from 'puppeteer-core';
 import {startServer} from '../../tools/serve.mjs';
 import {CHROME} from '../../tools/run-tests.mjs';
+import {clientYForPercent} from '../../src/overviews/_shared/vertical-level.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const server = await startServer({root, port: 0});
@@ -107,9 +108,9 @@ try {
       calls: window.lightCalls,
       open: !!window.card.shadowRoot.querySelector('.hv-screensaver')
     }));
-  await page.mouse.move(input.x, input.bottom - input.height * 0.32);
+  await page.mouse.move(input.x, clientYForPercent(input, 32));
   await page.mouse.down();
-  await page.mouse.move(input.x, input.bottom - input.height * 0.8, {steps: 8});
+  await page.mouse.move(input.x, clientYForPercent(input, 80), {steps: 8});
   let state = await probe();
   assert.equal(state.value, '80');
   assert.equal(state.fill, '80%');
@@ -155,11 +156,11 @@ try {
   const cdp = await page.createCDPSession();
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchStart',
-    touchPoints: [{x: touchInput.x, y: touchInput.bottom - touchInput.height * 0.2}]
+    touchPoints: [{x: touchInput.x, y: clientYForPercent(touchInput, 20)}]
   });
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchMove',
-    touchPoints: [{x: touchInput.x, y: touchInput.bottom - touchInput.height * 0.7}]
+    touchPoints: [{x: touchInput.x, y: clientYForPercent(touchInput, 70)}]
   });
   const touchValue = Number((await probe()).value);
   assert.ok(Math.abs(touchValue - 70) <= 1); // CDP touch coordinates are quantised to CSS pixels.

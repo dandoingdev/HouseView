@@ -16,7 +16,7 @@ export function colourMarkup(ctx) {
   </div>`;
 }
 
-/** Live colour changes use the guarded, coalescing range-action queue shared with brightness. */
+/** Live colour changes are debounced, then use the guarded range-action queue shared with brightness. */
 export function bindColour(ctx) {
   const pane = ctx.el.querySelector('.ov-light-colour');
   if (!pane) return;
@@ -55,10 +55,8 @@ export function bindColour(ctx) {
         return;
       local.selected = action();
       pending = true;
-      if (timer === null) {
-        flush();
-        timer = setTimeout(flush, 120);
-      }
+      clearTimeout(timer);
+      timer = setTimeout(flush, 80);
     };
     const paint = () => {
       const c = local.ctx;

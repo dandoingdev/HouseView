@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import puppeteer from 'puppeteer-core';
 import {startServer} from '../../tools/serve.mjs';
 import {CHROME} from '../../tools/run-tests.mjs';
+import {clientYForPercent} from '../../src/overviews/_shared/vertical-level.js';
 const server = await startServer({root: process.cwd(), port: 0});
 const browser = await puppeteer.launch({
   executablePath: CHROME,
@@ -78,11 +79,11 @@ try {
   const cdp = await page.createCDPSession();
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchStart',
-    touchPoints: [{x: input.x, y: input.bottom - input.height * 0.25}]
+    touchPoints: [{x: input.x, y: clientYForPercent(input, 25)}]
   });
   await cdp.send('Input.dispatchTouchEvent', {
     type: 'touchMove',
-    touchPoints: [{x: input.x, y: input.bottom - input.height * 0.65}]
+    touchPoints: [{x: input.x, y: clientYForPercent(input, 65)}]
   });
   assert.equal((await probe()).value, '65');
   assert.equal((await probe()).fill, '65%');
@@ -124,14 +125,14 @@ try {
   await page.keyboard.press('ArrowUp');
   await page.waitForFunction('window.volumeCalls.length === 3');
   assert.equal((await probe()).calls[2].data.volume_level, 0.01);
-  await page.mouse.move(input.x, input.bottom - input.height * 0.5);
+  await page.mouse.move(input.x, clientYForPercent(input, 50));
   await page.mouse.down();
-  await page.mouse.move(input.x, input.top - 40);
+  await page.mouse.move(input.x, input.top + 8);
   await page.mouse.up();
   await page.waitForFunction('window.volumeCalls.length === 4');
   assert.equal((await probe()).calls[3].data.volume_level, 1);
   console.log(
-    'PASS cancelled drag restores volume, native keyboard, zero stays a volume command, and mouse capture clamps to 100%'
+    'PASS cancelled drag restores volume, native keyboard, zero stays a volume command, and a fingertip at the top selects 100%'
   );
   await click('[data-action="media-player-volume-mute"]');
   await page.waitForFunction('window.volumeCalls.length === 5');

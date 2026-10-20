@@ -356,6 +356,98 @@ try {
       44
   );
   await headerDuringRender('small dashboard');
+  await page.setViewport({width: 480, height: 480, hasTouch: true});
+  await page.evaluate(() => {
+    window.card.setConfig({
+      ...window.card._config,
+      tablet_mode: true,
+      home_overview: true,
+      show_header: true,
+      performance: 'lite'
+    });
+    window.card.hass = window.mock.hass;
+    window.card._setPage(0);
+  });
+  await page.waitForFunction(
+    () =>
+      window.card.shadowRoot.querySelector('.home-button') &&
+      window.card.shadowRoot.querySelector('.dashboard-header')?.getBoundingClientRect().height ===
+        44
+  );
+  const pull = async (x, y, dy) => {
+    await page.evaluate(() => {
+      window.fake.now += 1000;
+      window.resetCalls();
+    });
+    await client.send('Input.dispatchTouchEvent', {type: 'touchStart', touchPoints: [{x, y}]});
+    for (let i = 1; i <= 8; i++) {
+      await client.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{x, y: y + (dy * i) / 8}]
+      });
+    }
+    await client.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
+    await page.evaluate(() => new Promise(window.requestAnimationFrame));
+  };
+  const homeState = () =>
+    page.evaluate(() => {
+      const shell = window.card.shadowRoot.querySelector('.shell').getBoundingClientRect();
+      return {
+        page: window.card._pageIndex,
+        home: window.card._screensaver?.active?.entry?.type || null,
+        calls: window.calls(),
+        shellTop: shell.top,
+        shellHeight: shell.height,
+        edge: window.card._gesture?.homeEdge ?? null
+      };
+    });
+  const spots = await page.evaluate(() => {
+    const shell = window.card.shadowRoot.querySelector('.shell').getBoundingClientRect();
+    const widget = window.card.shadowRoot.querySelector('.widget').getBoundingClientRect();
+    return {
+      x: shell.left + shell.width / 2,
+      top: shell.top + 60,
+      widgetX: widget.left + widget.width / 2,
+      widgetY: widget.top + widget.height / 2
+    };
+  });
+  await pull(spots.widgetX, spots.widgetY, 90);
+  const fromWidget = await homeState();
+  assert.equal(
+    fromWidget.home,
+    null,
+    `a pull from the middle of a tile must not open home (${JSON.stringify(fromWidget)})`
+  );
+  assert.equal(
+    fromWidget.page,
+    0,
+    `a pull from a tile must not turn the page (${JSON.stringify(fromWidget)})`
+  );
+  assert.deepEqual(
+    fromWidget.calls,
+    [],
+    `a pull must not toggle a light (${JSON.stringify(fromWidget)})`
+  );
+  await pull(spots.x, spots.top, 100);
+  const fromTop = await homeState();
+  assert.equal(
+    fromTop.home,
+    'home',
+    `a downward swipe from the top of a 480px display opens the home summary (${JSON.stringify(fromTop)})`
+  );
+  assert.equal(fromTop.page, 0, `opening home must not turn the page (${JSON.stringify(fromTop)})`);
+  assert.deepEqual(
+    fromTop.calls,
+    [],
+    `opening home must not call a service (${JSON.stringify(fromTop)})`
+  );
+  await page.evaluate(() => window.card._screensaver?.idle?.wake('api'));
+  await page.waitForFunction(() => !window.card.shadowRoot.querySelector('.hv-screensaver'));
+  await swipe('.dashboard-header', -100);
+  assert.equal(await index(), 1, 'a sideways swipe from the header still turns the page');
+  console.log(
+    'PASS a downward swipe from the top of a 480px display opens home and does not page or toggle'
+  );
   await page.screenshot({path: '/tmp/houseview-dashboard-swipe.png'});
   assert.deepEqual(errors, []);
 } finally {

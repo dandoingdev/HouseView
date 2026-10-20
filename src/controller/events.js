@@ -39,6 +39,17 @@ export function bindEvents(card) {
     card._gesturePointerCancel();
   });
 
+  // A downward pull starts in the top band. Claiming the touch keeps the browser from treating it as a scroll
+  // and cancelling the pointer before the home summary can open.
+  root.addEventListener(
+    'touchmove',
+    (event) => {
+      if (!card._gesture?.homeEdge || !event.cancelable) return;
+      event.preventDefault();
+    },
+    {passive: false}
+  );
+
   root.addEventListener('contextmenu', (event) => card._gestureContextMenu(event));
 
   root.addEventListener('keydown', (event) => {

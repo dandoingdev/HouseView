@@ -2,9 +2,24 @@
 import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 
-import {swipeAxis, swipeStep, SWIPE_CLICK_GUARD_MS} from '../core/swipe.js';
+import {isHomePage} from './render.js';
+import {
+  homePullEdgePx,
+  homePullRelease,
+  swipeAxis,
+  swipeStep,
+  SWIPE_CLICK_GUARD_MS
+} from '../core/swipe.js';
 
 const SLIDER_SELECTOR = 'input[type=range],[role=slider],ha-slider,ha-control-slider';
+
+function capturePointer(event) {
+  try {
+    event.target?.setPointerCapture?.(event.pointerId);
+  } catch {
+    // The pointer can already have been released.
+  }
+}
 
 export const navigationMixin = {
   /** The previous / dots / next buttons of the page nav. */
@@ -43,6 +58,21 @@ export const navigationMixin = {
     if (outgoing) this._glidePage(face, outgoing, direction);
   },
 
+  /** The home button's twin: `home_overview` is on, and this page is not already the home summary. */
+  _homePullEnabled() {
+    const config = this._config;
+    if (config?.home_overview !== true || config.single_widget) return false;
+    return !isHomePage(this._screens?.[this._pageIndex]);
+  },
+
+  /** Top of the visible card, in client coordinates. Null when it has not been laid out. */
+  _displayFrame() {
+    const shell = this.shadowRoot?.querySelector?.('.shell');
+    const rect = shell?.getBoundingClientRect?.() || this.getBoundingClientRect?.();
+    if (!rect || !(rect.height > 0)) return null;
+    return {top: rect.top || 0, height: rect.height};
+  },
+
   /** pointerdown: remember where a possible swipe starts (not on sliders, not with a mouse's other buttons). */
   _swipeStart(e) {
     this._swipeCancel();
@@ -50,30 +80,45 @@ export const navigationMixin = {
     if (e.composedPath?.().some((node) => node.matches?.(SLIDER_SELECTOR))) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     this._clearPageTransition();
-    this._gesture = {x: e.clientX, y: e.clientY, time: Date.now(), pointerId: e.pointerId};
+    const frame = this._displayFrame();
+    const fromTop = frame ? e.clientY - frame.top : Infinity;
+    this._gesture = {
+      x: e.clientX,
+      y: e.clientY,
+      time: Date.now(),
+      pointerId: e.pointerId,
+      homeEdge:
+        !!frame &&
+        this._homePullEnabled() &&
+        fromTop >= 0 &&
+        fromTop <= homePullEdgePx(frame.height)
+    };
   },
 
-  /** Lock only horizontal movement; vertical scrolling and widget holds keep their own gestures. */
+  /** Lock horizontal paging, or a downward pull from the top edge. Other vertical movement keeps scrolling. */
   _swipeMove(e) {
     const start = this._gesture;
     if (!start || start.pointerId !== e.pointerId || this._navigationBlocked()) return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
+    if (start.homePull) return;
     if (!start.dragging) {
       const axis = swipeAxis(dx, dy);
       if (axis === 'pending') return;
       if (axis === 'vertical') {
-        this._gesture = null;
+        if (start.homeEdge && dy > 0) {
+          start.homePull = true;
+          this._gesturePointerCancel();
+          capturePointer(e);
+        } else {
+          this._gesture = null;
+        }
         return;
       }
       start.dragging = true;
       this._gesturePointerCancel();
       // Follow the finger even when it slides off the tile that received the press.
-      try {
-        e.target?.setPointerCapture?.(e.pointerId);
-      } catch {
-        // The pointer can already have been released.
-      }
+      capturePointer(e);
     }
     this._dragPage(start, dx);
   },
@@ -84,6 +129,13 @@ export const navigationMixin = {
     this._gesture = null;
     if (!start || start.pointerId !== e.pointerId) {
       this._clearPageTransition();
+      return;
+    }
+    if (start.homePull) {
+      this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
+      if (homePullRelease(dx, dy)) this._act('home-view');
       return;
     }
     const dx = e.clientX - start.x;
@@ -97,6 +149,7 @@ export const navigationMixin = {
   _swipeCancel() {
     const start = this._gesture;
     this._gesture = null;
+    if (start?.homePull) this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
     if (start?.dragging) {
       this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
       this._settlePageDrag(start, 0);

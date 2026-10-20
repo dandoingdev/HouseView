@@ -58,7 +58,8 @@ and anything that needs attention. It works in landscape and portrait:
 * **Space to adjust things comfortably.** Open a light to drag its brightness up or down, set the heating on a full-screen
   thermostat, or browse your music favourites with artwork and swipeable pages.
 * **A useful home summary.** See the state of your home, run scenes, and check open doors, low batteries, lights left on
-  and devices that need attention. Battery warnings can find the relevant Home Assistant entities automatically.
+  and devices that need attention. Open it from the home button, or swipe down from the top of the display. Battery
+  warnings can find the relevant Home Assistant entities automatically.
 * **Useful while idle.** Choose weather, photos, a calendar or another full-screen view. Timers and playing music can
   bring up their own displays automatically.
 * **A consistent look.** Choose glass, soft, teal, silver or champagne, with light and dark appearances, high contrast
@@ -198,7 +199,7 @@ them and how to combine them.
 | [Clock](docs/overviews/clock.md) | `clock` | Analogue or digital idle screensaver; opened by pressing the card | none | `face`, `use_dashboard_background`, `background_color`, `second_color`, `show_seconds`, `show_date` | `custom:houseview-clock-overview-card` |
 | [World Clock](docs/overviews/world_clock.md) | `world_clock` | Opened by pressing the clock widget | none | `entities`, `show_local` | `custom:houseview-world-clock-overview-card` |
 | [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
-| [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
+| [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, a swipe down from the top, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
 | [Light view](docs/overviews/light.md) | `light` | Control panel opened by holding a light widget | `light.*` | `icon` | `custom:houseview-light-overview-card` |
 | [Thermostat view](docs/overviews/climate.md) | `climate` | Control panel opened by pressing the thermostat widget's number; not a screensaver choice | `climate.*` | `show_time` | `custom:houseview-climate-overview-card` |
 | [Vacuum view](docs/overviews/vacuum.md) | `vacuum` | Control panel opened by tapping a vacuum widget; not a screensaver choice | `vacuum.*` | none | `custom:houseview-vacuum-overview-card` |
@@ -257,7 +258,7 @@ More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel
 | `palette` | `stone`, `forest` |
 | `high_contrast`, `bedtime` | `true` / `false`; bedtime adds night styling and a Dim button |
 | `performance` | `auto`, `full`, `lite`: `lite` uses opaque glass and no decorative animation. `auto` picks it on a device with 2 GB of memory or less, 4 cores or fewer, or an old Android WebView |
-| `home_overview` | `true` adds a scrollable home screen (chips, cameras, scenes) built from your widgets behind a home button at the bottom left; `home_title` sets its title |
+| `home_overview` | `true` adds a scrollable home screen (chips, cameras, scenes) built from your widgets. The home button opens it, and so does a downward swipe from the top of the display; `home_title` sets its title |
 | `editor_preview` | `landscape` (default), `portrait` or `auto`: how the preview in the card editor is drawn. The card is laid out as a wall tablet and scaled to fit the preview, so it shows the real arrangement |
 
 See [theming](docs/theming.md) and [performance](docs/performance.md).
@@ -287,7 +288,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |
 | `tablet_mode` | The same as `?tablet=1`. Also the **Tablet mode** switch in the card editor |
 | `show_header` | Show the date on the left and time centred above every page |
-| `home_overview`, `home_title` | Show the home summary button and choose its title |
+| `home_overview`, `home_title` | Show the home summary (button and a swipe down from the top) and choose its title |
 | `home_attention` | Choose the doors, lights and devices to watch for attention |
 | `home_battery_auto` | Find low batteries automatically; see [Home summary](docs/overviews/home.md) |
 

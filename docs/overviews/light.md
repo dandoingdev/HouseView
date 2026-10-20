@@ -9,7 +9,9 @@ with an edge-to-edge flat yellow fill on pale grey-blue. A bold percentage and t
 The name, icon and percentage follow the entity. Close with the close key or Escape; the power key toggles the light
 and the settings key opens Home Assistant's more-info dialog.
 
-Drag anywhere on the control: the fill boundary follows the finger vertically and the percentage updates immediately.
+Drag anywhere on the control and the percentage updates immediately. A fingertip-wide band at the top selects
+100% and the same band at the bottom selects 0%, so an edge-to-edge screen can reach both ends without pressing
+the glass. The fill still runs the full height of the view.
 The brightness is committed on release through the widget's ordinary service action, with no writes during movement.
 A cancelled pointer gesture restores the starting value. The native range is also keyboard and screen-reader accessible:
 arrow keys adjust by one percent; Home and End select zero and full brightness. Changes made while a brightness call
@@ -31,8 +33,8 @@ type: custom:houseview-light-overview-card
 entity: light.living_room
 ```
 
-The same view can be placed on a carousel or used as a standalone card. Its fill has no animation so the boundary
-stays under the pointer, including with reduced motion and on low-performance devices.
+The same view can be placed on a carousel or used as a standalone card. Its fill has no animation, including
+with reduced motion and on low-performance devices, so the level does not lag the pointer.
 
 For colour-capable lights, the palette key beside power opens a full-screen colour field. Drag across the field
 for hue and saturation, with white at the centre. The marker follows your finger and changes apply as you move, with no confirmation key.

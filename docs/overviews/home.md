@@ -94,9 +94,12 @@ carousel's dark appearance.
 The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It can be a page of the dashboard (the
 chips, cameras and scenes are buttons) or a **screensaver**: choose **Home summary** in the editor's screensaver list
 (or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
-full-screen view it remains interactive: scene tiles run their scenes, and the close button or Escape returns to the dashboard. The screensaver shows the carousel's lights, climate,
-locks, cameras and scenes, so it follows what you add. A page that holds only this overview also takes the overview's
-colour for the whole page background, and the page dots change colour to match.
+full-screen view it remains interactive: scene tiles run their scenes, and the close button or Escape returns to the
+dashboard. With `home_overview: true` on the carousel, the home button opens this screen, and a downward swipe from the
+top of the display does the same. On a short panel that top band is taller, which is the easier reach when the button
+sits in the navigation. The screensaver shows the carousel's lights, climate, locks, cameras and scenes, so it follows
+what you add. A page that holds only this overview also takes the overview's colour for the whole page background, and
+the page dots change colour to match.
 
 ```yaml
 type: custom:houseview-card

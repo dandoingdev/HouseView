@@ -1050,6 +1050,78 @@ describe('navigation', () => {
       assert.equal(card._pageIndex, 0);
     });
 
+    it('opens the home summary on a downward swipe from the top of the display', () => {
+      const {card} = pagedCard({reduced: true});
+      card._config = {home_overview: true};
+      const opened = [];
+      card._act = (action) => opened.push(action);
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(220, 40));
+      card._swipeMove(touch(230, 100));
+      card._swipeEnd(touch(230, 100));
+      assert.deepEqual(opened, ['home-view']);
+      assert.equal(card._pageIndex, 0);
+      assert.ok(card._suppressClickUntil > Date.now());
+    });
+
+    it('uses a taller top band on a short display', () => {
+      const {card} = pagedCard({reduced: true});
+      card._config = {home_overview: true};
+      card.getBoundingClientRect = () => ({top: 20, width: 480, height: 480});
+      const opened = [];
+      card._act = (action) => opened.push(action);
+      card._swipeStart(touch(200, 80)); // 60 px into a 480 px display: inside the short band
+      card._swipeMove(touch(210, 160));
+      card._swipeEnd(touch(210, 160));
+      assert.deepEqual(opened, ['home-view']);
+      opened.length = 0;
+      card._swipeStart(touch(200, 100)); // 80 px down: below the band, so it stays a scroll
+      card._swipeMove(touch(210, 180));
+      card._swipeEnd(touch(210, 180));
+      assert.deepEqual(opened, []);
+      assert.equal(card._pageIndex, 0);
+    });
+
+    it('keeps a sideways swipe from the top as paging', () => {
+      const {card} = pagedCard({reduced: true});
+      card._config = {home_overview: true};
+      const opened = [];
+      card._act = (action) => opened.push(action);
+      card._swipeStart(touch(300, 8));
+      card._swipeMove(touch(160, 30));
+      card._swipeEnd(touch(160, 30));
+      assert.deepEqual(opened, []);
+      assert.equal(card._pageIndex, 1);
+    });
+
+    it('does not open the home summary when the pull is short, upward, disabled, or already showing', () => {
+      const {card} = pagedCard({reduced: true});
+      const opened = [];
+      card._act = (action) => opened.push(action);
+      card._config = {home_overview: true};
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(206, 40)); // downward, but not far enough
+      card._swipeEnd(touch(206, 40));
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 8 - 80));
+      card._swipeEnd(touch(210, 8 - 80));
+      card._config = {home_overview: false};
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 120));
+      card._swipeEnd(touch(210, 120));
+      card._config = {home_overview: true, single_widget: true};
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 120));
+      card._swipeEnd(touch(210, 120));
+      card._config = {home_overview: true};
+      card._screens[0].placements = [{widget: {type: 'home_overview'}}];
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 120));
+      card._swipeEnd(touch(210, 120));
+      assert.deepEqual(opened, []);
+      assert.equal(card._pageIndex, 0);
+    });
+
     it('is not a swipe when short, steep or slow', () => {
       const {card} = pagedCard({reduced: true});
       card._swipeStart(touch(300, 100));
