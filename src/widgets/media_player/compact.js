@@ -1,5 +1,5 @@
-// A tiny panel tile keeps its quick keys. Tapping the track opens the full-screen player; holding it
-// still opens speaker settings (the dots are hidden in that layout).
+// A tiny panel tile keeps its quick keys. Tapping or holding the track opens the full-screen player.
+// Speaker settings stay on the title inside that player (the dots are hidden on the tile).
 import {isTinyPlayer} from './player.js';
 
 const optionsLabel = (ctx) =>

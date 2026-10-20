@@ -8,8 +8,8 @@ a **surface** per page (or one **wallpaper** for every page), the **appearance**
 
 | Option | Where | Values |
 | --- | --- | --- |
-| `surface` | each page | `glass` (default), `soft`, `teal`, `silver`, `champagne` |
-| `wallpaper` | the carousel | `teal`, `silver`, `champagne`, or leave out to use each page's `surface` |
+| `surface` | each page | `glass` (default), `soft`, `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk`, `blush` |
+| `wallpaper` | the carousel | `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk`, `blush`, or leave out to use each page's `surface` |
 | `appearance` | the carousel (default `auto`) or a standalone card (default `light`) | `auto`, `light`, `dark` |
 | `palette` | the carousel | `stone` (default), `forest` |
 | `high_contrast` | the carousel | `true` for stronger fills and edges |
@@ -34,6 +34,10 @@ pages:
 | `teal` | Glass over an illustrated folded-ribbon background |
 | `silver` | Glass over a silver ribbon background |
 | `champagne` | Glass over a warm ribbon background |
+| `sage` | The same ribbons in muted green |
+| `slate` | The same ribbons in blue-grey |
+| `dusk` | The same ribbons in plum |
+| `blush` | The same ribbons in dusty rose |
 
 The ribbon and fold backgrounds are built into the plugin as part of the one file: there are no files to host. The
 backgrounds are original artwork shipped with HouseView.

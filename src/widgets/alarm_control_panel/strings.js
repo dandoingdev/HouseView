@@ -3,6 +3,7 @@ export default {
   en: {
     'alarm_control_panel.label': 'Alarm panel',
     'alarm_control_panel.description': 'Show the alarm state and open its arming controls.',
-    'alarm_control_panel.note': 'Open arming controls'
+    'alarm_control_panel.note': 'Open arming controls',
+    'alarm_control_panel.confirm_disarm': 'Disarm {name}?'
   }
 };

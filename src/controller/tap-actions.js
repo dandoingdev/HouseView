@@ -14,9 +14,20 @@ export function configuredWidgetOf(card, button) {
 
 const SETTINGS_ACTIONS = new Set(['info', 'light-view', 'climate-view']);
 
-/** Settings keys open on hold. A tiny player's track title also opens on tap, and still holds for settings. */
+/** Settings keys open on hold. A tiny player's track title opens the full player on hold as well as tap. */
 const holdable = (action) =>
   SETTINGS_ACTIONS.has(action) || String(action || '').startsWith('media-player-expand-');
+
+/** Full-screen player opened from a compact music tile, or null. */
+function expandPress(button) {
+  const direct = button?.dataset?.action || '';
+  if (direct.startsWith('media-player-expand-')) return {action: direct, entity: button.dataset.entity};
+  const tile = button?.classList?.contains('mc-compact') ? button : button?.closest?.('.mc-compact');
+  const details = tile?.querySelector?.('.mc-details');
+  const action = details?.dataset?.action || '';
+  if (!action.startsWith('media-player-expand-')) return null;
+  return {action, entity: details.dataset.entity};
+}
 
 function pressTarget(card, target) {
   if (target?.closest?.('.hv-screensaver, .ov-scene')) return null;
@@ -91,8 +102,13 @@ export const tapActionsMixin = {
           },
           onHold: () => {
             const current = widgetNow();
-            if (!entry.button?.isConnected || entry.button.disabled || !current) return;
+            const target = entry.button;
+            if (!target?.isConnected || target.disabled || !current) return;
+            const expand = expandPress(target);
+            // A configured hold_action stays the override. Otherwise a compact player opens full screen
+            // before speaker settings, which remain on the title inside that player.
             if (current.hold_action != null) run('hold_action');
+            else if (expand) this._act(expand.action, expand.entity);
             else {
               const action = settingsAction(this, current);
               if (action) this._act(action, current.entity);
@@ -126,11 +142,13 @@ export const tapActionsMixin = {
     if (!pressed) return false;
     event.preventDefault();
     if (this._activeGesture) return true;
+    const expand = expandPress(pressed.button);
     if (pressed.widget.hold_action != null) {
       runActionConfig(this, pressed.widget, 'hold_action').catch((error) => {
         console.error('[HouseView] hold_action failed', error);
       });
-    } else if (pressed.action) this._act(pressed.action, pressed.widget.entity);
+    } else if (expand) this._act(expand.action, expand.entity);
+    else if (pressed.action) this._act(pressed.action, pressed.widget.entity);
     return true;
   },
 

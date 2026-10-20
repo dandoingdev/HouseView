@@ -9,12 +9,13 @@ import {esc} from '../core/html.js';
 import {t} from '../core/i18n.js';
 import {widgetHassChanged} from '../core/hass-signature.js';
 import {getWidget} from '../core/registry.js';
+import {SATIN_SURFACES, WALLPAPER_SURFACES} from '../core/surfaces.js';
 
 /** A page that holds the home summary alone: the whole page takes the overview's colour (no wallpaper around it). */
 export const isHomePage = (screen) =>
   screen?.placements?.length === 1 && screen.placements[0].widget?.type === 'home_overview';
 
-const SURFACES_WITH_WALLPAPER = ['teal', 'silver', 'champagne'];
+const SURFACES_WITH_WALLPAPER = WALLPAPER_SURFACES;
 
 export const renderMixin = {
   /** Dark when asked for, or when "auto" and Home Assistant is in dark mode. */
@@ -64,7 +65,8 @@ export const renderMixin = {
     // header until the sync below; slow panels lay that gap out and the page jumps up between swipes.
     const headerOn = this._headerHeight() > 0;
     this._reserveHeaderSpace(shell);
-    shell.className = `shell adaptive carousel surface-${surface} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}${headerOn ? ' has-header' : ''}`;
+    const satin = SATIN_SURFACES.includes(surface) ? ' surface-satin' : '';
+    shell.className = `shell adaptive carousel surface-${surface}${satin} layout-page ${extra} ${config.bedtime ? 'night-mode' : ''} ${this._dim ? 'screen-dim' : ''} ${dark ? 'dark' : ''} ${config.palette === 'forest' ? 'forest' : ''} ${config.high_contrast ? 'contrast' : ''} ${config.single_widget ? 'single-widget' : ''}${this._perf === 'lite' ? ' perf-lite' : ''}${isHomePage(screen) ? ' surface-home' : ''}${headerOn ? ' has-header' : ''}`;
 
     this._syncDashboardHeader(shell);
     const face = shell.querySelector('.face');

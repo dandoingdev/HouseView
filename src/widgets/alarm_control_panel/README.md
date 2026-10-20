@@ -8,8 +8,14 @@ since: 1.0
 
 Shows an `alarm_control_panel.*` entity as an icon widget with its name, its state and the hint "Open arming
 controls". The widget is highlighted and uses the check shield while the state starts with `armed` (`armed_home`,
-`armed_away`, ...); otherwise it shows the moon shield. A long press opens the Home Assistant more-info dialog, which holds
-the arming keypad. HouseView never arms or disarms the alarm itself. An unavailable or unknown alarm is shown disabled.
+`armed_away`, ...); otherwise it shows the moon shield. An unavailable or unknown alarm is shown disabled.
+
+Tap the tile to open the [alarm view](../overviews/alarm_control_panel.md): Home, Away, Night and Holiday (the modes the
+panel advertises) and Disarm. Arming starts from disarmed, and disarming asks to confirm first. Nothing is sent when the
+tile is opened. HouseView has no keypad: when the panel wants a code, those keys stay disabled and the view points to
+Home Assistant's own dialog, which a hold on the tile opens.
+
+`alarm_view: false` on the carousel leaves the tile on Home Assistant's dialog, opened with a hold, the same way as the other widgets.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -27,7 +33,7 @@ entity: alarm_control_panel.home
 The widget works with any `alarm_control_panel` entity (the built-in manual alarm, a hardware panel integration, and so
 on). It is most often used with **[Alarmo](https://github.com/nielsfaber/alarmo)**, a community alarm system for Home
 Assistant. HouseView does not include or depend on Alarmo's code: Alarmo has to be installed and set up on its own, and
-HouseView only shows the entity it creates and opens Home Assistant's own arming dialog.
+HouseView only shows the entity it creates, and arms or disarms it when you press a key.
 
 1. Install Alarmo through HACS (search for **Alarmo**, category Integration) and restart Home Assistant.
 2. Go to **Settings > Devices & services > Add integration**, add **Alarmo**, then open the **Alarmo** panel in the
@@ -43,6 +49,6 @@ entity: alarm_control_panel.alarmo
 name: Alarm
 ```
 
-Holding the widget opens the more-info dialog, where you choose a mode and enter the code Alarmo asks for. The widget is
+Tapping the widget opens the alarm view, which arms and disarms a panel that has no code. When Alarmo asks for a code, hold the widget to open the more-info dialog, where you choose a mode and enter it. The widget is
 highlighted while the alarm is armed and shows its state (`disarmed`, `armed_home`, `arming`, `pending`, `triggered`, ...)
 as Home Assistant reports it.

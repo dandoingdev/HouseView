@@ -109,7 +109,11 @@ try {
   for (const [wallpaper, expected] of [
     ['teal', 'rgb(12, 85, 85)'],
     ['silver', 'rgb(129, 133, 132)'],
-    ['champagne', 'rgb(150, 125, 104)']
+    ['champagne', 'rgb(150, 125, 104)'],
+    ['sage', 'rgb(115, 132, 114)'],
+    ['slate', 'rgb(108, 123, 141)'],
+    ['dusk', 'rgb(122, 106, 126)'],
+    ['blush', 'rgb(160, 124, 118)']
   ]) {
     await page.evaluate((wallpaper) => {
       window.card.setConfig({...window.clockConfig, wallpaper});

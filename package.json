@@ -38,6 +38,7 @@
     "size": "node tools/size-check.mjs",
     "release": "node tools/release.mjs",
     "deploy": "node tools/deploy.mjs",
+    "bump-cache": "node tools/bump-cache.mjs",
     "test:overviews:light": "node tests/overviews/light-input.mjs",
     "test:media:seek": "node tests/media-seek-input.mjs",
     "test:media:library": "node tools/run-tests.mjs tests/media-library.html --target=dist && node tests/media-library-input.mjs",

@@ -6,7 +6,7 @@ The contract of an overview module. An overview is a full-screen view that House
 | --- | --- |
 | **Idle screensaver** (`activation: 'idle'`, the default) | After `idle_timeout` seconds without a touch, as an entry of the carousel's `screensaver` option |
 | **Event display** (`activation: 'event'`) | The overview's own `autoShow` predicate turns true (a timer starts) |
-| **Opened by pressing a widget** | A clock widget opens World Clock (`world-clock-view`); a date or calendar widget opens the month calendar (`calendar-view`); a weather widget opens the weather scene (`weather-view`); a thermostat widget opens the thermostat view (`climate-view`); a vacuum widget opens the cleaning panel (`vacuum-view`); a weather overview or photo frame card opens its full-screen view (`overview-open`) |
+| **Opened by pressing a widget** | A clock widget opens World Clock (`world-clock-view`); a date or calendar widget opens the month calendar (`calendar-view`); a weather widget opens the weather scene (`weather-view`); a thermostat widget opens the thermostat view (`climate-view`); a vacuum widget opens the cleaning panel (`vacuum-view`); an alarm panel widget opens the alarm view (`alarm-view`); a weather overview or photo frame card opens its full-screen view (`overview-open`) |
 | **Card** | Placed on a page or on a dashboard as `custom:houseview-<name>-overview-card` |
 
 One module serves all of them: `render(ctx, mode)` is called with `mode` `'screensaver'` or `'card'`. The framework adds
@@ -76,7 +76,7 @@ export default defineOverview({
 | `controls` | `false` | Needs `interactive`. `true` makes the full-page layer a **control panel** (see "Control panels" below): the buttons stay in screensaver mode, a press on one runs its action, a press elsewhere does nothing, and the layer closes through an `overview-close` button or Escape |
 | `manualClose` | `false` | A layer opened from a button stays until its close button or Escape. A tap on the scene does nothing. The idle screensaver still dismisses on the first tap (weather) |
 | `actions` | `[]` | `controls` only. Widget action names the buttons may carry besides `INTERACTIVE_ACTIONS` (the thermostat view: `up`, `down`). Each must be an action a widget registers |
-| `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list (the timer display, cover art and the home summary). It can still be written in YAML |
+| `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list. Only the clock, photo frame, weather and home summary are offered; the others (month calendar, world clock, timer display, cover art, the control panels) are overlays, automatic displays or cards. It can still be written in YAML |
 | `data({hass, options, entityId})` | none | Subscriptions, keyed by the name `render` reads from `ctx.data[name]` (section 6) |
 | `afterRender(hctx)` | none | After a card-mode root is created or patched; idempotent |
 | `tick` | none | `{every, run, align?}` on the shared ticker while the overview is on screen. `align: 'minute'` runs when the minute changes |
@@ -211,6 +211,8 @@ with the predicate already true. It replaces whatever layer is showing. It is no
   has one. Skipped when the card has `climate_view: false` (the widget then renders `info` instead).
 * **`vacuum-view`**: a vacuum widget asks for the overview named `vacuum` with its entity, and its `name` when it
   has one. Skipped when the card has `vacuum_view: false` (the widget then renders `info` instead).
+* **`alarm-view`**: an alarm panel widget asks for the overview named `alarm_control_panel` with its entity, and its
+  `name` when it has one. Skipped when the card has `alarm_view: false` (the widget then renders `info` instead).
 * **`overview-open`**: a card with `display: tile`, or an overview with `tap: {card: 'open'}` (photo frame), opens its own
   overview.
 

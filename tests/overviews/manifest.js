@@ -2,6 +2,10 @@
 
 // Each entry lazily imports a widget's browser test; the module default-exports `async (harness) => {}`.
 export const manifest = [
+  {
+    type: 'alarm_control_panel',
+    load: () => import('../../src/overviews/alarm_control_panel/test.js')
+  },
   {type: 'calendar_month', load: () => import('../../src/overviews/calendar_month/test.js')},
   {type: 'climate', load: () => import('../../src/overviews/climate/test.js')},
   {type: 'clock', load: () => import('../../src/overviews/clock/test.js')},

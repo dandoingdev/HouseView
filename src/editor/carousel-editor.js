@@ -10,6 +10,7 @@ import {fromCard, onPage, toCards} from '../config/convert.js';
 import {fireEvent} from '../core/events.js';
 import {AUTOMATIC_DISPLAYS, overviewList} from '../core/overview-registry.js';
 import {PERFORMANCE_MODES} from '../core/performance.js';
+import {PAGE_SURFACES, WALLPAPER_SURFACES} from '../core/surfaces.js';
 import {
   applyAutomatic,
   automaticData,
@@ -40,7 +41,7 @@ const APPEARANCE_DEFAULTS = {
   show_header: false,
   tablet_mode: false
 };
-const SURFACES = ['glass', 'soft', 'teal', 'silver', 'champagne'];
+const SURFACES = PAGE_SURFACES;
 
 const newPage = (name, surface = 'glass') => ({name, surface});
 
@@ -100,7 +101,7 @@ export const appearanceSchema = (hass) => [
   field('show_header', {boolean: {}}),
   field('tablet_mode', {boolean: {}}),
   field('appearance', select(hass, ['auto', 'light', 'dark'])),
-  field('wallpaper', select(hass, ['page', 'teal', 'silver', 'champagne'])),
+  field('wallpaper', select(hass, ['page', ...WALLPAPER_SURFACES])),
   field('palette', select(hass, ['stone', 'forest'])),
   field('bedtime', {boolean: {}}),
   field('high_contrast', {boolean: {}}),

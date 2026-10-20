@@ -301,6 +301,32 @@ export default async function ({mount, check, variants, advance, settle}) {
     'close returns to the tile',
     !t.q('.media-stage') && t.q('.face .mc-details') && !t.card._navigationBlocked()
   );
+  t = await mount(variants.ok, {width: 225, height: 178});
+  const small = t.q('.mc');
+  small.style.width = '225px';
+  small.style.height = '178px';
+  await settle(50);
+  const smallAction = t.q('.mc-details').dataset.action;
+  await t.hold('.mc-details');
+  const opened = t.q('.media-stage');
+  const smallHold =
+    smallAction.startsWith('media-player-expand-') &&
+    !!opened &&
+    t.infos.length === 0 &&
+    t.calls.length === 0;
+  if (!smallHold) {
+    console.error(
+      'small player hold',
+      JSON.stringify({
+        size: `${small.clientWidth}x${small.clientHeight}`,
+        action: smallAction,
+        stage: !!opened,
+        infos: t.infos,
+        calls: t.calls.length
+      })
+    );
+  }
+  check('holding the track on a small player opens the full player first', smallHold);
   await t.act('media-player-expand-0', ENTITY);
   t.root.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
   await settle();

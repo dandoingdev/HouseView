@@ -142,6 +142,20 @@ export const featureActions = freeze({
       });
     }
   }),
+  // The alarm tile: the full-screen arming view. Nothing is called on Home Assistant.
+  'alarm-view': freeze({
+    immediate: true,
+    run: (ctx, id) => {
+      if (ctx.card._config?.alarm_view === false || !ctx.availableOf(id)) return undefined;
+      const widget = ctx.card._config?.widgets?.find(
+        (w) => w.type === 'alarm_control_panel' && w.entity === id
+      );
+      return ctx.card._screensaverOpenType?.('alarm_control_panel', {
+        entity: id,
+        ...(widget?.name ? {name: widget.name} : {})
+      });
+    }
+  }),
   'home-view': freeze({
     immediate: true,
     run: (ctx) =>

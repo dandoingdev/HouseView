@@ -32,6 +32,7 @@ export const FEATURE_ACTIONS = [
   'weather-view',
   'climate-view',
   'vacuum-view',
+  'alarm-view',
   'goto-widget',
   'page-prev',
   'page-next',

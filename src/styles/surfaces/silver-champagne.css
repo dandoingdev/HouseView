@@ -1,6 +1,7 @@
-/* @owns carousel surface-silver surface-champagne face tile widget control active page-nav manage dim-screen home-button night-mode camera-gallery calendar-month */
+/* @owns carousel surface-satin surface-silver surface-champagne surface-sage surface-slate surface-dusk surface-blush face tile widget control active page-nav manage dim-screen home-button night-mode camera-gallery calendar-month */
 /*
- * Silver and champagne surface rules, wallpaper url()s and every user of --hv-wallpaper.
+ * Satin ribbon surfaces: silver, champagne, sage, slate, dusk and blush. Each sets its picture;
+ * `.surface-satin` is the shared glass. Teal is a different picture and lives in teal.css.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
  * sections inside one phase.
  */
@@ -26,50 +27,86 @@
 }
 
 /* @important overrides an earlier !important rule */
-.carousel:is(.surface-silver,.surface-champagne) .face {
+.carousel.surface-sage {
+  --hv-glass: #46544480;
+  --hv-edge: #f4fff090;
+  --hv-wallpaper: url('../assets/sage-ribbons.svg');
+  background: #738472 var(--hv-wallpaper) center/cover !important;
+  color: #fff;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-slate {
+  --hv-glass: #3a4a5c80;
+  --hv-edge: #eef5ff90;
+  --hv-wallpaper: url('../assets/slate-ribbons.svg');
+  background: #6c7b8d var(--hv-wallpaper) center/cover !important;
+  color: #fff;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-dusk {
+  --hv-glass: #4c3c5080;
+  --hv-edge: #fff0fa90;
+  --hv-wallpaper: url('../assets/dusk-ribbons.svg');
+  background: #7a6a7e var(--hv-wallpaper) center/cover !important;
+  color: #fff;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-blush {
+  --hv-glass: #68444080;
+  --hv-edge: #fff2ee90;
+  --hv-wallpaper: url('../assets/blush-ribbons.svg');
+  background: #a07c76 var(--hv-wallpaper) center/cover !important;
+  color: #fff8f6;
+}
+
+/* @important overrides an earlier !important rule */
+.carousel.surface-satin .face {
   background: transparent !important;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .face::before {
+.carousel.surface-satin .face::before {
   display: none;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .tile.widget {
+.carousel.surface-satin .tile.widget {
   background: linear-gradient(145deg,#ffffff1f,#ffffff05),var(--hv-glass);
   border-color: var(--hv-edge);
   color: inherit;
   text-shadow: 0 1px 2px #20252c66;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .control.active {
+.carousel.surface-satin .control.active {
   background: linear-gradient(145deg,#ffffff48,#ffffff18),var(--hv-glass);
   border-color: #ffffffd9;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .page-nav {
+.carousel.surface-satin .page-nav {
   background: transparent;
   color: inherit;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .dim-screen,
-.carousel:is(.surface-silver,.surface-champagne) .home-button {
+.carousel.surface-satin .dim-screen,
+.carousel.surface-satin .home-button {
   background: #39404b45;
   color: inherit;
   border-color: #fff5;
 }
 
 /* @important overrides an earlier !important rule */
-.carousel:is(.surface-silver,.surface-champagne).night-mode {
+.carousel.surface-satin.night-mode {
   background-image: linear-gradient(#14192438,#14192438),var(--hv-wallpaper) !important;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .camera-gallery {
+.carousel.surface-satin .camera-gallery {
   background: #777c7c var(--hv-wallpaper) center/cover;
   color: inherit;
 }
 
 /* shared: calendar, date */
-.carousel:is(.surface-silver,.surface-champagne) .calendar-month {
+.carousel.surface-satin .calendar-month {
   color: inherit;
   opacity: .8;
 }

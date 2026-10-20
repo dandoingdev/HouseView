@@ -137,10 +137,15 @@ test('automatic displays are not offered in the screensaver list, but one writte
   const values = (data) =>
     screensaverSchema({}, data)[0].selector.select.options.map((option) => option.value);
   const offered = values({});
-  for (const type of ['weather', 'photo_frame', 'calendar_month'])
-    assert.ok(offered.includes(type), type);
-  for (const type of ['timer', 'cover_art'])
-    assert.ok(!offered.includes(type), `${type} is automatic`);
+  assert.deepEqual(
+    offered.filter((type) => type && type !== 'demo').sort(), // '' is Off; demo is this file's own
+    ['clock', 'home', 'photo_frame', 'weather'],
+    'the editor offers Clock, Photo frame, Weather and Home summary only'
+  );
+  assert.ok(
+    values({type: 'calendar_month'}).includes('calendar_month'),
+    'a configured month calendar is still shown'
+  );
   assert.ok(
     values({type: 'timer'}).includes('timer'),
     'a configured automatic display is still shown'

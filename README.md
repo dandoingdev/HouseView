@@ -77,7 +77,7 @@ and anything that needs attention. It works in landscape and portrait:
   warnings can find the relevant Home Assistant entities automatically.
 * **Useful while idle.** Choose weather, photos, a calendar or another full-screen view. Timers and playing music can
   bring up their own displays automatically.
-* **A consistent look.** Choose glass, soft, teal, silver or champagne, with light and dark appearances, high contrast
+* **A consistent look.** Choose glass, soft, teal, silver, champagne, sage, slate, dusk or blush, with light and dark appearances, high contrast
   and a bedtime mode with a Dim button.
 * **Made for wall tablets and square panels.** Large touch targets, a camera grid and an optional tablet mode that hides
   Home Assistant's sidebar and header. A lighter appearance helps older tablets and an NSPanel Pro keep up. On a
@@ -198,7 +198,7 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 | [Weather](docs/widgets/weather.md) | `weather` | `weather.*` | | Opens the entity dialog |
 | [Music](docs/widgets/media_player.md) | `media_player` | `media_player.*` | | Transport, volume, shuffle and repeat keys; a small tile opens the full player; the dots open the dialog |
 | [Timer](docs/widgets/timer.md) | `timer` | `timer.*` | | Presets start the timer; pause, resume, cancel |
-| [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the arming dialog (never arms by itself). Works with any alarm entity, e.g. [Alarmo](#works-with-alarmo) |
+| [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the alarm view to arm and disarm (or the dialog on hold with `alarm_view: false`). Works with any alarm entity, e.g. [Alarmo](#works-with-alarmo) |
 | [Vacuum](docs/widgets/vacuum.md) | `vacuum` | `vacuum.*` | `icon` | Opens the cleaning panel (or the dialog on hold with `vacuum_view: false`) |
 | [Action](docs/widgets/action.md) | `action` | `scene.*`, `script.*`, `button.*`, `input_button.*` | `icon`, `note` | Runs the scene, script or button |
 
@@ -216,11 +216,12 @@ them and how to combine them.
 | [Volume view](docs/overviews/volume.md) | `volume` | Opened by the music volume button | `media_player.*` | none | `custom:houseview-volume-overview-card` |
 | [Clock](docs/overviews/clock.md) | `clock` | Analogue or digital idle screensaver; opened by pressing the card | none | `face`, `use_dashboard_background`, `background_color`, `second_color`, `show_seconds`, `show_date` | `custom:houseview-clock-overview-card` |
 | [World Clock](docs/overviews/world_clock.md) | `world_clock` | Opened by pressing the clock widget | none | `entities`, `show_local` | `custom:houseview-world-clock-overview-card` |
-| [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Idle screensaver; opened by pressing a date or calendar widget | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
+| [Month calendar](docs/overviews/calendar_month.md) | `calendar_month` | Opened by pressing a date or calendar widget; idle screensaver in YAML only | none | `week_start`, `show_time` | `custom:houseview-calendar-month-overview-card` |
 | [Home summary](docs/overviews/home.md) | `home` | A page of the dashboard, the home button, a swipe down from the top, or an idle screensaver | none (built from the carousel's widgets) | `title`, `show_time` | `custom:houseview-home-overview-card` |
 | [Light view](docs/overviews/light.md) | `light` | Control panel opened by holding a light widget | `light.*` | `icon` | `custom:houseview-light-overview-card` |
 | [Thermostat view](docs/overviews/climate.md) | `climate` | Control panel opened by pressing the thermostat widget's number; not a screensaver choice | `climate.*` | `show_time` | `custom:houseview-climate-overview-card` |
 | [Vacuum view](docs/overviews/vacuum.md) | `vacuum` | Control panel opened by tapping a vacuum widget; not a screensaver choice | `vacuum.*` | none | `custom:houseview-vacuum-overview-card` |
+| [Alarm view](docs/overviews/alarm_control_panel.md) | `alarm_control_panel` | Control panel opened by tapping an alarm panel widget; not a screensaver choice | `alarm_control_panel.*` | none | `custom:houseview-alarm-control-panel-overview-card` |
 
 ```yaml
 type: custom:houseview-card
@@ -244,15 +245,15 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 | `weather_view` | `true` | `false` makes the weather widget open more-info instead of the full-screen weather |
 | `climate_view` | `true` | `false` makes the thermostat widget open more-info instead of the full-screen thermostat view |
 | `vacuum_view` | `true` | `false` makes the vacuum widget open more-info on hold instead of the full-screen cleaning panel |
+| `alarm_view` | `true` | `false` makes the alarm panel widget open more-info on hold instead of the full-screen alarm view |
 
 Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Passive overviews only read data. Light and thermostat control panels route explicit button and slider input through the same guarded actions as their widgets.
 
 ## Works with Alarmo
 
-The alarm panel widget shows any `alarm_control_panel` entity and opens Home Assistant's own arming dialog when pressed.
+The alarm panel widget shows any `alarm_control_panel` entity. Tapping it opens the alarm view, where you arm Home, Away, Night or Holiday and disarm (disarming asks to confirm). A panel that wants a code is finished in Home Assistant's own dialog: hold the tile, or use the Code key in the view.
 It pairs naturally with **[Alarmo](https://github.com/nielsfaber/alarmo)**, a community alarm system for Home Assistant. Alarmo is a
-separate project that you install and configure yourself; HouseView does not bundle it and never arms or disarms anything on
-its own.
+separate project that you install and configure yourself; HouseView does not bundle it, and arms or disarms only when you press a key.
 
 1. Install Alarmo through HACS (category Integration) and restart Home Assistant.
 2. Add the **Alarmo** integration under **Settings > Devices & services**, then use the **Alarmo** sidebar panel to set up areas,
@@ -270,8 +271,8 @@ More detail is in the [alarm panel widget page](docs/widgets/alarm_control_panel
 
 | Option | Values |
 | --- | --- |
-| `surface` (per page) | `glass`, `soft`, `teal`, `silver`, `champagne` |
-| `wallpaper` | `teal`, `silver`, `champagne`: one background behind every page |
+| `surface` (per page) | `glass`, `soft`, `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk`, `blush` |
+| `wallpaper` | `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk`, `blush`: one background behind every page |
 | `appearance` | `auto` (follows Home Assistant), `light`, `dark` |
 | `palette` | `stone`, `forest` |
 | `high_contrast`, `bedtime` | `true` / `false`; bedtime adds night styling and a Dim button |
@@ -300,7 +301,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |
 | `screensaver` | An overview or a list of them: `type`, `entity`, `idle_timeout`, `enabled`, `preview`, `start_in_edit_mode`, plus the overview's own options |
-| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `vacuum_view`, `world_clock_view` | The automatic displays |
+| `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `vacuum_view`, `alarm_view`, `world_clock_view` | The automatic displays |
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
 | `state_compare` | `auto`, `reference` or `deep`: how state changes are detected (leave at `auto`) |

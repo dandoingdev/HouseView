@@ -442,6 +442,8 @@ export async function runSuite({params, results, summary, stage}) {
       const probe = createHandle({type: entry.type, env, stage, check: () => {}, variants});
       try {
         const t = await probe.mount(variants.ok, {mode: 'screensaver', event: true});
+        // A control panel is operated, not tapped away: the zero-impact flow dismisses with a tap.
+        if (t.card._screensaver?.entries[0]?.overview?.controls) continue;
         const activation = t.card._screensaver?.entries[0]?.event ? 'event' : 'idle';
         if (!kinds.has(activation)) kinds.set(activation, {entry, variants});
       } finally {

@@ -260,7 +260,8 @@ export const screensaverMixin = {
       calendar_month: 'calendar_view',
       weather: 'weather_view',
       climate: 'climate_view',
-      vacuum: 'vacuum_view'
+      vacuum: 'vacuum_view',
+      alarm_control_panel: 'alarm_view'
     }[type];
     if (!this._hass || !getOverview(type) || (optOut && this._config?.[optOut] === false)) return;
     const [entry] = normalizeScreensaver({

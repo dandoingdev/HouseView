@@ -20,7 +20,7 @@ be used four ways:
 | [Timer display](overviews/timer.md) | `timer` | event (while the timer is `active`), automatic with `timer_display`, card | `timer.*` | none | Screensaver: closes it. Card: more-info |
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |
 | [Photo frame](overviews/photo_frame.md) | `photo_frame` | idle (screensaver), card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | Card: opens it full screen |
-| [Month calendar](overviews/calendar_month.md) | `calendar_month` | idle (screensaver), opened by pressing a date or calendar widget, card | none | `week_start`, `show_time` | Card: nothing |
+| [Month calendar](overviews/calendar_month.md) | `calendar_month` | opened by pressing a date or calendar widget, card; idle screensaver in YAML only | none | `week_start`, `show_time` | Card: nothing |
 | [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button or a swipe down from the top | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
 
 Card types are `custom:houseview-<name>-overview-card` with the name in the table's `type` column, underscores written as
@@ -53,6 +53,9 @@ screensaver:
 ```
 
 The carousel editor has a **Screensaver** section with the same fields. It edits the first entry; a list is edited in YAML.
+It offers four screensavers: **Clock**, **Photo frame**, **Weather** and **Home summary**. Every other overview (the month
+calendar, world clock, timer display, cover art and the control panels) still works as an overlay, an automatic display
+or a card, and can be written as a `screensaver` entry in YAML, but is not in the editor's list.
 
 | Key | Default | What it does |
 | --- | --- | --- |
@@ -75,7 +78,7 @@ Only the carousel (`custom:houseview-card`) has a screensaver; a standalone widg
 screensaver:
   - {type: weather, entity: weather.home, idle_timeout: 90}
   - {type: photo_frame, folder: media-source://media_source/local/Photos, idle_timeout: 90}
-  - {type: calendar_month, idle_timeout: 90}
+  - {type: clock, idle_timeout: 90}
 ```
 
 Each time the screensaver starts it shows the next **enabled** entry, round robin. The timeout is the one of the entry
@@ -193,6 +196,10 @@ you flip that switch.
 * **Vacuum view.** Tapping a vacuum widget opens the [vacuum view](overviews/vacuum.md): activity, battery, fan
   speed, and the cleaning commands the vacuum supports. It is a control panel. Turn this off with `vacuum_view: false`
   on the carousel; a hold on the tile then opens the entity dialog.
+* **Alarm view.** Tapping an alarm panel widget opens the [alarm view](overviews/alarm_control_panel.md): the state, a
+  key for each arming mode the panel supports, and Disarm. It is a control panel. A panel that wants a code is finished
+  in Home Assistant's dialog. Turn this off with `alarm_view: false` on the carousel; a hold on the tile then opens the
+  entity dialog.
 * **Photo frame.** The photo frame card opens full screen when pressed.
 
 These layers are one-off: they never start by themselves, they run even in edit mode, and the first tap on them only closes

@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import puppeteer from 'puppeteer-core';
+import {PAGE_SURFACES} from '../src/core/surfaces.js';
 import {startServer} from './serve.mjs';
 
 const CHROME =
@@ -112,7 +113,7 @@ async function measure(config, name, mode) {
 
 let worst = 0;
 console.log('combination                         full            lite            delta');
-for (const surface of ['glass', 'teal', 'silver', 'champagne', 'soft']) {
+for (const surface of PAGE_SURFACES) {
   for (const appearance of ['light', 'dark']) {
     for (const palette of ['stone', 'forest']) {
       // the wallpaper surfaces ignore appearance and palette: one run is enough

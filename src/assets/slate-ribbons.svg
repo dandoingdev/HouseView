@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+<!-- Original satin ribbon composition for HouseView. -->
+<defs>
+ <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#93a0b2"/><stop offset=".55" stop-color="#526070"/><stop offset="1" stop-color="#7e8c9e"/></linearGradient>
+ <linearGradient id="satin" x1="0" y1="0" x2="1" y2=".4"><stop stop-color="#2e3c4c"/><stop offset=".28" stop-color="#8496aa"/><stop offset=".5" stop-color="#d4e0ec"/><stop offset=".67" stop-color="#8496aa"/><stop offset="1" stop-color="#2e3c4c"/></linearGradient>
+ <linearGradient id="edge" x1="0" y1="0" x2=".5" y2="1"><stop stop-color="#d4e0ec"/><stop offset=".25" stop-color="#8496aa"/><stop offset=".74" stop-color="#2e3c4c"/><stop offset="1" stop-color="#d4e0ec"/></linearGradient>
+ <filter id="shade" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="24"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#ground)"/>
+<path d="M-340 220C230-100 470 280 510 580S930 1160 1650 750" fill="none" stroke="#2e3c4c" stroke-width="360" opacity=".45" filter="url(#shade)"/>
+<path d="M-320 150C250-180 500 210 540 540S940 1100 1670 690" fill="none" stroke="url(#satin)" stroke-width="300"/>
+<path d="M1100-260C850 210 1150 330 1300 360S1700 520 1560 1170" fill="none" stroke="#2e3c4c" stroke-width="330" opacity=".38" filter="url(#shade)"/>
+<path d="M1060-280C810 180 1110 300 1260 330S1660 490 1520 1140" fill="none" stroke="url(#edge)" stroke-width="260"/>
+<path d="M-120 1050C320 820 570 800 1040 520S1560 250 1760 310" fill="none" stroke="url(#satin)" stroke-width="190" opacity=".8"/>
+</svg>

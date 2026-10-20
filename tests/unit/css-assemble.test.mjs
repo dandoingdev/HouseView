@@ -404,7 +404,7 @@ describe('real tree', () => {
     ]);
   });
 
-  it('hands esbuild a stylesheet that inlines the three wallpapers (target chrome105, whitespace only)', async () => {
+  it('hands esbuild a stylesheet that inlines the wallpapers (target chrome105, whitespace only)', async () => {
     const assembled = await assembleCss({root: ROOT});
     const result = await esbuild.build({
       stdin: {
@@ -425,16 +425,24 @@ describe('real tree', () => {
     const css = result.outputFiles[0].text;
     assert.equal(
       (css.match(/data:image\/svg\+xml/g) || []).length,
-      5,
-      'teal x3 (face, night, gallery), silver, champagne'
+      9,
+      'teal x3 (face, night, gallery), plus one picture each for silver, champagne, sage, slate, dusk, blush'
     );
     assert.doesNotMatch(css, /\.\.\/assets|@layer|@import/);
     // minifySyntax:false keeps the colours as written (syntax minification would rewrite their alpha)
     assert.match(css, /rgba\(107,\s*203,\s*191,\s*\.15\)/);
   });
 
-  it('ships the three wallpapers', () => {
-    for (const name of ['teal-folds.svg', 'silver-ribbons.svg', 'champagne-ribbons.svg']) {
+  it('ships the wallpapers', () => {
+    for (const name of [
+      'teal-folds.svg',
+      'silver-ribbons.svg',
+      'champagne-ribbons.svg',
+      'sage-ribbons.svg',
+      'slate-ribbons.svg',
+      'dusk-ribbons.svg',
+      'blush-ribbons.svg'
+    ]) {
       assert.ok(fs.existsSync(path.join(ROOT, 'src/assets', name)), name);
     }
   });

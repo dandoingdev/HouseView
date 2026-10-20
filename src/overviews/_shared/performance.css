@@ -67,6 +67,18 @@
 .shell.perf-lite.surface-champagne {
   --hv-glass: #806e61;
 }
+.shell.perf-lite.surface-sage {
+  --hv-glass: #637160;
+}
+.shell.perf-lite.surface-slate {
+  --hv-glass: #576778;
+}
+.shell.perf-lite.surface-dusk {
+  --hv-glass: #6b596e;
+}
+.shell.perf-lite.surface-blush {
+  --hv-glass: #8a6661;
+}
 
 /* The bedtime dimmer: a plain dark layer in place of a filter over the whole card (the filter needs an offscreen pass). */
 .shell.perf-lite.screen-dim {

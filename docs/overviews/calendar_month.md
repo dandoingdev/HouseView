@@ -10,8 +10,8 @@ needs no entity.
 
 * **Opened by pressing a widget.** A tap on a **clock**, **date** or **calendar** widget opens it full screen; a tap on
   it returns. Set `calendar_view: false` on the carousel card to turn this off.
-* **As a screensaver** (`type: calendar_month`): it starts after `idle_timeout` seconds without a touch, like any idle
-  overview.
+* **As a screensaver** (`type: calendar_month`, written in YAML): it starts after `idle_timeout` seconds without a touch,
+  like any idle overview. The editor's screensaver list does not offer it.
 * **As a card**: `custom:houseview-calendar-month-overview-card`. A tap on the card does nothing.
 
 The options of an explicit `screensaver` entry with `type: calendar_month` also apply when the month calendar is opened

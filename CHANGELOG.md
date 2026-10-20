@@ -8,7 +8,13 @@ The release workflow publishes the section of the tagged version as the release 
 
 ### Added
 
+* **Alarm view.** Tapping an alarm panel widget opens a full-screen panel to arm Home, Away, Night or Holiday (the modes the panel supports) and to disarm, which asks to confirm first. A panel that needs a code keeps those keys disabled and points to Home Assistant's dialog, which a hold on the tile still opens. `alarm_view: false` keeps the tile on the dialog.
 * Documentation and an example dashboard for an NSPanel Pro 86 (480 × 480), with screenshots in a mock of the panel.
+
+### Changed
+
+* On a small music tile, a long press on the track title opens the full-screen player. Speaker settings stay available from the title inside that player.
+* Four more satin backgrounds, in the same ribbons as silver and champagne: sage, slate, dusk and blush. Choose one under Appearance → Background, or as a page background when Background is "Use page backgrounds".
 
 ## [1.5.0] - 2026-10-20
 

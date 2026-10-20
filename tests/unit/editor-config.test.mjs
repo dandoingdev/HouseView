@@ -215,3 +215,21 @@ test('the appearance form has a performance select with helper text', () => {
   assert.match(helper({name: 'tablet_mode'}), /touch panel/);
   assert.equal(appearanceData({tablet_mode: true}).tablet_mode, true);
 });
+
+test('background menus offer the satin colourways', () => {
+  const hass = {};
+  const wallpaper = appearanceSchema(hass).find((item) => item.name === 'wallpaper');
+  assert.deepEqual(
+    wallpaper.selector.select.options.map((option) => option.value),
+    ['page', 'teal', 'silver', 'champagne', 'sage', 'slate', 'dusk', 'blush']
+  );
+  assert.deepEqual(
+    wallpaper.selector.select.options.map((option) => option.label),
+    ['Use page backgrounds', 'Teal', 'Silver', 'Champagne', 'Sage', 'Slate', 'Dusk', 'Blush']
+  );
+  const surface = pageSchema(hass).find((item) => item.name === 'surface');
+  assert.deepEqual(
+    surface.selector.select.options.map((option) => option.value),
+    ['glass', 'soft', 'teal', 'silver', 'champagne', 'sage', 'slate', 'dusk', 'blush']
+  );
+});

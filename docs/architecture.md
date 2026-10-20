@@ -6,7 +6,7 @@ A contributor's map of HouseView. For the user-facing behaviour read the [config
 
 ## Goals
 
-* **One file to install.** `npm run build` bundles everything (JavaScript, one stylesheet, the three wallpapers as
+* **One file to install.** `npm run build` bundles everything (JavaScript, one stylesheet, the wallpapers as
   `data:` URIs) into `dist/houseview.js`. No server component, no external fonts, images or scripts.
 * **A widget is a folder.** Each widget and overview owns its markup, actions, strings, CSS, fixtures, tests and
   documentation. The controller and `core/` know no widget names; adding a folder adds the widget everywhere.
@@ -33,7 +33,7 @@ src/
   overviews/<type>/   one folder per overview (+ _shared/)
   i18n/en.js          core English strings
   styles/             core/, layouts/, surfaces/, control-family.css, phases.json
-  assets/             the three wallpapers (inlined into the CSS at build time)
+  assets/             the wallpapers (inlined into the CSS at build time)
 tools/                build, generators, linters, test runner, benchmark (see tools/README.md)
 tests/                unit, contract, overview and browser suites (see tests/README.md)
 docs/                 these pages; docs/widgets and docs/overviews are generated

@@ -6,11 +6,12 @@
 //   appearance, wallpaper, height (standalone only).
 import {colourFormData} from '../core/colour.js';
 import {widgetList} from '../core/registry.js';
+import {WALLPAPER_SURFACES} from '../core/surfaces.js';
 import {capitalise, field, select, text, textField, textOrNone} from './form.js';
 
 export const SIZES = ['normal', 'wide', 'tall', 'large'];
 const APPEARANCES = ['auto', 'light', 'dark'];
-const STANDALONE_WALLPAPERS = ['teal', 'silver', 'champagne'];
+const STANDALONE_WALLPAPERS = WALLPAPER_SURFACES;
 
 /** Fields every widget form has, whatever the kind; everything else comes from `options`. */
 const FRAMEWORK_FIELDS = [

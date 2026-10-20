@@ -87,6 +87,7 @@ export default defineOverview({
   type: 'calendar_month',
   label: 'Month calendar',
   order: 50,
+  selectable: false,
   entity: 'none',
   domains: [],
   strings,

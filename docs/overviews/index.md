@@ -18,3 +18,4 @@ An overview fills a whole page. Use it as a [screensaver](../screensavers.md) ov
 | [Clock](clock.md) | `clock` | `custom:houseview-clock-overview-card` | none | 1.3 |
 | [Volume view](volume.md) | `volume` | `custom:houseview-volume-overview-card` | required, a `media_player` entity | 1.3 |
 | [Vacuum view](vacuum.md) | `vacuum` | `custom:houseview-vacuum-overview-card` | required, a `vacuum` entity | 1.4 |
+| [Alarm view](alarm_control_panel.md) | `alarm_control_panel` | `custom:houseview-alarm-control-panel-overview-card` | required, a `alarm_control_panel` entity | 1.6 |

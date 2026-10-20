@@ -202,23 +202,23 @@
 
 /* @phase lifted */
 /* Lifted glass: softer geometry, a luminous rim and deeper separation. */
-.carousel:is(.surface-silver,.surface-champagne) .clock-number {
+.carousel.surface-satin .clock-number {
   display: none;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .dial i {
+.carousel.surface-satin .dial i {
   display: block;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .dial i::before {
+.carousel.surface-satin .dial i::before {
   background: #fff;
   border-radius: 4px;
   width: 4px;
   height: 9%;
 }
 
-.carousel:is(.surface-silver,.surface-champagne) .hand,
-.carousel:is(.surface-silver,.surface-champagne) .pin {
+.carousel.surface-satin .hand,
+.carousel.surface-satin .pin {
   background: #fff;
   box-shadow: 0 2px 3px #2b2d3055;
 }

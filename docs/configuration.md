@@ -36,7 +36,7 @@ screensaver:
 | `pages` | one page called `Home` | A list of [pages](#pages). Widgets name the page they belong to |
 | `appearance` | `auto` | `auto` follows the Home Assistant light/dark mode; `light` and `dark` force it |
 | `palette` | `stone` | `stone` or `forest`: the colour family of the faces |
-| `wallpaper` | the page's `surface` | `teal`, `silver` or `champagne` puts that background behind **every** page, overriding each page's `surface`. Leave it out (editor: "page") to let pages choose |
+| `wallpaper` | the page's `surface` | `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk` or `blush` puts that background behind **every** page, overriding each page's `surface`. Leave it out (editor: "page") to let pages choose |
 | `show_header` | `false` | Show a compact header above every swipe page: date on the left, time centred. Uses your Home Assistant language, 12/24-hour preference and time zone. Updates every minute, including the date at midnight. Available as **Show time and date header** in the visual editor |
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
@@ -53,6 +53,7 @@ screensaver:
 | `weather_view` | `true` | `false` makes a press on the weather widget open more-info instead of the full-screen weather |
 | `climate_view` | `true` | `false` makes a press on the thermostat widget's number open more-info instead of the full-screen thermostat view |
 | `vacuum_view` | `true` | `false` makes a hold on the vacuum widget open more-info instead of the full-screen cleaning panel |
+| `alarm_view` | `true` | `false` makes a hold on the alarm panel widget open more-info instead of the full-screen alarm view |
 | `world_clock_view` | `true` | `false` disables the clock widget’s World Clock overlay |
 | `calendar_view` | `true` | `false` stops the date and calendar widgets from opening the month calendar (the calendar widget opens its dialog instead) |
 | `confirm_mode` | `native` | `native` asks with the browser's confirm dialog; `inline` asks with a sheet inside the card, which is translated, follows the card's look and works in kiosk browsers that block dialogs |
@@ -71,7 +72,7 @@ move between pages. There is no automatic rotation.
 | Key | Default | Description |
 | --- | --- | --- |
 | `name` | required | A unique, non-empty name. Widgets refer to it with `page: <name>` |
-| `surface` | `glass` | The background style: `glass`, `soft` (pale panels, dark text), `teal`, `silver` or `champagne` |
+| `surface` | `glass` | The background style: `glass`, `soft` (pale panels, dark text), `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk` or `blush` |
 | `columns` | 3 | Landscape only: the most columns a wide landscape screen may use, a whole number from 2 to 5. Phones and portrait tablets always use 2 |
 
 Older configurations may still contain a `layout:` key on a page. It is ignored: there is one layout.
@@ -149,7 +150,7 @@ In addition to the widget's options, standalone cards accept:
 | Key | Default | Description |
 | --- | --- | --- |
 | `appearance` | `light` | `auto`, `light` or `dark`. Note that the default differs from the carousel's |
-| `wallpaper` | `teal` | `teal`, `silver` or `champagne` |
+| `wallpaper` | `teal` | `teal`, `silver`, `champagne`, `sage`, `slate`, `dusk` or `blush` |
 | `height` | by widget | Card height in pixels (240 for most widgets, 280 for `climate`, 380 for `media_player` and the overview cards). The editor allows 220 to 800 |
 | `camera_gallery` | none | As in the carousel, for a standalone camera card |
 | `performance` | `auto` | As in the carousel (YAML only: the settings form does not show it) |
@@ -199,8 +200,8 @@ A broken configuration shows a red error card with one of these messages:
 
 Tap a widget for its everyday action. Hold it for half a second to open its controls or settings:
 lights open the dimmer, thermostats open their full-screen control, and other entity widgets open Home Assistant’s
-entity dialog. On a small panel tile, tap the track title to open the music player full screen. Holding the track
-information or options dots opens speaker settings. Operational keys such as
+entity dialog. On a small panel tile, a tap or a long press on the track title opens the music player full
+screen first. Speaker settings are a hold on that title once the full player is open. Operational keys such as
 volume, playback, Browse and temperature arrows still work with a tap. Moving your finger cancels a hold so swiping
 continues to turn pages. A configured `hold_action` takes precedence, including `action: none`.
 Keyboard users can focus a widget or settings key and press Shift+F10 or the context-menu key.

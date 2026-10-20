@@ -7,7 +7,7 @@
 .shell.carousel.surface-home.surface-home {
   --hv-home-bg: #f5f5f7;
   --hv-home-ink: #1d1d1f;
-  /* beats every wallpaper (teal, silver, champagne) and the bedtime overlay, which paint images with !important */
+  /* beats every wallpaper and the bedtime overlay, which paint images with !important */
   background: var(--hv-home-bg) !important;
   background-image: none !important;
   color: var(--hv-home-ink);

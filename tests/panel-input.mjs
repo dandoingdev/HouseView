@@ -177,7 +177,10 @@ try {
         new window.KeyboardEvent('keydown', {key: 'F10', shiftKey: true, bubbles: true})
       )
   );
-  assert.deepEqual(await page.evaluate(() => window.panelInfos), ['media_player.test']);
+  await page.waitForFunction('window.card.shadowRoot.querySelector(".media-stage")');
+  assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
+  await click('.ms-close');
+  await page.waitForFunction('!window.card.shadowRoot.querySelector(".media-stage")');
   await assertLayout(480, 480);
   await click('.mc-play');
   await page.waitForFunction('window.panelCalls.length === 1');
@@ -190,7 +193,7 @@ try {
   await click('.mc-play');
   await page.waitForFunction('window.panelCalls.length === 2');
   assert.equal(await page.evaluate(() => window.panelCalls[1].s), 'media_play_pause');
-  console.log('PASS 480px edge-to-edge layout, track settings hold, idle resume and play/pause');
+  console.log('PASS 480px edge-to-edge layout, full player on track hold, idle resume and play/pause');
   for (const [w, h] of [
     [480, 440],
     [440, 480],
