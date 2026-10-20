@@ -1,5 +1,5 @@
 /* @phase overviews */
-/* @owns ov-world-clock-scene ov-world-clock-head ov-world-clock-list ov-world-clock-row ov-world-clock-place ov-world-clock-city ov-world-clock-sub ov-world-clock-time ov-world-clock-location ov-world-clock-empty ov-world-clock-unavailable ov-world-clock-period */
+/* @owns ov-world-clock-scene ov-world-clock-head ov-world-clock-list ov-world-clock-row ov-world-clock-place ov-world-clock-city ov-world-clock-sub ov-world-clock-time ov-world-clock-location ov-world-clock-pin ov-world-clock-empty ov-world-clock-unavailable ov-world-clock-period */
 .ov-world-clock-scene {
   display: flex;
   flex-direction: column;
@@ -59,9 +59,15 @@
   font-variant-numeric: tabular-nums;
 }
 .ov-world-clock-location {
-  display: inline-block;
-  margin-left: 0.3em;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.28em;
   color: #ffd149;
+  vertical-align: -0.12em;
+}
+.ov-world-clock-city .ov-world-clock-pin {
+  --mdc-icon-size: 0.82em;
+  margin: 0;
 }
 .ov-world-clock-empty {
   padding: 3cqmin;

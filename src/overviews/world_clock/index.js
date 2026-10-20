@@ -32,6 +32,11 @@ function timeHTML(ctx, time) {
     : ctx.esc(time);
 }
 
+function localMark(ctx) {
+  const icon = ctx.icon('map-marker').replace('<ha-icon', '<ha-icon class="ov-world-clock-pin"');
+  return `<span class="ov-world-clock-location" aria-label="${ctx.esc(ctx.t('world_clock_overview.local'))}">${icon}</span>`;
+}
+
 function rowsOf(ctx) {
   const rows = clockRows(ctx.hass, ctx.data.clocks || [], ctx.options, ctx.now());
   if (ctx.options.show_local) {
@@ -77,7 +82,7 @@ export default defineOverview({
       .map(
         (row) =>
           `<div class="ov-world-clock-row${row.available ? '' : ' ov-world-clock-unavailable'}" data-clock="${ctx.esc(row.entity)}" role="group" aria-label="${ctx.esc(`${row.name}, ${subtitle(ctx, row)}, ${row.time}`)}">` +
-          `<div class="ov-world-clock-place"><span class="ov-world-clock-sub">${ctx.esc(subtitle(ctx, row))}</span><strong class="ov-world-clock-city">${ctx.esc(row.name)}${row.local ? '<span class="ov-world-clock-location" aria-label="' + ctx.esc(ctx.t('world_clock_overview.local')) + '">↗</span>' : ''}</strong></div><span class="ov-world-clock-time">${timeHTML(ctx, row.time)}</span></div>`
+          `<div class="ov-world-clock-place"><span class="ov-world-clock-sub">${ctx.esc(subtitle(ctx, row))}</span><strong class="ov-world-clock-city">${ctx.esc(row.name)}${row.local ? localMark(ctx) : ''}</strong></div><span class="ov-world-clock-time">${timeHTML(ctx, row.time)}</span></div>`
       )
       .join('');
     const empty = rows.some((row) => !row.local)

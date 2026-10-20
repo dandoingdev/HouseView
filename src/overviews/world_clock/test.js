@@ -1,9 +1,11 @@
 export default async function ({mount, check, variants, wait}) {
   let t = await mount(variants.ok);
   check(
-    'dark scene, yellow title and rounded city rows match the reference',
+    'dark scene, yellow title, location pin and rounded city rows match the reference',
     getComputedStyle(t.q('.ov-world-clock-scene')).backgroundColor === 'rgb(23, 23, 25)' &&
-      !!t.q('.ov-world-clock-location') &&
+      t.q('.ov-world-clock-pin')?.getAttribute('icon') === 'mdi:map-marker' &&
+      getComputedStyle(t.q('.ov-world-clock-pin')).color === 'rgb(255, 209, 73)' &&
+      getComputedStyle(t.q('.ov-world-clock-pin')).marginBottom === '0px' &&
       t.qa('.ov-world-clock-row').length === 2
   );
   check(

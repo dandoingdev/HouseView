@@ -6,6 +6,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-20
+
 ### Added
 
 * **Alarm view.** Tapping an alarm panel widget opens a full-screen panel to arm Home, Away, Night or Holiday (the modes the panel supports) and to disarm, which asks to confirm first. A panel that needs a code keeps those keys disabled and points to Home Assistant's dialog, which a hold on the tile still opens. `alarm_view: false` keeps the tile on the dialog.
@@ -15,6 +17,12 @@ The release workflow publishes the section of the tagged version as the release 
 
 * On a small music tile, a long press on the track title opens the full-screen player. Speaker settings stay available from the title inside that player.
 * Four more satin backgrounds, in the same ribbons as silver and champagne: sage, slate, dusk and blush. Choose one under Appearance → Background, or as a page background when Background is "Use page backgrounds".
+* The local city on the World Clock is marked with a location pin.
+* The music tile's volume button matches the Browse button.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.6.0`.
 
 ## [1.5.0] - 2026-10-20
 

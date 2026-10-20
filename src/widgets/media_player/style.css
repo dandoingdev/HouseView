@@ -1,4 +1,4 @@
-/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-close */
 /*
  * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
  * its lower edge, a progress bar, a transport row and a volume pill.
@@ -95,23 +95,26 @@
   gap: 8px;
   min-width: 0;
 }
-.carousel .mc .mc-volume {
+/* Same specificity as each other, and higher than `.carousel .mc button`, so the pill actually paints. */
+.carousel .mc .mc-volume,
+.carousel .mc .mc-browse {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
   height: 44px;
-  min-width: 84px;
-  padding: 0 10px;
-  background: #ffffff24;
+  min-width: 44px;
+  padding: 0 18px;
   border: 0;
   border-radius: 999px;
+  background: rgba(255, 255, 255, 0.17);
+  color: inherit;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
 }
 .carousel .mc .mc-volume-value {
-  min-width: 2.6em;
-  text-align: center;
-  font-size: clamp(12px, 3cqmin, 15px);
-  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
@@ -441,21 +444,6 @@
 }
 
 /* @owns mc-browse media-library ml-header ml-key ml-content ml-grid ml-item ml-art ml-empty ml-footer */
-.carousel .mc-browse {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.17);
-  color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-}
 .media-library {
   position: absolute;
   inset: 0;
@@ -618,10 +606,10 @@
   }
 }
 @container (width < 300px) {
-  .mc-browse {
-    padding: 8px;
+  .carousel .mc .mc-browse {
+    padding: 0 8px;
   }
-  .mc-browse span {
+  .carousel .mc .mc-browse span {
     display: none;
   }
 }
@@ -662,9 +650,9 @@
       grid-column: 1;
       grid-row: 1;
     }
-    .carousel .tile .mc-volume {
+    .carousel .tile .mc-volume,
+    .carousel .tile .mc-browse {
       height: 44px;
-      padding: 0 10px;
     }
     .carousel .tile .mc-progress,
     .carousel .tile .mc-more,
@@ -715,10 +703,10 @@
     .carousel .tile .mc-play ha-icon {
       --mdc-icon-size: 32px;
     }
-    .carousel .mc-browse {
-      padding: 8px;
+    .carousel .tile .mc-browse {
+      padding: 0 8px;
     }
-    .carousel .mc-browse span {
+    .carousel .tile .mc-browse span {
       display: none;
     }
   }
@@ -932,6 +920,7 @@
   width: 64px;
   height: 64px;
 }
-.carousel .media-stage .mc-volume {
+.carousel .media-stage .mc-volume,
+.carousel .media-stage .mc-browse {
   height: 64px;
 }
