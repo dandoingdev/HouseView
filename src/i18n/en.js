@@ -21,6 +21,8 @@ export default {
   'nav.previous': 'Previous page',
   'nav.next': 'Next page',
   'nav.go_to': 'Go to {label}',
+  'nav.show_all': 'Show all pages',
+  'nav.close': 'Close',
   'empty.cards': 'Add cards using Edit dashboard → Edit card.',
   'native.loading': 'Loading card…',
   'dim.dim': 'Dim',

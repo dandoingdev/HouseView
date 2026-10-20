@@ -114,12 +114,14 @@ export const appearanceHelper = (hass) => (item) => textOrNone(hass, `editor.hel
 
 export const pageData = (page) => ({
   surface: page.surface || 'glass',
-  columns: page.columns
+  columns: page.columns,
+  icon: page.icon
 });
 
 export const pageSchema = (hass) => [
   field('surface', select(hass, SURFACES)),
-  field('columns', {number: {min: 2, max: 5, step: 1, mode: 'box'}})
+  field('columns', {number: {min: 2, max: 5, step: 1, mode: 'box'}}),
+  field('icon', {icon: {}})
 ];
 
 /** The screensaver section appears when an overview is registered, or when the config already has the key. */
@@ -503,6 +505,8 @@ export class HouseViewEditor extends HTMLElement {
     delete page.layout;
     if (value.columns) page.columns = value.columns;
     else delete page.columns;
+    if (value.icon) page.icon = value.icon;
+    else delete page.icon;
     this._emit();
   }
 

@@ -61,6 +61,11 @@ export function bindEvents(card) {
       card._gestureContextMenu(event);
       return;
     }
+    if (event.key === 'Escape' && root.querySelector('.page-menu')) {
+      card._closePageMenu();
+      return;
+    }
+    if (root.querySelector('.page-menu')) return;
     if (event.key === 'ArrowRight') {
       event.preventDefault();
       card._setPage((card._pageIndex || 0) + 1);
@@ -76,9 +81,19 @@ export function bindEvents(card) {
       event.preventDefault();
       return;
     }
+    if (event.target.classList?.contains('page-menu')) {
+      card._closePageMenu();
+      return;
+    }
     const button = event.target.closest('button[data-action]');
     if (!button || button.disabled) return;
     if (button.dataset.action === 'page-select') card._setPage(Number(button.dataset.page));
+    else if (button.dataset.action === 'page-menu') card._openPageMenu();
+    else if (button.dataset.action === 'page-menu-close') card._closePageMenu();
+    else if (button.dataset.action === 'page-goto') {
+      card._closePageMenu();
+      card._setPage(Number(button.dataset.page));
+    }
     else if (!card._runTapAction(button)) card._act(button.dataset.action, button.dataset.entity);
   });
 }

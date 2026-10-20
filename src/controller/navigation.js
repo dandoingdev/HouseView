@@ -29,10 +29,36 @@ export const navigationMixin = {
     const dots = this._screens
       .map(
         (screen, i) =>
-          `<button data-action="page-select" data-page="${i}" class="page-dot ${i === this._pageIndex ? 'selected' : ''}" aria-label="${esc(t(hass, 'nav.go_to', {label: screen.label}))}" aria-current="${i === this._pageIndex ? 'page' : 'false'}"><span></span></button>`
+          `<button data-action="page-menu" class="page-dot ${i === this._pageIndex ? 'selected' : ''}" aria-label="${esc(t(hass, 'nav.show_all', {label: screen.label}))}" aria-haspopup="dialog" aria-current="${i === this._pageIndex ? 'page' : 'false'}"><span></span></button>`
       )
       .join('');
     return `<button data-action="page-prev" aria-label="${esc(t(hass, 'nav.previous'))}" ${this._pageIndex === 0 ? 'disabled' : ''}>${this._icon('chevron-left')}</button><div class="page-indicators">${dots}</div><button data-action="page-next" aria-label="${esc(t(hass, 'nav.next'))}" ${this._pageIndex === last ? 'disabled' : ''}>${this._icon('chevron-right')}</button>`;
+  },
+
+  /** Full-screen list of every page: a button per page with its icon and name. */
+  _openPageMenu() {
+    if (!this._screens?.length || this._navigationBlocked()) return;
+    this._closePageMenu();
+    const shell = this.shadowRoot.querySelector('.shell');
+    if (!shell) return;
+    const hass = this._hass;
+    const buttons = this._screens
+      .map((screen, i) => {
+        const icon = screen.icon ? this._icon(screen.icon) : '';
+        return `<button data-action="page-goto" data-page="${i}" class="page-menu-item ${i === this._pageIndex ? 'selected' : ''}" aria-current="${i === this._pageIndex ? 'page' : 'false'}">${icon}<span>${esc(screen.label)}</span></button>`;
+      })
+      .join('');
+    const menu = document.createElement('div');
+    menu.className = 'page-menu';
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', t(hass, 'nav.label'));
+    menu.innerHTML = `<div class="page-menu-grid">${buttons}</div><button data-action="page-menu-close" class="page-menu-close" aria-label="${esc(t(hass, 'nav.close'))}">${this._icon('close')}</button>`;
+    shell.append(menu);
+    menu.querySelector('.selected')?.focus?.();
+  },
+
+  _closePageMenu() {
+    this.shadowRoot?.querySelector('.page-menu')?.remove();
   },
 
   /**
@@ -77,6 +103,7 @@ export const navigationMixin = {
   _swipeStart(e) {
     this._swipeCancel();
     if (e.isPrimary === false || this._navigationBlocked()) return;
+    if (this.shadowRoot.querySelector('.page-menu')) return;
     if (e.composedPath?.().some((node) => node.matches?.(SLIDER_SELECTOR))) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     this._clearPageTransition();

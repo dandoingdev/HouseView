@@ -94,7 +94,7 @@ test('form data defaults', () => {
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
   assert.equal(appearanceData({wallpaper: 'silver', bedtime: false}).wallpaper, 'silver');
   assert.equal(appearanceData({bedtime: false}).bedtime, false);
-  assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', columns: undefined});
+  assert.deepEqual(pageData({name: 'x'}), {surface: 'glass', columns: undefined, icon: undefined});
 });
 
 test('withoutPage drops that page and its cards, and keeps the last page', () => {
@@ -133,7 +133,7 @@ test('the page form has a surface and landscape columns, and no layout', () => {
   const schema = pageSchema({localize: () => ''});
   assert.deepEqual(
     schema.map((item) => item.name),
-    ['surface', 'columns']
+    ['surface', 'columns', 'icon']
   );
   assert.deepEqual(schema[1].selector, {number: {min: 2, max: 5, step: 1, mode: 'box'}});
   assert.equal(
@@ -143,7 +143,8 @@ test('the page form has a surface and landscape columns, and no layout', () => {
   assert.equal(strings.en['editor.layout'], undefined);
   assert.deepEqual(Object.keys(pageData({name: 'x', layout: 'kitchen', surface: 'teal'})), [
     'surface',
-    'columns'
+    'columns',
+    'icon'
   ]);
 });
 
