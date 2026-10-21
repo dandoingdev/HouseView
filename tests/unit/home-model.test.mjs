@@ -327,6 +327,27 @@ test('goto-widget: jumps to the page that holds the widget; unknown input does n
   assert.deepEqual(pages, [2, 0, 1]);
 });
 
+test('goto-widget closes a home summary layer after the page change, and only that layer', () => {
+  const order = [];
+  const card = {
+    _screens: [{placements: [{index: 0}]}, {placements: [{index: 2}]}],
+    _setPage: (page) => order.push(`page:${page}`),
+    _screensaver: {active: {entry: {type: 'home'}}},
+    _screensaverClose: () => order.push('close')
+  };
+  featureActions['goto-widget'].run({card}, 'widget:2');
+  assert.deepEqual(order, ['page:1', 'close']);
+  featureActions['goto-widget'].run({card}, 'widget:9');
+  featureActions['goto-widget'].run({card}, 'nope');
+  assert.deepEqual(order, ['page:1', 'close'], 'an unknown target leaves the summary up');
+  card._screensaver.active.entry.type = 'weather';
+  featureActions['goto-widget'].run({card}, 'widget:0');
+  assert.deepEqual(order, ['page:1', 'close', 'page:0']);
+  card._screensaver.active = null;
+  featureActions['goto-widget'].run({card}, 'widget:2');
+  assert.deepEqual(order, ['page:1', 'close', 'page:0', 'page:1']);
+});
+
 test('the tick patches time and cameras in place when the minute or snapshot bucket changes', () => {
   const minute = Date.UTC(2026, 9, 15, 10, 0, 0);
   const camera = {type: 'camera', entity: 'camera.c'};

@@ -112,7 +112,8 @@ data-entity="...">` in **card** mode. The rules (checked by `tests/overviews/ove
 
 `goto-widget` is a core feature action (`src/core/core-actions.js`): it finds the carousel page whose placements contain the
 widget and calls the controller's `_setPage`. An unknown or malformed id is a no-op; it works only on a page that exists at the
-current size and is ignored while the camera gallery owns the screen.
+current size and is ignored while the camera gallery owns the screen. When the home summary is the layer on screen, the same
+press closes that layer after the page change, including when the widget is already on the page showing.
 
 ### Control panels
 

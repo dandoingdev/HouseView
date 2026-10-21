@@ -195,6 +195,51 @@ try {
       (await calls()).length === 0
   );
 
+  // 2d the opaque screensaver leaves the first page underneath
+  await page.evaluate((c) => mount(c), config);
+  await page.evaluate(() => card._setPage(1));
+  await sleep(380);
+  const homeKey = await page.evaluate(() => card._screens[0].key);
+  await advance(10);
+  await sleep(80);
+  check(
+    'the page stays put while the screensaver is still fading in',
+    (await layerState()) === 'on' && (await page.evaluate(() => card._pageIndex)) === 1
+  );
+  await advance(1);
+  check(
+    'a covered screensaver leaves the carousel on the first page',
+    (await layerState()) === 'on' &&
+      (await page.evaluate(() => card._pageIndex)) === 0 &&
+      (await page.evaluate(() => card._screenKey)) === homeKey
+  );
+  await page.mouse.click(400, 300);
+  await sleep(450);
+  check(
+    'waking a covered screensaver reveals the first page',
+    (await layerState()) === null && (await page.evaluate(() => card._pageIndex)) === 0
+  );
+
+  // 2e no screensaver: return_timeout brings the first page back
+  await page.evaluate(() => mount(undefined));
+  await page.evaluate(() => {
+    card.setConfig({...card._config, return_timeout: 5});
+    card.hass = window.mock.hass;
+  });
+  await sleep(80);
+  await page.evaluate(() => card._setPage(1));
+  await sleep(380);
+  await advance(4);
+  check(
+    'without a screensaver the page stays during the wait',
+    (await page.evaluate(() => card._pageIndex)) === 1 && (await layerState()) === null
+  );
+  await advance(1);
+  check(
+    'without a screensaver the carousel returns to the first page after the timeout',
+    (await page.evaluate(() => card._pageIndex)) === 0 && (await layerState()) === null
+  );
+
   // 3 a swipe on the layer wakes it and never turns pages
   await page.evaluate((c) => mount(c), config);
   await advance(10);

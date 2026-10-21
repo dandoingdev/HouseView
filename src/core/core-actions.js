@@ -60,19 +60,30 @@ function openCalendar(ctx) {
   return ctx.card._screensaverOpenType?.('calendar_month');
 }
 
+/** The home summary is the layer on screen (a downward swipe, the home button, or the idle screensaver). */
+const homeLayerOpen = (card) => card._screensaver?.active?.entry?.type === 'home';
+
 /**
  * Jump to the carousel page that holds a widget (the home summary's chips and headers). The id is `widget:<index>`,
  * the index of the widget in the card's normalised `widgets` list (its `data-widget` number). An unknown index, or a
- * widget that is on no page, does nothing. Nothing is called on Home Assistant.
+ * widget that is on no page, does nothing. When the home summary is covering the dashboard, the press also closes
+ * that layer, including when the widget is already on the page showing. Nothing is called on Home Assistant.
  */
 function gotoWidget(ctx, id) {
   const match = /^widget:(\d+)$/.exec(String(id ?? ''));
   if (!match) return undefined;
   const index = Number(match[1]);
-  const page = ctx.card._screens?.findIndex((screen) =>
+  const screens = ctx.card._screens;
+  if (!Array.isArray(screens)) return undefined;
+  const page = screens.findIndex((screen) =>
     screen.placements?.some((placement) => placement.index === index)
   );
-  return page >= 0 ? setPage(ctx, page) : undefined;
+  if (page < 0) return undefined;
+  // Read this before the page change: a render must not decide whether the summary was up.
+  const closeHome = homeLayerOpen(ctx.card);
+  setPage(ctx, page);
+  if (closeHome) ctx.card._screensaverClose?.();
+  return undefined;
 }
 
 export const featureActions = freeze({

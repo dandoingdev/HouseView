@@ -95,8 +95,10 @@ carousel's dark appearance.
 The card takes `page`, `size` (default `large`) and `name`; it takes no entity. It can be a page of the dashboard (the
 chips, cameras and scenes are buttons) or a **screensaver**: choose **Home summary** in the editor's screensaver list
 (or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
-full-screen view it remains interactive: scene tiles run their scenes, and the close button or Escape returns to the
-dashboard. With `home_overview: true` on the carousel, the home button at the bottom left opens this screen. `home_swipe: true`
+full-screen view it remains interactive. A chip or a section heading goes to that widget's page and closes the
+summary, whether it was opened with the home button, a downward swipe, or as the screensaver, and whether or not
+that page is already showing. Scene tiles run their scenes and leave the summary open. The close button or Escape
+returns to the dashboard without changing the page. With `home_overview: true` on the carousel, the home button at the bottom left opens this screen. `home_swipe: true`
 opens it with a downward swipe from the top of the display and does not show that button. A carousel that already has
 `home_overview: true` and no `home_swipe` still swipes; set `home_swipe: false` to keep the button and turn the swipe off.
 On a short panel that top band is taller, which is the easier reach when the button sits in the navigation. The screensaver shows the carousel's lights, climate, locks, cameras and scenes, so it follows

@@ -33,6 +33,7 @@ test('registry registers the overview, its derived widget and its strings', () =
   assert.equal(t({}, 'demo_overview.description'), 'A demo.');
   assert.equal(t({}, 'screensaver.dismiss'), 'Dismiss screensaver');
   assert.ok(hasString('screensaver.helper.idle_timeout'));
+  assert.ok(hasString('screensaver.helper.return_timeout'));
 });
 
 test('a duplicate type or order is refused', () => {
@@ -99,6 +100,17 @@ test('screensaver block errors (exact strings)', () => {
       {...ok, idle_timeout},
       'Screensaver idle_timeout must be 0 or a number of seconds from 5 to 86400.'
     );
+  }
+});
+
+test('return_timeout is 0 or 5 to 86400 seconds, and lives on the card', () => {
+  validateScreensaver({widgets: [{}], return_timeout: 0});
+  validateScreensaver({widgets: [{}], return_timeout: 120});
+  validateScreensaver({widgets: [{}]});
+  for (const return_timeout of [-1, 4, 86401, '60', NaN, null, true]) {
+    assert.throws(() => validateScreensaver({widgets: [{}], return_timeout}), {
+      message: 'return_timeout must be 0 or a number of seconds from 5 to 86400.'
+    });
   }
 });
 

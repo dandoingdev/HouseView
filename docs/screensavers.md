@@ -21,7 +21,7 @@ be used four ways:
 | [Cover art](overviews/cover_art.md) | `cover_art` | idle with priority 10 and an eligibility rule (a speaker is playing with a cover), automatic with `music_screensaver`, card | `media_player.*` | none | Screensaver: closes it. Card: more-info |
 | [Photo frame](overviews/photo_frame.md) | `photo_frame` | idle (screensaver), card | none | `folder`, `interval`, `shuffle`, `recursive`, `show_time` | Card: opens it full screen |
 | [Month calendar](overviews/calendar_month.md) | `calendar_month` | opened by pressing a date or calendar widget, card; idle screensaver in YAML only | none | `week_start`, `show_time` | Card: nothing |
-| [Home summary](overviews/home.md) | `home` | idle screensaver (read-only), or a card / the `home_overview` button or `home_swipe` from the top | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget, a camera opens the camera gallery (or more-info), a scene runs |
+| [Home summary](overviews/home.md) | `home` | idle screensaver, or a card / the `home_overview` button or `home_swipe` from the top | none, built from the carousel's widgets | `title`, `show_time` | Chips and headings go to the page of a widget and close the summary; a camera opens the camera gallery (or more-info); a scene runs and the summary stays open |
 
 Card types are `custom:houseview-<name>-overview-card` with the name in the table's `type` column, underscores written as
 hyphens: `custom:houseview-weather-overview-card`, `custom:houseview-timer-overview-card`,
@@ -65,12 +65,33 @@ or a card, and can be written as a `screensaver` entry in YAML, but is not in th
 | `idle_timeout` | `120` | Seconds without a touch. `0` never starts by itself; otherwise 5 to 86400. Ignored by event overviews |
 | `start_in_edit_mode` | `false` | Also run while the dashboard is being edited |
 | `preview` | `false` | Show it at once, and again 5 seconds after every dismissal. For choosing options in the editor |
+| `return_timeout` | `120` | A card option, not part of the screensaver entry. See [returning to the first page](#returning-to-the-first-page) |
 | ... | | Then the overview's own options, flat beside these (`details`, `sun_entity`, ... for weather) |
 
 A wrong value is reported when the card loads, for example `Screensaver idle_timeout must be 0 or a number of seconds from
 5 to 86400.` or `weather screensaver needs a weather entity.`
 
 Only the carousel (`custom:houseview-card`) has a screensaver; a standalone widget card does not read the key.
+
+### Returning to the first page
+
+`return_timeout` is set in the Screensaver section of the editor, or on the card itself. The default is 120 seconds.
+`0` turns it off.
+
+* **A screensaver is set** (an idle entry that will start by itself). When that screensaver, or album art that takes its
+  turn, has faded in, the carousel underneath moves to the first page. Waking it shows that page. A timer display, the
+  doorbell camera, and a view opened from a button leave the page where it was.
+* **No screensaver is set**, or the screensaver never starts by itself (`idle_timeout: 0`, or every entry disabled).
+  The carousel returns to the first page after `return_timeout` seconds without a touch. A touch, a key press, or the
+  same things that hold a screensaver back (the camera grid, a running command, edit mode, a hidden tab) start the
+  wait again.
+
+```yaml
+type: custom:houseview-card
+cards:
+  - {type: custom:houseview-clock-card}
+return_timeout: 60 # no screensaver: back to the first page after a quiet minute
+```
 
 ### Several screensavers
 
@@ -239,6 +260,7 @@ camera snapshot request. The first thing a wake does is catch all of that up.
 | `Unsupported screensaver: x` | `type` is not an overview (the editor lists the ones that are) |
 | `Screensaver enabled must be true or false.` | A bad `enabled` (`start_in_edit_mode` and `preview` likewise) |
 | `Screensaver idle_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `idle_timeout` |
+| `return_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `return_timeout` |
 | `weather screensaver needs a weather entity.` | A missing or wrong `entity` (`<type> screensaver needs a <domain> entity.`) |
 | `Weather overview details must be a list of: ...` | An option with a bad value (`<Label> <option> must be ...`) |
 

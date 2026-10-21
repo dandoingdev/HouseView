@@ -3,6 +3,8 @@
 // Deadline based (`now - lastActivity >= timeout`), so it survives device sleep and needs no per-card timer.
 
 export const DEFAULT_IDLE_SECONDS = 120;
+/** Seconds before the carousel returns to its first page when no idle screensaver will start. `0` turns that off. */
+export const DEFAULT_RETURN_SECONDS = 120;
 /** A gap this long between two ticks means the page was suspended (hidden tab, device sleep): count it as activity. */
 export const SUSPEND_GAP_MS = 5000;
 

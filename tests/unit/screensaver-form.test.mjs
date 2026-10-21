@@ -29,11 +29,12 @@ registerStrings({
 const hass = {locale: {language: 'en'}};
 const names = (schema) => schema.map((field) => field.name);
 
-test('schema: type only until one is chosen, then framework fields, options, advanced fields', () => {
-  assert.deepEqual(names(screensaverSchema(hass, {})), ['type']);
+test('schema: type and the return timeout until one is chosen, then framework fields, options, advanced fields', () => {
+  assert.deepEqual(names(screensaverSchema(hass, {})), ['type', 'return_timeout']);
   const schema = screensaverSchema(hass, {type: 'demo'});
   assert.deepEqual(names(schema), [
     'type',
+    'return_timeout',
     'enabled',
     'entity',
     'idle_timeout',
@@ -80,6 +81,8 @@ test('selectors follow the option types', () => {
 test('labels: framework keys from screensaver.*, options from <type>_overview.option.*', () => {
   const {computeLabel, computeHelper} = screensaverLabels(hass, 'demo');
   assert.equal(computeLabel({name: 'idle_timeout'}), 'Start after (seconds without a touch)');
+  assert.equal(computeLabel({name: 'return_timeout'}), 'Return to the first page (seconds)');
+  assert.match(computeHelper({name: 'return_timeout'}), /first page/);
   assert.equal(computeLabel({name: 'level'}), 'Level');
   assert.equal(computeHelper({name: 'level'}), 'How much.');
   assert.equal(computeLabel({name: 'flag'}), 'flag'); // no string yet: falls back to the key, never throws
@@ -89,8 +92,14 @@ test('labels: framework keys from screensaver.*, options from <type>_overview.op
 
 test('round trip keeps YAML minimal and preserves other entries', () => {
   const config = {pages: [], screensaver: {type: 'demo', entity: 'sensor.x'}};
-  assert.deepEqual(screensaverData(config), {enabled: true, type: 'demo', entity: 'sensor.x'});
-  assert.deepEqual(screensaverData({}), {});
+  assert.deepEqual(screensaverData(config), {
+    enabled: true,
+    type: 'demo',
+    entity: 'sensor.x',
+    return_timeout: 120
+  });
+  assert.deepEqual(screensaverData({}), {return_timeout: 120});
+  assert.equal(screensaverData({return_timeout: 45}).return_timeout, 45);
   assert.deepEqual(
     applyScreensaver(config, {enabled: true, type: 'demo', entity: 'sensor.x', idle_timeout: 60}),
     {pages: [], screensaver: {type: 'demo', entity: 'sensor.x', idle_timeout: 60}}
@@ -101,6 +110,21 @@ test('round trip keeps YAML minimal and preserves other entries', () => {
     false
   );
   assert.deepEqual(applyScreensaver(config, {type: ''}), {pages: []});
+  assert.deepEqual(
+    applyScreensaver(config, {type: 'demo', entity: 'sensor.x', return_timeout: 45}),
+    {pages: [], screensaver: {type: 'demo', entity: 'sensor.x'}, return_timeout: 45}
+  );
+  assert.deepEqual(
+    applyScreensaver(
+      {pages: [], return_timeout: 45, screensaver: {type: 'demo', entity: 'sensor.x'}},
+      {type: '', return_timeout: 120}
+    ),
+    {pages: []}
+  );
+  assert.deepEqual(applyScreensaver({pages: []}, {type: '', return_timeout: 0}), {
+    pages: [],
+    return_timeout: 0
+  });
   assert.deepEqual(applyScreensaver({}, {type: 'demo', entity: '', note: undefined}), {
     screensaver: {type: 'demo'}
   });

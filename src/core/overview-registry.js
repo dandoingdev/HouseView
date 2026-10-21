@@ -58,6 +58,18 @@ function checkIdleTimeout(seconds) {
   }
 }
 
+function checkReturnTimeout(seconds) {
+  if (seconds === undefined) return;
+  const valid =
+    typeof seconds === 'number' &&
+    (seconds === 0 || (seconds >= MIN_IDLE_SECONDS && seconds <= MAX_IDLE_SECONDS));
+  if (!valid) {
+    throw new Error(
+      `return_timeout must be 0 or a number of seconds from ${MIN_IDLE_SECONDS} to ${MAX_IDLE_SECONDS}.`
+    );
+  }
+}
+
 /**
  * The automatic displays: overviews that the dashboard's own widgets switch on, without a `screensaver` entry
  * (docs/overview-api.md). `key` is the card option (true by default, false = off, a list of entity ids replaces the
@@ -102,6 +114,7 @@ export function validateScreensaver(config) {
   validateScreensaverBlock(config);
   validateAutomaticDisplays(config);
   validateDoorbell(config);
+  checkReturnTimeout(config.return_timeout);
 }
 
 function validateScreensaverBlock(config) {

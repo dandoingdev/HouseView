@@ -60,8 +60,8 @@ export default async function ({mount, check, variants}) {
   await t.click('goto-widget', 'widget:2');
   check(
     'the lights chip goes to the page of the first light widget',
-    page(t) === 2 && t.calls.length === 0,
-    `page ${page(t)}`
+    page(t) === 2 && t.calls.length === 0 && !t.layer,
+    `page ${page(t)} layer ${t.layerState}`
   );
   t.card._setPage(0);
   await t.settle();
@@ -338,5 +338,91 @@ export default async function ({mount, check, variants}) {
   check(
     'the close button dismisses Home without a service call',
     t.layerState === 'leaving' && t.calls.length === 0
+  );
+
+  // ---- chips on the covering summary go to the page and close it, in every way it is opened ----
+  const pressLayerChip = async (handle, entity) => {
+    const button = handle.layer?.querySelector(
+      `button[data-action="goto-widget"][data-entity="${entity}"]`
+    );
+    if (!button) return false;
+    button.click();
+    await handle.settle();
+    return true;
+  };
+  t = await open(everything, {home_overview: true, home_swipe: true});
+  t.card._setPage(4);
+  await t.settle();
+  await t.card._act('home-view');
+  await t.settle();
+  check(
+    'the slide-down summary opens as a layer with the lights chip',
+    t.layerState === 'on' &&
+      !!t.layer.querySelector('button[data-action="goto-widget"][data-entity="widget:2"]'),
+    `layer ${t.layerState} page ${page(t)}`
+  );
+  check(
+    'a lights chip on that layer goes to the lights page and closes the summary',
+    (await pressLayerChip(t, 'widget:2')) && page(t) === 2 && t.layerState === 'leaving' && t.calls.length === 0,
+    `page ${page(t)} layer ${t.layerState}`
+  );
+  t.card._setPage(2);
+  await t.settle();
+  await t.card._act('home-view');
+  await t.settle();
+  check(
+    'a chip for the page already showing still closes the summary',
+    t.layerState === 'on' &&
+      (await pressLayerChip(t, 'widget:2')) &&
+      page(t) === 2 &&
+      t.layerState === 'leaving'
+  );
+  t.mock.replaceState('light.kitchen', {...t.hass.states['light.kitchen'], state: 'off'});
+  t.mock.replaceState('light.hall', {...t.hass.states['light.hall'], state: 'off'});
+  t.el.hass = t.hass;
+  t.card._setPage(4);
+  await t.settle();
+  await t.card._act('home-view');
+  await t.settle();
+  const dimChip = t.layer?.querySelector('button[data-entity="widget:2"]');
+  check(
+    'a dim lights chip, with none on, still goes to the lights page and closes the summary',
+    dimChip?.classList.contains('ov-home-dim') &&
+      (await pressLayerChip(t, 'widget:2')) &&
+      page(t) === 2 &&
+      t.layerState === 'leaving',
+    `dim ${dimChip?.className} page ${page(t)} layer ${t.layerState}`
+  );
+  t.card._setPage(4);
+  await t.settle();
+  await t.card._act('home-view');
+  await t.settle();
+  t.advance(1);
+  await t.settle();
+  check(
+    'a chip still works after the summary has covered the dashboard',
+    t.card._screensaverCovered() &&
+      (await pressLayerChip(t, 'widget:1')) &&
+      page(t) === 1 &&
+      t.layerState === 'leaving',
+    `covered ${t.card._screensaverCovered()} page ${page(t)} layer ${t.layerState}`
+  );
+
+  t = await mount(variants.ok, {
+    mode: 'screensaver',
+    bare: true,
+    width: 900,
+    height: 640,
+    cards: [HOME, CARDS.light, CARDS.scene],
+    config: pagesFor([CARDS.light, CARDS.scene])
+  });
+  check(
+    'the screensaver summary chip goes to the light page and closes the summary',
+    t.layerState === 'on' &&
+      (await pressLayerChip(t, 'widget:1')) &&
+      page(t) === 1 &&
+      t.layerState === 'leaving' &&
+      t.calls.length === 0,
+    `page ${page(t)} layer ${t.layerState}`
   );
 }

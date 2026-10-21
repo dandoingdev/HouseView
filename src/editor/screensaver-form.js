@@ -3,14 +3,21 @@
 import {getOverview, overviewList} from '../core/overview-registry.js';
 import {colourFormData} from '../core/colour.js';
 import {t} from '../core/i18n.js';
+import {DEFAULT_RETURN_SECONDS} from '../core/idle.js';
 
 const FRAMEWORK_FIELDS = [
   'type',
+  'return_timeout',
   'enabled',
   'entity',
   'idle_timeout',
   'start_in_edit_mode'
 ];
+
+const RETURN_FIELD = {
+  name: 'return_timeout',
+  selector: {number: {min: 0, max: 86400, step: 5, mode: 'box', unit_of_measurement: 's'}}
+};
 
 function selectorFor(hass, overview, key, spec) {
   const label = (value) => t(hass, `${overview.type}_overview.option.${key}.value.${value}`);
@@ -35,17 +42,21 @@ function selectorFor(hass, overview, key, spec) {
   }
 }
 
-/** First entry of `screensaver` (object or list) as ha-form data; `{}` when there is none. */
+const returnTimeoutOf = (config) => config.return_timeout ?? DEFAULT_RETURN_SECONDS;
+
+/** First entry of `screensaver` (object or list) as ha-form data, plus the carousel return timeout. */
 export function screensaverData(config) {
   const raw = config.screensaver;
   const entry = Array.isArray(raw) ? raw[0] : raw;
-  if (!entry) return {};
+  const return_timeout = returnTimeoutOf(config);
+  if (!entry) return {return_timeout};
   const overview = getOverview(entry.type);
   return {
     enabled: true,
     ...entry,
     ...colourFormData(overview?.options, entry),
-    ...overview?.editor?.toForm?.(entry)
+    ...overview?.editor?.toForm?.(entry),
+    return_timeout
   };
 }
 
@@ -60,7 +71,10 @@ export function screensaverSchema(hass, data) {
     {value: '', label: t(hass, 'screensaver.none')},
     ...offered.map((o) => ({value: o.type, label: t(hass, `${o.type}_overview.label`)}))
   ];
-  const schema = [{name: 'type', selector: {select: {mode: 'dropdown', options: typeOptions}}}];
+  const schema = [
+    {name: 'type', selector: {select: {mode: 'dropdown', options: typeOptions}}},
+    RETURN_FIELD
+  ];
   const overview = getOverview(data.type);
   if (!overview) return schema;
   schema.push({name: 'enabled', selector: {boolean: {}}});
@@ -105,20 +119,40 @@ export function screensaverLabels(hass, type) {
   };
 }
 
+function withoutReturnTimeout(config) {
+  if (config.return_timeout === undefined) return config;
+  const {return_timeout: _return_timeout, ...rest} = config;
+  return rest;
+}
+
+/** Keep a custom timeout, and leave the default out of the YAML. A missing field keeps what the card already has. */
+function withReturnTimeout(config, value) {
+  if (!value || !('return_timeout' in value)) return config;
+  const seconds = value.return_timeout;
+  const base = withoutReturnTimeout(config);
+  if (seconds === '' || seconds == null || seconds === DEFAULT_RETURN_SECONDS) return base;
+  return {...base, return_timeout: seconds};
+}
+
 /**
  * Form value -> new card config. Keeps YAML minimal (an enabled screensaver has no `enabled` key), preserves the
- * entries beyond the first, and removes the key when the type is cleared.
+ * entries beyond the first, and removes the key when the type is cleared. `return_timeout` is a card option, not
+ * part of the screensaver entry.
  */
 export function applyScreensaver(config, value) {
+  const {return_timeout: _return_timeout, ...fields} = value ?? {};
   const {screensaver: old, ...rest} = config;
   const tail = Array.isArray(old) ? old.slice(1) : [];
-  if (!value.type) {
-    return tail.length ? {...rest, screensaver: tail.length === 1 ? tail[0] : tail} : rest;
+  let next;
+  if (!fields.type) {
+    next = tail.length ? {...rest, screensaver: tail.length === 1 ? tail[0] : tail} : rest;
+  } else {
+    const {enabled, ...entry} = fields;
+    const clean = Object.fromEntries(
+      Object.entries(entry).filter(([, v]) => v !== undefined && v !== '')
+    );
+    const first = enabled === false ? {...clean, enabled: false} : clean;
+    next = {...rest, screensaver: tail.length ? [first, ...tail] : first};
   }
-  const {enabled, ...entry} = value;
-  const clean = Object.fromEntries(
-    Object.entries(entry).filter(([, v]) => v !== undefined && v !== '')
-  );
-  const first = enabled === false ? {...clean, enabled: false} : clean;
-  return {...rest, screensaver: tail.length ? [first, ...tail] : first};
+  return withReturnTimeout(next, value);
 }

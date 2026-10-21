@@ -126,7 +126,7 @@ controller makes exactly five calls into it (set config, connect, disconnect, ha
 block and no timer or music widget it allocates nothing. See the [overview API](overview-api.md).
 
 An `interactive` overview (the home summary) is the one kind that has buttons in card mode. They go through the normal click
-path: `goto-widget` (a core feature action that looks the widget up in the controller's `_screens` and calls `_setPage`),
+path: `goto-widget` (a core feature action that looks the widget up in the controller's `_screens`, calls `_setPage`, and closes the home summary when that layer is up),
 `camera-grid` and `run-action` run through `core/dispatch.js` with their usual guards. Its `watch(options, config)` receives the
 card config, so the change detection in `core/hass-signature.js` watches the entities of every widget it is built from.
 

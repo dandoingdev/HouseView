@@ -6,6 +6,14 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* The carousel returns to the first page when the screensaver appears, or after a quiet interval when no screensaver is set. **Return to the first page (seconds)** is in the Screensaver section of the editor. The default is 120 seconds; `return_timeout: 0` turns it off.
+
+### Fixed
+
+* Chips and headings on the home summary go to that widget's page and close the summary when it is covering the dashboard (a downward swipe, the home button, or the screensaver). The same press still moves the page when the summary is a page of the dashboard. A scene tile still runs and leaves the summary open.
+
 ## [1.8.0] - 2026-10-21
 
 ### Added

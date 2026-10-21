@@ -7,7 +7,8 @@
 //   _screensaverDisconnect disconnectedCallback (also called by _screensaverSetConfig)
 //   _screensaverHass       the hass setter, last statement
 //   _screensaverSync       the end of _renderWidgets
-// With no `screensaver` key `_screensaver` is null: nothing is allocated, listened to or inserted.
+// With no `screensaver` key `_screensaver` is null. The carousel can still return to its first page after
+// `return_timeout` seconds; `0` allocates nothing for that either. A standalone widget card never does.
 //
 // Two kinds of entry share the one layer (docs/overview-api.md). An `idle` entry starts after idle_timeout seconds
 // without a touch and takes part in the round robin. An `event` entry (`overview.activation === 'event'`) is never
@@ -18,7 +19,7 @@
 // normalizeScreensaver for the dashboard's own timer and media_player widgets (timer_display, music_screensaver).
 // Precedence on screen: event overlays above idle entries; among idle entries an activation shows the highest
 // `priority` of the ELIGIBLE ones (`_screensaverPick`), equal priorities by the round robin cursor.
-import {DEFAULT_IDLE_SECONDS, createIdleManager} from '../core/idle.js';
+import {DEFAULT_IDLE_SECONDS, DEFAULT_RETURN_SECONDS, createIdleManager} from '../core/idle.js';
 import {contextFor, layerMarkup, resolveOptions} from '../core/define-overview.js';
 import {discoveredBatteryIds} from '../core/home-attention.js';
 import {createOverviewSession} from '../core/overview-session.js';
@@ -26,6 +27,7 @@ import {getOverview, normalizeScreensaver, pickEntry} from '../core/overview-reg
 import {getWidget} from '../core/registry.js';
 import {t} from '../core/i18n.js';
 import * as ticker from '../core/ticker.js';
+import {inCardPreview} from './screen-model.js';
 
 // The ONE shared 1 s ticker. Adapter over core/ticker.js: subscribe(fn) -> token, unsubscribe(token).
 const subscribeTick = (fn) => {
@@ -137,15 +139,18 @@ export const screensaverMixin = {
           events: eventStates(entries, previous), // entry -> {last, pending, parked, sig, reshowAt}; empty without event entries
           forced: null // the event entry `_screensaverShow` must show instead of the next idle entry
         }
-      : null; // no screensaver (or all disabled): nothing is allocated, nothing is rendered
-    if (this._screensaver && this.isConnected) this._screensaverConnect();
+      : null; // no screensaver (or all disabled): the layer is not allocated
+    if (this.isConnected) this._screensaverConnect();
   },
 
   // ---- integration point 2: connectedCallback ----
   _screensaverConnect() {
     this._overviewSync();
     const ss = this._screensaver;
-    if (!ss || ss.idle) return;
+    if (!ss || ss.idle) {
+      this._screensaverReturnStart();
+      return;
+    }
     ss.idle = createIdleManager({
       subscribe: subscribeTick, // the ONE shared 1 s ticker; no interval of our own
       blocked: () => this._screensaverBlocked(),
@@ -158,8 +163,14 @@ export const screensaverMixin = {
       },
       timeout: this._screensaverTimeoutNow()
     });
-    ss.onActivity = () => ss.idle?.activity();
-    ss.onVisibility = () => ss.idle?.visibility(document.hidden);
+    ss.onActivity = () => {
+      ss.idle?.activity();
+      this._screensaverReturn?.activity();
+    };
+    ss.onVisibility = () => {
+      ss.idle?.visibility(document.hidden);
+      this._screensaverReturn?.visibility(document.hidden);
+    };
     for (const type of ACTIVITY_EVENTS) {
       // Capture phase on the shadow root, so native cards that stop propagation still count as activity.
       this.shadowRoot.addEventListener(type, ss.onActivity, {capture: true, passive: true});
@@ -171,10 +182,12 @@ export const screensaverMixin = {
     ss.idle.start();
     if (this._screensaverLead()?.preview) ss.idle.activate(); // shows as soon as a hass and a shell exist
     if (ss.events?.size) this._screensaverEvents(Date.now(), true); // a timer that is already running
+    this._screensaverReturnStart();
   },
 
   // ---- integration point 3: disconnectedCallback (also called by setConfig) ----
   _screensaverDisconnect() {
+    this._screensaverReturnStop();
     const ss = this._screensaver;
     this._overviewDispose();
     if (!ss) return;
@@ -909,6 +922,8 @@ export const screensaverMixin = {
     if (!shell || active.layer.parentNode !== shell) return;
     active.covered = true;
     shell.dataset.covered = '';
+    // The page change happens under the opaque layer, so waking reveals the first page.
+    this._screensaverReturnOnCover(active);
     // Neighbour pages under the cover are never swiped to: drop them so wake does not pay for stale DOM.
     this._dropPagePrefetch();
   },
@@ -920,6 +935,102 @@ export const screensaverMixin = {
     const shell = this.shadowRoot.querySelector('ha-card.shell');
     if (shell) delete shell.dataset.covered;
     if (resume) this._resumeAfterCover?.();
+  },
+
+  // ---- return to the first page (card option `return_timeout`, edited in the Screensaver section) ----
+
+  /** Seconds before a carousel with no idle screensaver returns home. `0` is off; a missing key is the default. */
+  _screensaverReturnSeconds() {
+    const value = this._config?.return_timeout;
+    return value === undefined ? DEFAULT_RETURN_SECONDS : value;
+  },
+
+  /**
+   * True when an idle screensaver the user configured will show by itself. The page then returns as that layer
+   * becomes opaque, including when album art wins the turn. Event and hand-opened layers do not count.
+   */
+  _screensaverReturnFollows() {
+    if (!this._screensaverReturnSeconds()) return false;
+    return (this._screensaver?.entries ?? []).some(
+      (entry) =>
+        !entry.implicit && entry.enabled && !entry.event && (entry.preview || entry.idleTimeout > 0)
+    );
+  },
+
+  /** Same quiet-time blockers as an idle screensaver, plus a layer that is already up. */
+  _screensaverReturnBlocked() {
+    if (!this._hass || !this.isConnected || document.hidden) return true;
+    if (isEditMode(this) || inCardPreview(this)) return true;
+    if (this._galleryOpen || this._alarm || this._pending?.size) return true;
+    if (this._navigationBlocked?.()) return true;
+    return !!this._screensaver?.active;
+  },
+
+  /** Go to page 0. Under an opaque screensaver the face is rebuilt in place; otherwise the normal page change. */
+  _screensaverReturnHome() {
+    if (this._config?.single_widget) return;
+    if (isEditMode(this) || inCardPreview(this)) return;
+    if (!this._screens?.length || (this._pageIndex || 0) === 0) return;
+    if (this._screensaverCovered()) {
+      this._pageIndex = 0;
+      this._screenKey = this._screens[0].key;
+      this._renderWidgets?.();
+      return;
+    }
+    this._setPage?.(0);
+  },
+
+  /** An idle layer has finished fading in. Hand-opened and event layers leave the page where it was. */
+  _screensaverReturnOnCover(active) {
+    if (!this._screensaverReturnFollows()) return;
+    const entry = active?.entry;
+    if (!entry || entry.event || entry.manual) return;
+    this._screensaverReturnHome();
+  },
+
+  /**
+   * Count quiet time when no idle screensaver will appear. Touches already counted by the screensaver are not
+   * listened for twice. `return_timeout: 0` and a standalone widget card allocate nothing.
+   */
+  _screensaverReturnStart() {
+    this._screensaverReturnStop();
+    if (!this.isConnected || this._config?.single_widget) return;
+    if (!this._screensaverReturnSeconds() || this._screensaverReturnFollows()) return;
+    this._screensaverReturn = createIdleManager({
+      subscribe: subscribeTick,
+      blocked: () => this._screensaverReturnBlocked(),
+      onActivate: () => {
+        try {
+          this._screensaverReturnHome();
+        } finally {
+          this._screensaverReturn?.wake('api');
+        }
+      },
+      onDeactivate: () => {},
+      timeout: this._screensaverReturnSeconds()
+    });
+    if (!this._screensaver?.onActivity) {
+      const activity = () => this._screensaverReturn?.activity();
+      const visibility = () => this._screensaverReturn?.visibility(document.hidden);
+      this._screensaverReturnListeners = {activity, visibility};
+      for (const type of ACTIVITY_EVENTS) {
+        this.shadowRoot.addEventListener(type, activity, {capture: true, passive: true});
+      }
+      document.addEventListener('visibilitychange', visibility);
+    }
+    this._screensaverReturn.start();
+  },
+
+  _screensaverReturnStop() {
+    this._screensaverReturn?.dispose();
+    this._screensaverReturn = null;
+    const listeners = this._screensaverReturnListeners;
+    this._screensaverReturnListeners = null;
+    if (!listeners) return;
+    for (const type of ACTIVITY_EVENTS) {
+      this.shadowRoot.removeEventListener(type, listeners.activity, {capture: true});
+    }
+    document.removeEventListener('visibilitychange', listeners.visibility);
   },
 
   // ---- card-mode overviews: only their data leases live here (render/tick/afterRender are the derived widget's) ----

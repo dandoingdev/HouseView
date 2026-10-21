@@ -38,5 +38,7 @@ The doorbell **rings** when a `binary_sensor` or `input_boolean` turns `on`, or 
 stays up for `duration` seconds from that press. A binary sensor that turns off again does not close it: a doorbell
 often reports on for about a second (shown as Detected, then Clear) and the press time is remembered.
 
-The picture is the camera's `camera_proxy_stream` (MJPEG) from your own Home Assistant. A stream that fails is retried
-every ten seconds while the display is up.
+The picture comes up in two steps, both from your own Home Assistant. A still (`camera_proxy`) is shown as soon as it
+decodes, and the MJPEG stream (`camera_proxy_stream`) covers it once a frame has loaded. While the dashboard is open
+a still is kept warm and refreshed every few seconds, so a ring can show the last frame before the new request
+returns. A stream that fails leaves the still up and is retried every ten seconds.

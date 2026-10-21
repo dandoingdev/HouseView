@@ -2,8 +2,9 @@
 export default async function ({mount, check, variants}) {
   let t = await mount(variants.ok);
   check(
-    'the card is the camera stream with its name',
-    t.q('.ov-doorbell-img')?.dataset.path === '/api/camera_proxy_stream/camera.front_door' &&
+    'the card shows a still immediately and starts the stream over it',
+    t.q('.ov-doorbell-still')?.dataset.path === '/api/camera_proxy/camera.front_door' &&
+      t.q('.ov-doorbell-stream')?.dataset.path === '/api/camera_proxy_stream/camera.front_door' &&
       t.text('.ov-doorbell-name') === 'Front door'
   );
   check(

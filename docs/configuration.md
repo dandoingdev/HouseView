@@ -49,6 +49,7 @@ screensaver:
 | `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |
+| `return_timeout` | `120` | Seconds before the carousel returns to the first page. When an idle screensaver is set, it returns as that screensaver appears. With no screensaver, it returns after this many seconds without a touch. `0` turns it off. The same field is in the editor's Screensaver section |
 | `timer_display` | `true` | The timer display appears while a timer runs: `true` (every `timer` widget), `false`, or a list of `timer.*` entities. See [automatic displays](screensavers.md#automatic-displays) |
 | `music_screensaver` | `true` | The cover art appears at screensaver time while a speaker plays: `true` (every `media_player` widget), `false`, or a list of `media_player.*` entities |
 | `weather_view` | `true` | `false` makes a press on the weather widget open more-info instead of the full-screen weather |
@@ -68,7 +69,8 @@ A wrong value in an option that is checked is reported when the card loads (see 
 ### Pages
 
 A page is one screen. Swipe horizontally, press the page dots or arrows, or use the left and right arrow keys to
-move between pages. There is no automatic rotation.
+move between pages. Pages do not advance by themselves. After a while without a touch the carousel returns to the
+first page (`return_timeout`, below).
 
 | Key | Default | Description |
 | --- | --- | --- |
@@ -196,6 +198,7 @@ A broken configuration shows a red error card with one of these messages:
 | `timer_display must be true, false or a list of timer entities.` | A bad `timer_display` (`music_screensaver` likewise) |
 | `Tap action must be one of more-info, toggle, ...` | A bad action in `tap_action` (`Hold action`, `Double tap action` likewise) |
 | `Screensaver ...`, `<type> screensaver needs ...` | See [overviews and screensavers](screensavers.md#errors) |
+| `return_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `return_timeout` |
 
 ### Holding widgets
 

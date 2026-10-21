@@ -164,6 +164,12 @@ bedroomForm.dispatchEvent(new FocusEvent('focusin',{bubbles:true,composed:true})
 check('Returning keyboard focus to an already open page selects it again',previewCard._screens[previewCard._pageIndex].name==='Bedroom');
 const screensaverPanel=expandEditor('Screensaver');
 check('Opening Screensaver immediately previews its configured view',previewCard._screensaver?.active?.entry.type==='weather');
+const returnField=previewEditor._view.screensaver.form.schema.find(field=>field.name==='return_timeout');
+const returnData=previewEditor._view.screensaver.form.data;
+previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{...returnData,return_timeout:45}}}));
+const returnWrote=previewEditor._config.return_timeout===45&&previewEditor._config.screensaver.return_timeout===undefined;
+previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{...previewEditor._view.screensaver.form.data,return_timeout:120}}}));
+check('Screensaver section returns the carousel to the first page, 120 seconds unless changed',returnField?.selector.number.unit_of_measurement==='s'&&returnData.return_timeout===120&&returnWrote&&previewEditor._config.return_timeout===undefined);
 previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{type:'calendar_month'}}}));
 check('Changing the screensaver type replaces the preview immediately',previewCard._screensaver?.active?.entry.type==='calendar_month');
 previewEditor._view.screensaver.form.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{type:'clock',face:'digital'}}}));

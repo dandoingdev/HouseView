@@ -64,27 +64,38 @@ const inEdit = {localName: 'hui-card-options', parentElement: null};
 // ---------------------------------------------------------------------------------------------------------------
 // zero impact
 
-test('no screensaver block and no timer or media_player widget: nothing is allocated, listened to or rendered', (t) => {
+test('no screensaver block and no timer or media_player widget: no layer, and the return timer is the only listener', (t) => {
   const env = dashboard(t, {
     widgets: [{type: 'light', entity: 'light.a'}],
     hass: withStates(timerState())
   });
   assert.equal(env.host._screensaver, null);
-  assert.equal(env.shadowRoot.listeners.length, 0);
-  assert.equal(env.documentListeners.length, 0);
+  assert.equal(env.shadowRoot.listeners.length, 4);
+  assert.equal(env.documentListeners.length, 1);
   env.second(600);
   assert.equal(env.layer, null);
   assert.equal(env.shell.children.length, 0);
 });
 
-test('a timer_display: false dashboard with a timer widget allocates nothing either', (t) => {
+test('return_timeout 0 with no screensaver allocates nothing', (t) => {
+  const env = dashboard(t, {
+    widgets: [{type: 'light', entity: 'light.a'}],
+    return_timeout: 0,
+    hass: withStates(timerState())
+  });
+  assert.equal(env.host._screensaver, null);
+  assert.equal(env.shadowRoot.listeners.length, 0);
+  assert.equal(env.documentListeners.length, 0);
+});
+
+test('a timer_display: false dashboard with a timer widget still has no screensaver layer', (t) => {
   const env = dashboard(t, {
     widgets: [timerWidget()],
     timer_display: false,
     hass: withStates(timerState())
   });
   assert.equal(env.host._screensaver, null);
-  assert.equal(env.shadowRoot.listeners.length, 0);
+  assert.equal(env.shadowRoot.listeners.length, 4);
   env.second(30);
   assert.equal(env.layer, null);
 });

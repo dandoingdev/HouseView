@@ -311,7 +311,7 @@ test('the five integration points exist and are plain methods', () => {
   }
 });
 
-test('without a screensaver nothing is allocated and nothing touches the DOM', () => {
+test('return_timeout 0 with no screensaver allocates nothing and touches no DOM', () => {
   const host = Object.create(screensaverMixin);
   host.isConnected = true;
   host.shadowRoot = new Proxy(
@@ -322,8 +322,8 @@ test('without a screensaver nothing is allocated and nothing touches the DOM', (
       }
     }
   );
-  host._config = {widgets: []};
-  host._screensaverSetConfig({widgets: []});
+  host._config = {widgets: [], return_timeout: 0};
+  host._screensaverSetConfig(host._config);
   assert.equal(host._screensaver, null);
   host._screensaverConnect();
   host._screensaverHass({});
@@ -336,9 +336,9 @@ test('without a screensaver nothing is allocated and nothing touches the DOM', (
 test('disabled entries behave exactly like no key at all', (t) => {
   const env = setup(t, {screensaver: [block({enabled: false}), block({enabled: false})]});
   assert.equal(env.host._screensaver, null);
-  assert.equal(env.shadowRoot.listeners.length, 0);
-  assert.equal(env.documentListeners.length, 0);
-  assert.equal(ticker.subscriberCount(), 0);
+  assert.equal(env.shadowRoot.listeners.length, 4, 'the return timer counts touches');
+  assert.equal(env.documentListeners.length, 1);
+  assert.equal(ticker.subscriberCount(), 1);
   env.second(60);
   assert.equal(env.layer, null);
   assert.equal(env.shell.children.length, 0);
@@ -1073,8 +1073,8 @@ test('setConfig on a live card removes the old layer and rebuilds; a preview com
   env.configure();
   assert.equal(env.host._screensaver, null);
   assert.equal(env.layer, null);
-  assert.equal(ticker.subscriberCount(), 0);
-  assert.equal(env.shadowRoot.listeners.length, 0);
+  assert.equal(ticker.subscriberCount(), 1, 'the return timer stays when the screensaver is removed');
+  assert.equal(env.shadowRoot.listeners.length, 4);
 });
 
 test('removing the card while the layer is up (or fading) leaves nothing behind', (t) => {
@@ -1093,6 +1093,92 @@ test('removing the card while the layer is up (or fading) leaves nothing behind'
   env.host._screensaverDisconnect();
   assert.equal(env.layer, null, 'a fading layer is removed too');
   env.wait(1000); // the fade timer was cleared: no late removal error
+});
+
+// ---- return to the first page ----
+
+function armPages(env, index = 1) {
+  env.host._screens = [{key: 'home'}, {key: 'next'}, {key: 'last'}];
+  env.host._pageIndex = index;
+  env.host._screenKey = env.host._screens[index].key;
+  env.host._dropPagePrefetch = () => {};
+  env.host.renders = 0;
+  env.host._renderWidgets = () => {
+    env.host.renders++;
+  };
+  env.host.pages = [];
+  env.host._setPage = (page) => {
+    env.host.pages.push(page);
+    env.host._pageIndex = page;
+    env.host._screenKey = env.host._screens[page].key;
+  };
+}
+
+test('an idle screensaver returns the carousel to the first page once the layer is opaque', (t) => {
+  const env = setup(t, {screensaver: block()});
+  armPages(env, 2);
+  env.second(10);
+  assert.equal(env.state, 'on');
+  assert.equal(env.host._pageIndex, 2, 'the page stays through the fade-in');
+  assert.equal(env.host.renders, 0);
+  env.second(1);
+  assert.equal(env.host._screensaverCovered(), true);
+  assert.equal(env.host._pageIndex, 0);
+  assert.equal(env.host._screenKey, 'home');
+  assert.equal(env.host.renders, 1, 'the first page is built under the opaque layer');
+  assert.deepEqual(env.host.pages, [], 'the glide is not used while the layer covers the card');
+});
+
+test('return_timeout 0 leaves the page where it is when the screensaver covers it', (t) => {
+  const env = setup(t, {screensaver: block(), connect: false});
+  env.host._config.return_timeout = 0;
+  env.connect();
+  armPages(env, 1);
+  env.second(11);
+  assert.equal(env.host._screensaverCovered(), true);
+  assert.equal(env.host._pageIndex, 1);
+  assert.equal(env.host.renders, 0);
+});
+
+test('a hand-opened or event layer does not return the carousel home', (t) => {
+  const env = setup(t, {screensaver: block()});
+  env.second(10);
+  env.host._screensaver.active.entry.manual = true;
+  armPages(env, 1);
+  env.second(1);
+  assert.equal(env.host._screensaverCovered(), true);
+  assert.equal(env.host._pageIndex, 1);
+});
+
+test('with no screensaver the carousel returns home after return_timeout quiet seconds', (t) => {
+  const env = setup(t, {connect: false});
+  env.host._config.return_timeout = 5;
+  armPages(env, 2);
+  env.connect();
+  assert.equal(ticker.subscriberCount(), 1);
+  env.second(4);
+  assert.equal(env.host._pageIndex, 2);
+  env.shadowRoot.listeners.find((listener) => listener.type === 'pointerdown').fn();
+  env.second(4);
+  assert.equal(env.host._pageIndex, 2, 'a touch starts the timeout again');
+  env.second(1);
+  assert.equal(env.host._pageIndex, 0);
+  assert.deepEqual(env.host.pages, [0]);
+  env.second(5);
+  assert.deepEqual(env.host.pages, [0], 'already home: the timeout does not navigate again');
+});
+
+test('an idle screensaver that never starts uses return_timeout and the screensaver touch listeners', (t) => {
+  const env = setup(t, {screensaver: block({idle_timeout: 0}), connect: false});
+  env.host._config.return_timeout = 5;
+  armPages(env, 1);
+  env.connect();
+  assert.equal(env.shadowRoot.listeners.length, 4, 'touches are not listened for twice');
+  assert.equal(ticker.subscriberCount(), 2);
+  env.second(5);
+  assert.equal(env.layer, null);
+  assert.equal(env.host._pageIndex, 0);
+  assert.deepEqual(env.host.pages, [0]);
 });
 
 // ---- card-mode overview sessions ----
