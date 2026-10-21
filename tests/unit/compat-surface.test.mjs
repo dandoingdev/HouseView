@@ -1123,6 +1123,23 @@ describe('navigation', () => {
       assert.equal(card._pageIndex, 0);
     });
 
+    it('opens the home summary from a swipe without the footer button', () => {
+      const {card} = pagedCard({reduced: true});
+      const opened = [];
+      card._act = (action) => opened.push(action);
+      card._config = {home_swipe: true};
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 120));
+      card._swipeEnd(touch(210, 120));
+      assert.deepEqual(opened, ['home-view']);
+      opened.length = 0;
+      card._config = {home_overview: true, home_swipe: false};
+      card._swipeStart(touch(200, 8));
+      card._swipeMove(touch(210, 120));
+      card._swipeEnd(touch(210, 120));
+      assert.deepEqual(opened, []);
+    });
+
     it('is not a swipe when short, steep or slow', () => {
       const {card} = pagedCard({reduced: true});
       card._swipeStart(touch(300, 100));

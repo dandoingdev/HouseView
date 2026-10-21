@@ -85,8 +85,10 @@
   outline: var(--hv-focus-ring, 3px solid currentColor);
   outline-offset: -6px;
 }
-/* Screensaver only. Carousel tiles and their buttons keep their borders and focus rings. */
-.hv-screensaver:has(.ov-clock) .ov-dismiss {
+/* The dismiss control fills the screensaver and is focused when it opens, so its ring reads as a
+   border around the scene. Specificity beats `.carousel button:focus-visible`. Tiles keep theirs. */
+.hv-screensaver .ov-dismiss:focus,
+.hv-screensaver .ov-dismiss:focus-visible {
   outline: none;
 }
 /* A scene opened from a button: the same corner close key as control panels. */

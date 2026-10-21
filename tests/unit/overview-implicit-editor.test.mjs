@@ -55,14 +55,18 @@ test('the home overview form: switch, title, bins and transport, empty values re
   const home = await import('../../src/editor/home-form.js');
   assert.deepEqual(home.homeData({}), {
     home_overview: false,
+    home_swipe: false,
     home_battery_auto: false,
     home_title: '',
     home_bins: '',
     home_transport: [],
     home_attention: []
   });
+  assert.equal(home.homeData({home_overview: true}).home_swipe, true);
+  assert.equal(home.homeData({home_overview: true, home_swipe: false}).home_swipe, false);
   assert.deepEqual(home.homeData({home_transport: ['sensor.a'], home_bins: {entity: 'sensor.b'}}), {
     home_overview: false,
+    home_swipe: false,
     home_battery_auto: false,
     home_title: '',
     home_bins: 'sensor.b',
@@ -75,6 +79,7 @@ test('the home overview form: switch, title, bins and transport, empty values re
     {
       ...data,
       home_overview: true,
+      home_swipe: true,
       home_title: 'My Home',
       home_bins: 'sensor.bins',
       home_transport: [{entity: 'sensor.t', label: 'Work', icon: 'mdi:train'}, {entity: ''}]
@@ -98,6 +103,25 @@ test('the home overview form: switch, title, bins and transport, empty values re
   // untouched values keep the shape the user wrote
   const raw = {home_bins: {entity: 'sensor.b'}, home_transport: ['sensor.a']};
   assert.deepEqual(home.applyHome(raw, home.homeData(raw)), raw);
+  const shown = home.homeData({});
+  assert.deepEqual(home.applyHome({wallpaper: 'teal'}, {...shown, home_swipe: true}), {
+    wallpaper: 'teal',
+    home_swipe: true
+  });
+  assert.deepEqual(
+    home.applyHome(
+      {home_overview: true},
+      {...home.homeData({home_overview: true}), home_swipe: false}
+    ),
+    {home_overview: true, home_swipe: false}
+  );
+  assert.deepEqual(
+    home.applyHome(
+      {home_overview: true},
+      {...home.homeData({home_overview: true}), home_overview: false, home_swipe: true}
+    ),
+    {home_swipe: true}
+  );
 });
 
 test('turning a switch off writes false, turning it on removes the key', () => {

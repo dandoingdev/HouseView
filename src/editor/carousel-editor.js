@@ -56,7 +56,7 @@ export function editorConfig(config) {
   for (const key of TOP_LEVEL_KEYS) delete next[key];
   next.wallpaper = resolveWallpaper(next);
   next.pages = next.pages?.length ? next.pages : [newPage('Home')];
-  next.pages = next.pages.map(({surface, layout, ...page}) => page);
+  next.pages = next.pages.map(({surface: _surface, layout: _layout, ...page}) => page);
   for (const card of next.cards) {
     const page = fromCard(card).page;
     if (page && !next.pages.some((p) => p.name === page)) next.pages.push(newPage(page));

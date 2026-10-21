@@ -155,11 +155,16 @@ export const navigationMixin = {
     if (outgoing) this._glidePage(face, outgoing, direction);
   },
 
-  /** The home button's twin: `home_overview` is on, and this page is not already the home summary. */
+  /**
+   * Downward swipe opens the home summary. `home_swipe` is its own switch, so it can be on without the footer
+   * button. An older config that only set `home_overview` still swipes, unless `home_swipe` is explicitly false.
+   */
   _homePullEnabled() {
     const config = this._config;
-    if (config?.home_overview !== true || config.single_widget) return false;
-    return !isHomePage(this._screens?.[this._pageIndex]);
+    if (!config || config.single_widget) return false;
+    if (isHomePage(this._screens?.[this._pageIndex])) return false;
+    if (config.home_swipe === false) return false;
+    return config.home_swipe === true || config.home_overview === true;
   },
 
   /** Top of the visible card, in client coordinates. Null when it has not been laid out. */

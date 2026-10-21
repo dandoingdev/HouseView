@@ -81,6 +81,42 @@ export default async function ({mount, check, variants}) {
   await t.settle();
   check('an unknown widget index does nothing', page(t) === 0);
 
+  const plants = {
+    type: 'custom:houseview-plants-card',
+    page: 'Plants',
+    name: 'Plants',
+    plants: [
+      {name: 'Fern', humidity: 'sensor.fern_humidity'},
+      {name: 'Cactus', humidity: 'sensor.cactus_humidity', humidity_low: 10, humidity_high: 40}
+    ]
+  };
+  t = await mount(
+    {
+      ...variants.ok,
+      states: {
+        ...variants.ok.states,
+        'sensor.fern_humidity': {state: '18', attributes: {unit_of_measurement: '%'}},
+        'sensor.cactus_humidity': {state: '20', attributes: {unit_of_measurement: '%'}}
+      }
+    },
+    {
+      mode: 'carousel',
+      bare: true,
+      width: 900,
+      height: 640,
+      cards: [HOME, plants],
+      config: pagesFor([plants])
+    }
+  );
+  const plantsChip = t.qa('.ov-home-chip').find((chip) => chip.dataset.tone === 'amber');
+  check(
+    'plants needing care: an amber chip counts them',
+    plantsChip?.textContent.trim() === '1' &&
+      plantsChip.getAttribute('aria-label') === 'Plants needing care: 1'
+  );
+  await t.click('goto-widget', plantsChip.dataset.entity);
+  check('the plants chip goes to the plants page', page(t) === 1 && t.calls.length === 0);
+
   // ---- a lock that is open turns its chip amber ----
   t = await open(everything);
   t.mock.replaceState('lock.front_door', {

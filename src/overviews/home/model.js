@@ -1,6 +1,7 @@
 // Pure data mapping for the home summary: the carousel's widgets plus Home Assistant states -> chips, cameras and
 // scenes. No DOM, no Date.now, no Intl, no strings: `now` and the number formatter are passed in, words and markup
 // are made in index.js.
+import {needsCare, PLANT_DEFAULTS, readPlant} from '../../core/plants.js';
 
 /** Cameras shown on the home screen (the rest are one press away in the camera gallery). */
 export const MAX_CAMERAS = 3;
@@ -17,15 +18,28 @@ const known = (state) => !!state && typeof state.state === 'string' && !UNKNOWN.
  * The widgets the home screen is made of, grouped by kind, each with its position in `widgets` (the widget's
  * `data-widget` number, which `goto-widget` takes). One entry per entity: the first widget that names it wins.
  * @param {any[]|undefined} widgets   the card's normalised widget list
- * @returns {{climate: Item[], light: Item[], lock: Item[], media: Item[], camera: Item[], scene: Item[]}}
+ * @returns {{climate: Item[], light: Item[], lock: Item[], media: Item[], camera: Item[], scene: Item[], plants: Item[]}}
  *
- * @typedef {{index: number, entity: string, name?: string, icon?: string}} Item
+ * @typedef {{index: number, entity: string, name?: string, icon?: string, plants?: Object[], range?: Object}} Item
  */
 export function collect(widgets) {
-  const groups = {climate: [], light: [], lock: [], media: [], camera: [], scene: []};
+  const groups = {climate: [], light: [], lock: [], media: [], camera: [], scene: [], plants: []};
   const seen = new Set();
   (Array.isArray(widgets) ? widgets : []).forEach((widget, index) => {
     if (!widget || typeof widget !== 'object' || widget.type === SELF) return;
+    if (widget.type === 'plants' && Array.isArray(widget.plants) && widget.plants.length) {
+      const range = {};
+      for (const key of Object.keys(PLANT_DEFAULTS)) {
+        if (typeof widget[key] === 'number') range[key] = widget[key];
+      }
+      groups.plants.push({
+        index,
+        entity: typeof widget.entity === 'string' ? widget.entity : `plants.${index}`,
+        plants: widget.plants,
+        range
+      });
+      return;
+    }
     const entity = widget.entity;
     if (typeof entity !== 'string') return;
     let group;
@@ -89,9 +103,20 @@ export function lockCounts(items, stateOf) {
 export const anyPlaying = (items, stateOf) =>
   items.some(({entity}) => stateOf(entity)?.state === 'playing');
 
+/** How many plants on the dashboard need care (too dry, wet, cold or warm). Offline plants are not counted. */
+export function plantsNeedingCare(items, stateOf) {
+  let count = 0;
+  for (const item of items) {
+    for (const plant of item.plants || []) {
+      if (needsCare(readPlant(plant, item.range, stateOf).status)) count++;
+    }
+  }
+  return count;
+}
+
 /**
- * The chips of the top row, in a fixed order (climate, lights, locks, media). A kind has a chip only when the carousel
- * has widgets of that kind. `target` is the widget index a press jumps to (the first widget of the kind).
+ * The chips of the top row, in a fixed order (climate, lights, locks, media, plants). A kind has a chip only when the
+ * carousel has widgets of that kind. `target` is the widget index a press jumps to (the first widget of the kind).
  * @param {ReturnType<typeof collect>} groups
  * @param {(id: string) => any} stateOf
  * @param {(n: number) => string} [format]
@@ -158,6 +183,18 @@ export function chips(groups, stateOf, format = String) {
       dim: false,
       active: anyPlaying(groups.media, stateOf),
       target: groups.media[0].index
+    });
+  }
+  if (groups.plants.length) {
+    const count = plantsNeedingCare(groups.plants, stateOf);
+    out.push({
+      key: 'plants',
+      tone: count > 0 ? 'amber' : 'teal',
+      value: format(count),
+      count,
+      dim: count === 0,
+      active: false,
+      target: groups.plants[0].index
     });
   }
   return out;

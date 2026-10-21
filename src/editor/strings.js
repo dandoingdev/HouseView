@@ -35,7 +35,8 @@ export default {
     'editor.timer_display': 'Show the timer display while a timer runs',
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
     'editor.home_section': 'Home summary',
-    'editor.home_overview': 'Add a home button that opens the home summary',
+    'editor.home_overview': 'Show a home button in the footer',
+    'editor.home_swipe': 'Open the home summary with a downward swipe',
     'editor.home_title': 'Title',
     'editor.helper.home_title': 'The large heading on the home summary. Empty uses "Home".',
     'editor.home_battery_auto': 'Find low batteries automatically',
@@ -51,7 +52,9 @@ export default {
     'editor.helper.home_transport':
       'Departure sensors (for example from the London TfL integration). Each shows your label, the icon and the next time, and turns amber when nothing is running.',
     'editor.helper.home_overview':
-      'A scrollable home screen built from the widgets on this dashboard: lights, climate and lock chips, cameras and scenes. Open it from the home button at the bottom left, or by swiping down from the top of the display.',
+      'A scrollable home screen built from the widgets on this dashboard. The button sits at the bottom left and can be hidden while the downward swipe stays on.',
+    'editor.helper.home_swipe':
+      'Swipe down from the top of the display to open the home summary. Turn this on by itself to skip the footer button. On a short panel the top band is taller.',
     'editor.helper.timer_display':
       'Every timer widget on the dashboard gets a full-screen countdown while it runs. It replaces the screensaver and returns control when the timer ends. A list of timer entities in YAML replaces the widgets.',
     'editor.helper.music_screensaver':

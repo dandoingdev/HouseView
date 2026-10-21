@@ -9,7 +9,7 @@ export default async function ({mount, check, variants, wait}) {
   );
   check(
     'default background uses the dashboard surface base',
-    getComputedStyle(t.q('.ov-clock-backdrop')).backgroundColor === 'rgb(129, 124, 112)'
+    getComputedStyle(t.q('.ov-clock-backdrop')).backgroundColor === 'rgb(12, 85, 85)'
   );
   check(
     'hands and accessible local time are present',

@@ -41,7 +41,8 @@ screensaver:
 | `bedtime` | `false` | Night styling plus a **Dim** button that lowers the brightness of the whole card until you press **Brighter** |
 | `high_contrast` | `false` | Stronger fills and edges |
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
-| `home_overview` | `false` | `true` adds the [home summary](overviews/home.md) (a scrollable home screen built from this dashboard's widgets). A home button at the bottom left opens it full screen, and so does a downward swipe from the top of the display. On a short panel that top band is taller. It adds no page. Also a switch in the card editor's Home summary section |
+| `home_overview` | `false` | `true` adds a home button at the bottom left that opens the [home summary](overviews/home.md) full screen. It adds no page. A switch in the card editor's Home summary section |
+| `home_swipe` | follows `home_overview` | `true` opens the home summary with a downward swipe from the top of the display, without the footer button. On a short panel that top band is taller. `false` turns the swipe off even when the button is showing. Leave it out and a carousel with `home_overview: true` still swipes |
 | `home_bins` | none | A [waste_collection_schedule](overviews/home.md) sensor (`sensor.bins`): the home summary shows an icon chip for the bins going out in the next 7 days |
 | `home_transport` | none | A list of departure sensors (`sensor.id` or `{entity, label, icon}`): the home summary shows a chip per entry with the next departure time, amber when nothing is running |
 | `home_title` | `Home` | The title shown on the home summary when `home_overview` is on |

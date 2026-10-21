@@ -605,7 +605,6 @@ async function shoot(browser, base, shot) {
     const config = {
       type: 'custom:houseview-card',
       wallpaper: 'teal',
-      wallpaper: 'teal',
       pages: [{name: 'Home'}],
       cards: shot.cards || [{type: 'custom:houseview-clock-card'}],
       ...(panel ? {tablet_mode: true, performance: 'lite'} : {}),

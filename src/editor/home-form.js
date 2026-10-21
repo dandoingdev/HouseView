@@ -5,6 +5,7 @@ import {field} from './form.js';
 
 export const HOME_KEYS = [
   'home_overview',
+  'home_swipe',
   'home_title',
   'home_bins',
   'home_transport',
@@ -22,9 +23,14 @@ const itemsOf = (value) =>
     .map((item) => (typeof item === 'string' ? {entity: item} : item))
     .filter((item) => item && typeof item === 'object');
 
-/** The form data: the switch is off unless the config says `true`; a plain `sensor.id` transport entry reads as {entity}. */
+/**
+ * The form data. The home button is off unless the config says `true`. Swipe is on when `home_swipe` is true, or when
+ * an older config only turned on the button (swipe came with it) and did not set `home_swipe: false`.
+ */
 export const homeData = (config) => ({
   home_overview: config.home_overview === true,
+  home_swipe:
+    config.home_swipe === true || (config.home_swipe !== false && config.home_overview === true),
   home_battery_auto: config.home_battery_auto === true,
   home_title: config.home_title ?? '',
   home_bins: binsOf(config.home_bins),
@@ -34,6 +40,7 @@ export const homeData = (config) => ({
 
 export const homeSchema = () => [
   field('home_overview', {boolean: {}}),
+  field('home_swipe', {boolean: {}}),
   field('home_title', {text: {}}),
   field('home_bins', {entity: {domain: 'sensor'}}),
   field('home_battery_auto', {boolean: {}}),
@@ -88,6 +95,7 @@ export function applyHome(config, value) {
     if (value[key] === undefined || JSON.stringify(value[key]) === JSON.stringify(shown[key]))
       continue;
     const v = value[key];
+    if (key === 'home_swipe') continue;
     if (key === 'home_overview' || key === 'home_battery_auto') {
       if (v) next[key] = true;
       else delete next[key];
@@ -113,6 +121,15 @@ export function applyHome(config, value) {
       else delete next[key];
     } else if (v) next[key] = v;
     else delete next[key];
+  }
+  // Swipe can be on without the footer button. When the button is on, omit `home_swipe` so older configs keep
+  // swiping; write false only to turn the swipe off while the button stays.
+  if ('home_swipe' in value) {
+    const button = next.home_overview === true;
+    const swipe = value.home_swipe === true;
+    if (swipe && !button) next.home_swipe = true;
+    else if (!swipe && button) next.home_swipe = false;
+    else delete next.home_swipe;
   }
   return next;
 }

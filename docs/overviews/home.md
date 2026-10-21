@@ -19,6 +19,7 @@ Everything reads from the card's widget list and Home Assistant; the overview ne
 | **Lights chip** (yellow bulb) | `light` widgets: how many are on (dim at 0) | Goes to the page of the first light widget |
 | **Locks chip** (teal lock) | `lock` widgets: how many are locked. When any lock is unlocked, open or jammed the chip turns amber with an open lock and counts those instead | Goes to the page of the first lock widget |
 | **Media chip** (speaker) | `media_player` widgets; a subtle green accent while one is playing | Goes to the page of the first media player widget |
+| **Plants chip** (leaf) | `plants` widgets: how many plants need care (too dry, too wet, too cold or too warm). Dim and teal at zero; amber when any need care. A plant with no signal is not counted | Goes to the page of the first plants widget |
 | **Cameras** | Up to three `camera` widgets: a large rounded snapshot with a small "2m ago" label (from the entity's `last_updated`, in your language) | Opens the camera gallery when the card has `camera_gallery`, otherwise the camera's more-info dialog. The heading "Cameras" goes to the page of the first camera widget |
 | **Scenes** | Every `action` widget whose entity is a `scene.*` (scripts and buttons are not listed): a tile with the icon and name, two per row | Runs the scene. The heading goes to the page of the first scene widget |
 
@@ -95,9 +96,10 @@ The card takes `page`, `size` (default `large`) and `name`; it takes no entity. 
 chips, cameras and scenes are buttons) or a **screensaver**: choose **Home summary** in the editor's screensaver list
 (or `screensaver: {type: home}`) and the same screen appears after the idle time, instead of, say, the weather. As a
 full-screen view it remains interactive: scene tiles run their scenes, and the close button or Escape returns to the
-dashboard. With `home_overview: true` on the carousel, the home button opens this screen, and a downward swipe from the
-top of the display does the same. On a short panel that top band is taller, which is the easier reach when the button
-sits in the navigation. The screensaver shows the carousel's lights, climate, locks, cameras and scenes, so it follows
+dashboard. With `home_overview: true` on the carousel, the home button at the bottom left opens this screen. `home_swipe: true`
+opens it with a downward swipe from the top of the display and does not show that button. A carousel that already has
+`home_overview: true` and no `home_swipe` still swipes; set `home_swipe: false` to keep the button and turn the swipe off.
+On a short panel that top band is taller, which is the easier reach when the button sits in the navigation. The screensaver shows the carousel's lights, climate, locks, cameras and scenes, so it follows
 what you add. A page that holds only this overview also takes the overview's colour for the whole page background, and
 the page dots change colour to match.
 

@@ -9,26 +9,53 @@ const SKEW_MS = 5000;
 const RETRY_MS = 10000;
 
 const domainOf = (id) => String(id).split('.')[0];
+const levelDomain = (id) => {
+  const domain = domainOf(id);
+  return domain === 'binary_sensor' || domain === 'input_boolean';
+};
 
 /**
- * Is the doorbell ringing now: pressed within `duration` seconds. `event`, `button` and `input_button` entities
- * keep the time of the last press as their state; a `binary_sensor` or `input_boolean` rings while it is on.
+ * Rising edge of a binary sensor or input boolean, keyed by entity. Those states fall back to off after a short
+ * pulse (an occupancy doorbell is Detected for about a second), and `last_changed` then points at the clear, not
+ * the press. The press time has to be remembered or the camera would close with the pulse.
+ */
+const presses = new Map();
+
+const windowOf = (ctx) => (Number(ctx.options.duration) || 30) * 1000;
+
+/** Milliseconds since the press, or null when this state is not a press. */
+function pressAge(ctx) {
+  const state = ctx.state?.state;
+  if (!state || state === 'unavailable' || state === 'unknown') return null;
+  if (!levelDomain(ctx.entityId)) {
+    const since = Date.parse(state);
+    return Number.isNaN(since) ? null : ctx.now() - since;
+  }
+  const changed = Date.parse(ctx.state.last_changed);
+  if (state === 'on') {
+    if (!Number.isNaN(changed)) presses.set(ctx.entityId, changed);
+    else return 0; // on, but no timestamp: still a press
+  }
+  const since = presses.get(ctx.entityId);
+  if (since == null) return null;
+  return ctx.now() - since;
+}
+
+/** The camera stays up from the press until `duration` elapses, including after the sensor has turned off. */
+function held(ctx) {
+  const age = pressAge(ctx);
+  return age != null && age >= -SKEW_MS && age < windowOf(ctx);
+}
+
+/**
+ * Arm the overlay on a new press. A binary sensor or input boolean arms only while it is on, so the clear after a
+ * pulse is a false -> true edge for the next press. The hold itself is `held`: that is what keeps the camera up.
  */
 function ringing(ctx) {
   const state = ctx.state?.state;
   if (!state || state === 'unavailable' || state === 'unknown') return false;
-  const window = (Number(ctx.options.duration) || 30) * 1000;
-  const domain = domainOf(ctx.entityId);
-  const since =
-    domain === 'binary_sensor' || domain === 'input_boolean'
-      ? state === 'on'
-        ? Date.parse(ctx.state.last_changed)
-        : null
-      : Date.parse(state);
-  if (since === null) return false;
-  if (Number.isNaN(since)) return domain === 'binary_sensor' || domain === 'input_boolean';
-  const age = ctx.now() - since;
-  return age >= -SKEW_MS && age < window;
+  if (levelDomain(ctx.entityId)) return state === 'on' && held(ctx);
+  return held(ctx);
 }
 
 function sceneHTML(ctx, mode) {
@@ -90,7 +117,7 @@ export default defineOverview({
   // Always shows: it closes the camera grid, menus and the like instead of waiting for them.
   interrupt: true,
   autoShow: ringing,
-  autoWake: (ctx) => !ringing(ctx),
+  autoWake: (ctx) => !held(ctx),
 
   options: {
     camera: {type: 'entity', domains: ['camera']},

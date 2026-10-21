@@ -1,6 +1,7 @@
 import {relativeTimeFormatter} from '../../core/intl.js';
 import {defineOverview} from '../../core/define-overview.js';
 import {attentionRules, attentionIds, attentionItems} from '../../core/home-attention.js';
+import {plantEntities} from '../../core/plants.js';
 import {panelKey} from '../_shared/control-panel.js';
 import {cameraUrl} from '../../core/media-url.js';
 import strings from './strings.js';
@@ -24,7 +25,8 @@ const CHIP_ICONS = {
   lights: 'mdi:lightbulb',
   locks: 'mdi:lock',
   unlocked: 'mdi:lock-open-variant',
-  media: 'mdi:speaker'
+  media: 'mdi:speaker',
+  plants: 'mdi:leaf'
 };
 
 /** "2m ago", "now", "3h ago" in the user's language; '' when the time is unknown. */
@@ -405,6 +407,7 @@ const watched = (config, hass) => {
   ]
     .map((item) => item.entity)
     .concat(
+      groups.plants.flatMap((item) => plantEntities(item.plants)),
       attentionIds(config, hass),
       binsEntity(config?.home_bins) || [],
       transportItems(config?.home_transport).map((item) => item.entity)

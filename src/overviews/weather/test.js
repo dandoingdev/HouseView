@@ -174,6 +174,18 @@ export default async function ({mount, check, variants, wait}) {
       t.layer.getAttribute('role') === 'dialog' &&
       t.layer.querySelector('.ov-dismiss').getAttribute('aria-label') === 'Dismiss screensaver'
   );
+  const dismiss = t.layer.querySelector('.ov-dismiss');
+  dismiss.focus({focusVisible: true});
+  const dismissStyle = getComputedStyle(dismiss);
+  check(
+    'weather screensaver has no border while focused',
+    dismiss.matches(':focus-visible') &&
+      dismissStyle.outlineStyle === 'none' &&
+      dismissStyle.borderTopWidth === '0px' &&
+      dismissStyle.borderRightWidth === '0px' &&
+      dismissStyle.borderBottomWidth === '0px' &&
+      dismissStyle.borderLeftWidth === '0px'
+  );
   await t.tap();
   check(
     'first tap dismisses and reaches nothing underneath',

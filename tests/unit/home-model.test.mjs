@@ -10,6 +10,7 @@ import {
   anyPlaying,
   chips,
   collect,
+  plantsNeedingCare,
   lightsOn,
   lockCounts,
   temperatureRange,
@@ -137,6 +138,30 @@ test('chips exist only for the kinds on the carousel, in a fixed order, with the
   assert.equal(all[1].dim, true, 'zero lights on is dim');
   assert.equal(all[0].dim, false);
   assert.equal(all[3].active, true, 'a playing speaker has the accent');
+  const plants = [
+    {name: 'Fern', humidity: 'sensor.fern'},
+    {name: 'Cactus', humidity: 'sensor.cactus', humidity_low: 10, humidity_high: 40}
+  ];
+  const withPlants = chips(
+    collect([{type: 'plants', plants, humidity_low: 30, humidity_high: 70}]),
+    stateOf({'sensor.fern': s('18'), 'sensor.cactus': s('20')})
+  );
+  assert.deepEqual(
+    withPlants.map((c) => [c.key, c.tone, c.value, c.dim, c.target]),
+    [['plants', 'amber', '1', false, 0]],
+    'the dry fern needs care; the cactus is inside its own range'
+  );
+  assert.equal(
+    plantsNeedingCare(
+      collect([{type: 'plants', plants}]).plants,
+      stateOf({'sensor.fern': s('50')})
+    ),
+    0
+  );
+  assert.equal(
+    chips(collect([{type: 'plants', plants}]), stateOf({'sensor.fern': s('50')}))[0].tone,
+    'teal'
+  );
   assert.deepEqual(chips(collect([{type: 'clock'}]), stateOf(states)), []);
   assert.deepEqual(
     chips(collect([{type: 'light', entity: 'light.a'}]), stateOf(states)).map((c) => c.key),

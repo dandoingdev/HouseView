@@ -33,9 +33,10 @@ doorbell:
 | duration | number | 30 | Seconds the stream stays up (5 to 600) |
 | name | text | camera name | Used for the title bar and the screen reader label (YAML only) |
 
-The doorbell **rings** when a `binary_sensor` or `input_boolean` is `on`, or when an `event`, `button` or
-`input_button` was pressed less than `duration` seconds ago (their state is the time of the last press). A
-`binary_sensor` that turns off again ends the display early.
+The doorbell **rings** when a `binary_sensor` or `input_boolean` turns `on`, or when an `event`, `button` or
+`input_button` was pressed less than `duration` seconds ago (their state is the time of the last press). The camera
+stays up for `duration` seconds from that press. A binary sensor that turns off again does not close it: a doorbell
+often reports on for about a second (shown as Detected, then Clear) and the press time is remembered.
 
 The picture is the camera's `camera_proxy_stream` (MJPEG) from your own Home Assistant. A stream that fails is retried
 every ten seconds while the display is up.

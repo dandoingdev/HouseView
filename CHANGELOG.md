@@ -6,6 +6,16 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* The home summary can open with a downward swipe on its own. **Open the home summary with a downward swipe** in the card editor, or `home_swipe: true`, leaves the footer home button hidden. A dashboard that already uses the home button still swipes until `home_swipe` is turned off.
+* The home summary has a plants chip. It counts the plants that need care and turns amber while any do. A press goes to the plants tile.
+
+### Fixed
+
+* The weather screensaver no longer draws a focus border around the scene when it opens.
+* The doorbell camera stays up for its show time after the sensor turns off. A press that only reports Detected for about a second, then Clear, was closing the camera immediately.
+
 ## [1.7.0] - 2026-10-21
 
 ### Added

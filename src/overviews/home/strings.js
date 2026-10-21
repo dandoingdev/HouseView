@@ -27,6 +27,7 @@ export default {
     'home_overview.chip.unlocked': 'Unlocked: {n}',
     'home_overview.chip.media': 'Media',
     'home_overview.chip.media_playing': 'Media, playing',
+    'home_overview.chip.plants': 'Plants needing care: {n}',
     'home_overview.camera': 'Open {name}',
     'home_overview.bins': 'Bins out: {names}',
     'home_overview.bin.today': 'today',

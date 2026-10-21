@@ -68,6 +68,9 @@ function validateOptionalSettings(config) {
   if (config.home_overview !== undefined && typeof config.home_overview !== 'boolean') {
     throw new Error('home_overview must be true or false.');
   }
+  if (config.home_swipe !== undefined && typeof config.home_swipe !== 'boolean') {
+    throw new Error('home_swipe must be true or false.');
+  }
   if (config.home_title !== undefined && typeof config.home_title !== 'string') {
     throw new Error('home_title must be text.');
   }
@@ -212,7 +215,7 @@ function normalizeWallpaper(config) {
     const next = pages.map((page) => {
       if (page.surface === undefined && page.layout === undefined) return page;
       pagesChanged = true;
-      const {surface, layout, ...rest} = page;
+      const {surface: _surface, layout: _layout, ...rest} = page;
       return rest;
     });
     if (pagesChanged) pages = next;
