@@ -1,26 +1,26 @@
 # HouseView
 
-An opinionated [Home Assistant](https://www.home-assistant.io/) dashboard that makes everyday home controls easy for
-**everyone else**.
+The [Home Assistant](https://www.home-assistant.io/) dashboard for the screen on the wall.
 
 [![HACS custom repository](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml/badge.svg)](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/dandoingdev/HouseView)](https://github.com/dandoingdev/HouseView/releases/latest)
 
-Home Assistant can do an incredible amount. The people you share your home with should be able to walk up to a screen
-and use it without a tour of your setup. HouseView brings the things they need into a few clear, swipeable pages: lights,
-heating, music, cameras and the kitchen timer.
+Home Assistant can run the whole house. Most of the people in it just want the lights, the heating, the music and the
+front door, and they want those to be obvious. HouseView is that screen: a few pages you can swipe, with controls
+big enough to hit on the first try.
 
-It makes deliberate choices about layout, touch controls and what belongs on screen. Big buttons, familiar gestures and
-room for the essentials help everyday tasks feel straightforward. Put it on a wall tablet, a kitchen display or an
-NSPanel Pro, choose the controls that matter in that room, and give everyone a comfortable way to use the home.
+It is opinionated about what goes on the page. A light is a button you hold to dim. The heating is a number you
+press. Music looks like a player, with the artwork. Put it on a kitchen tablet, a panel by the door, or an NSPanel
+Pro, and leave the controls for that room on it.
 
-When the screen is idle, it can become a weather display, photo frame, calendar, album cover or a clear view of the timer.
+Walk away and the screen can settle into the weather, a clock, your photos, the calendar, or the timer that is
+still running.
 
 ![HouseView kitchen dashboard: clock, date, front door camera and a kitchen timer](docs/images/hero.png)
 
-A kitchen dashboard, with music and home controls a swipe away. Try the [kitchen example](examples/kitchen.yaml):
+A kitchen page, with music and the rest of the house one swipe away. The YAML for this one is the [kitchen example](examples/kitchen.yaml):
 
 | Music page | Home controls page |
 | --- | --- |
@@ -32,10 +32,10 @@ A kitchen dashboard, with music and home controls a swipe away. Try the [kitchen
 
 ### NSPanel Pro
 
-The same dashboard on a square wall panel. An NSPanel Pro 86 is a 480 × 480 touchscreen, and each page holds four
-controls. Hold a light to set its brightness, press the thermostat number to set the heating, and leave it idle for the
-clock. These pictures are that resolution inside a mock of the panel. Setup is in [NSPanel Pro](docs/nspanel.md), and
-the dashboard is the [panel example](examples/nspanel.yaml).
+The same dashboard, on a square wall panel. An NSPanel Pro 86 is 480 × 480, so each page holds four controls. Hold a
+light for the brightness, press the thermostat number for the heating, and leave it for the clock. The pictures are
+that resolution, drawn inside a mock of the panel. Setup is in [NSPanel Pro](docs/nspanel.md). The YAML is the
+[panel example](examples/nspanel.yaml).
 
 | Room | Scenes | Music |
 | --- | --- | --- |
@@ -47,7 +47,8 @@ the dashboard is the [panel example](examples/nspanel.yaml).
 
 ### Overviews
 
-Give the whole screen to what matters right now: the weather, a running timer, your music or a favourite photo.
+Some things deserve the whole screen. The weather outside, a timer that is actually counting, the song that is on,
+a photo you want left up.
 
 | Weather | Timer display | Cover art |
 | --- | --- | --- |
@@ -57,8 +58,8 @@ Give the whole screen to what matters right now: the weather, a running timer, y
 | --- | --- | --- |
 | ![Photo frame](docs/images/overview-photo-frame.png) | ![Month calendar](docs/images/overview-calendar.png) | ![Weather widget tile](docs/images/widget-weather-tile.png) |
 
-The [home summary](docs/overviews/home.md) brings your home together: a quick look at lights and heating, cameras, scenes
-and anything that needs attention. It works in landscape and portrait:
+The [home summary](docs/overviews/home.md) puts the house on one scroll: lights and heating, cameras, scenes, and
+anything that needs a glance. It works in landscape and portrait:
 
 | Home summary (1280 x 800) | Home summary (800 x 1280) |
 | --- | --- |
@@ -66,30 +67,35 @@ and anything that needs attention. It works in landscape and portrait:
 
 ## Features
 
-* **A few pages, easy to find your way around.** Swipe between screens, tap the page dots or use the arrow keys.
-  Each page fits the display in landscape or portrait.
-* **Everyday controls.** Lights, heating, blinds, locks, fans, switches, cameras, music, timers, weather and more.
-  Use them together or add individual HouseView cards to an existing dashboard.
-* **Space to adjust things comfortably.** Open a light to drag its brightness up or down, set the heating on a full-screen
-  thermostat, or browse your music favourites with artwork and swipeable pages.
-* **A useful home summary.** See the state of your home, run scenes, and check open doors, low batteries, lights left on
-  and devices that need attention. Open it from the home button, or swipe down from the top of the display. Battery
-  warnings can find the relevant Home Assistant entities automatically.
-* **Useful while idle.** Choose weather, photos, a calendar or another full-screen view. Timers and playing music can
-  bring up their own displays automatically.
-* **A consistent look.** Choose glass, soft, teal, silver, champagne, sage, slate, dusk or blush, with light and dark appearances, high contrast
-  and a bedtime mode with a Dim button.
-* **Made for wall tablets and square panels.** Large touch targets, a camera grid and an optional tablet mode that hides
-  Home Assistant's sidebar and header. A lighter appearance helps older tablets and an NSPanel Pro keep up. On a
-  480 × 480 panel, four controls fill a page.
-* **Set it up your way.** Use Home Assistant's visual editor or YAML, with support for scenes, scripts and custom actions.
+* **Pages you move through with a swipe.** Tap the dots, or use the arrow keys. Each page fits the screen, landscape
+  or portrait. After a quiet spell the carousel goes back to the first page, so the next person starts where you
+  meant them to. If a screensaver is set, that happens as the screensaver comes up.
+* **The controls people actually ask for.** Lights, heating, blinds, locks, fans, switches, cameras, music, timers,
+  weather, plants, an alarm. Use them together, or drop one HouseView card onto a dashboard you already have.
+* **The fiddly bit gets its own screen.** Hold a light and drag the brightness. Press the thermostat number and set
+  the heating full screen. Music has the artwork, and a library you can swipe through.
+* **A home summary built from the widgets you already added.** What is on, what is warm, which cameras you have,
+  which scenes you can run. It can also flag a door left open, a light still on, a plant that needs water, or a
+  battery running down (it can find those batteries itself). Open it from the home button, or swipe down from the
+  top of the display.
+* **Still worth a look when nobody is touching it.** Weather, photos, a calendar, a clock. A running timer takes
+  the screen on its own, and so can the album cover while music plays. A doorbell can open its camera without
+  anyone walking over.
+* **One background for the whole dashboard.** Glass, soft, or a colour: teal, silver, champagne, sage, slate, dusk,
+  blush. Light and dark can follow Home Assistant. High contrast is there if you need it, and bedtime mode adds a
+  Dim button for the night.
+* **At home on a wall tablet and on a square panel.** Large touch targets, up to four cameras in a grid, and a
+  tablet mode that hides Home Assistant's sidebar and header. A lighter mode skips the blur and the extra
+  animation, so an older tablet or an NSPanel Pro can keep up. On a 480 × 480 panel, four controls fill the page.
+* **Edited like any other card.** Home Assistant's visual editor, or YAML. Scenes, scripts and your own tap actions
+  are included.
 
 ## Terminology
 
 | Term | Meaning |
 | --- | --- |
-| **Widget** | Any element on a page: clock, date, calendar, light, switch, fan, lock, blinds, thermostat, sensor, weather, music player, camera, timer, alarm panel, action |
-| **Overview** | A full-screen view. It can be a screensaver, appear automatically (the running-timer display, the album cover while music plays), open when you press a widget (the month calendar from a date or calendar widget; the weather scene; the photo frame), or be used as a card |
+| **Widget** | One thing on a page: a clock, a light, the music player, a plant shelf, and the rest of the list below |
+| **Overview** | A full-screen view. It can wait until the screen is idle (the weather, a clock, your photos), appear because something happened (a timer, the doorbell, the album cover), open when you press a widget, or sit on a page as its own card |
 | **Page** | One swipeable screen of widgets |
 | **Carousel** | The `custom:houseview-card` card that holds the pages |
 
@@ -136,8 +142,7 @@ Details and troubleshooting: [Installation](docs/installation.md).
 
 ## Quick start
 
-Create a dashboard view of type **Panel (1 card)**, open the raw configuration editor and use a carousel with two pages and a
-screensaver:
+Make a view of type **Panel (1 card)**, open the raw configuration editor, and paste a carousel. This one has a kitchen page, a second page for the rest of the house, and a weather screensaver:
 
 ```yaml
 title: Home
@@ -177,10 +182,10 @@ dashboards are in [`examples/`](examples/): [minimal](examples/minimal.yaml), [k
 
 ![Some of the widgets: lights, thermostat, weather, music player, sensor, lock and the weather overview as a widget](docs/images/widgets.png)
 
-In the carousel write `type: custom:houseview-<type>-card`. On a dashboard of its own the same string is a card; it appears
-in the picker as **HouseView · Light** and so on. Every widget accepts `size` (`normal`, `wide`, `tall`, `large`), `name` and
-`page`; widgets whose whole face is one button also accept [`tap_action`, `hold_action` and
-`double_tap_action`](docs/actions.md).
+In the carousel, write `type: custom:houseview-<type>-card`. On any other dashboard that same string is a card of its
+own, and it shows up in the picker as **HouseView · Light** and the rest. Every widget takes `size` (`normal`,
+`wide`, `tall`, `large`), `name` and `page`. A widget whose whole face is one button also takes [`tap_action`,
+`hold_action` and `double_tap_action`](docs/actions.md).
 
 | Widget | `type` | Entity | Key options | A tap |
 | --- | --- | --- | --- | --- |
@@ -200,12 +205,13 @@ in the picker as **HouseView · Light** and so on. Every widget accepts `size` (
 | [Timer](docs/widgets/timer.md) | `timer` | `timer.*` | | Presets start the timer; pause, resume, cancel |
 | [Alarm panel](docs/widgets/alarm_control_panel.md) | `alarm_control_panel` | `alarm_control_panel.*` | | Opens the alarm view to arm and disarm (or the dialog on hold with `alarm_view: false`). Works with any alarm entity, e.g. [Alarmo](#works-with-alarmo) |
 | [Vacuum](docs/widgets/vacuum.md) | `vacuum` | `vacuum.*` | `icon` | Opens the cleaning panel (or the dialog on hold with `vacuum_view: false`) |
+| [Plants](docs/widgets/plants.md) | `plants` | none | `plants` (a list of humidity sensors) | Tap a plant for its sensor; hold the tile for the full shelf |
 | [Action](docs/widgets/action.md) | `action` | `scene.*`, `script.*`, `button.*`, `input_button.*` | `icon`, `note` | Runs the scene, script or button |
 
 ## Overviews
 
-An overview is a full-screen view. See [overviews and screensavers](docs/screensavers.md) for how they start, what blocks
-them and how to combine them.
+An overview fills the screen. [Overviews and screensavers](docs/screensavers.md) covers when each one starts, what
+keeps it from starting, and how to run more than one.
 
 | Overview | `type` | Activation | Entity | Options | Card type |
 | --- | --- | --- | --- | --- | --- |
@@ -247,13 +253,19 @@ Two overviews need no `screensaver` entry. They follow the widgets on the carous
 | `vacuum_view` | `true` | `false` makes the vacuum widget open more-info on hold instead of the full-screen cleaning panel |
 | `alarm_view` | `true` | `false` makes the alarm panel widget open more-info on hold instead of the full-screen alarm view |
 
-Each can be `false`; `timer_display` and `music_screensaver` also take a list of entities. Passive overviews only read data. Light and thermostat control panels route explicit button and slider input through the same guarded actions as their widgets.
+Any of these can be `false`. `timer_display` and `music_screensaver` can also name a list of entities. Weather,
+photos, the calendar and the clock only read Home Assistant. A light, thermostat, vacuum or alarm panel changes a
+device only when you press a button or move a slider, using the same checks as the tile on the page.
 
 ## Works with Alarmo
 
-The alarm panel widget shows any `alarm_control_panel` entity. Tapping it opens the alarm view, where you arm Home, Away, Night or Holiday and disarm (disarming asks to confirm). A panel that wants a code is finished in Home Assistant's own dialog: hold the tile, or use the Code key in the view.
-It pairs naturally with **[Alarmo](https://github.com/nielsfaber/alarmo)**, a community alarm system for Home Assistant. Alarmo is a
-separate project that you install and configure yourself; HouseView does not bundle it, and arms or disarms only when you press a key.
+The alarm tile works with any `alarm_control_panel` entity. Tap it for a full-screen panel: arm Home, Away, Night or
+Holiday, and disarm, which asks first. If the alarm wants a code, that step stays in Home Assistant's own dialog.
+Hold the tile, or press Code in the view.
+
+It works well with **[Alarmo](https://github.com/nielsfaber/alarmo)**. Alarmo is a separate project. You install it
+and set up the sensors, modes and codes yourself. HouseView does not include it, and it only arms or disarms when
+someone presses a key.
 
 1. Install Alarmo through HACS (category Integration) and restart Home Assistant.
 2. Add the **Alarmo** integration under **Settings > Devices & services**, then use the **Alarmo** sidebar panel to set up areas,
@@ -284,10 +296,12 @@ See [theming](docs/theming.md) and [performance](docs/performance.md).
 
 ## Editor
 
-Every card has a visual editor that uses Home Assistant's own forms: the carousel editor has Appearance, one section per page
-(with Home Assistant's card editor for the widgets on it), Screensaver, Automatic displays and Camera grid sections; widget
-cards have a settings form with entity selectors. The preview follows the page or full-screen view you are editing. YAML always works, and options the forms do not show (such as a list of
-screensavers, `confirm_mode` or `tap_action`) are kept when you edit.
+Every card has a visual editor, and it uses Home Assistant's own forms. The carousel editor has Appearance, a
+section for each page (with Home Assistant's card editor for the widgets on it), Home summary, Screensaver, Doorbell
+camera, Automatic displays and Camera grid. A single widget card has a shorter form, with an entity picker. The
+preview follows the page or the full-screen view you are editing, so you see the change as you make it. YAML still
+works. Options the forms do not show, such as a list of screensavers, `confirm_mode` or `tap_action`, stay in the
+file when you save from the editor.
 
 ## Configuration reference
 
@@ -301,7 +315,7 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 | `performance` | `auto`, `full`, `lite` |
 | `camera_gallery` | A grid of one to four cameras |
 | `screensaver` | An overview or a list of them: `type`, `entity`, `idle_timeout`, `enabled`, `preview`, `start_in_edit_mode`, plus the overview's own options |
-| `return_timeout` | Seconds before the carousel returns to the first page. With a screensaver, it returns as the screensaver appears; without one, after this many quiet seconds. Default 120, `0` off |
+| `return_timeout` | How long before the carousel goes back to the first page. With a screensaver, that happens as the screensaver appears. Without one, it happens after this many seconds with no touch. Default 120. `0` leaves the page where you left it |
 | `timer_display`, `music_screensaver`, `calendar_view`, `weather_view`, `climate_view`, `vacuum_view`, `alarm_view`, `world_clock_view` | The automatic displays |
 | `confirm_mode` | `native` (browser dialog) or `inline` (a sheet inside the card) |
 | `localized_states` | Show entity states in your Home Assistant language |
@@ -314,9 +328,9 @@ Card-level options of `custom:houseview-card` (details and defaults in [Configur
 
 ## Translations
 
-All interface text is English today (widgets, the editor, error messages). Dates, times and numbers follow your Home Assistant
-language and time zone; entity states can be shown in your language with `localized_states: true`; the weather overview also
-ships German text. Contributions to help HouseView feel at home in more languages are welcome; see
+The buttons, labels and error messages are English for now. Dates, times and numbers follow your Home Assistant
+language and time zone. Entity states can be shown in your language with `localized_states: true`, and the weather
+overview already has German text. Help with another language is welcome. Start at
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Troubleshooting and FAQ
@@ -383,21 +397,26 @@ part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Support the project
 
-HouseView is free and MIT licensed, built and maintained in spare time. If it is useful to you, these are the ways to help
-keep it going:
+HouseView is free, MIT licensed, and looked after in spare time. If it has a place on your wall, a few things
+actually help:
 
-* **Star the repository and tell other people** who run Home Assistant on a wall tablet.
-* **Report bugs and share your setup** in the [issues](https://github.com/dandoingdev/HouseView/issues). Feedback from different
-  devices is the most valuable contribution.
-* **[Buy me a coffee](https://buymeacoffee.com/dandoingdev)** to support further development.
-* **Take a look at [AmongFolk.com](https://amongfolk.com)**, my main venture, which is where most of my time goes.
+* **Star the repository**, and mention it to someone else with a tablet on the wall.
+* **Say what your screen does.** Bugs, and notes from real setups, go in the
+  [issues](https://github.com/dandoingdev/HouseView/issues). A report from a different device is the most useful
+  thing you can send.
+* **[Buy me a coffee](https://buymeacoffee.com/dandoingdev)** if you want to chip in for the time.
+* **[AmongFolk.com](https://amongfolk.com)** is where most of my hours go. Have a look if you want to see what else
+  I make.
 
 ## Security and privacy
 
-* HouseView loads no external scripts or fonts. Playlist artwork loads the thumbnail URLs supplied by your configured music services, without a page referrer or added Home Assistant authentication.
-* Camera snapshots, now-playing album art and photo-frame images stay on Home Assistant’s own address and approved proxy paths. Playlist-browser thumbnails use the original media-browser image URLs as described above.
-* Passive overviews are read-only. Interactive views route controls through the widget action dispatcher; service calls
-  require explicit control input or a configured action. Entity names and states are escaped before they reach the page.
+* HouseView loads no scripts or fonts from the internet. Playlist artwork uses the thumbnail addresses your music
+  service already gave Home Assistant, without sending a page referrer or a Home Assistant token with them.
+* Camera snapshots, the album art for the song that is playing, and photo-frame pictures stay on your Home
+  Assistant address, or on a proxy path HouseView already allows. Playlist thumbnails are the one exception: they
+  use the original media-browser image address.
+* Weather, photos, the calendar and the clock only read Home Assistant. A control changes a device only when you
+  press it, or when you have set an action that does. Names and states are escaped before they reach the page.
 * The `url` action only opens `http`, `https`, `mailto` and `tel` links.
 * Files in `/config/www` are public; put only `houseview.js` there.
 
