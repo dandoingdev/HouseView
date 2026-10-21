@@ -106,14 +106,6 @@ const volumeButton = (ctx) =>
     {attrs: `aria-label="${ctx.esc(ctx.t('media_player.adjust_volume'))}" `}
   );
 
-const optionsButton = (ctx) =>
-  ctx.btn(
-    'info',
-    `${ctx.icon('dots-horizontal')}<span class="sr">${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}</span>`,
-    'mc-more',
-    ctx.ok
-  );
-
 /** Fields that change the controls. The moving playhead is painted separately so a drag is not reset. */
 function structureKey(ctx) {
   const attrs = ctx.attrs;
@@ -150,7 +142,7 @@ export function playerInner(ctx) {
   const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumeButton(ctx)}${browse}</div>`;
   const stage =
     `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>` +
-    `<div class="mc-meta">${ctx.btn('info', `<strong class="mc-title">${ctx.esc(titleText(ctx))}</strong><span class="mc-artist">${ctx.esc(artistText(ctx))}</span>`, 'mc-details', ctx.ok, {attrs: `aria-label="${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}" `})}</div>${optionsButton(ctx)}</div></div>`;
+    `<div class="mc-meta">${ctx.btn('info', `<strong class="mc-title">${ctx.esc(titleText(ctx))}</strong><span class="mc-artist">${ctx.esc(artistText(ctx))}</span>`, 'mc-details', ctx.ok, {attrs: `aria-label="${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}" `})}</div></div></div>`;
   return `${top}${stage}${progressRow(ctx)}${transportRow(ctx)}`;
 }
 

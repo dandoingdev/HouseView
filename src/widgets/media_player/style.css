@@ -1,4 +1,4 @@
-/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-more mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-info */
+/* @owns media_player music-panel mc mc-body music-art mc-top mc-volume mc-browse mc-volume-value mc-stage mc-cover mc-meta mc-details mc-title mc-artist mc-progress mc-track mc-fill mc-elapsed mc-remaining mc-transport mc-aux mc-skip mc-play is-on media-stage ms-head ms-title ms-info */
 /*
  * Music widget: on the tile's own glass (no background of its own), a big rounded cover with the title and artist over
  * its lower edge, a progress bar, a transport row and a volume pill.
@@ -165,7 +165,7 @@
   position: absolute;
   z-index: 2;
   left: 7cqmin;
-  right: 20cqmin;
+  right: 7cqmin;
   bottom: 8cqmin;
   min-width: 0;
 }
@@ -190,17 +190,6 @@
   font-size: clamp(10px, 5.6cqmin, 26px);
   opacity: 0.75;
 }
-.carousel .mc .mc-more {
-  position: absolute;
-  z-index: 2;
-  right: 5cqmin;
-  bottom: 7cqmin;
-  width: clamp(30px, 14cqmin, 44px);
-  height: clamp(30px, 14cqmin, 44px);
-  border-radius: 50%;
-  background: #ffffff38;
-}
-
 /* progress */
 .carousel .mc .mc-progress {
   display: grid;
@@ -290,7 +279,6 @@
     padding: 4cqh 4cqw;
   }
   .carousel .mc .mc-progress,
-  .carousel .mc .mc-more,
   .carousel .mc .mc-aux,
   .carousel .mc .mc-cover .music-art,
   .carousel .mc .mc-cover::after {
@@ -653,7 +641,6 @@
       --mdc-icon-size: 22px;
     }
     .carousel .tile .mc-progress,
-    .carousel .tile .mc-more,
     .carousel .tile .mc-aux,
     .carousel .tile .mc-cover .music-art,
     .carousel .tile .mc-cover::after {
@@ -835,15 +822,10 @@
   .carousel .tile .mc-browse,
   .carousel .tile .mc-skip,
   .carousel .tile .mc-play,
-  .carousel .tile .mc-more,
   .carousel .tile .mc-aux,
   .carousel .tile .mc-aux.is-on {
     background: none;
     box-shadow: none;
-  }
-  .carousel .tile .mc-more {
-    right: max(16px, 8cqmin);
-    bottom: max(16px, 10cqmin);
   }
 }
 
@@ -946,8 +928,7 @@
   height: 88px;
 }
 .carousel .media-stage .mc-skip,
-.carousel .media-stage .mc-aux,
-.carousel .media-stage .mc-more {
+.carousel .media-stage .mc-aux {
   width: 64px;
   height: 64px;
 }

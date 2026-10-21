@@ -8,13 +8,13 @@ since: 1.0
 
 A now-playing panel for a `media_player.*` entity: a large rounded album cover with the title and artist over its
 lower edge, a progress bar with elapsed and remaining time, shuffle / previous / play-pause / next / repeat, a volume
-button showing the current volume and an options button (hold the dots over the cover) that opens the more-info dialog.
+button showing the current volume. Hold the cover, title or artist to open the more-info dialog.
 
 * Previous and next are enabled when the entity advertises the `supported_features` bits 16 and 32; the volume
   keys when it advertises bit 4; shuffle and repeat with bits 32768 and 262144. Play / pause is enabled whenever the
   speaker is available.
 * Play / pause sends `media_play_pause` while playing or paused. An idle player advertising PLAY (bit 512) resumes
-  its queue with `media_play`. Other inactive players open more-info. On a large tile, hold the track title or
+  its queue with `media_play`. Other inactive players open more-info. Hold the cover, the track title or the
   artist to open speaker controls. On a small panel tile (about 225 × 178, when four controls share a 480 × 480
   screen), a tap or a long press on the track title opens this same player full screen first, with the cover,
   progress, shuffle, repeat and larger keys. Play, volume and Browse on the tile keep working, as plain icons set in

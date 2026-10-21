@@ -126,11 +126,15 @@ export default async function ({mount, check, variants, advance, settle}) {
   );
 
   t = await mount(variants.ok);
-  await t.hold('[data-action="info"]');
-  check(
-    'holding speaker options opens more-info',
-    t.infos.includes(ENTITY) && t.calls.length === 0
-  );
+  await t.hold('.music-art');
+  const coverHold = !t.q('.mc-more') && t.infos.includes(ENTITY) && t.calls.length === 0;
+  if (!coverHold) {
+    console.error(
+      'cover hold',
+      JSON.stringify({dots: !!t.q('.mc-more'), infos: t.infos, calls: t.calls.length})
+    );
+  }
+  check('holding the cover opens more-info', coverHold);
 
   t = await mount(variants.artwork);
   const img = t.q('.music-art img');
