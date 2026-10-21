@@ -7,7 +7,7 @@ alwaysApply: true
 
 `.github/workflows/ci.yml` job `check` is the gate. The release workflow runs the same scripts. A change is not done until the scripts that cover it pass locally.
 
-- Run `npm run lint` before `git push`, including a release. The check and release jobs fail on eslint, and a failed tag push publishes no GitHub release. v1.7.0 failed on unused `surface` and `layout` bindings and a duplicated `wallpaper` key. When a destructure only drops keys, name the bindings `_surface` and `_layout`. Do not repeat an object key.
+- Run `npm run lint` before `git push`, including a release. The check and release jobs fail on eslint, and a failed tag push publishes no GitHub release. v1.7.0 failed on unused `surface` and `layout` bindings and a duplicated `wallpaper` key, so the browser suite never ran. When a destructure only drops keys, name the bindings `_surface` and `_layout`. Do not repeat an object key. If the latest CI run on main died before the browser suite, run `npm run build:dev` and `npm run test:browser` before tagging. A page edit does not change the wallpaper: the shell class follows the card `wallpaper` (teal by default), not a page `surface`.
 - Run `npm run test:unit` for logic changes.
 - Run `npm run build:dev` before any browser script. Those suites load `dist/`, not `src/`.
 - Run the browser script that owns the behaviour. Screensaver wake, cover, prefetch, and disconnect: `npm run test:overviews:input`.

@@ -154,8 +154,8 @@ const expandEditor=name=>{const el=editPanel(name);el.expanded=true;el.dispatchE
 expandEditor('Bedroom');
 check('Opening a page editor immediately selects that page in the preview',previewCard._screens[previewCard._pageIndex].name==='Bedroom');
 const bedroomForm=previewEditor._view.pages[1].form;
-bedroomForm.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{surface:'silver',columns:2}}}));
-check('A page stays selected as edited values are echoed back from HA',previewCard._screens[previewCard._pageIndex].name==='Bedroom'&&previewShell().classList.contains('surface-silver'));
+bedroomForm.dispatchEvent(new CustomEvent('value-changed',{detail:{value:{columns:2}}}));
+check('A page stays selected as edited values are echoed back from HA',previewCard._screens[previewCard._pageIndex].name==='Bedroom'&&previewCard._config.pages[1].columns===2&&previewShell().classList.contains('surface-teal'));
 expandEditor('Home summary');
 check('Opening Home summary previews it even before its home button is enabled',previewCard._screensaver?.active?.entry.type==='home');
 expandEditor('Kitchen');
