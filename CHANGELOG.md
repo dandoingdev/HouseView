@@ -6,13 +6,25 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.9.0] - 2026-10-21
+
 ### Added
 
 * The carousel returns to the first page when the screensaver appears, or after a quiet interval when no screensaver is set. **Return to the first page (seconds)** is in the Screensaver section of the editor. The default is 120 seconds; `return_timeout: 0` turns it off.
 
+### Changed
+
+* Choosing a playlist closes the playlist view immediately and starts it on that speaker. A failed start is reported on the player.
+* The dots on the album cover are gone. Hold the cover, the title, or the artist to open speaker details.
+
 ### Fixed
 
+* The full-screen music player follows playback. After a playlist starts, the cover and the pause button appear on the player that is already open.
 * Chips and headings on the home summary go to that widget's page and close the summary when it is covering the dashboard (a downward swipe, the home button, or the screensaver). The same press still moves the page when the summary is a page of the dashboard. A scene tile still runs and leaves the summary open.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.9.0`.
 
 ## [1.8.0] - 2026-10-21
 
