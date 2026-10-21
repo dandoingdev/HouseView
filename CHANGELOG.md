@@ -6,6 +6,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-10-21
+
 ### Added
 
 * The home summary can open with a downward swipe on its own. **Open the home summary with a downward swipe** in the card editor, or `home_swipe: true`, leaves the footer home button hidden. A dashboard that already uses the home button still swipes until `home_swipe` is turned off.
@@ -15,6 +17,10 @@ The release workflow publishes the section of the tagged version as the release 
 
 * The weather screensaver no longer draws a focus border around the scene when it opens.
 * The doorbell camera stays up for its show time after the sensor turns off. A press that only reports Detected for about a second, then Clear, was closing the camera immediately.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.8.0`.
 
 ## [1.7.0] - 2026-10-21
 
