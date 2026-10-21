@@ -359,4 +359,59 @@ export default async function ({mount, check, variants, advance, settle}) {
   t.root.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
   await settle();
   check('escape closes the full player', !t.q('.media-stage'));
+
+  // Playback arrives as a hass update while the overlay stays mounted. The shell must not treat that as already painted.
+  t = await mount(variants.idle);
+  await t.act('media-player-expand-0', ENTITY);
+  const idleStage = t.q('.media-stage');
+  const idlePlay = idleStage?.querySelector('.mc-play ha-icon')?.getAttribute('icon') === 'mdi:play';
+  check(
+    'an idle full player starts on play with no cover',
+    !!idleStage && idlePlay && !idleStage.querySelector('.music-art img')
+  );
+  await t.setState(ENTITY, {
+    state: 'playing',
+    attributes: {
+      media_title: 'So What',
+      media_artist: 'Miles Davis',
+      entity_picture: '/api/media_player_proxy/media_player.test?token=abc&cache=1'
+    }
+  });
+  const playing = t.q('.media-stage');
+  const cover = playing?.querySelector('.music-art img');
+  const painted =
+    playing === idleStage &&
+    playing?.querySelector('.mc-play ha-icon')?.getAttribute('icon') === 'mdi:pause' &&
+    !!cover &&
+    cover.getAttribute('src').includes('/api/media_player_proxy/') &&
+    t.text('.media-stage .mc-title') === 'So What';
+  if (!painted) {
+    console.error(
+      'full player update',
+      JSON.stringify({
+        same: playing === idleStage,
+        icon: playing?.querySelector('.mc-play ha-icon')?.getAttribute('icon') || null,
+        src: cover?.getAttribute('src') || null,
+        title: t.text('.media-stage .mc-title')
+      })
+    );
+  }
+  check('a playback update paints the full player cover and pause button in place', painted);
+  await t.setState(ENTITY, {state: 'paused'});
+  const paused = t.q('.media-stage');
+  const pausedPainted =
+    paused === idleStage &&
+    paused?.querySelector('.mc-play ha-icon')?.getAttribute('icon') === 'mdi:play' &&
+    !!paused?.querySelector('.music-art img')?.getAttribute('src')?.includes('/api/media_player_proxy/');
+  if (!pausedPainted) {
+    console.error(
+      'full player pause',
+      JSON.stringify({
+        same: paused === idleStage,
+        icon: paused?.querySelector('.mc-play ha-icon')?.getAttribute('icon') || null,
+        src: paused?.querySelector('.music-art img')?.getAttribute('src') || null
+      })
+    );
+  }
+  check('a later update keeps the cover and shows play', pausedPainted);
 }

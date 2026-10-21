@@ -76,6 +76,7 @@ const EXTENSION_KEYS = new Set([
   'compat',
   'shellClasses',
   'overlay',
+  'retain',
   'afterRender',
   'tick',
   'blocksNavigation',

@@ -210,10 +210,15 @@ function stageView(ctx) {
   return view;
 }
 
+/** True while the full player is open for a widget that is still on the card. */
+export function stageOpen(ctx) {
+  return !!stageView(ctx);
+}
+
 export function stageMarkup(ctx) {
   const view = stageView(ctx);
   if (!view) return '';
-  ctx.ext.playerKey = structureKey(view);
+  const key = structureKey(view);
   const close = buttonHTML(
     'media-player-stage-close',
     view.entityId,
@@ -231,11 +236,15 @@ export function stageMarkup(ctx) {
   return (
     `<section class="media-stage" role="dialog" aria-modal="true" aria-label="${ctx.esc(ctx.t('media_player.open_player'))}" tabindex="-1">` +
     `<header class="ms-head">${close}<h2 class="ms-title">${ctx.esc(view.rawName)}</h2>${details}</header>` +
-    `<section class="music-panel mc${progressOf(view) ? ' mc-has-progress' : ''}" data-widget="${view.index}"><div class="mc-body">${playerInner(view)}</div></section></section>`
+    `<section class="music-panel mc${progressOf(view) ? ' mc-has-progress' : ''}" data-widget="${view.index}" data-player-key="${ctx.esc(key)}"><div class="mc-body">${playerInner(view)}</div></section></section>`
   );
 }
 
-/** Keep the open stage in step with Home Assistant without rebuilding it on every playhead tick. */
+/**
+ * Keep the open stage in step with Home Assistant without rebuilding it on every playhead tick.
+ * The key of what is on screen lives on the panel. Playback updates leave the overlay mounted, and the cover
+ * and transport are written here when that key changes.
+ */
 export function syncStage(ctx) {
   const view = stageView(ctx);
   const root = ctx.q?.('.media-stage');
@@ -244,18 +253,23 @@ export function syncStage(ctx) {
   if (!panel) return;
   view.el = panel;
   const key = structureKey(view);
-  bindProgress(view);
-  if (ctx.ext.playerKey !== key && view.store.get('seek')?.pointer == null) {
-    ctx.ext.playerKey = key;
+  const seek = view.store.get('seek');
+  const input = panel.querySelector('.mc-seek');
+  if (seek?.input === input && seek.pointer != null && panel.getAttribute('data-player-key') !== key)
+    bindProgress(view);
+  if (panel.getAttribute('data-player-key') !== key && view.store.get('seek')?.pointer == null) {
     const body = panel.querySelector('.mc-body');
     if (body) body.innerHTML = playerInner(view);
+    panel.setAttribute('data-player-key', key);
     panel.classList.toggle('mc-has-progress', !!progressOf(view));
     const title = root.querySelector('.ms-title');
     if (title && title.textContent !== view.rawName) title.textContent = view.rawName;
     const details = root.querySelector('.ms-info');
     if (details) details.disabled = !view.ok;
     bindProgress(view);
+    return;
   }
+  bindProgress(view);
 }
 
 export function paintStage(ctx) {
@@ -271,7 +285,6 @@ export function openStage(ctx, id) {
   const widget = ctx.config?.widgets?.[index];
   if (!/^\d+$/.test(ctx.param) || widget?.type !== 'media_player' || widget.entity !== id) return;
   ctx.ext.player = {index, entity: id};
-  ctx.ext.playerKey = '';
   ctx.render();
   ctx.focus('.media-stage .ms-close');
 }
@@ -279,7 +292,6 @@ export function openStage(ctx, id) {
 export function closeStage(ctx) {
   const index = ctx.ext.player?.index;
   ctx.ext.player = null;
-  ctx.ext.playerKey = '';
   ctx.ext.seekStore = new Map();
   ctx.render();
   if (index != null) ctx.focus(`[data-widget="${index}"] .mc-details`);

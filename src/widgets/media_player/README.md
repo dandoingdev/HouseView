@@ -49,7 +49,7 @@ entity: media_player.living_room
 
 ## Playlists and favourites
 
-Browse appears when the speaker supports Home Assistant media browsing. It opens a teal glass library with artwork and six large tiles per page; swipe left/right or use the arrows to move through the list without scrolling. Back or Escape returns to the player. Opening, refreshing and editing this library never starts playback. Press a playlist tile to play it on that card’s speaker and return to the player after Home Assistant accepts playback. A failed request keeps the browser open with an error so you can retry. Artwork fills the width of each rounded glass tile, with its name below.
+Browse appears when the speaker supports Home Assistant media browsing. It opens a teal glass library with artwork and six large tiles per page; swipe left/right or use the arrows to move through the list without scrolling. Back or Escape returns to the player. Opening, refreshing and editing this library never starts playback. Press a playlist tile to play it on that card’s speaker. The playlist view closes as soon as the tile is pressed. A failed request is reported on the player. Artwork fills the width of each rounded glass tile, with its name below.
 
 In the native card editor, set **Shown playlists** to **Selected favourites**, then choose items under **Choose and order playlists**. Drag the selected chips to set their order. Each media card saves its own selection. **All favourites** is the default; an empty selected list deliberately shows none. Saved missing items remain visible in settings and disabled in the browser until removed or restored.
 

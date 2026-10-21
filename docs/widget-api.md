@@ -189,8 +189,8 @@ logs once.
 
 ## 6. Extension (card-level features)
 
-For behaviour bigger than one widget: the camera grid overlay, the timer alarm banner and its audio. Hosted by
-`src/controller/extensions.js`; the controller never names the widget. Only `camera` and `timer` use it.
+For behaviour bigger than one widget: the camera grid overlay, the timer alarm banner and its audio, and the
+full-screen music player. Hosted by `src/controller/extensions.js`; the controller never names the widget.
 
 | Field | Meaning |
 | --- | --- |
@@ -200,7 +200,8 @@ For behaviour bigger than one widget: the camera grid overlay, the timer alarm b
 | `state()` | Initial state, kept at `card._ext[type]` |
 | `compat` | Property accessors on the card, `{name: {get, set?}}` |
 | `shellClasses(card)` | Classes for the shell (`camera-view-open`) |
-| `overlay(ctx)` | HTML appended to the shell on render and update |
+| `overlay(ctx)` | HTML inserted when the overlay opens or the shell is rebuilt. A state update leaves a mounted overlay in place, and removes it when this returns nothing |
+| `retain(ctx)` | Optional. On a state update, `true` keeps the mounted overlay and skips `overlay()` (`afterRender` syncs it); `false` removes it |
 | `afterRender(ctx)`, `tick` | As the widget hooks, card-level |
 | `blocksNavigation(ext)` | True stops page changes and swipes (the grid is open) |
 | `onKeydown(ctx, event)`, `onPointerDown(ctx, event)` | Key and pointer handling; `onKeydown` returns true when handled |

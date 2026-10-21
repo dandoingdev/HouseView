@@ -2,7 +2,7 @@
 // than one tile, such as the camera gallery overlay and the timer alarm banner.
 //
 // The controller never names the widget that owns an extension. It asks the registry for every extension and
-// calls the optional members: state, shellClasses, overlay, afterRender, tick, blocksNavigation, onKeydown,
+// calls the optional members: state, shellClasses, overlay, retain, afterRender, tick, blocksNavigation, onKeydown,
 // onPointerDown, dispose, and the `compat` accessors that keep private names (_galleryOpen,
 // _galleryCamera, _refreshGallery, _alarm, _audio, _timerStates) working on the card.
 //
@@ -126,7 +126,8 @@ export const extensionsMixin = {
    * Put each extension's overlay markup into the shell.
    * `rebuild` (a full render) removes what was inserted before and inserts fresh markup; otherwise (a state
    * update) an overlay that is still in the DOM is left alone, a missing one is inserted, and one whose
-   * extension now returns no markup is removed.
+   * extension now returns no markup is removed. `retain` can answer that without building markup: true keeps
+   * the nodes (afterRender syncs them), false removes them.
    * Extensions are processed in reverse registry order so the timer alarm banner precedes the camera gallery
    * in the DOM.
    */
@@ -135,17 +136,31 @@ export const extensionsMixin = {
     const nodes = (this._overlayNodes ||= new Map());
     for (const {type, extension} of [...extensions()].reverse()) {
       if (!extension.overlay) continue;
+      let current = nodes.get(type) || [];
+      const connected =
+        current.length > 0 &&
+        current.every((node) => node.isConnected && shell.contains(node));
+      if (!rebuild && connected && extension.retain) {
+        const keep = guarded(
+          extension,
+          'retain',
+          `${type}.extension.retain`,
+          this._extensionContext(type)
+        );
+        if (keep === true) continue;
+        if (keep === false) {
+          current.forEach((node) => node.remove());
+          nodes.delete(type);
+          continue;
+        }
+      }
       const html =
         guarded(extension, 'overlay', `${type}.extension.overlay`, this._extensionContext(type)) ||
         '';
-      let current = nodes.get(type) || [];
       if (rebuild) {
         current.forEach((node) => node.remove());
         current = [];
-      } else if (
-        current.length &&
-        current.every((node) => node.isConnected && shell.contains(node))
-      ) {
+      } else if (connected) {
         if (!html) {
           current.forEach((node) => node.remove());
           nodes.delete(type);

@@ -3,6 +3,7 @@ import {buttonHTML} from '../../core/html.js';
 import {BROWSE_MEDIA, PLAY_MEDIA, libraryArtwork, loadLibrary, shownItems} from './library-data.js';
 import {
   stageMarkup,
+  stageOpen,
   syncStage,
   paintStage,
   openStage,
@@ -200,7 +201,6 @@ function dispose(ctx) {
   if (ctx.reason !== 'disconnect') return;
   ctx.ext.open = false;
   ctx.ext.player = null;
-  ctx.ext.playerKey = '';
   ctx.ext.seekStore = new Map();
   ctx.ext.abort?.abort();
   ctx.ext.revision++;
@@ -209,7 +209,9 @@ function dispose(ctx) {
 }
 
 export default {
-  state: () => ({open: false, revision: 0, items: [], page: 0, player: null, playerKey: ''}),
+  state: () => ({open: false, revision: 0, items: [], page: 0, player: null}),
+  // A playback update must not rebuild this shell: the host keeps it and afterRender paints the new track.
+  retain: (ctx) => stageOpen(ctx) || !!ctx.ext.open,
   overlay: (ctx) => `${stageMarkup(ctx)}${ctx.ext.open ? markup(ctx) : ''}`,
   afterRender,
   tick: {every: 1000, when: (ext) => !!ext.player, run: paintStage},
@@ -294,21 +296,14 @@ export default {
       },
       async run(ctx, id) {
         const item = ctx.ext.items[Number(ctx.param)];
-        const revision = ctx.ext.revision;
-        try {
-          await ctx.call('media_player', 'play_media', {
-            entity_id: id,
-            media_content_id: item.media_content_id,
-            media_content_type: item.media_content_type
-          });
-          if (valid(ctx) && ctx.ext.entity === id && ctx.ext.revision === revision) close(ctx);
-        } catch (error) {
-          if (valid(ctx) && ctx.ext.entity === id && ctx.ext.revision === revision) {
-            ctx.ext.error = ctx.t('media_player.play_error');
-            paint(ctx);
-          }
-          throw error;
-        }
+        const media = {
+          entity_id: id,
+          media_content_id: item.media_content_id,
+          media_content_type: item.media_content_type
+        };
+        // Leave the list as soon as the tile is pressed. Playback continues after the view is gone.
+        close(ctx);
+        await ctx.call('media_player', 'play_media', media);
       }
     }
   }

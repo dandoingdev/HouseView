@@ -10,7 +10,6 @@ export default {
     'media_player.item_missing': 'No longer available',
     'media_player.loading': 'Loading favourites…',
     'media_player.browse_error': 'Could not load favourites. Use Refresh to try again.',
-    'media_player.play_error': 'Could not start playback. Use Refresh to try again.',
     'media_player.empty':
       'No playlists to show. Choose favourites in this card’s settings, or save them in your music app.',
     'media_player.partial': 'Some favourites could not be loaded',

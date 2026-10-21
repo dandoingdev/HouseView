@@ -207,6 +207,43 @@ describe('overlays', () => {
     assert.deepEqual(classesOf(newShell), ['face', 'timer-alarm']);
   });
 
+  it('a state update keeps a retained overlay without asking for markup again', () => {
+    let built = 0;
+    registerWidget(
+      defineWidget({
+        type: 'fan',
+        label: 'Fan',
+        order: 80,
+        render: () => '<i></i>',
+        extension: {
+          state: () => ({open: true}),
+          retain: (ctx) => ctx.ext.open,
+          overlay() {
+            built += 1;
+            return '<section class="fan-overlay">fan</section>';
+          }
+        }
+      })
+    );
+    const card = newCard();
+    const shell = shellWith('face');
+    card._syncOverlays(shell, true);
+    const overlay = shell.children.find((node) => node.classNames.has('fan-overlay'));
+    card._syncOverlays(shell, false);
+    assert.equal(built, 1);
+    assert.equal(
+      shell.children.find((node) => node.classNames.has('fan-overlay')),
+      overlay
+    );
+    card._ext.fan.open = false;
+    card._syncOverlays(shell, false);
+    assert.equal(built, 1, 'retain false removes the overlay without building markup');
+    assert.equal(
+      shell.children.some((node) => node.classNames.has('fan-overlay')),
+      false
+    );
+  });
+
   it('a throwing overlay is isolated: the other extensions still insert', () => {
     const errors = mock.method(console, 'error', () => {});
     _resetRegistry();
