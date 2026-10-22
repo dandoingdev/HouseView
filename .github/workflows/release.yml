@@ -7,6 +7,11 @@ on:
 permissions:
   contents: write
 
+# A repeated push or rerun for a tag must wait for its publisher to finish.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -65,9 +70,4 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          FLAGS=""
-          case "$GITHUB_REF_NAME" in *-*) FLAGS="--prerelease" ;; esac
-          gh release create "$GITHUB_REF_NAME" dist/release/houseview.js \
-            dist/release/houseview.js.map dist/release/houseview.js.sha256 \
-            --title "HouseView ${GITHUB_REF_NAME#v}" --notes-file dist/release/NOTES.md $FLAGS
+        run: node tools/publish-release.mjs

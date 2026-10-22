@@ -6,6 +6,10 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Fixed
+
+* Duplicate tag pushes and release workflow reruns leave an already published release intact and succeed when all release assets are present.
+
 ## [1.9.0] - 2026-10-21
 
 ### Added
