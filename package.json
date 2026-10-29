@@ -54,7 +54,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.13.0",
     "prettier": "^3.9.10",
-    "puppeteer-core": "^25.14.0"
+    "puppeteer-core": "^25.16.0"
   },
   "keywords": [
     "home-assistant",
