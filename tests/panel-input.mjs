@@ -171,13 +171,8 @@ try {
   await click('.ms-close');
   await page.waitForFunction('!window.card.shadowRoot.querySelector(".media-stage")');
   assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
-  await page.evaluate(() =>
-    window.card.shadowRoot
-      .querySelector('.mc-details')
-      .dispatchEvent(
-        new window.KeyboardEvent('keydown', {key: 'F10', shiftKey: true, bubbles: true})
-      )
-  );
+  // A second tap on the track title opens the full player again (hold no longer duplicates the same action).
+  await click('.mc-details');
   await page.waitForFunction('window.card.shadowRoot.querySelector(".media-stage")');
   assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
   await click('.ms-close');
