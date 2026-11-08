@@ -67,6 +67,9 @@ anything that needs a glance. It works in landscape and portrait:
 
 ## Features
 
+* **Leave home and say good night with confidence.** Review configured doors, windows, lights, heating and alarm checks, resolve exceptions and run your routine. Results verify reported device states and the house mode separately. Available from Away, Sleeping and Quick actions. [Setup](docs/house-modes.md#leaving-home-and-good-night).
+* **House modes with shared context.** Home, Away, Guests, Evening and Sleeping on their own screen: swipe right from the left edge to open, then left to return, with explanations before switching and a visible mode indicator on every page. Create the helper and connect your routines in the editor. [Setup](docs/house-modes.md).
+* **Quick actions from any page.** Swipe up from the bottom for up to six configurable lights, helpers, scenes or routines; swipe down to return. Set them in **Quick actions · Swipe up** in the card editor. [Configuration and examples](docs/actions.md#swipe-up-quick-actions).
 * **Pages you move through with a swipe.** Tap the dots, or use the arrow keys. Each page fits the screen, landscape
   or portrait. After a quiet spell the carousel goes back to the first page, so the next person starts where you
   meant them to. If a screensaver is set, that happens as the screensaver comes up.
@@ -132,7 +135,7 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 3. Hard-refresh your browser.
 
 **Caching.** Browsers and wall tablets keep the old file. After an update append a version to the resource URL
-(`/local/houseview/houseview.js?v=1.9.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
+(`/local/houseview/houseview.js?v=1.10.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
 
 **Kiosk mode.** Add `?tablet=1` to the dashboard address (or set `tablet_mode: true`) and HouseView hides Home Assistant's
 sidebar and header so the carousel uses the whole screen. This relies on Home Assistant internals that are not a public API,

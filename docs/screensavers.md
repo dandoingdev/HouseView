@@ -65,6 +65,7 @@ or a card, and can be written as a `screensaver` entry in YAML, but is not in th
 | `idle_timeout` | `120` | Seconds without a touch. `0` never starts by itself; otherwise 5 to 86400. Ignored by event overviews |
 | `start_in_edit_mode` | `false` | Also run while the dashboard is being edited |
 | `preview` | `false` | Show it at once, and again 5 seconds after every dismissal. For choosing options in the editor |
+| `control_timeout` | `30` | Card option controlling inactivity dismissal of manually opened screens. See [closing idle controls](#closing-idle-controls) |
 | `return_timeout` | `120` | A card option, not part of the screensaver entry. See [returning to the first page](#returning-to-the-first-page) |
 | ... | | Then the overview's own options, flat beside these (`details`, `sun_entity`, ... for weather) |
 
@@ -73,7 +74,17 @@ A wrong value is reported when the card loads, for example `Screensaver idle_tim
 
 Only the carousel (`custom:houseview-card`) has a screensaver; a standalone widget card does not read the key.
 
-### Returning to the first page
+### Closing idle controls
+
+Manually opened views (including brightness, colour and volume), House modes and Quick actions return to the
+current dashboard page after 30 seconds without interaction. Adjust **Close idle controls (seconds)** in the
+Screensaver editor section, or set `control_timeout` on the card. `0` keeps these screens open.
+Touch, keyboard input and scrolling restart the countdown. A held pointer, a pending command or a house routine
+that is running or verifying defers closure. Closing sends no device commands and preserves the settings already
+applied. The screensaver gets a fresh idle countdown afterwards. Editor previews and automatic event displays
+keep their existing behaviour. This does not close Home Assistant's own card editor or external entity dialogs.
+
+## Returning to the first page
 
 `return_timeout` is set in the Screensaver section of the editor, or on the card itself. The default is 120 seconds.
 `0` turns it off.
@@ -207,7 +218,7 @@ you flip that switch.
   screen; a tap closes it. Turn this off with `calendar_view: false` on the carousel. An explicit
   `screensaver` entry with `type: calendar_month` (for example with `week_start: sunday`) supplies the options.
 * **Weather scene.** Pressing a weather widget, or a weather overview card with `display: tile`, opens the full scene.
-  It stays until the close button or Escape. A tap on the sky does nothing. The idle screensaver still wakes on the
+  It closes through its close button, Escape or the control inactivity timeout. A tap on the sky does nothing. The idle screensaver still wakes on the
   first tap. Turn the widget off with `weather_view: false`; the widget then opens the entity dialog.
 * **Thermostat view.** Pressing the number on a thermostat widget opens the [thermostat view](overviews/climate.md):
   the target in large figures with down and up keys, the room temperature and humidity, and a key for Home Assistant's
@@ -224,7 +235,7 @@ you flip that switch.
 * **Photo frame.** The photo frame card opens full screen when pressed.
 
 These layers are one-off: they never start by themselves, they run even in edit mode, and the first tap on them only closes
-them. The weather scene stays until its close button. A control panel (the thermostat view) closes with its own key.
+them. The weather scene closes through its close button or the control inactivity timeout. A control panel (the thermostat view) closes with its own key.
 
 ## Tablet, bedtime and motion
 
@@ -260,6 +271,7 @@ camera snapshot request. The first thing a wake does is catch all of that up.
 | `Unsupported screensaver: x` | `type` is not an overview (the editor lists the ones that are) |
 | `Screensaver enabled must be true or false.` | A bad `enabled` (`start_in_edit_mode` and `preview` likewise) |
 | `Screensaver idle_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `idle_timeout` |
+| `control_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `control_timeout` |
 | `return_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `return_timeout` |
 | `weather screensaver needs a weather entity.` | A missing or wrong `entity` (`<type> screensaver needs a <domain> entity.`) |
 | `Weather overview details must be a list of: ...` | An option with a bad value (`<Label> <option> must be ...`) |

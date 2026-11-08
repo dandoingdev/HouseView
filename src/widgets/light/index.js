@@ -2,8 +2,8 @@ import {defineWidget} from '../../core/define-widget.js';
 import {canDim, colourModes, kelvinRange} from '../../core/light.js';
 import {controlTile} from '../_shared/control-tile.js';
 
-// Light tile: tap toggles and hold opens brightness; explicit toggle/off actions keep
-// direct service behaviour for shortcuts and bedtime buttons. Reference widget: docs/widget-api.md
+// Light tile: tap toggles; the default view action also shows a brightness key (hold still works).
+// Explicit toggle/off actions keep direct service behaviour for shortcuts and bedtime buttons.
 export default defineWidget({
   type: 'light',
   label: 'Light',
@@ -30,16 +30,20 @@ export default defineWidget({
     toForm: (widget) => ({action: widget.action === false ? 'off' : widget.action || 'view'})
   },
 
-  render: (ctx) =>
-    controlTile(ctx, {
-      action:
-        ctx.widget.action === 'off'
-          ? 'light-off'
-          : ctx.widget.action === 'toggle'
-            ? 'light'
-            : 'light',
-      icon: 'lightbulb-outline'
-    }),
+  render(ctx) {
+    const mode = ctx.widget.action;
+    const view = mode !== 'toggle' && mode !== 'off';
+    return controlTile(ctx, {
+      action: mode === 'off' ? 'light-off' : 'light',
+      icon: 'lightbulb-outline',
+      ...(view
+        ? {
+            iconAction: 'light-view',
+            iconLabel: ctx.t('light.brightness', {name: ctx.rawName})
+          }
+        : {})
+    });
+  },
 
   actions: {
     // `ctx.widget` may be undefined (a direct card._act call), so run only uses the entity id it is given.

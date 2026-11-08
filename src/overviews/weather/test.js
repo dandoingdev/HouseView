@@ -76,9 +76,9 @@ export default async function ({mount, check, variants, wait}) {
     !t.q('[data-widget]').classList.contains('tile') &&
       !t.q('[data-widget]').classList.contains('widget')
   );
-  await t.hold('[data-action="info"]');
+  await t.click('info');
   check(
-    'card hold opens more-info for the weather entity and calls no service',
+    'card tap opens more-info for the weather entity and calls no service',
     t.infos[0] === 'weather.test' && t.calls.length === 0
   );
 

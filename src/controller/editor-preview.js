@@ -8,12 +8,20 @@ export const editorPreviewMixin = {
     switch (target?.kind) {
       case 'page':
         return (
-          !active && !this._galleryOpen && this._screens?.[this._pageIndex]?.name === target.name
+          !active &&
+          !this._quickActions?.open &&
+          !this._houseModes?.open &&
+          !this._galleryOpen &&
+          this._screens?.[this._pageIndex]?.name === target.name
         );
       case 'overview':
         return !!active?.entry?.manual && active.entry.type === target.type;
       case 'cameras':
         return !!this._galleryOpen && !active;
+      case 'house-modes':
+        return !!this._houseModes?.preview;
+      case 'quick-actions':
+        return !!this._quickActions?.preview;
       default:
         return false;
     }
@@ -37,6 +45,8 @@ export const editorPreviewMixin = {
     this._editorPreviewKey = key;
     this._syncingEditorPreview = true;
     try {
+      this._disposeQuickActions?.();
+      this._disposeHouseModes?.();
       // Replace immediately: the previous screen must never cover the one being edited.
       if (this._screensaver?.active) this._screensaver.idle?.wake('replace');
       if (this._screensaver) this._screensaverRemoveLayer(this._screensaver);
@@ -47,6 +57,10 @@ export const editorPreviewMixin = {
       }
       if (target?.kind === 'page') {
         this._renderWidgets();
+      } else if (target?.kind === 'house-modes') {
+        this._openHouseModes({preview: true});
+      } else if (target?.kind === 'quick-actions') {
+        this._openQuickActions({preview: true});
       } else if (target?.kind === 'overview' && target.type) {
         this._screensaverOpenType(target.type, target.options || {});
       } else if (target?.kind === 'cameras' && this._config.camera_gallery?.length) {

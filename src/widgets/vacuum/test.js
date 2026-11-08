@@ -120,9 +120,9 @@ export default async function ({mount, check, variants}) {
     'vacuum_view: false keeps the entity dialog on the tile',
     !!t.q('[data-action="info"]') && !t.q('[data-action="vacuum-view"]')
   );
-  await t.hold('[data-action="info"]');
+  await t.click('info');
   check(
-    'that hold opens more-info and calls no service',
+    'that tap opens more-info and calls no service',
     t.infos.includes('vacuum.test') && t.calls.length === 0
   );
 

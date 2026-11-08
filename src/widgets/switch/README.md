@@ -7,7 +7,8 @@ since: 1.0
 # Switch
 
 Shows a `switch.*` entity as an icon widget with its name and state. The widget is highlighted while the switch is
-`on`. A tap flips it through `homeassistant.toggle`. An unavailable or unknown switch is shown disabled.
+`on`. A tap flips it through `homeassistant.toggle`. The icon is a details key that opens Home Assistant's dialog
+(holding the tile does the same). An unavailable or unknown switch is shown disabled.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

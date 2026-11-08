@@ -184,7 +184,13 @@ test('the editor hides idle_timeout for an event overview and keeps it for an id
   const event = names({type: 'bell'});
   assert.equal(event.includes('idle_timeout'), false);
   assert.ok(event.includes('return_timeout'));
-  assert.deepEqual(event.slice(0, 4), ['type', 'return_timeout', 'enabled', 'entity']);
+  assert.deepEqual(event.slice(0, 5), [
+    'type',
+    'return_timeout',
+    'control_timeout',
+    'enabled',
+    'entity'
+  ]);
   assert.equal(event.at(-1), 'start_in_edit_mode');
   assert.equal(event.includes('preview'), false);
 });

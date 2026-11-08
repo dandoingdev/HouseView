@@ -4,6 +4,7 @@ import {isUsable} from '../../core/state.js';
 import {canSetVolume} from '../../core/media-volume.js';
 import {artworkHTML} from './artwork.js';
 import {BROWSE_MEDIA} from './library-data.js';
+import {hasSonosQueue} from './tracks-data.js';
 import {progressOf, progressRow, bindProgress, paintProgress} from './progress.js';
 
 export const PLAY = 512;
@@ -140,8 +141,20 @@ export function playerInner(ctx) {
       )
     : '';
   const top = `<div class="mc-top"><span class="sr">${ctx.name}</span>${volumeButton(ctx)}${browse}</div>`;
+  const tracks =
+    ctx.feature(BROWSE_MEDIA) || hasSonosQueue(ctx.hass, ctx.entityId)
+      ? control(
+          ctx,
+          `media-player-show-tracks-${ctx.index}`,
+          'format-list-bulleted',
+          ctx.t('media_player.tracks'),
+          'mc-tracks',
+          ctx.ok,
+          {attrs: `aria-haspopup="dialog" aria-label="${ctx.esc(ctx.t('media_player.tracks'))}" `}
+        )
+      : '';
   const stage =
-    `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>` +
+    `<div class="mc-stage"><div class="mc-cover"><div class="music-art">${art}</div>${tracks}` +
     `<div class="mc-meta">${ctx.btn('info', `<strong class="mc-title">${ctx.esc(titleText(ctx))}</strong><span class="mc-artist">${ctx.esc(artistText(ctx))}</span>`, 'mc-details', ctx.ok, {attrs: `aria-label="${ctx.esc(ctx.t('media_player.options'))}${ctx.esc(ctx.t('media_player.more_controls'))}" `})}</div></div></div>`;
   return `${top}${stage}${progressRow(ctx)}${transportRow(ctx)}`;
 }
@@ -247,7 +260,11 @@ export function syncStage(ctx) {
   const key = structureKey(view);
   const seek = view.store.get('seek');
   const input = panel.querySelector('.mc-seek');
-  if (seek?.input === input && seek.pointer != null && panel.getAttribute('data-player-key') !== key)
+  if (
+    seek?.input === input &&
+    seek.pointer != null &&
+    panel.getAttribute('data-player-key') !== key
+  )
     bindProgress(view);
   if (panel.getAttribute('data-player-key') !== key && view.store.get('seek')?.pointer == null) {
     const body = panel.querySelector('.mc-body');

@@ -171,13 +171,8 @@ try {
   await click('.ms-close');
   await page.waitForFunction('!window.card.shadowRoot.querySelector(".media-stage")');
   assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
-  await page.evaluate(() =>
-    window.card.shadowRoot
-      .querySelector('.mc-details')
-      .dispatchEvent(
-        new window.KeyboardEvent('keydown', {key: 'F10', shiftKey: true, bubbles: true})
-      )
-  );
+  // A second tap on the track title opens the full player again (hold no longer duplicates the same action).
+  await click('.mc-details');
   await page.waitForFunction('window.card.shadowRoot.querySelector(".media-stage")');
   assert.deepEqual(await page.evaluate(() => window.panelInfos), []);
   await click('.ms-close');
@@ -194,7 +189,7 @@ try {
   await click('.mc-play');
   await page.waitForFunction('window.panelCalls.length === 2');
   assert.equal(await page.evaluate(() => window.panelCalls[1].s), 'media_play_pause');
-  console.log('PASS 480px edge-to-edge layout, full player on track hold, idle resume and play/pause');
+  console.log('PASS 480px edge-to-edge layout, full player on track tap, idle resume and play/pause');
   for (const [w, h] of [
     [480, 440],
     [440, 480],

@@ -13,9 +13,9 @@ export default async function ({mount, check, variants}) {
       t.q('.tile').dataset.entity === 'sensor.test' &&
       t.q('ha-icon').getAttribute('icon') === 'mdi:gauge'
   );
-  await t.hold('[data-action="info"]');
+  await t.click('info');
   check(
-    'hold opens more-info and calls no service',
+    'a tap opens more-info and calls no service',
     t.infos.includes('sensor.test') && t.calls.length === 0
   );
 

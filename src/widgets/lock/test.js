@@ -5,8 +5,9 @@ export default async function ({mount, check, variants, confirms, confirmWith}) 
   check(
     'a locked door shows the closed padlock and its raw state',
     t.q('ha-icon').getAttribute('icon') === 'mdi:lock' &&
-      t.text('[data-action="lock"] small') === 'locked' &&
-      !t.q('[data-action="lock"].active')
+      t.text('.control > small') === 'locked' &&
+      !t.q('.control.active') &&
+      !!t.q('[data-action="info"].control-icon')
   );
 
   confirms.length = 0;
@@ -59,7 +60,7 @@ export default async function ({mount, check, variants, confirms, confirmWith}) 
   check(
     'custom icon and name are used',
     t.q('ha-icon').getAttribute('icon') === 'mdi:door-closed-lock' &&
-      t.text('[data-action="lock"] span') === 'Back door'
+      t.text('.control > span') === 'Back door'
   );
 
   t = await mount(variants.foreignIcon);
@@ -71,13 +72,13 @@ export default async function ({mount, check, variants, confirms, confirmWith}) 
   t = await mount(variants.hostileName);
   check(
     'name is escaped, not parsed as markup',
-    !t.q('[data-action="lock"] b') && t.text('[data-action="lock"] span') === '<b>"Door" & co</b>'
+    !t.q('.control b') && t.text('.control > span') === '<b>"Door" & co</b>'
   );
 
   t = await mount(variants.unavailable);
   check(
     'unavailable lock is disabled and labelled',
-    t.q('[data-action="lock"]').disabled && t.text('[data-action="lock"]').includes('Unavailable')
+    t.q('[data-action="lock"]').disabled && t.text('.control').includes('Unavailable')
   );
   await t.act('lock', 'lock.test');
   check('unavailable lock issues no service call', t.calls.length === 0);

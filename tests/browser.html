@@ -19,7 +19,7 @@ const hass={config:{unit_system:{temperature:'°C'}},locale:{language:'en-GB'},s
 card.addEventListener('hass-more-info',e=>infos.push(e.detail.entityId));
 card.setConfig(cfg);card.hass=hass;
 let passed=0,failed=0;
-function check(name,ok){const li=document.createElement('li');li.textContent=`${ok?'PASS':'FAIL'} — ${name}`;results.append(li);ok?passed++:failed++;}
+function check(name,ok,observed){const li=document.createElement('li');li.textContent=`${ok?'PASS':'FAIL'} — ${name}${!ok&&observed?' observed '+JSON.stringify(observed):''}`;results.append(li);ok?passed++:failed++;}
 async function click(action){calls=[];const b=card.shadowRoot.querySelector(`[data-action="${action}"]`);b.click();await new Promise(r=>setTimeout(r,20));}
 const a=hass.states['climate.test'].attributes;
 await click('up');check('Uses the thermostat target step',calls[0]?.data.temperature===20.5 && calls[0]?.s==='set_temperature');
@@ -260,9 +260,12 @@ const panelHeaderCard=headerFrame.contentDocument.createElement('houseview-card'
 const panelHeaderConfig={show_header:true,tablet_mode:true,performance:'lite',pages:[{name:'Panel',surface:'teal',columns:2}],widgets:[{type:'light',entity:'light.test',size:'normal'},{type:'light',entity:'light.second',size:'normal'},{type:'climate',entity:'climate.test',size:'normal'},{type:'media_player',entity:'media_player.test',size:'normal'}]};
 panelHeaderCard.setConfig(panelHeaderConfig);panelHeaderCard.hass=hass;await new Promise(r=>setTimeout(r,150));
 const panelHeaderRoot=panelHeaderCard.shadowRoot,panelHeaderBounds=panelHeaderRoot.querySelector('.dashboard-header').getBoundingClientRect(),panelHeaderTiles=[...panelHeaderRoot.querySelectorAll('.face > houseview-widget-card')].map(w=>w.firstElementChild.getBoundingClientRect());
-check('A 480x480 panel keeps four tiles below the header and above navigation',headerFrame.contentWindow.innerWidth===480&&panelHeaderBounds.height===44&&panelHeaderTiles.length===4&&panelHeaderTiles.every(r=>r.left>=0&&r.right<=480&&r.top>=44&&r.bottom<=panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().top));
+check('A 480x480 panel keeps four tiles below the header and above navigation',headerFrame.contentWindow.innerWidth===480&&panelHeaderBounds.height===56&&panelHeaderTiles.length===4&&panelHeaderTiles.every(r=>r.left>=0&&r.right<=480&&r.top>=56&&r.bottom<=panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().top),{header:panelHeaderBounds,tiles:panelHeaderTiles,nav:panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect()});
 panelHeaderCard.setConfig({...panelHeaderConfig,show_header:false});await new Promise(r=>setTimeout(r,80));
-check('A 480x480 panel restores its full page height when the header is disabled',!panelHeaderRoot.querySelector('.dashboard-header')&&panelHeaderRoot.querySelector('.face').getBoundingClientRect().height===480-panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().height);headerFrame.remove();
+const compactToolbar=panelHeaderRoot.querySelector('.dashboard-header.controls-only');
+check('A 480x480 panel retains playback access when the date/time header is disabled',!!compactToolbar&&!!compactToolbar.querySelector('.dashboard-control')&&getComputedStyle(compactToolbar.querySelector('.dashboard-time')).visibility==='hidden'&&panelHeaderRoot.querySelector('.face').getBoundingClientRect().height===480-panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().height-56,{header:compactToolbar?.getBoundingClientRect(),face:panelHeaderRoot.querySelector('.face').getBoundingClientRect()});
+panelHeaderCard.hass={...hass,states:{...hass.states,'media_player.test':{...hass.states['media_player.test'],state:'idle'}}};await new Promise(r=>setTimeout(r,80));
+check('A 480x480 panel restores its full page height when playback and the header are inactive',!panelHeaderRoot.querySelector('.dashboard-header')&&panelHeaderRoot.querySelector('.face').getBoundingClientRect().height===480-panelHeaderRoot.querySelector('.page-nav').getBoundingClientRect().height,{header:!!panelHeaderRoot.querySelector('.dashboard-header'),face:panelHeaderRoot.querySelector('.face').getBoundingClientRect()});headerFrame.remove();
 // home_overview: true adds a home button at the bottom left (no page); pressing it opens the home overview full screen.
 card.setConfig({home_overview:true,widgets:[{type:'clock'},{type:'light',entity:'light.second'}]});card.hass=hass;
 check('home_overview adds a home button and no page',card._screens.length===1&&!!card.shadowRoot.querySelector('.home-button'));

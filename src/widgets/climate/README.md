@@ -7,15 +7,15 @@ since: 1.0
 # Thermostat
 
 A `climate.*` entity as a minimal thermostat: a very large temperature, and along the bottom a down chevron,
-the name with a "room • current temperature" line beneath it, and an up chevron. Holding
+the name with a "room • current temperature" line beneath it, and an up chevron. Tapping
 the number opens the full-screen [thermostat view](../overviews/climate.md), which has the same keys, the room
-temperature and humidity, and a key for Home Assistant's own dialog (power, modes, fan). With `climate_view: false` on
-the carousel the number opens that dialog directly. The widget defaults to size `large` and scales with its own size,
-from one cell to a large widget.
+temperature and humidity, and a key for Home Assistant's own dialog (power, modes, fan). Holding the number opens that
+dialog when the tap already opened the view. With `climate_view: false` on the carousel the number opens that dialog
+directly. The widget defaults to size `large` and scales with its own size, from one cell to a large widget.
 
 * **Temperature.** Shows the target. In `heat_cool` mode, or without a numeric target, it shows the room temperature
   instead, and the chevrons are disabled. The number is formatted for your language with at most one decimal, and is
-  an em dash when unknown. Holding it opens the thermostat view (the more-info dialog with `climate_view: false`).
+  an em dash when unknown. Tapping it opens the thermostat view (the more-info dialog with `climate_view: false`).
 * **Down / up.** Disabled unless the entity has a numeric target and advertises target-temperature support
   (`supported_features` bit 1), and disabled at `min_temp` / `max_temp`. A step is the entity's `target_temp_step`,
   else 1 for Fahrenheit and 0.5 otherwise, clamped to the limits. Each press calls `climate.set_temperature`.

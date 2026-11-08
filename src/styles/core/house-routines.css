@@ -1,0 +1,71 @@
+/* @owns is-routine hr-panel hr-description hr-summary hr-headline hr-counts hr-mode-state hr-message hr-checks hr-check hr-icon hr-copy hr-name hr-detail hr-expected hr-fix-error hr-fix hr-empty hr-actions hr-start hr-back */
+/* @phase nav-compact */
+.is-routine .hm-current,.is-routine .hm-hint,.is-routine .hm-grid,.is-routine .hm-status {display:none}
+.hr-panel {max-width:900px;margin:0 auto;padding-bottom:4px}
+.house-modes .hr-description {margin:12px 0 16px;font-size:15px;line-height:1.6;color:#d4e9e3;white-space:pre-line;overflow-wrap:anywhere}
+.hr-summary {position:relative;padding:18px;padding-right:calc(var(--ov-panel-key-size) + 12px);min-height:var(--ov-panel-key-size);box-sizing:border-box;border:1px solid #ffffff35;border-radius:22px;background:#ffffff12}
+.house-modes .hr-headline {font-size:22px;line-height:1.3;margin:0;font-weight:600;letter-spacing:-.02em}
+.house-modes .hr-counts {margin:8px 0 0;font-size:13px;line-height:1.5;color:#d4e9e3}
+.house-modes .hr-mode-state {font-size:13px;line-height:1.5;margin:12px 2px;color:#d4e9e3}
+.house-modes .hr-message {font-size:14px;line-height:1.6;padding:14px;border-radius:16px;background:#f5bd7220;color:#ffe6bf;overflow-wrap:anywhere}
+.hr-message:empty {display:none}
+.hr-checks {display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.hr-check {display:flex;gap:12px;align-items:center;box-sizing:border-box;min-height:96px;padding:16px;border:1px solid #ffffff28;border-radius:20px;background:linear-gradient(135deg,#ffffff13,#ffffff05)}
+.hr-check[data-status=attention] {border-color:#f4c48670;background:#f4c48610}
+.hr-check[data-status=unknown] {border-style:dashed}
+.hr-icon {display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px}
+.house-modes .hr-icon ha-icon {display:block;width:26px;height:26px;--mdc-icon-size:26px;margin:0}
+.hr-copy {display:grid;gap:5px;flex:1;min-width:0}
+.house-modes .hr-name {font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.house-modes .hr-detail {font-size:13px;line-height:1.4;color:#f5e7c9;overflow-wrap:anywhere}
+.hr-check[data-status=ready] .hr-detail {color:#b9f4d3}
+.house-modes .hr-expected {font-size:12px;line-height:1.4;color:#c3ded7;margin:0;overflow-wrap:anywhere}
+.house-modes .hr-fix-error {font-size:12px;line-height:1.4;color:#ffdeb4;margin:0;overflow-wrap:anywhere}
+.hr-fix-error:empty {display:none}
+.house-modes .hr-fix,.house-modes .hr-start,.house-modes .hr-back {box-sizing:border-box;min-width:64px;min-height:64px;flex-shrink:0;border:1px solid #ffffff40;border-radius:16px;background:#ffffff15;color:inherit;font:inherit;font-size:14px;padding:12px;touch-action:pan-y}
+.house-modes .hr-fix {max-width:35%;white-space:normal;overflow-wrap:anywhere}
+.house-modes .hr-fix[hidden] {display:none}
+.hr-actions {display:flex;flex-wrap:wrap;gap:10px;margin:0 auto 12px;width:100%;max-width:900px}
+.house-modes .hr-start {flex:2 1 180px;background:#c4f5d8;color:#123e38;font-weight:650}
+.house-modes .hr-back {flex:1 1 140px}
+.hr-start:disabled,.hr-back:disabled,.hr-fix:disabled {opacity:.5;cursor:default}
+.house-modes .hr-empty {font-size:14px;line-height:1.6;color:#d4e9e3}
+.hr-empty:empty {display:none}
+.hr-start:focus-visible,.hr-back:focus-visible,.hr-fix:focus-visible {outline:3px solid #d0ffeb;outline-offset:-5px}
+@container house-modes (max-width:300px) {.hr-check {flex-wrap:wrap;padding:12px}.house-modes .hr-fix {margin-left:40px;max-width:100%}}
+@media (max-width:300px) {.hr-check {flex-wrap:wrap;padding:12px}.house-modes .hr-fix {margin-left:40px;max-width:100%}}
+
+@container house-modes (min-width:800px) {.hr-checks {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@supports not (container-type:size) {@media (min-width:840px) {.hr-checks {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}}
+
+@container house-modes (max-height:700px) {
+.house-modes .hr-description {font-size:13px;line-height:1.4;margin-bottom:10px}
+.hr-summary {padding:12px;padding-right:calc(var(--ov-panel-key-size) + 12px);border-radius:18px}
+.house-modes .hr-headline {font-size:18px}
+.house-modes .hr-counts {font-size:12px;line-height:1.4;margin-top:5px}
+.is-routine[data-routine-stage=review]:not([data-routine-checks="0"]) .hr-headline {display:none}
+.is-routine[data-routine-stage=review] .hr-counts {margin:0}
+.is-routine[data-routine-stage=review] .hr-mode-state {display:none}
+.hr-checks {gap:8px;margin:12px 0}
+.hr-check {min-height:80px;padding:8px;gap:10px}
+.house-modes .hr-name {font-size:14px}
+.house-modes .hr-detail {font-size:12px}
+.hr-copy {gap:3px}
+}
+@media (max-height:740px) {
+.house-modes.is-routine {padding:16px;gap:12px}
+.house-modes .hr-description {font-size:13px;line-height:1.4;margin-bottom:10px}
+.hr-summary {padding:12px;padding-right:calc(var(--ov-panel-key-size) + 12px);border-radius:18px}
+.house-modes .hr-headline {font-size:18px}
+.house-modes .hr-counts {font-size:12px;line-height:1.4;margin-top:5px}
+.is-routine[data-routine-stage=review]:not([data-routine-checks="0"]) .hr-headline {display:none}
+.is-routine[data-routine-stage=review] .hr-counts {margin:0}
+.is-routine[data-routine-stage=review] .hr-mode-state {display:none}
+.hr-checks {gap:8px;margin:12px 0}
+.hr-check {min-height:80px;padding:8px;gap:10px}
+.house-modes .hr-name {font-size:14px}
+.house-modes .hr-detail {font-size:12px}
+.hr-copy {gap:3px}
+}
+
+.house-modes .hr-summary > .hm-info {position:absolute;right:0;top:0;border-radius:0 18px 18px 0}

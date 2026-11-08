@@ -283,7 +283,7 @@ export default async function ({mount, check, variants, wait}) {
     cards: [widget],
     config: {vacuum_view: false}
   });
-  await t.hold('[data-action="info"]');
+  await t.click('info');
   check(
     'vacuum_view: false keeps the entity dialog on the tile',
     !t.layer && t.infos.includes(ENTITY) && t.calls.length === 0

@@ -200,6 +200,7 @@ full-screen music player. Hosted by `src/controller/extensions.js`; the controll
 | `state()` | Initial state, kept at `card._ext[type]` |
 | `compat` | Property accessors on the card, `{name: {get, set?}}` |
 | `shellClasses(card)` | Classes for the shell (`camera-view-open`) |
+| `dashboardControl(ctx)` | Optional `{action, entity, icon, label, disabled?}` shortcut, or null. The first active extension owns the single shortcut. The host preserves its button beside the dim key in the footer, or in a 56px header on screens narrower than 700px. A compact toolbar can appear even with `show_header: false`; date/time stay hidden. Standalone widget cards omit this shortcut. Actions belong to the extension and use the normal pending/availability pipeline. |
 | `overlay(ctx)` | HTML inserted when the overlay opens or the shell is rebuilt. A state update leaves a mounted overlay in place, and removes it when this returns nothing |
 | `retain(ctx)` | Optional. On a state update, `true` keeps the mounted overlay and skips `overlay()` (`afterRender` syncs it); `false` removes it |
 | `afterRender(ctx)`, `tick` | As the widget hooks, card-level |

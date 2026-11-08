@@ -27,6 +27,8 @@ export function bindEvents(card) {
     navHold = null;
   };
 
+  card._clearNavHold = clearNavHold;
+
   root.addEventListener('pointerdown', (event) => {
     clearNavHold();
     const arrow = event.target.closest?.(
@@ -55,7 +57,14 @@ export function bindEvents(card) {
   });
 
   root.addEventListener('pointermove', (event) => {
-    if (navHold && card._gesture?.dragging) clearNavHold();
+    if (
+      navHold &&
+      (card._gesture?.dragging ||
+        card._gesture?.homePull ||
+        card._gesture?.quickPull ||
+        card._gesture?.modePull)
+    )
+      clearNavHold();
     card._gesturePointerMove(event);
     card._swipeMove(event);
   });
@@ -72,12 +81,15 @@ export function bindEvents(card) {
     card._gesturePointerCancel();
   });
 
-  // A downward pull starts in the top band. Claiming the touch keeps the browser from treating it as a scroll
-  // and cancelling the pointer before the home summary can open.
+  // Claim the home, footer and left-edge bands so browser scrolling cannot cancel their pointers.
   root.addEventListener(
     'touchmove',
     (event) => {
-      if (!card._gesture?.homeEdge || !event.cancelable) return;
+      if (
+        !(card._gesture?.homeEdge || card._gesture?.quickEdge || card._gesture?.modeEdge) ||
+        !event.cancelable
+      )
+        return;
       event.preventDefault();
     },
     {passive: false}
@@ -98,6 +110,8 @@ export function bindEvents(card) {
 
   root.addEventListener('keydown', (event) => {
     if (TEXT_ENTRY_TAGS.includes(event.target.tagName)) return;
+    if (card._quickActionsKeydown(event)) return;
+    if (card._houseModesKeydown?.(event)) return;
     // An extension that owns the screen (the camera gallery) gets the key first
     if (card._extensionKeydown(event)) return;
     if (card._navigationBlocked()) return;
@@ -134,7 +148,8 @@ export function bindEvents(card) {
     if (button.dataset.action === 'page-select') card._setPage(Number(button.dataset.page));
     else if (button.dataset.action === 'page-menu') card._openPageMenu();
     else if (button.dataset.action === 'page-menu-close') card._closePageMenu();
-    else if (button.dataset.action === 'scene-all') card._openSceneMenu(button.dataset.entity, !!button.dataset.all);
+    else if (button.dataset.action === 'scene-all')
+      card._openSceneMenu(button.dataset.entity, !!button.dataset.all);
     else if (button.dataset.action === 'scene-activate') {
       card._closePageMenu();
       card._act('scene', button.dataset.entity);

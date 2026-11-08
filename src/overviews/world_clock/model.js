@@ -1,17 +1,21 @@
+import {cachedValue, cacheValue} from '../../core/bounded-cache.js';
 import {dateTimeFormatter} from '../../core/intl.js';
 
+// Locale-independent validation results live for this bundle, with LRU eviction for arbitrary input.
+export const ZONE_CACHE_LIMIT = 128;
 const zones = new Map();
 
 /** Validate timezone metadata rather than guessing offsets from a formatted clock value. */
 export function validZone(value) {
   if (typeof value !== 'string' || !value) return null;
-  if (zones.has(value)) return zones.get(value);
+  const cached = cachedValue(zones, value);
+  if (cached !== undefined) return cached;
   try {
     dateTimeFormatter('en', {timeZone: value}).format(0);
-    zones.set(value, value);
+    cacheValue(zones, value, value, ZONE_CACHE_LIMIT);
     return value;
   } catch {
-    zones.set(value, null);
+    cacheValue(zones, value, null, ZONE_CACHE_LIMIT);
     return null;
   }
 }

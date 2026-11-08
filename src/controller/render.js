@@ -78,6 +78,8 @@ export const renderMixin = {
     this._writeNav();
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, true);
+    this._syncQuickActions();
+    this._syncHouseModes();
     this._syncDimButton(shell);
     this._syncHomeButton(shell);
     this._layout(model);
@@ -166,6 +168,8 @@ export const renderMixin = {
     shell.classList.toggle('dark', !!this._isDark());
     shell.querySelector('.feedback').textContent = this._message || '';
     this._syncOverlays(shell, false);
+    this._syncQuickActions();
+    this._syncHouseModes();
     this._runAfterRender();
   }
 };

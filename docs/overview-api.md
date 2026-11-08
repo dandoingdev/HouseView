@@ -74,7 +74,7 @@ export default defineOverview({
 | `watch(options, config)` | none | Extra entity ids whose change re-renders (weather: the sun entity). The primary entity is always watched. `config` is the card config as the controller holds it: the derived widget's `watch`, the screensaver change signature and the carousel's `hass-signature` all pass it, so an overview built from the dashboard's own widgets (home) can watch every entity of the configured `config.widgets` |
 | `interactive` | `false` | `true` allows `<button data-action data-entity>` in **card** mode (see "Interactive overviews" below). The derived card then has no full-card `ov-tap` overlay |
 | `controls` | `false` | Needs `interactive`. `true` makes the full-page layer a **control panel** (see "Control panels" below): the buttons stay in screensaver mode, a press on one runs its action, a press elsewhere does nothing, and the layer closes through an `overview-close` button or Escape |
-| `manualClose` | `false` | A layer opened from a button stays until its close button or Escape. A tap on the scene does nothing. The idle screensaver still dismisses on the first tap (weather) |
+| `manualClose` | `false` | A layer opened from a button closes through its close button, Escape or the card-level inactivity timeout (`control_timeout`, 30 seconds by default). A tap on the scene does nothing. The idle screensaver still dismisses on the first tap (weather) |
 | `actions` | `[]` | `controls` only. Widget action names the buttons may carry besides `INTERACTIVE_ACTIONS` (the thermostat view: `up`, `down`). Each must be an action a widget registers |
 | `selectable` | `true` | `false` keeps the overview out of the editor's screensaver list. Only the clock, photo frame, weather and home summary are offered; the others (month calendar, world clock, timer display, cover art, the control panels) are overlays, automatic displays or cards. It can still be written in YAML |
 | `data({hass, options, entityId})` | none | Subscriptions, keyed by the name `render` reads from `ctx.data[name]` (section 6) |
@@ -220,8 +220,8 @@ with the predicate already true. It replaces whatever layer is showing. It is no
 A manual layer is one-off: the entry never starts by itself (`idle_timeout: 0`), runs even in edit mode, is shown whatever
 the priority and eligibility of the entries around it, and is dropped when the layer goes away, so a configured
 rotation keeps its position. It behaves like a screensaver: the first tap only closes it and presses nothing underneath,
-unless the overview is a control panel (its own buttons work, its close button or Escape closes it) or it sets
-`manualClose` (the weather scene stays until its close button or Escape; the idle screensaver still dismisses on a tap).
+unless the overview is a control panel (its own buttons work; its close button, Escape or the control inactivity timeout closes it) or it sets
+`manualClose` (the weather scene closes through its close button, Escape or the control inactivity timeout; the idle screensaver still dismisses on a tap).
 
 ### Implicit entries (automatic displays)
 

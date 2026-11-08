@@ -4,6 +4,7 @@ export default {
     'action.label': 'Action',
     'action.description': 'Run a scene or script, or press a button.',
     'action.scene': 'Scene',
+    'action.scenes': 'Scenes',
     'action.run': 'Run',
     'action.press': 'Press',
     'action.running': 'Running'

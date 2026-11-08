@@ -1,3 +1,5 @@
+import {tracksMarkup, paintTracks, tracksKeydown, disposeTracks, tracksActions} from './tracks.js';
+import {dashboardControl, shortcutPlayer, shortcutActions} from './shortcut.js';
 import {swipeStep, SWIPE_CLICK_GUARD_MS} from '../../core/swipe.js';
 import {buttonHTML} from '../../core/html.js';
 import {BROWSE_MEDIA, PLAY_MEDIA, libraryArtwork, loadLibrary, shownItems} from './library-data.js';
@@ -183,8 +185,10 @@ function paint(ctx) {
 }
 
 function afterRender(ctx) {
+  ctx.ext.shortcutEntity = shortcutPlayer(ctx)?.entity || null;
   paint(ctx);
   syncStage(ctx);
+  paintTracks(ctx);
 }
 
 function libraryKeys(ctx, event) {
@@ -199,6 +203,8 @@ function libraryKeys(ctx, event) {
 
 function dispose(ctx) {
   if (ctx.reason !== 'disconnect') return;
+  ctx.ext.shortcutEntity = null;
+  disposeTracks(ctx);
   ctx.ext.open = false;
   ctx.ext.player = null;
   ctx.ext.seekStore = new Map();
@@ -209,20 +215,32 @@ function dispose(ctx) {
 }
 
 export default {
-  state: () => ({open: false, revision: 0, items: [], page: 0, player: null}),
+  dashboardControl,
+  state: () => ({
+    open: false,
+    revision: 0,
+    items: [],
+    page: 0,
+    player: null,
+    tracks: null,
+    selections: new WeakMap()
+  }),
   // A playback update must not rebuild this shell: the host keeps it and afterRender paints the new track.
-  retain: (ctx) => stageOpen(ctx) || !!ctx.ext.open,
-  overlay: (ctx) => `${stageMarkup(ctx)}${ctx.ext.open ? markup(ctx) : ''}`,
+  retain: (ctx) => stageOpen(ctx) || !!ctx.ext.open || !!ctx.ext.tracks?.open,
+  overlay: (ctx) => `${stageMarkup(ctx)}${ctx.ext.open ? markup(ctx) : ''}${tracksMarkup(ctx)}`,
   afterRender,
   tick: {every: 1000, when: (ext) => !!ext.player, run: paintStage},
-  blocksNavigation: (ext) => !!(ext.open || ext.player),
+  blocksNavigation: (ext) => !!(ext.open || ext.player || ext.tracks?.open),
   onKeydown(ctx, event) {
+    if (ctx.ext.tracks?.open) return tracksKeydown(ctx, event);
     if (ctx.ext.open) return libraryKeys(ctx, event);
     if (ctx.ext.player) return stageKeydown(ctx, event);
     return false;
   },
   dispose,
   actions: {
+    ...shortcutActions,
+    ...tracksActions,
     'media-player-browse-*': {
       immediate: true,
       run(ctx, id) {
@@ -296,6 +314,8 @@ export default {
       },
       async run(ctx, id) {
         const item = ctx.ext.items[Number(ctx.param)];
+        const widget = ctx.ext.widget;
+        const selections = ctx.ext.selections;
         const media = {
           entity_id: id,
           media_content_id: item.media_content_id,
@@ -304,6 +324,7 @@ export default {
         // Leave the list as soon as the tile is pressed. Playback continues after the view is gone.
         close(ctx);
         await ctx.call('media_player', 'play_media', media);
+        if (ctx.ext.selections === selections) selections.set(widget, item);
       }
     }
   }

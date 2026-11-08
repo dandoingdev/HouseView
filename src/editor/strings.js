@@ -5,6 +5,12 @@
 export default {
   en: {
     // carousel editor
+    'editor.line_alert_entity': 'Line disruption sensor',
+    'editor.helper.line_alert_entity':
+      'Choose a London Underground line-status sensor. An alert appears only for a reported disruption; tap it for details. Clear to disable.',
+    'editor.line_alert_name': 'Line alert name',
+    'editor.helper.line_alert_name':
+      'Optional short name, such as Piccadilly. Defaults to the sensor’s friendly name.',
     'editor.show_header': 'Show time and date header',
     'editor.helper.show_header':
       'Date on the left, time centred above every page. Uses your Home Assistant language, time format and time zone.',
@@ -36,7 +42,35 @@ export default {
     'editor.music_screensaver': 'Show album art when music has been playing for a while',
     'editor.home_section': 'Home summary',
     'editor.home_overview': 'Show a home button in the footer',
+    'editor.quick_actions_section': 'Quick actions · Swipe up',
+    'editor.quick_actions_swipe': 'Open quick actions with an upward swipe',
+    'editor.quick_actions_title': 'Quick actions title',
+    'editor.flow': 'Action type',
+    'editor.quick_actions': 'Choose and order quick actions',
+    'editor.helper.quick_actions':
+      'Up to six shortcuts on one fixed screen. Choose Leaving home or Good night as a guided routine, or choose a light group for all lights off, or a script, scene or helper for routines and guest mode. Automatic runs scripts/scenes/buttons and toggles other entities. Swipe down to close; Alt+↑ opens with a keyboard.',
     'editor.home_swipe': 'Open the home summary with a downward swipe',
+    'editor.house_modes_section': 'House modes · Swipe from left',
+    'editor.house_routines_suggest': 'Use dashboard devices for readiness checks',
+    'editor.house_routines_suggested':
+      'Suggestions added to empty Away and Sleeping checklists. Review their expected states before saving; climate defaults to off and alarm defaults to armed away or armed home.',
+    'editor.house_routines_no_suggestions':
+      'No supported dashboard devices found. Add checks to Away and Sleeping below.',
+    'editor.house_modes_setup': 'Set up house modes',
+    'editor.helper.house_modes_setup':
+      '1. Create the five-mode helper below, or choose an existing selector. 2. Choose a script for each mode and explain what it changes. 3. Save, then review and swipe right from the left edge to review and activate a mode. Creating the helper does not change your devices. Helper creation needs a Home Assistant administrator.',
+    'editor.house_modes_create': 'Create house mode helper',
+    'editor.house_modes_creating': 'Connecting your house mode helper…',
+    'editor.house_modes_ready':
+      'Helper connected. Add your mode scripts and explanations below, including Home to restore everyday behaviour.',
+    'editor.house_modes_helpers': 'Open Helpers',
+    'editor.house_modes_scripts': 'Create or edit scripts',
+    'editor.house_mode_entity': 'House mode selector',
+    'editor.helper.house_mode_entity':
+      'An input_select or select with the five house modes. Choose scripts below, or use Home Assistant automations triggered by this selector.',
+    'editor.house_modes': 'Mode options and explanations',
+    'editor.helper.house_modes':
+      'Match each option exactly to your selector. Describe the actual changes before enabling it, including Home so other modes can be ended.',
     'editor.home_title': 'Title',
     'editor.helper.home_title': 'The large heading on the home summary. Empty uses "Home".',
     'editor.home_battery_auto': 'Find low batteries automatically',

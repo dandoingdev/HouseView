@@ -24,7 +24,7 @@ export const dimMixin = {
       button = document.createElement('button');
       button.className = 'dim-screen';
       button.dataset.action = 'dim';
-      shell.append(button);
+      (shell.querySelector('.dashboard-controls') || shell).append(button);
     }
     this._paintDimButton(button);
   },

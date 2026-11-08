@@ -113,10 +113,77 @@ try {
       }
     }
   }
+  await page.setViewport({width: 480, height: 480, hasTouch: true});
+  for (const widget of [
+    {type: 'light', entity: 'light.a'},
+    {type: 'switch', entity: 'switch.a'},
+    {type: 'fan', entity: 'fan.a'},
+    {type: 'lock', entity: 'lock.a'},
+    {type: 'action', entity: 'scene.a'},
+    {type: 'plants', name: 'Plants', plants: [{name: 'Fig', humidity: 'sensor.fig'}]}
+  ]) {
+    await page.evaluate((widget) => {
+      window.card?.remove();
+      const card = (window.card = document.createElement('houseview-card'));
+      card.style.cssText = 'width:480px;height:480px';
+      card.setConfig({tablet_mode: true, widgets: [widget]});
+      card.hass = {
+        states: {
+          'light.a': {state: 'on', attributes: {friendly_name: 'Lamp'}},
+          'switch.a': {state: 'off', attributes: {friendly_name: 'Plug'}},
+          'fan.a': {state: 'on', attributes: {friendly_name: 'Fan'}},
+          'lock.a': {state: 'locked', attributes: {friendly_name: 'Door'}},
+          'scene.a': {state: 'scening', attributes: {friendly_name: 'Relax'}},
+          'sensor.fig': {state: '42', attributes: {unit_of_measurement: '%'}}
+        },
+        locale: {language: 'en'},
+        callService: async () => {}
+      };
+      document.body.replaceChildren(card);
+    }, widget);
+    await page.waitForSelector('houseview-card >>> .control-icon, houseview-card >>> .plants-title');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const item = await page.evaluate(() => {
+      const root = window.card.shadowRoot;
+      const rect = (el) => {
+        const r = el.getBoundingClientRect();
+        return {x: r.x, y: r.y, right: r.right, bottom: r.bottom, w: r.width, h: r.height};
+      };
+      const button = root.querySelector('.control-icon, .plants-title');
+      const tile = button.closest('[data-widget]') || button.closest('.tile');
+      const label = tile?.querySelector(':scope > span, .plants-summary');
+      return {
+        action: button.dataset.action,
+        button: rect(button),
+        tile: tile ? rect(tile) : null,
+        label: label ? rect(label) : null
+      };
+    });
+    const label = `${widget.type}: ${JSON.stringify(item)}`;
+    assert.ok(item.button.w >= 44 && item.button.h >= 44, label);
+    assert.ok(
+      item.tile &&
+        item.button.x >= item.tile.x - 0.5 &&
+        item.button.right <= item.tile.right + 0.5 &&
+        item.button.y >= item.tile.y - 0.5 &&
+        item.button.bottom <= item.tile.bottom + 0.5,
+      label
+    );
+    if (item.label && item.label.w > 0 && item.label.h > 0) {
+      assert.ok(
+        item.button.right <= item.label.x + 0.5 ||
+          item.label.right <= item.button.x + 0.5 ||
+          item.button.bottom <= item.label.y + 0.5 ||
+          item.label.bottom <= item.button.y + 0.5,
+        `icon overlaps label: ${label}`
+      );
+    }
+  }
   assert.deepEqual(errors, []);
   console.log(
     'PASS overview button sizes, circles, icon centres and bounds across six sizes in card and full-screen modes'
   );
+  console.log('PASS 480px split-tile icon keys stay at least 44px and clear their labels');
 } finally {
   await browser.close();
   await server.close();

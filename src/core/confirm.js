@@ -18,10 +18,12 @@ export function confirmMode(card) {
 /**
  * @param {any} card
  * @param {string} message
+ * @param {Object} [options] Optional in-card title, accept label and touch target sizing.
  * @returns {boolean|Promise<boolean>}
  */
-export function requestConfirmation(card, message) {
-  if (confirmMode(card) === 'inline' && card?.shadowRoot) return askInline(card, message);
+export function requestConfirmation(card, message, options = {}) {
+  if ((options.inline || confirmMode(card) === 'inline') && card?.shadowRoot)
+    return askInline(card, message, options);
   return !!globalThis.window.confirm(message);
 }
 
@@ -71,7 +73,7 @@ function styled(element, style) {
   return element;
 }
 
-function askInline(card, message) {
+function askInline(card, message, options) {
   const root = card.shadowRoot;
   const host = root.querySelector('.shell') || root;
   const doc = root.ownerDocument || globalThis.document;
@@ -79,13 +81,28 @@ function askInline(card, message) {
   return new Promise((resolve) => {
     const previous = root.activeElement;
     const sheet = styled(doc.createElement('div'), SHEET_STYLE);
-    sheet.className = 'hv-confirm';
+    sheet.className = `hv-confirm${options.className ? ` ${options.className}` : ''}`;
     sheet.setAttribute('role', 'alertdialog');
     sheet.setAttribute('aria-modal', 'true');
     const panel = styled(doc.createElement('div'), PANEL_STYLE);
+    if (options.title) {
+      const title = doc.createElement('h2');
+      title.textContent = options.title;
+      title.style.margin = '0';
+      panel.append(title);
+      sheet.setAttribute('aria-label', options.title);
+      panel.style.maxHeight = 'calc(100% - 32px)';
+      panel.style.overflowY = 'auto';
+      panel.style.minWidth = '0';
+      panel.style.boxSizing = 'border-box';
+    }
     const text = doc.createElement('p');
     text.style.margin = '0';
     text.textContent = message;
+    if (options.title) {
+      text.id = 'hv-house-mode-message';
+      sheet.setAttribute('aria-describedby', text.id);
+    }
     const row = styled(doc.createElement('div'), {
       display: 'flex',
       gap: '8px',
@@ -95,11 +112,20 @@ function askInline(card, message) {
       const element = styled(doc.createElement('button'), BUTTON_STYLE);
       element.type = 'button';
       element.dataset.confirm = choice;
-      element.textContent = translateFor(hass, key);
+      element.textContent =
+        choice === 'yes' && options.accept ? options.accept : translateFor(hass, key);
+      if (options.targetSize) element.style.minHeight = `${options.targetSize}px`;
       return element;
     };
+    if (options.title) row.style.flexWrap = 'wrap';
     const cancel = button('no', 'confirm.no');
     const accept = button('yes', 'confirm.yes');
+    if (options.title)
+      for (const key of [cancel, accept]) {
+        key.style.flex = '1 1 120px';
+        key.style.minWidth = '0';
+        key.style.padding = '8px 12px';
+      }
     row.append(cancel, accept);
     panel.append(text, row);
     sheet.append(panel);
@@ -122,6 +148,10 @@ function askInline(card, message) {
     sheet.addEventListener('keydown', (event) => {
       event.stopPropagation();
       if (event.key === 'Escape') finish(false);
+      if (options.title && event.key === 'Tab') {
+        event.preventDefault();
+        (root.activeElement === cancel ? accept : cancel).focus();
+      }
     });
     host.append(sheet);
     cancel.focus?.({preventScroll: true});

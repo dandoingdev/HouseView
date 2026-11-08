@@ -3,11 +3,12 @@
 import {getOverview, overviewList} from '../core/overview-registry.js';
 import {colourFormData} from '../core/colour.js';
 import {t} from '../core/i18n.js';
-import {DEFAULT_RETURN_SECONDS} from '../core/idle.js';
+import {DEFAULT_RETURN_SECONDS, DEFAULT_CONTROL_SECONDS} from '../core/idle.js';
 
 const FRAMEWORK_FIELDS = [
   'type',
   'return_timeout',
+  'control_timeout',
   'enabled',
   'entity',
   'idle_timeout',
@@ -49,14 +50,16 @@ export function screensaverData(config) {
   const raw = config.screensaver;
   const entry = Array.isArray(raw) ? raw[0] : raw;
   const return_timeout = returnTimeoutOf(config);
-  if (!entry) return {return_timeout};
+  if (!entry)
+    return {return_timeout, control_timeout: config.control_timeout ?? DEFAULT_CONTROL_SECONDS};
   const overview = getOverview(entry.type);
   return {
     enabled: true,
     ...entry,
     ...colourFormData(overview?.options, entry),
     ...overview?.editor?.toForm?.(entry),
-    return_timeout
+    return_timeout,
+    control_timeout: config.control_timeout ?? DEFAULT_CONTROL_SECONDS
   };
 }
 
@@ -73,7 +76,8 @@ export function screensaverSchema(hass, data) {
   ];
   const schema = [
     {name: 'type', selector: {select: {mode: 'dropdown', options: typeOptions}}},
-    RETURN_FIELD
+    RETURN_FIELD,
+    {...RETURN_FIELD, name: 'control_timeout'}
   ];
   const overview = getOverview(data.type);
   if (!overview) return schema;
@@ -140,7 +144,11 @@ function withReturnTimeout(config, value) {
  * part of the screensaver entry.
  */
 export function applyScreensaver(config, value) {
-  const {return_timeout: _return_timeout, ...fields} = value ?? {};
+  const {
+    return_timeout: _return_timeout,
+    control_timeout: _control_timeout,
+    ...fields
+  } = value ?? {};
   const {screensaver: old, ...rest} = config;
   const tail = Array.isArray(old) ? old.slice(1) : [];
   let next;
@@ -154,5 +162,14 @@ export function applyScreensaver(config, value) {
     const first = enabled === false ? {...clean, enabled: false} : clean;
     next = {...rest, screensaver: tail.length ? [first, ...tail] : first};
   }
-  return withReturnTimeout(next, value);
+  next = withReturnTimeout(next, value);
+  if (value && 'control_timeout' in value) {
+    const {control_timeout: _control_timeout, ...base} = next;
+    const seconds = value.control_timeout;
+    next =
+      seconds === '' || seconds == null || seconds === DEFAULT_CONTROL_SECONDS
+        ? base
+        : {...base, control_timeout: seconds};
+  }
+  return next;
 }
