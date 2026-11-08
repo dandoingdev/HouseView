@@ -6,6 +6,8 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.10.0] - 2026-11-08
+
 ### Added
 
 * Configurable London Underground disruption alerts in the responsive toolbar or footer, with live delay/closure severity, sensor details and automatic hiding during good service.
@@ -35,6 +37,10 @@ The release workflow publishes the section of the tagged version as the release 
 * House-mode and guided-routine descriptions now expand from aligned, touch-sized info buttons, keeping small screens concise without truncating explanations.
 
 * Duplicate tag pushes and release workflow reruns leave an already published release intact and succeed when all release assets are present.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.10.0`.
 
 ## [1.9.0] - 2026-10-21
 
