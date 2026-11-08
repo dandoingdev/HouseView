@@ -75,6 +75,7 @@ const EXTENSION_KEYS = new Set([
   'state',
   'compat',
   'shellClasses',
+  'dashboardControl',
   'overlay',
   'retain',
   'afterRender',

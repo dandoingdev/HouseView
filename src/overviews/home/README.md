@@ -11,7 +11,7 @@ since: 1.1
 A scrollable home screen that **builds itself from the widgets on the carousel**. Put it on a page of its own
 (`custom:houseview-home-overview-card`) and it shows a large title with the time, a row of chips, the cameras and the
 scenes of the dashboard. Nothing is configured: add or remove a light, a lock or a camera widget and the screen follows.
-Everything reads from the card's widget list and Home Assistant; the overview never calls a service itself.
+Everything reads from the card's configuration and Home Assistant; the controller runs actions and the overview never calls a service itself.
 
 ![The home summary on a 1280 x 800 tablet](../images/overview-home.png)
 

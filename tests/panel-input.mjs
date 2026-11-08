@@ -194,7 +194,7 @@ try {
   await click('.mc-play');
   await page.waitForFunction('window.panelCalls.length === 2');
   assert.equal(await page.evaluate(() => window.panelCalls[1].s), 'media_play_pause');
-  console.log('PASS 480px edge-to-edge layout, full player on track hold, idle resume and play/pause');
+  console.log('PASS 480px edge-to-edge layout, full player on track tap, idle resume and play/pause');
   for (const [w, h] of [
     [480, 440],
     [440, 480],

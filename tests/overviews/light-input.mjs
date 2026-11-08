@@ -10,7 +10,11 @@ import {CHROME} from '../../tools/run-tests.mjs';
 import {clientYForPercent} from '../../src/overviews/_shared/vertical-level.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const server = await startServer({root, port: 0});
+const server = await startServer({
+  root,
+  port: 0,
+  target: process.argv.includes('--min') ? 'dist-min' : 'dist'
+});
 const browser = await puppeteer.launch({
   executablePath: CHROME,
   headless: true,
@@ -384,6 +388,111 @@ try {
   await page.evaluate(async () => window.card._act('light-colour-10:50', 'light.test'));
   assert.equal((await colour()).calls.length, beforeInvalid);
   console.log('PASS invalid and unavailable colour changes send no service');
+  // Manual controls share one inactivity lease, independent of idle art and carousel return.
+  await page.evaluate(() => {
+    window.realControlNow = Date.now;
+    let now = Date.now();
+    Date.now = () => now;
+    window.advanceControlIdle = (seconds, screensaver = false) => {
+      for (let i = 0; i < seconds; i++) {
+        now += 1000;
+        if (!screensaver) window.card._controlIdle?.idle.tick();
+        window.card._screensaver?.idle?.tick();
+      }
+    };
+    const state = window.lightHass.states['light.test'];
+    window.lightHass.states['light.test'] = {...state, state: 'on'};
+    window.lightHass.callService = async (d, s, data) => window.lightCalls.push({d, s, data});
+    window.card.setConfig({
+      performance: 'lite',
+      return_timeout: 0,
+      control_timeout: 5,
+      screensaver: {type: 'clock', idle_timeout: 10},
+      widgets: [{type: 'light', entity: 'light.test'}]
+    });
+    window.card.hass = window.lightHass;
+    window.card._screensaverOpenType('light', {entity: 'light.test'});
+  });
+  const idleOpen = () => page.evaluate(() => !!window.card._screensaver?.active?.entry.manual);
+  await page.evaluate(() => window.advanceControlIdle(4));
+  assert.equal(await idleOpen(), true);
+  await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-input').focus());
+  await page.keyboard.press('ArrowUp');
+  await page.evaluate(() => window.advanceControlIdle(4));
+  assert.equal(await idleOpen(), true);
+  const held = await centre('.ov-light-input');
+  await page.mouse.move(held.x, held.y);
+  await page.mouse.down();
+  await page.evaluate(() => window.advanceControlIdle(40));
+  assert.equal(await idleOpen(), true);
+  await page.mouse.up();
+  await page.evaluate(() => window.advanceControlIdle(4));
+  assert.equal(await idleOpen(), true);
+  await page.screenshot({path: '/tmp/houseview-light-before-idle-close.png'});
+  const callsBeforeIdleClose = await page.evaluate(() => window.lightCalls.length);
+  await page.evaluate(() => window.advanceControlIdle(1));
+  assert.equal(await idleOpen(), false);
+  await page.waitForFunction(() => !window.card.shadowRoot.querySelector('.hv-screensaver'));
+  assert.equal(await page.evaluate(() => window.lightCalls.length), callsBeforeIdleClose);
+  assert.equal(await page.evaluate(() => window.card._controlIdle), null);
+  await page.screenshot({path: '/tmp/houseview-light-after-idle-close.png'});
+  await page.evaluate(() => window.advanceControlIdle(9, true));
+  assert.equal(await page.evaluate(() => !!window.card._screensaver.active), false);
+  await page.evaluate(() => window.advanceControlIdle(1, true));
+  assert.equal(await page.evaluate(() => !!window.card._screensaver.active), true);
+  assert.equal(await page.evaluate(() => window.card._controlIdle), null);
+  console.log(
+    'PASS keyboard activity and held pointers defer control timeout; idle closure sends no command and restarts the screensaver countdown'
+  );
+  await page.evaluate(() => {
+    window.card.setConfig({
+      performance: 'lite',
+      return_timeout: 0,
+      control_timeout: 5,
+      widgets: [{type: 'light', entity: 'light.test'}]
+    });
+    window.card._screensaverOpenType('light', {entity: 'light.test'});
+  });
+  await click('.ov-light-open-colour');
+  assert.equal((await colour()).open, true);
+  await page.evaluate(() => {
+    window.card._pending.add('light.test');
+    window.advanceControlIdle(40);
+  });
+  assert.equal(await idleOpen(), true);
+  await page.evaluate(() => {
+    window.card._pending.delete('light.test');
+    window.advanceControlIdle(4);
+  });
+  assert.equal(await idleOpen(), true);
+  await page.evaluate(() => window.advanceControlIdle(1));
+  assert.equal(await idleOpen(), false);
+  await page.waitForFunction(() => !window.card.shadowRoot.querySelector('.hv-screensaver'));
+  await page.evaluate(() => {
+    window.card.setConfig({...window.card._config, control_timeout: 0});
+    window.card._screensaverOpenType('light', {entity: 'light.test'});
+  });
+  assert.equal(await page.evaluate(() => window.card._controlIdle), null);
+  assert.equal(await idleOpen(), true);
+  await page.evaluate(() => {
+    window.card.setConfig({...window.card._config, control_timeout: 5});
+    window.card._screensaverOpenType('light', {entity: 'light.test'});
+    window.card.remove();
+  });
+  assert.equal(await page.evaluate(() => window.card._controlIdle), null);
+  await page.evaluate(() => {
+    document.body.append(window.card);
+    window.card.hass = window.lightHass;
+    window.card._screensaverOpenType('light', {entity: 'light.test'});
+  });
+  assert.equal(await page.evaluate(() => !!window.card._controlIdle), true);
+  await page.evaluate(() => {
+    window.card.remove();
+    Date.now = window.realControlNow;
+  });
+  console.log(
+    'PASS pending commands defer closure; timeout opt-out, configuration changes and disconnect/reconnect release the inactivity lease'
+  );
   assert.deepEqual(errors, []);
   console.log('PASS authoritative updates after release and Escape dismissal; no browser errors');
 } finally {

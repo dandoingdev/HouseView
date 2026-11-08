@@ -1,3 +1,4 @@
+import {cachedValue, cacheValue} from '../../core/bounded-cache.js';
 import {defineOverview} from '../../core/define-overview.js';
 import {cameraUrl} from '../../core/media-url.js';
 import {setText} from '../_shared/dom.js';
@@ -21,9 +22,25 @@ const levelDomain = (id) => {
  * pulse (an occupancy doorbell is Detected for about a second), and `last_changed` then points at the clear, not
  * the press. The press time has to be remembered or the camera would close with the pulse.
  */
-const presses = new Map();
-/** camera id -> {img, href}. The decoded still is kept off-screen and reused when the overlay opens. */
-const stills = new Map();
+// Keep bounded state only for the same HA connection; a replaced connection can be collected.
+const connections = new WeakMap();
+const noHass = {};
+export const PRESS_CACHE_LIMIT = 64;
+export const STILL_CACHE_LIMIT = 4;
+function stateFor(hass = noHass) {
+  const owner = hass.connection || hass.callWS || hass;
+  let state = connections.get(owner);
+  if (!state) connections.set(owner, (state = {presses: new Map(), stills: new Map()}));
+  return state;
+}
+
+function disposeStill(entry) {
+  for (const image of [entry.img, entry.next]) {
+    if (!image) continue;
+    image.onload = image.onerror = null;
+    image.removeAttribute('src');
+  }
+}
 
 /** The camera proxy URL, or null when it is missing or not from this Home Assistant. */
 function proxyUrl(picture, hass) {
@@ -53,12 +70,13 @@ function warmStill(ctx) {
   if (!camera) return null;
   const url = stillUrl(ctx.attrsOf(camera).entity_picture, ctx.hass, ctx.now());
   if (!url) return null;
-  let entry = stills.get(camera);
+  const {stills} = stateFor(ctx.hass);
+  let entry = cachedValue(stills, camera);
   if (!entry) {
     entry = {img: new Image(), href: '', next: null, nextHref: ''};
     entry.img.decoding = 'async';
     entry.img.alt = '';
-    stills.set(camera, entry);
+    cacheValue(stills, camera, entry, STILL_CACHE_LIMIT, disposeStill);
   }
   if (entry.href === url.href || entry.nextHref === url.href) return entry;
   // The decoded frame stays put. The next one replaces it only after it has loaded.
@@ -91,12 +109,13 @@ function pressAge(ctx) {
     const since = Date.parse(state);
     return Number.isNaN(since) ? null : ctx.now() - since;
   }
+  const {presses} = stateFor(ctx.hass);
   const changed = Date.parse(ctx.state.last_changed);
   if (state === 'on') {
-    if (!Number.isNaN(changed)) presses.set(ctx.entityId, changed);
+    if (!Number.isNaN(changed)) cacheValue(presses, ctx.entityId, changed, PRESS_CACHE_LIMIT);
     else return 0; // on, but no timestamp: still a press
   }
-  const since = presses.get(ctx.entityId);
+  const since = cachedValue(presses, ctx.entityId);
   if (since == null) return null;
   return ctx.now() - since;
 }

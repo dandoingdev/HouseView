@@ -24,6 +24,12 @@ export default async function ({mount, check, variants}) {
     t.infos.join() === 'sensor.cactus_humidity' && t.calls.length === 0
   );
 
+  await t.click('plants-view');
+  check(
+    'the plants heading opens the full-screen plants view',
+    !!t.card.shadowRoot.querySelector('.ov-plants-scene') && t.calls.length === 0
+  );
+  t = await mount(variants.ok);
   await t.hold('.plants-pod');
   check(
     'holding a plant opens the full-screen plants view',

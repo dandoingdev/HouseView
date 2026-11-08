@@ -206,3 +206,12 @@ test('the default array of an option is copied, never shared', () => {
   assert.deepEqual(b.options.picks, ['one']);
   assert.deepEqual(demo.options.picks.default, ['one']);
 });
+
+test('control timeout accepts disabled and bounded seconds and rejects invalid values', () => {
+  for (const value of [undefined, 0, 5, 30, 86400]) validateScreensaver({control_timeout: value});
+  for (const value of [-1, 1, 86401, Infinity, NaN, '30', null]) {
+    assert.throws(() => validateScreensaver({control_timeout: value}), {
+      message: 'control_timeout must be 0 or a number of seconds from 5 to 86400.'
+    });
+  }
+});

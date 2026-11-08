@@ -63,3 +63,58 @@ test('an event doorbell still rings from its timestamp state', () => {
   assert.equal(overview.autoShow(old), false);
   assert.equal(overview.autoWake(old), true);
 });
+
+test('remembered doorbell presses are isolated by connection and bounded', async () => {
+  const {PRESS_CACHE_LIMIT} = await import('../../src/overviews/doorbell/index.js');
+  const connection = {};
+  const make = (entity, state, owner = connection) => ({
+    ...ctx({entity, state, last_changed: new Date(T0).toISOString(), now: T0 + 100}),
+    hass: {connection: owner}
+  });
+  assert.equal(overview.autoShow(make('binary_sensor.shared', 'on')), true);
+  assert.equal(overview.autoWake(make('binary_sensor.shared', 'off')), false);
+  assert.equal(overview.autoWake(make('binary_sensor.shared', 'off', {})), true);
+  for (let i = 0; i < PRESS_CACHE_LIMIT; i++)
+    overview.autoShow(make(`binary_sensor.test${i}`, 'on'));
+  assert.equal(overview.autoWake(make('binary_sensor.shared', 'off')), true, 'old press evicted');
+  assert.equal(overview.autoWake(make(`binary_sensor.test${PRESS_CACHE_LIMIT - 1}`, 'off')), false);
+});
+
+test('warm camera stills reuse recent images and release evicted image work', async () => {
+  const {STILL_CACHE_LIMIT} = await import('../../src/overviews/doorbell/index.js');
+  const images = [];
+  const oldImage = globalThis.Image;
+  const oldWindow = globalThis.window;
+  globalThis.window = {location: {origin: 'http://ha.local', href: 'http://ha.local/'}};
+  globalThis.Image = class {
+    constructor() {
+      images.push(this);
+      this.naturalWidth = 0;
+    }
+    removeAttribute(name) {
+      if (name === 'src') this.src = '';
+    }
+  };
+  try {
+    const connection = {};
+    const make = (camera, owner = connection) => ({
+      ...ctx({entity: 'binary_sensor.stills', state: 'off', now: T0}),
+      hass: {connection: owner},
+      options: {camera},
+      attrsOf: () => ({entity_picture: `/api/camera_proxy/${camera}?token=synthetic`})
+    });
+    for (let i = 0; i < STILL_CACHE_LIMIT; i++) overview.autoShow(make(`camera.test${i}`));
+    assert.equal(images.length, STILL_CACHE_LIMIT);
+    overview.autoShow(make('camera.test0'));
+    assert.equal(images.length, STILL_CACHE_LIMIT);
+    overview.autoShow(make('camera.new'));
+    assert.ok(images[0].src, 'recent image retained');
+    assert.equal(images[1].src, '', 'evicted image stopped');
+    assert.equal(images[1].onload, null);
+    overview.autoShow(make('camera.test0', {}));
+    assert.equal(images.length, STILL_CACHE_LIMIT + 2, 'other connection loads its own image');
+  } finally {
+    globalThis.Image = oldImage;
+    globalThis.window = oldWindow;
+  }
+});

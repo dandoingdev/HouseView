@@ -13,6 +13,9 @@ export default {
     'screensaver.field.enabled': 'Enabled',
     'screensaver.field.entity': 'Entity',
     'screensaver.field.idle_timeout': 'Start after (seconds without a touch)',
+    'screensaver.field.control_timeout': 'Close idle controls (seconds)',
+    'screensaver.helper.control_timeout':
+      'Return open control screens to the dashboard after inactivity. Default 30 seconds; 0 keeps them open. Active touches and pending commands pause the timeout.',
     'screensaver.field.return_timeout': 'Return to the first page (seconds)',
     'screensaver.field.start_in_edit_mode': 'Also run while editing the dashboard',
     'screensaver.helper.idle_timeout': '0 turns the automatic start off. 5 to 86400 seconds.',

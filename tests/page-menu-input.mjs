@@ -1,4 +1,4 @@
-/* global window */
+/* global window, document */
 import assert from 'node:assert/strict';
 import puppeteer from 'puppeteer-core';
 import {startServer} from '../tools/serve.mjs';
@@ -75,6 +75,30 @@ try {
       false,
       `menu closes after choosing page ${target}`
     );
+  }
+  // A held pointer may never deliver pointerup when a card is detached or reconfigured.
+  for (const lifecycle of ['configure', 'disconnect']) {
+    const dot = await point('.page-dot');
+    await page.touchscreen.touchStart(dot.x, dot.y);
+    await page.evaluate((kind) => {
+      window.navMenuCalls = 0;
+      window.originalOpenPageMenu = window.card._openPageMenu;
+      window.card._openPageMenu = () => window.navMenuCalls++;
+      if (kind === 'disconnect') window.card.remove();
+      else window.card.setConfig(window.card._config);
+    }, lifecycle);
+    await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 650)));
+    await page.touchscreen.touchEnd();
+    assert.equal(
+      await page.evaluate(() => window.navMenuCalls),
+      0,
+      `${lifecycle} cancels a pending hold`
+    );
+    await page.evaluate((kind) => {
+      window.card._openPageMenu = window.originalOpenPageMenu;
+      if (kind === 'disconnect') document.body.append(window.card);
+      window.card.hass = window.mock.hass;
+    }, lifecycle);
   }
   // Held scene: the "All Scenes" chip lists the scenes of the pressed scene's own room.
   await page.evaluate(() => {

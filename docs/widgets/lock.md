@@ -4,8 +4,9 @@
 
 Card type `custom:houseview-lock-card`, or `type: lock` in the `cards` list of `custom:houseview-card`. Available since 1.0.
 
-Shows a `lock.*` entity as an icon widget with its name and state. The icon is an open padlock while the lock is
-`unlocked` and a closed one otherwise. A tap locks an unlocked door and unlocks a locked one; unlocking asks
+Shows a `lock.*` entity as an icon widget with its name and state. The padlock is a details key that opens Home
+Assistant's dialog (holding the tile does the same); the glyph is an open padlock while the lock is `unlocked` and a
+closed one otherwise. A tap on the rest of the tile locks an unlocked door and unlocks a locked one; unlocking asks
 "Unlock this door?" first. While the lock is in any other state (`locking`, `unlocking`, `jammed`, `open`, ...) a tap
 opens the more-info dialog instead of sending a command. An unavailable or unknown lock is shown disabled.
 

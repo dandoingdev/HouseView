@@ -91,6 +91,8 @@ test('form data defaults', () => {
     performance: 'auto',
     editor_preview: 'landscape',
     show_header: false,
+    line_alert_entity: '',
+    line_alert_name: '',
     tablet_mode: false
   });
   assert.equal(appearanceData({performance: 'lite'}).performance, 'lite');
@@ -228,5 +230,22 @@ test('background menu offers glass, soft and the satin colourways for every page
     wallpaper.selector.select.options.map((option) => option.label),
     ['Glass', 'Soft', 'Teal', 'Silver', 'Champagne', 'Sage', 'Slate', 'Dusk', 'Blush']
   );
-  assert.equal(pageSchema(hass).find((item) => item.name === 'surface'), undefined);
+  assert.equal(
+    pageSchema(hass).find((item) => item.name === 'surface'),
+    undefined
+  );
+});
+
+test('line alert editor exposes a sensor picker and optional name without inventing a default entity', () => {
+  const schema = appearanceSchema({});
+  assert.deepEqual(schema.find((f) => f.name === 'line_alert_entity').selector, {
+    entity: {domain: ['sensor']}
+  });
+  assert.deepEqual(schema.find((f) => f.name === 'line_alert_name').selector, {text: {}});
+  assert.equal(
+    appearanceData({line_alert_entity: 'sensor.demo_line', line_alert_name: 'City'})
+      .line_alert_entity,
+    'sensor.demo_line'
+  );
+  assert.equal(appearanceData({}).line_alert_entity, '');
 });

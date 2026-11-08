@@ -6,7 +6,33 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Added
+
+* Configurable London Underground disruption alerts in the responsive toolbar or footer, with live delay/closure severity, sensor details and automatic hiding during good service.
+
+* Idle control screens return to the dashboard after 30 seconds, with an adjustable timeout and protection for active touches, pending commands and running house routines.
+
+* Guided Leaving home and Good night reviews with explicit readiness checks, individual fixes, script failure reporting, live result verification and Quick action shortcuts.
+
+* House modes on a dedicated screen opened with a rightward swipe from the left edge, with reviewed explanations, optional scripts, a shared Home Assistant selector, a persistent dashboard indicator, and helper creation in the editor.
+
+* Open configurable quick actions from any dashboard page with a swipe up, then swipe down to return; includes native settings, a read-only editor preview and one fixed responsive screen.
+
+* Play or pause the active dashboard speaker from a shared shortcut beside the dim control, or as a spaced chip in the header on small screens.
+
+* Choose individual playlist tracks from the media player’s album-cover list button, with a responsive teal track view and Sonos queue-preserving playback.
+
+### Changed
+
+* Every tile follows one press rule: a short press runs the control that was touched, and a hold opens a different next screen only when there is one. Everyday second screens get a visible key—brightness on lights, details on switches, fans and locks, other scenes on scene tiles, and the plants heading for the plants view—so wall panels no longer hide those behind a half-second hold alone.
+
 ### Fixed
+
+* Bound photo, doorbell and timezone caches, isolate cached household media by Home Assistant connection, and ignore stale photo requests after configuration changes.
+
+* Avoid repeated toolbar measurements and unchanged routine DOM writes; cancel held navigation when a dashboard is reconfigured or disconnected.
+
+* House-mode and guided-routine descriptions now expand from aligned, touch-sized info buttons, keeping small screens concise without truncating explanations.
 
 * Duplicate tag pushes and release workflow reruns leave an already published release intact and succeed when all release assets are present.
 

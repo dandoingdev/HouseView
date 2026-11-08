@@ -172,7 +172,7 @@ export const navigationMixin = {
     const shell = this.shadowRoot?.querySelector?.('.shell');
     const rect = shell?.getBoundingClientRect?.() || this.getBoundingClientRect?.();
     if (!rect || !(rect.height > 0)) return null;
-    return {top: rect.top || 0, height: rect.height};
+    return {top: rect.top || 0, height: rect.height, left: rect.left || 0, width: rect.width};
   },
 
   /**
@@ -188,7 +188,9 @@ export const navigationMixin = {
       '.hv-confirm',
       '.media-stage',
       '.media-library',
-      '.camera-gallery'
+      '.camera-gallery',
+      '.quick-actions',
+      '.house-modes'
     ].some((selector) => root.querySelector(selector));
   },
 
@@ -202,11 +204,30 @@ export const navigationMixin = {
     this._clearPageTransition();
     const frame = this._displayFrame();
     const fromTop = frame ? e.clientY - frame.top : Infinity;
+    // Include the whole footer band, even where its floating controls sit outside page-nav.
+    const nav = this.shadowRoot?.querySelector?.('.page-nav')?.getBoundingClientRect?.();
+    const quickTop = frame
+      ? Math.min(
+          frame.top + frame.height - homePullEdgePx(frame.height),
+          nav?.height > 0 ? nav.top : Infinity
+        )
+      : Infinity;
     this._gesture = {
       x: e.clientX,
       y: e.clientY,
       time: Date.now(),
       pointerId: e.pointerId,
+      modeEdge:
+        !!frame &&
+        !!this._config?.house_mode_entity &&
+        !this._config.single_widget &&
+        e.clientX >= frame.left &&
+        e.clientX <= frame.left + Math.min(64, frame.width * 0.2),
+      quickEdge:
+        !!frame &&
+        this._quickActionsEnabled?.() &&
+        fromTop <= frame.height &&
+        e.clientY >= quickTop,
       homeEdge:
         !!frame &&
         this._homePullEnabled() &&
@@ -215,7 +236,7 @@ export const navigationMixin = {
     };
   },
 
-  /** Lock horizontal paging, or a downward pull from the top edge. Other vertical movement keeps scrolling. */
+  /** Lock paging, a downward top-edge pull, or an upward footer pull. Other vertical movement keeps scrolling. */
   _swipeMove(e) {
     const start = this._gesture;
     if (!start || start.pointerId !== e.pointerId) return;
@@ -227,7 +248,7 @@ export const navigationMixin = {
     }
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
-    if (start.homePull) return;
+    if (start.homePull || start.quickPull || start.modePull) return;
     if (!start.dragging) {
       const axis = swipeAxis(dx, dy);
       if (axis === 'pending') return;
@@ -236,9 +257,19 @@ export const navigationMixin = {
           start.homePull = true;
           this._gesturePointerCancel();
           capturePointer(e);
+        } else if (start.quickEdge && dy < 0) {
+          start.quickPull = true;
+          this._gesturePointerCancel();
+          capturePointer(e);
         } else {
           this._gesture = null;
         }
+        return;
+      }
+      if (start.modeEdge && dx > 0) {
+        start.modePull = true;
+        this._gesturePointerCancel();
+        capturePointer(e);
         return;
       }
       start.dragging = true;
@@ -282,6 +313,17 @@ export const navigationMixin = {
       if (homePullRelease(dx, dy)) this._act('home-view');
       return;
     }
+    if (start.modePull) {
+      this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+      if (homePullRelease(e.clientY - start.y, e.clientX - start.x)) this._act('house-modes-open');
+      return;
+    }
+    if (start.quickPull) {
+      this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+      if (homePullRelease(e.clientX - start.x, start.y - e.clientY))
+        this._act('quick-actions-open');
+      return;
+    }
     const dx = e.clientX - start.x;
     this._flushDrag(start, dx);
     const v = start.dragging ? this._releaseVelocity(start) : 0;
@@ -299,7 +341,8 @@ export const navigationMixin = {
   _swipeCancel() {
     const start = this._gesture;
     this._gesture = null;
-    if (start?.homePull) this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
+    if (start?.homePull || start?.quickPull || start?.modePull)
+      this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
     if (start?.dragging) {
       this._suppressClickUntil = Date.now() + SWIPE_CLICK_GUARD_MS;
       this._flushDrag(start);

@@ -2,7 +2,7 @@ import {defineWidget} from '../../core/define-widget.js';
 import {needsCare, percentOf, plantEntities, readPlant, validatePlants} from '../../core/plants.js';
 
 // Plants tile: a ring gauge per plant (soil humidity), its temperature beneath and a status colour, so a whole shelf
-// reads at a glance. Pressing a plant opens the more-info of its humidity sensor; holding anywhere on the tile opens
+// reads at a glance. Pressing a plant opens the more-info of its humidity sensor; the heading (and a hold) opens
 // the full-screen plants view (the `plants` overview, via the core `plants-view` action).
 //
 // The widget has no entity of its own: `plants` lists the sensors. `normalize` points `entity` at the first plant's
@@ -100,7 +100,7 @@ export default defineWidget({
   watch: (widget) => plantEntities(widget.plants),
 
   actions: {
-    // A tap on a plant opens the more-info of its humidity sensor; holding the tile opens the plants view.
+    // A tap on a plant opens the more-info of its humidity sensor; the heading opens the plants view.
     'plants-info': {immediate: true, run: (ctx, id) => ctx.info(id)}
   },
 
@@ -115,11 +115,17 @@ export default defineWidget({
         : ctx.t('plants.summary_many', {n: attention})
       : ctx.t('plants.summary_ok');
     const heading = widget.name ? ctx.name : ctx.esc(ctx.t('plants.label'));
+    const title = ctx.btn(
+      'plants-view',
+      `${ctx.icon(ctx.iconName('leaf'))}<span class="sr">${heading}. ${ctx.esc(ctx.t('plants.open_view'))}</span>`,
+      'plants-title',
+      true
+    );
     const pods = widget.plants.map((plant) => podHTML(ctx, plant, range)).join('');
     return ctx.root(
       'section',
       'plants-card',
-      `<header class="plants-head"><span class="plants-title">${ctx.icon(ctx.iconName('leaf'))}<span class="sr">${heading}</span></span>` +
+      `<header class="plants-head">${title}` +
         `<span class="plants-summary" data-tone="${attention ? 'care' : 'ok'}">${ctx.esc(summary)}</span></header>` +
         `<div class="plants-grid" style="--n:${widget.plants.length}">${pods}</div>`
     );

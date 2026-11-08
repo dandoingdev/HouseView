@@ -1,11 +1,12 @@
 // Browser behaviour tests (docs/widget-api.md). `calls` records every hass.callService.
 const tile = '[data-action="run-action"]';
+const scene = `.scene.control ${tile}`;
 
 export default async function ({mount, check, variants}) {
   let t = await mount(variants.ok);
   check(
     'scene tile shows name and the Scene caption',
-    t.text(`${tile} small`) === 'Scene' && !!t.q(`${tile}.scene.control`)
+    t.text('.control > small') === 'Scene' && !!t.q(scene) && !!t.q('[data-action="scene-menu"]')
   );
   await t.click('run-action');
   check(
@@ -14,6 +15,37 @@ export default async function ({mount, check, variants}) {
       t.calls[0].d === 'scene' &&
       t.calls[0].s === 'turn_on' &&
       t.calls[0].data.entity_id === 'scene.test'
+  );
+  t = await mount(variants.ok);
+  await t.click('scene-menu');
+  check(
+    'the scenes key opens more-info when the dashboard has no other scene',
+    t.infos.includes('scene.test') && t.calls.length === 0 && !t.q('.page-menu')
+  );
+  t = await mount(
+    {
+      widget: {entity: 'scene.test'},
+      states: {
+        'scene.test': {state: 'scening', attributes: {}},
+        'scene.other': {state: 'scening', attributes: {friendly_name: 'Other'}}
+      }
+    },
+    {as: 'card'}
+  );
+  t.card.setConfig({
+    widgets: [
+      {type: 'action', entity: 'scene.test'},
+      {type: 'action', entity: 'scene.other'}
+    ]
+  });
+  t.el.hass = t.mock.hass;
+  await t.settle();
+  await t.click('scene-menu', 'scene.test');
+  check(
+    'the scenes key opens the other-scenes menu without running a scene',
+    !!t.q('.page-menu [data-action="scene-activate"]') &&
+      t.calls.length === 0 &&
+      t.infos.length === 0
   );
 
   t = await mount(variants.sceneUnknown);
@@ -67,25 +99,25 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.customIcon);
   check(
     'custom icon and name are used',
-    t.q('ha-icon').getAttribute('icon') === 'mdi:lamps' && t.text(`${tile} span`) === 'Evening'
+    t.q('ha-icon').getAttribute('icon') === 'mdi:lamps' && t.text('.control > span') === 'Evening'
   );
 
   t = await mount(variants.entityIcon);
   check(
     'entity icon attribute is the fallback icon',
-    t.q('ha-icon').getAttribute('icon') === 'mdi:sofa' && t.text(`${tile} span`) === 'Movie'
+    t.q('ha-icon').getAttribute('icon') === 'mdi:sofa' && t.text('.control > span') === 'Movie'
   );
 
   t = await mount(variants.hostileName);
   check(
     'name is escaped, not parsed as markup',
-    !t.q(`${tile} b`) && t.text(`${tile} span`) === '<b>"Scene" & co</b>'
+    !t.q('.control b') && t.text('.control > span') === '<b>"Scene" & co</b>'
   );
 
   t = await mount(variants.unavailable);
   check(
     'unavailable action is disabled and labelled',
-    t.q(tile).disabled && t.text(tile).includes('Unavailable')
+    t.q(tile).disabled && t.text('.control').includes('Unavailable')
   );
   await t.act('run-action', 'scene.test');
   check('unavailable action issues no call', t.calls.length === 0);

@@ -1,5 +1,19 @@
 export default {
   en: {
+    'media_player.pause_speaker': 'Pause music on {name}',
+    'media_player.play_speaker': 'Play music on {name}',
+    'media_player.tracks': 'Playlist tracks',
+    'media_player.current_playlist': 'CURRENT PLAYLIST',
+    'media_player.refresh_tracks': 'Refresh tracks',
+    'media_player.loading_tracks': 'Loading tracks…',
+    'media_player.track_count': '{n} tracks · Tap a track to play',
+    'media_player.untitled_track': 'Untitled track',
+    'media_player.choose_playlist':
+      'Choose a playlist from Browse first, then find its tracks here.',
+    'media_player.tracks_empty':
+      'No tracks available. Choose a playlist in Browse. Radio and some music services do not share a track list.',
+    'media_player.tracks_error': 'Could not load tracks. Use Refresh to try again.',
+    'media_player.queue_changed': 'The playlist changed. Refresh the tracks before choosing again.',
     'media_player.browse': 'Browse',
     'media_player.playlists': 'Playlists & favourites',
     'media_player.back': 'Back to player',

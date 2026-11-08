@@ -1,3 +1,5 @@
+import {validateLineAlert} from '../core/line-alert.js';
+import {validateHouseModes} from '../core/house-modes.js';
 // The setConfig pipeline: turn whatever the user wrote into the config the card keeps, or throw.
 //
 //   cards -> widgets (fromCard)
@@ -17,6 +19,7 @@ import {extensions, getWidget, knownTypes} from '../core/registry.js';
 import {PAGE_SURFACES, resolveWallpaper} from '../core/surfaces.js';
 import {fromCard} from './convert.js';
 import {validateScreensaver} from '../core/overview-registry.js';
+import {validateQuickActions} from '../core/quick-actions.js';
 
 const EDITOR_PREVIEWS = ['landscape', 'portrait', 'auto'];
 
@@ -251,5 +254,8 @@ export function validateConfig(input) {
   if (!config.widgets) throw new Error('HouseView needs a list of cards.');
   const validated = normalizeWallpaper(validateWidgetsConfig(config));
   validateScreensaver(validated);
+  validateQuickActions(validated);
+  validateHouseModes(validated);
+  validateLineAlert(validated);
   return validated;
 }

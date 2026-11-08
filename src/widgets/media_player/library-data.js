@@ -5,7 +5,7 @@ export const selectedMode = (widget) =>
   (widget.playlist_mode || (Array.isArray(widget.playlists) ? 'selected' : 'all')) === 'selected';
 
 /** Bounded read-only request. A stalled integration must not leave the editor or browser loading forever. */
-export async function browse(hass, entity, item, signal) {
+export async function mediaRequest(hass, message, signal) {
   if (typeof hass?.callWS !== 'function') throw new Error('Media browsing is unavailable.');
   if (signal?.aborted) throw new Error('Cancelled');
   let timer;
@@ -16,13 +16,7 @@ export async function browse(hass, entity, item, signal) {
         abort = () => reject(new Error('Cancelled'));
         signal?.addEventListener('abort', abort, {once: true});
       }),
-      hass.callWS({
-        type: 'media_player/browse_media',
-        entity_id: entity,
-        ...(item
-          ? {media_content_type: item.media_content_type, media_content_id: item.media_content_id}
-          : {})
-      }),
+      hass.callWS(message),
       new Promise((_, reject) => {
         timer = setTimeout(() => reject(new Error('Media browsing timed out. Try again.')), 15000);
       })
@@ -31,6 +25,20 @@ export async function browse(hass, entity, item, signal) {
     clearTimeout(timer);
     signal?.removeEventListener('abort', abort);
   }
+}
+
+export function browse(hass, entity, item, signal) {
+  return mediaRequest(
+    hass,
+    {
+      type: 'media_player/browse_media',
+      entity_id: entity,
+      ...(item
+        ? {media_content_type: item.media_content_type, media_content_id: item.media_content_id}
+        : {})
+    },
+    signal
+  );
 }
 
 /** Browse only favourites and playlist folders, never crawl a music library or expand playable playlists. */

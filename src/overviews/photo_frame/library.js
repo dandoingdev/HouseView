@@ -1,3 +1,6 @@
+import {cachedValue, cacheValue} from '../../core/bounded-cache.js';
+import {sameOriginUrl} from '../../core/media-url.js';
+
 // The photo library: lists the images of a Home Assistant media folder and turns one of them into a URL the browser
 // can load. Everything goes through the frontend's own websocket (`hass.callWS`): `media_source/browse_media` for the
 // folder and `media_source/resolve_media` for a signed URL. Nothing is polled; a folder listing is cached for a quarter
@@ -36,10 +39,17 @@ const isImage = (child) =>
 
 const isFolder = (child) => child.media_class === 'directory' || child.can_expand === true;
 
-/** @type {Map<string, {at: number, promise: Promise<{id: string, title: string}[]>}>} */
-const lists = new Map();
-/** @type {Map<string, {until: number, promise: Promise<string>}>} */
-const urls = new Map();
+export const FOLDER_CACHE_LIMIT = 16;
+export const URL_CACHE_LIMIT = 256;
+// Share only within the same HA connection. Replacing a connection drops its cache naturally; old connections
+// can be collected. Entries expire on read and are LRU bounded even when users keep changing folders.
+let connections = new WeakMap();
+function cacheFor(hass) {
+  const owner = hass.connection || hass.callWS || hass;
+  let cache = connections.get(owner);
+  if (!cache) connections.set(owner, (cache = {lists: new Map(), urls: new Map()}));
+  return cache;
+}
 
 async function browse(hass, id, recursive, depth, out) {
   const result = await hass.callWS({type: 'media_source/browse_media', media_content_id: id});
@@ -58,34 +68,26 @@ async function browse(hass, id, recursive, depth, out) {
  * @returns {Promise<{id: string, title: string}[]>}
  */
 export function listPhotos(hass, folder, {recursive = false, now} = {}) {
+  const {lists} = cacheFor(hass);
   const key = `${folder}|${recursive}`;
-  const cached = lists.get(key);
+  const cached = cachedValue(lists, key);
   if (cached && now - cached.at < LIST_TTL_MS) return cached.promise;
   const promise = (async () => {
     const out = [];
     await browse(hass, folder, recursive, 0, out);
-    return out.sort((a, b) => a.title.localeCompare(b.title, undefined, {numeric: true}));
+    out.sort((a, b) => a.title.localeCompare(b.title, undefined, {numeric: true}));
+    for (const photo of out) Object.freeze(photo);
+    return Object.freeze(out);
   })();
-  lists.set(key, {at: now, promise});
+  cacheValue(lists, key, {at: now, promise}, FOLDER_CACHE_LIMIT);
   promise.catch(() => lists.get(key)?.promise === promise && lists.delete(key));
   return promise;
 }
 
-/** Only this origin and Home Assistant's own may serve a photo: a folder listing cannot point the card elsewhere. */
-function allowed(href, hass) {
-  try {
-    const url = new URL(href, window.location.origin);
-    const own = [window.location.origin];
-    if (typeof hass?.hassUrl === 'function') own.push(new URL(hass.hassUrl('/')).origin);
-    return own.includes(url.origin) ? url.href : '';
-  } catch {
-    return '';
-  }
-}
-
 /** A loadable URL for one photo (signed, cached until shortly before it expires). */
 export function photoUrl(hass, photo, {now} = {}) {
-  const cached = urls.get(photo.id);
+  const {urls} = cacheFor(hass);
+  const cached = cachedValue(urls, photo.id);
   if (cached && now < cached.until) return cached.promise;
   const promise = (async () => {
     const result = await hass.callWS({
@@ -93,14 +95,20 @@ export function photoUrl(hass, photo, {now} = {}) {
       media_content_id: photo.id,
       expires: URL_EXPIRES_S
     });
-    const href = allowed(
-      typeof hass.hassUrl === 'function' ? hass.hassUrl(result?.url) : result?.url,
-      hass
-    );
+    const source = result?.url;
+    const href =
+      typeof source === 'string' && source
+        ? sameOriginUrl(typeof hass.hassUrl === 'function' ? hass.hassUrl(source) : source, hass)
+        : null;
     if (!href) throw new Error('Photo URL is not served by Home Assistant');
-    return href;
+    return href.href;
   })();
-  urls.set(photo.id, {until: now + (URL_EXPIRES_S - URL_MARGIN_S) * 1000, promise});
+  cacheValue(
+    urls,
+    photo.id,
+    {until: now + (URL_EXPIRES_S - URL_MARGIN_S) * 1000, promise},
+    URL_CACHE_LIMIT
+  );
   promise.catch(() => urls.get(photo.id)?.promise === promise && urls.delete(photo.id));
   return promise;
 }
@@ -130,6 +138,5 @@ export const slotAt = (nowMs, intervalSeconds) =>
 
 /** Test hook: forget everything cached. */
 export function resetPhotoCache() {
-  lists.clear();
-  urls.clear();
+  connections = new WeakMap();
 }

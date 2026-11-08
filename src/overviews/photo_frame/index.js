@@ -70,23 +70,35 @@ function advance(ctx) {
   if (!el || typeof hass?.callWS !== 'function') return;
   const folder = normalizeFolder(options.folder);
   if (!folder) return;
-  if (store.get('folder') !== folder || store.get('recursive') !== options.recursive) {
+  const owner = hass.connection || hass.callWS || hass;
+  if (
+    store.get('folder') !== folder ||
+    store.get('recursive') !== options.recursive ||
+    store.get('owner') !== owner ||
+    store.get('shuffle') !== options.shuffle
+  ) {
     store.clear();
     store.set('folder', folder);
     store.set('recursive', options.recursive);
+    store.set('shuffle', options.shuffle);
+    store.set('owner', owner);
+    store.set('generation', {});
   }
   const photos = store.get('photos');
   if (!photos) {
     if (store.get('loading') || ctx.now() < (store.get('retryAt') || 0)) return;
     store.set('loading', true);
+    const generation = store.get('generation');
     listPhotos(hass, folder, {recursive: options.recursive, now: ctx.now()}).then(
       (list) => {
+        if (store.get('generation') !== generation) return;
         store.set('loading', false);
         if (!list.length) return setNote(ctx, ctx.t('photo_frame_overview.empty'), 'empty');
         store.set('photos', options.shuffle ? shuffled(list, folder) : list);
         advance(ctx);
       },
       () => {
+        if (store.get('generation') !== generation) return;
         store.set('loading', false);
         setNote(ctx, ctx.t('photo_frame_overview.unavailable'), 'error');
         // retry on a later tick, not in a tight loop

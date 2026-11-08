@@ -112,6 +112,8 @@ function eventStates(entries, previous) {
 
 /** An interrupting event (the doorbell) clears what is in its way: the page and scene menus, the camera grid, the dim. */
 function clearForInterrupt(card) {
+  card._disposeQuickActions?.();
+  card._disposeHouseModes?.();
   card._closePageMenu?.();
   if (card._galleryOpen) {
     card._galleryOpen = false;
@@ -187,6 +189,7 @@ export const screensaverMixin = {
 
   // ---- integration point 3: disconnectedCallback (also called by setConfig) ----
   _screensaverDisconnect() {
+    this._controlIdleStop?.();
     this._screensaverReturnStop();
     const ss = this._screensaver;
     this._overviewDispose();
@@ -210,7 +213,10 @@ export const screensaverMixin = {
   _screensaverHass() {
     const ss = this._screensaver;
     for (const session of this._overviewSessions?.values() ?? []) session.sync();
-    if (!ss?.idle) return;
+    if (!ss?.idle) {
+      this._syncHouseModes?.();
+      return;
+    }
     for (const session of ss.sessions.values()) session.sync();
     try {
       if (ss.pendingShow) this._screensaverShow();
@@ -223,6 +229,7 @@ export const screensaverMixin = {
       // A broken overview must never break the card's hass setter.
       console.error('[houseview] screensaver update failed', error);
     }
+    this._syncHouseModes?.();
   },
 
   // ---- integration point 5: end of _renderWidgets ----
@@ -643,6 +650,7 @@ export const screensaverMixin = {
       covered: false,
       store: new Map()
     };
+    this._controlIdleSync?.();
     this._screensaverAfterRender(); // an overview that fixes up its DOM does it before the first second is over
     ss.idle.configure({timeout: this._screensaverTimeoutNow()});
   },
@@ -769,6 +777,7 @@ export const screensaverMixin = {
     const active = ss.active;
     if (!active) return;
     ss.active = null;
+    this._controlIdleSync?.();
     if (active.entry.manual) this._screensaverDropManual(ss, active.entry);
     const event = ss.events?.get(active.entry);
     if (event) {

@@ -58,14 +58,14 @@ function checkIdleTimeout(seconds) {
   }
 }
 
-function checkReturnTimeout(seconds) {
+function checkReturnTimeout(seconds, key = 'return_timeout') {
   if (seconds === undefined) return;
   const valid =
     typeof seconds === 'number' &&
     (seconds === 0 || (seconds >= MIN_IDLE_SECONDS && seconds <= MAX_IDLE_SECONDS));
   if (!valid) {
     throw new Error(
-      `return_timeout must be 0 or a number of seconds from ${MIN_IDLE_SECONDS} to ${MAX_IDLE_SECONDS}.`
+      `${key} must be 0 or a number of seconds from ${MIN_IDLE_SECONDS} to ${MAX_IDLE_SECONDS}.`
     );
   }
 }
@@ -115,6 +115,7 @@ export function validateScreensaver(config) {
   validateAutomaticDisplays(config);
   validateDoorbell(config);
   checkReturnTimeout(config.return_timeout);
+  checkReturnTimeout(config.control_timeout, 'control_timeout');
 }
 
 function validateScreensaverBlock(config) {

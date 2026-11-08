@@ -87,6 +87,12 @@ function gotoWidget(ctx, id) {
 }
 
 export const featureActions = freeze({
+  'quick-actions-run-*': freeze({
+    immediate: true,
+    run: (ctx) => ctx.card._runQuickAction(Number(ctx.param))
+  }),
+  'quick-actions-open': freeze({immediate: true, run: (ctx) => ctx.card._openQuickActions()}),
+  'quick-actions-close': freeze({immediate: true, run: (ctx) => ctx.card._closeQuickActions()}),
   'goto-widget': freeze({immediate: true, run: gotoWidget}),
   'calendar-view': freeze({immediate: true, run: openCalendar}),
   'world-clock-view': freeze({
@@ -167,7 +173,7 @@ export const featureActions = freeze({
       });
     }
   }),
-  // Holding the plants tile: the full-screen plants view for that tile. Nothing is called on Home Assistant.
+  // Plants heading or hold: the full-screen plants view for that tile. Nothing is called on Home Assistant.
   'plants-view': freeze({
     immediate: true,
     run: (ctx, id) => {
@@ -178,6 +184,17 @@ export const featureActions = freeze({
       });
     }
   }),
+  'house-modes-open': freeze({immediate: true, run: (ctx) => ctx.card._openHouseModes?.()}),
+  'house-modes-close': freeze({immediate: true, run: (ctx) => ctx.card._closeHouseModes?.()}),
+  'house-routine-start': freeze({immediate: true, run: (ctx) => ctx.card._startHouseRoutine?.()}),
+  'house-routine-back': freeze({immediate: true, run: (ctx) => ctx.card._backHouseRoutine?.()}),
+  'house-routine-review': freeze({immediate: true, run: (ctx) => ctx.card._reviewHouseRoutine?.()}),
+  'house-routine-fix': freeze({immediate: true, run: (ctx, id) => ctx.card._fixHouseRoutine?.(id)}),
+  'house-mode-info': freeze({
+    immediate: true,
+    run: (ctx, id) => ctx.card._toggleHouseModeInfo?.(id)
+  }),
+  'house-mode': freeze({immediate: true, run: (ctx, id) => ctx.card._setHouseMode?.(id)}),
   'home-view': freeze({
     immediate: true,
     run: (ctx) =>
@@ -187,8 +204,8 @@ export const featureActions = freeze({
       )
   }),
   dim: freeze({immediate: true, run: toggleDim}),
-  // Holding a scene tile: a full-screen list of the dashboard's other scenes.
-  'scene-menu': freeze({immediate: true, run: (ctx, id) => ctx.card._openSceneMenu(id)}),
+  // Scene key or hold: a full-screen list of the dashboard's other scenes.
+  'scene-menu': freeze({immediate: true, run: (ctx, id) => ctx.card._openSceneMenu?.(id)}),
   'page-next': freeze({
     immediate: true,
     run: (ctx) => setPage(ctx, (ctx.card._pageIndex || 0) + 1)

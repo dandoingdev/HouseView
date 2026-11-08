@@ -1,4 +1,4 @@
-// Widget taps keep everyday actions; holding opens controls or Home Assistant settings.
+// A short press runs the control that was touched. A hold opens a different next screen when there is one.
 import {actionConfigFor, hasActionConfig, runActionConfig} from '../core/action-config.js';
 import {settingsAction} from '../core/widget-settings.js';
 import {createGestureDetector} from '../core/gesture.js';
@@ -12,7 +12,8 @@ export function configuredWidgetOf(card, button) {
   return widget && hasActionConfig(widget) ? {widget, index} : null;
 }
 
-const SETTINGS_ACTIONS = new Set([
+/** Actions that may start a hold gesture when pressed as a nested key (brightness, scenes, plants, expand). */
+const HOLDABLE_ACTIONS = new Set([
   'info',
   'light-view',
   'climate-view',
@@ -20,9 +21,9 @@ const SETTINGS_ACTIONS = new Set([
   'plants-view'
 ]);
 
-/** Settings keys open on hold. A tiny player's track title opens the full player on hold as well as tap. */
+/** Nested keys that still participate in hold detection (settings or expand). Operational keys stay immediate. */
 const holdable = (action) =>
-  SETTINGS_ACTIONS.has(action) ||
+  HOLDABLE_ACTIONS.has(action) ||
   String(action || '').startsWith('media-player-expand-') ||
   String(action || '').startsWith('plants-');
 
@@ -40,6 +41,18 @@ function expandPress(button) {
   return {action, entity: details.dataset.entity};
 }
 
+/** Hold target when it differs from the short-press action on `button`. */
+function holdTarget(card, widget, button) {
+  if (widget.hold_action != null) return {kind: 'config'};
+  const expand = expandPress(button);
+  if (expand && expand.action !== button?.dataset?.action)
+    return {kind: 'act', action: expand.action, entity: expand.entity};
+  const action = settingsAction(card, widget);
+  if (action && action !== button?.dataset?.action)
+    return {kind: 'act', action, entity: widget.entity};
+  return null;
+}
+
 function pressTarget(card, target) {
   if (target?.closest?.('.hv-screensaver, .ov-scene')) return null;
   const tile = target?.closest?.('[data-widget]');
@@ -51,9 +64,9 @@ function pressTarget(card, target) {
   if (button?.disabled) return null;
   // Nested operational keys (transport, volume, temperature steps...) remain direct controls.
   if (button && button !== tile && !holdable(button.dataset.action)) return null;
-  const action = settingsAction(card, widget);
-  if (!action && widget.hold_action == null && widget.double_tap_action == null) return null;
-  return {widget, index, button: button || tile, action};
+  const hold = holdTarget(card, widget, button || tile);
+  if (!hold && widget.double_tap_action == null) return null;
+  return {widget, index, button: button || tile, hold};
 }
 
 export const tapActionsMixin = {
@@ -63,9 +76,7 @@ export const tapActionsMixin = {
    */
   _runTapAction(button) {
     const configured = configuredWidgetOf(this, button);
-    if (!configured || !actionConfigFor(configured.widget, 'tap_action')) {
-      return !!pressTarget(this, button) && SETTINGS_ACTIONS.has(button.dataset.action);
-    }
+    if (!configured || !actionConfigFor(configured.widget, 'tap_action')) return false;
     runActionConfig(this, configured.widget, 'tap_action').catch((error) => {
       console.error('[HouseView] tap_action failed', error);
     });
@@ -102,12 +113,7 @@ export const tapActionsMixin = {
               actionConfigFor(current, 'tap_action')
             )
               run('tap_action');
-            else if (
-              target?.isConnected &&
-              !target.disabled &&
-              target.dataset.action &&
-              !SETTINGS_ACTIONS.has(target.dataset.action)
-            ) {
+            else if (target?.isConnected && !target.disabled && target.dataset.action) {
               this._act(target.dataset.action, target.dataset.entity);
             }
           },
@@ -115,15 +121,10 @@ export const tapActionsMixin = {
             const current = widgetNow();
             const target = entry.button;
             if (!target?.isConnected || target.disabled || !current) return;
-            const expand = expandPress(target);
-            // A configured hold_action stays the override. Otherwise a compact player opens full screen
-            // before speaker settings, which remain on the title inside that player.
-            if (current.hold_action != null) run('hold_action');
-            else if (expand) this._act(expand.action, expand.entity);
-            else {
-              const action = settingsAction(this, current);
-              if (action) this._act(action, current.entity);
-            }
+            const hold = holdTarget(this, current, target);
+            if (!hold) return;
+            if (hold.kind === 'config') run('hold_action');
+            else this._act(hold.action, hold.entity);
           },
           onDoubleTap: () => run('double_tap_action'),
           suppressClick: (until) => {
@@ -153,13 +154,13 @@ export const tapActionsMixin = {
     if (!pressed) return false;
     event.preventDefault();
     if (this._activeGesture) return true;
-    const expand = expandPress(pressed.button);
-    if (pressed.widget.hold_action != null) {
+    const hold = pressed.hold;
+    if (!hold) return true;
+    if (hold.kind === 'config') {
       runActionConfig(this, pressed.widget, 'hold_action').catch((error) => {
         console.error('[HouseView] hold_action failed', error);
       });
-    } else if (expand) this._act(expand.action, expand.entity);
-    else if (pressed.action) this._act(pressed.action, pressed.widget.entity);
+    } else this._act(hold.action, hold.entity);
     return true;
   },
 

@@ -29,6 +29,13 @@ export function widgetWatchIds(widget, config, hass) {
 export function watchedIds(config, hass) {
   if (!config) return [];
   const ids = [];
+  if (config.line_alert_entity) ids.push(config.line_alert_entity);
+  if (config.house_mode_entity) ids.push(config.house_mode_entity);
+  for (const mode of config.house_modes || []) {
+    if (mode.script) ids.push(mode.script);
+    for (const check of mode.checks || []) ids.push(check.entity);
+  }
+  for (const item of config.quick_actions || []) if (item.entity) ids.push(item.entity);
   for (const widget of config.widgets ?? []) ids.push(...widgetWatchIds(widget, config, hass));
   for (const {extension} of extensions()) ids.push(...(extension.entities?.(config) || []));
   return [...new Set(ids.filter(Boolean))];
@@ -116,6 +123,14 @@ export function hassChanged(card, hass) {
   const nextScalars = scalars(hass);
   const scalarsDirty = !card._scalars || !sameList(card._scalars, nextScalars);
   let signature = computeSignature(hass, watchedIds(config, hass), resolveMode(config, hass));
+  if (config?.line_alert_entity) {
+    // A stale disruption must disappear on disconnect even if HA retains the same sensor object.
+    const connected = hass?.connected !== false;
+    signature =
+      typeof signature === 'string'
+        ? JSON.stringify([signature, connected])
+        : {...signature, scalars: [...signature.scalars, connected]};
+  }
   if (config?.home_battery_auto) {
     // Registry identity is handled inside discoveredBatteries; the signature only cares when the
     // discovered id list actually changes, so a no-op registry swap does not repaint the card.

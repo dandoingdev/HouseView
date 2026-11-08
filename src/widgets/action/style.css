@@ -1,4 +1,4 @@
-/* @owns action script scene button input_button */
+/* @owns action script scene button input_button control-split control-unavailable */
 /*
  * action widget styles.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders

@@ -26,7 +26,9 @@ export default defineWidget({
   render: (ctx) =>
     controlTile(ctx, {
       action: 'lock',
-      icon: ctx.state?.state === 'unlocked' ? 'lock-open' : 'lock'
+      icon: ctx.state?.state === 'unlocked' ? 'lock-open' : 'lock',
+      iconAction: 'info',
+      iconLabel: ctx.t('common.more_info', {name: ctx.rawName})
     }),
 
   actions: {

@@ -1,3 +1,5 @@
+import {houseModesData, houseModesSchema, applyHouseModes} from './house-modes-form.js';
+import {renderHouseModeSetup} from './house-modes-setup.js';
 // houseview-editor: the visual editor of `custom:houseview-card` (the carousel). It edits the global look, the
 // camera grid, the screensaver and the pages; each page's cards are edited by Home Assistant's own
 // `hui-stack-card-editor`, which in turn creates houseview-widget-editor for HouseView cards.
@@ -19,6 +21,7 @@ import {
 } from './automatic-displays-form.js';
 import {applyDoorbell, doorbellData, doorbellSchema, showDoorbell} from './doorbell-form.js';
 import {applyHome, homeData, homeSchema, showHome} from './home-form.js';
+import {applyQuickActions, quickActionsData, quickActionsSchema} from './quick-actions-form.js';
 import {CAMERA_SLOTS, applySlot, slotData, slotHeadingKey, slotSchema} from './camera-forms.js';
 import {STYLES, createForm, field, select, text, textOrNone} from './form.js';
 import {createStackEditor, hasForm, hasStackEditor, whenNativeReady} from './native-stack.js';
@@ -40,6 +43,8 @@ const APPEARANCE_DEFAULTS = {
   performance: 'auto',
   editor_preview: 'landscape',
   show_header: false,
+  line_alert_entity: '',
+  line_alert_name: '',
   tablet_mode: false
 };
 
@@ -95,12 +100,16 @@ export const appearanceData = (config) =>
       'performance',
       'editor_preview',
       'show_header',
+      'line_alert_entity',
+      'line_alert_name',
       'tablet_mode'
     ].map((key) => [key, config[key] ?? APPEARANCE_DEFAULTS[key]])
   );
 
 export const appearanceSchema = (hass) => [
   field('show_header', {boolean: {}}),
+  field('line_alert_entity', {entity: {domain: ['sensor']}}),
+  field('line_alert_name', {text: {}}),
   field('tablet_mode', {boolean: {}}),
   field('appearance', select(hass, ['auto', 'light', 'dark'])),
   field('wallpaper', select(hass, PAGE_SURFACES)),
@@ -161,6 +170,7 @@ export class HouseViewEditor extends HTMLElement {
     for (const el of this.shadowRoot.querySelectorAll('ha-form,hui-stack-card-editor'))
       el.hass = hass;
     if (this._config && !this.shadowRoot.querySelector('.editor')) this._render();
+    this._view?.modeSetup?.();
   }
 
   set lovelace(value) {
@@ -174,6 +184,7 @@ export class HouseViewEditor extends HTMLElement {
     this._config = next;
     if (this._view?.key === structureKey(next)) this._sync();
     else this._render();
+    this._view?.modeSetup?.();
   }
 
   _emit() {
@@ -207,6 +218,8 @@ export class HouseViewEditor extends HTMLElement {
     this._view = view;
     view.appearance = this._renderAppearance(parent);
     if (showHome(this._config)) this._renderHome(parent, view);
+    this._renderHouseModes(parent, view);
+    this._renderQuickActions(parent, view);
     this._renderCameras(parent, view);
     if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
     if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
@@ -369,6 +382,41 @@ export class HouseViewEditor extends HTMLElement {
       changed: (value) => {
         this._config = applyHome(this._config, value);
         this._emit();
+      }
+    });
+  }
+
+  _renderHouseModes(parent, view) {
+    const {el, section} = panel(parent, text(this._hass, 'editor.house_modes_section'));
+    view.modeSetup = renderHouseModeSetup(this, section);
+    this._followPreview(el, () => ({kind: 'house-modes'}));
+    view.houseModes = this._form(section, {
+      data: houseModesData(this._config),
+      schema: houseModesSchema(),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
+      changed: (value) => {
+        this._config = applyHouseModes(this._config, value);
+        view.modeSetup();
+        this._emit();
+      }
+    });
+  }
+
+  _renderQuickActions(parent, view) {
+    const {el, section} = panel(parent, text(this._hass, 'editor.quick_actions_section'));
+    this._followPreview(el, () => ({kind: 'quick-actions'}));
+    view.quickActions = this._form(section, {
+      data: quickActionsData(this._config),
+      schema: quickActionsSchema(),
+      computeHelper: (item) => textOrNone(this._hass, `editor.helper.${item.name}`),
+      changed: (value) => {
+        try {
+          this._config = applyQuickActions(this._config, value);
+          this._status('');
+          this._emit();
+        } catch (error) {
+          this._status(error.message);
+        }
       }
     });
   }
@@ -631,6 +679,8 @@ export class HouseViewEditor extends HTMLElement {
     });
     if (view.automatic) view.automatic.data = automaticData(config);
     if (view.home) view.home.data = homeData(config);
+    if (view.houseModes) view.houseModes.data = houseModesData(config);
+    if (view.quickActions) view.quickActions.data = quickActionsData(config);
     if (view.doorbell) view.doorbell.data = doorbellData(config);
     if (view.screensaver) {
       const data = screensaverData(config);

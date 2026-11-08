@@ -50,11 +50,18 @@ export default async function ({mount, check, variants, advance, settle}) {
     t.calls[0]?.s === 'media_play' && t.calls[0]?.data.entity_id === ENTITY && t.infos.length === 0
   );
   t = await mount(variants.ok);
-  await t.hold('.mc-details');
-  check(
-    'holding track information opens speaker controls',
-    t.infos.includes(ENTITY) && t.calls.length === 0
-  );
+  {
+    const trackAction = t.q('.mc-details').dataset.action;
+    await t.click(trackAction);
+    check(
+      trackAction === 'info'
+        ? 'tapping track information opens speaker controls'
+        : 'tapping track information opens the full player',
+      trackAction === 'info'
+        ? t.infos.includes(ENTITY) && t.calls.length === 0
+        : !!t.q('.media-stage') && t.calls.length === 0 && t.infos.length === 0
+    );
+  }
   for (const variant of ['idle', 'off']) {
     t = await mount(variants[variant]);
     await t.click('media');
@@ -339,16 +346,16 @@ export default async function ({mount, check, variants, advance, settle}) {
   small.style.height = '178px';
   await settle(50);
   const smallAction = t.q('.mc-details').dataset.action;
-  await t.hold('.mc-details');
+  await t.click(smallAction);
   const opened = t.q('.media-stage');
-  const smallHold =
+  const smallTap =
     smallAction.startsWith('media-player-expand-') &&
     !!opened &&
     t.infos.length === 0 &&
     t.calls.length === 0;
-  if (!smallHold) {
+  if (!smallTap) {
     console.error(
-      'small player hold',
+      'small player tap',
       JSON.stringify({
         size: `${small.clientWidth}x${small.clientHeight}`,
         action: smallAction,
@@ -358,7 +365,7 @@ export default async function ({mount, check, variants, advance, settle}) {
       })
     );
   }
-  check('holding the track on a small player opens the full player first', smallHold);
+  check('tapping the track on a small player opens the full player first', smallTap);
   await t.act('media-player-expand-0', ENTITY);
   t.root.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
   await settle();

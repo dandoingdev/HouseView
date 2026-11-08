@@ -1,4 +1,5 @@
 import {defineWidget} from '../../core/define-widget.js';
+import {controlTile} from '../_shared/control-tile.js';
 
 // Action widget: one kind for scene, script, button and input_button entities. The config types `scene`,
 // `script`, `button` and `input_button` are aliases that the registry folds into `action` (docs/widget-api.md).
@@ -62,16 +63,29 @@ export default defineWidget({
     const running = domain === 'script' && state?.state === 'on';
     // The icon name is taken without "mdi:" and re-added, so a foreign prefix ("hass:x") becomes "mdi:hass:x"
     // (a name containing ':' is used verbatim by ctx.icon).
-    const icon = String(widget.icon || attrs.icon || DEFAULT_ICONS[domain]);
+    const icon = String(widget.icon || attrs.icon || DEFAULT_ICONS[domain]).replace(/^mdi:/, '');
     const label = !ok
       ? ctx.t('state.unavailable')
       : running
         ? ctx.t('action.running')
         : idleLabel(ctx, domain);
+    // Scenes keep a visible key for the other-scenes menu; scripts and buttons stay a single tap target.
+    if (domain === 'scene') {
+      return controlTile(ctx, {
+        action: 'run-action',
+        icon,
+        on: false,
+        sub: () => label,
+        iconAction: 'scene-menu',
+        iconLabel: ctx.t('action.scenes'),
+        extraClass: domain,
+        note: widget.note || ''
+      });
+    }
     const note = widget.note ? `<span class="control-note">${ctx.esc(widget.note)}</span>` : '';
     return ctx.btn(
       'run-action',
-      `${ctx.icon(`mdi:${icon.replace('mdi:', '')}`)}<span>${ctx.name}</span><small>${ctx.esc(label)}</small>${note}`,
+      `${ctx.icon(`mdi:${icon}`)}<span>${ctx.name}</span><small>${ctx.esc(label)}</small>${note}`,
       `tile ${ctx.cls} ${domain} control ${running ? 'active' : ''}`,
       ok && !running,
       {attrs: `${ctx.attr} `}

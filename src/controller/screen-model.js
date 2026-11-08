@@ -263,6 +263,7 @@ export const screenModelMixin = {
     if (this._layoutFrame) return;
     this._layoutFrame = requestAnimationFrame(() => {
       this._layoutFrame = 0;
+      this._syncDashboardHeader();
       this._layout();
     });
   },

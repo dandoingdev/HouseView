@@ -16,7 +16,7 @@ dock, clean a spot, locate, and fan speed. Only commands the vacuum advertises a
 does not apply right now is disabled. Hold the tile for Home Assistant's own vacuum dialog. Nothing is sent
 when the tile is opened.
 
-`vacuum_view: false` on the carousel leaves the tile on Home Assistant's dialog, opened with a hold, the same way as the other widgets.
+`vacuum_view: false` on the carousel leaves the tile on Home Assistant's dialog, opened with a tap.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

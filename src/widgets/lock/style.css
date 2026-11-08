@@ -1,4 +1,4 @@
-/* @owns lock */
+/* @owns lock control-split control-unavailable */
 /*
  * lock widget styles.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders

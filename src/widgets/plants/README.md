@@ -11,9 +11,9 @@ colour: green when the plant is in its comfortable range, amber when it needs wa
 blue or warm orange when the room is too cold or too warm. A low battery gets a small marker. A header counts the plants
 that need care.
 
-Tap a plant to open the more-info dialog of its humidity sensor. **Hold** anywhere on the tile for the full-screen
-plants view: a large card per plant with the humidity ring, the temperature, comfort bars, the battery and when the
-plant last reported.
+Tap a plant to open the more-info dialog of its humidity sensor. Tap the heading (or hold anywhere on the tile) for the
+full-screen plants view: a large card per plant with the humidity ring, the temperature, comfort bars, the battery and
+when the plant last reported.
 
 The widget has no entity of its own. List the plants under `plants`; each needs a `name` and a `humidity` sensor and may
 add `temperature` and `battery` sensors, an `icon`, and its own care range.

@@ -30,6 +30,15 @@
 .plants-title {
   display: inline-grid;
   place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
 /* The same large, centred icon as every other tile. */

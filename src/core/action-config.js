@@ -163,12 +163,14 @@ function navigate(config) {
  * @param {'tap_action'|'hold_action'|'double_tap_action'} gesture
  * @returns {Promise<boolean>} false when the widget does not configure the gesture (nothing happened)
  */
-export async function runActionConfig(card, widget, gesture) {
+export async function runActionConfig(card, widget, gesture, isCurrent) {
   const config = actionConfigFor(widget, gesture);
   if (!config) return false;
   const ctx = createBaseContext(card);
   const entity = config.entity || widget.entity;
   if (!(await confirmed(card, config, ctx))) return true;
+  // A transient action surface may have closed or been reconfigured while confirmation was open.
+  if (isCurrent && !isCurrent()) return true;
 
   switch (config.action) {
     case 'more-info':

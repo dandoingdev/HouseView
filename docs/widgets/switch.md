@@ -5,7 +5,8 @@
 Card type `custom:houseview-switch-card`, or `type: switch` in the `cards` list of `custom:houseview-card`. Available since 1.0.
 
 Shows a `switch.*` entity as an icon widget with its name and state. The widget is highlighted while the switch is
-`on`. A tap flips it through `homeassistant.toggle`. An unavailable or unknown switch is shown disabled.
+`on`. A tap flips it through `homeassistant.toggle`. The icon is a details key that opens Home Assistant's dialog
+(holding the tile does the same). An unavailable or unknown switch is shown disabled.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

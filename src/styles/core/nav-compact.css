@@ -1,4 +1,4 @@
-/* @owns empty-cards page-nav face dashboard-header dashboard-date dashboard-time has-header */
+/* @owns empty-cards page-nav face dashboard-header dashboard-date dashboard-time has-header dashboard-control dashboard-controls controls-only has-dashboard-control */
 /*
  * Core compact normal-flow navigation and the empty state.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders
@@ -74,11 +74,117 @@
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
+.dashboard-controls {
+  position: absolute;
+  z-index: 3;
+  right: 10px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Floating footer buttons sit outside page-nav; keep their swipes with the dashboard too. */
+.dashboard-controls,
+.dim-screen,
+.home-button {
+  touch-action: none;
+}
+.carousel .dashboard-controls .dim-screen {
+  position: static;
+  transform: none;
+  flex-shrink: 0;
+}
+.dashboard-control {
+  display: grid;
+  place-items: center;
+  flex: 0 0 56px;
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  min-height: 56px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ov-panel-key-bg, rgba(255, 255, 255, 0.18));
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.dashboard-control ha-icon {
+  display: block;
+  margin: 0;
+  --mdc-icon-size: 24px;
+}
+.dashboard-control:disabled {
+  opacity: .35;
+  cursor: default;
+}
+.dashboard-control:not(:disabled):active {
+  opacity: .6;
+}
+.dashboard-control:focus-visible {
+  outline: var(--hv-focus-ring, 3px solid currentColor);
+  outline-offset: -3px;
+}
+.dashboard-controls .dashboard-control {
+  color: #e2eddb;
+}
+.dashboard-header .dashboard-control {
+  position: relative;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  width: 64px;
+  margin-right: 0;
+  border-radius: 14px;
+  background: transparent;
+  isolation: isolate;
+}
+/* A compact painted chip inside the full-height touch target leaves air above and below. */
+.dashboard-header .dashboard-control::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 10px 0;
+  box-sizing: border-box;
+  border: 1px solid #ffffff30;
+  border-radius: 14px;
+  background: var(--ov-panel-key-bg, rgba(255, 255, 255, 0.18));
+}
+.dashboard-header.controls-only .dashboard-date,
+.dashboard-header.controls-only .dashboard-time {
+  visibility: hidden;
+}
+.dashboard-header.has-dashboard-control {
+  padding-inline: 10px;
+}
+@media (max-width:300px) {
+  .dashboard-header .dashboard-control {
+    width: 60px;
+  }
+}
 @media (max-width:519px) {
   .carousel .dashboard-header {
-    padding: 0 12px;
+    padding: 0 10px;
   }
   .carousel .dashboard-date {
     font-size: 12px;
   }
 }
+
+/* @phase nav-compact */
+.carousel .dashboard-header.has-house-mode {height:var(--hv-header-height,56px);padding-inline:10px}
+.dashboard-header.has-house-mode .dashboard-date {display:none}
+.dashboard-header.has-house-mode.controls-only .dashboard-time {display:block}
+.house-mode-indicator {grid-column:1;grid-row:1;display:flex;align-items:center;justify-self:start;gap:7px;box-sizing:border-box;min-width:56px;max-width:100%;height:56px;padding:0 8px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;overflow:hidden}
+.house-mode-indicator > span {display:grid;place-items:center;width:20px;height:20px;flex:0 0 20px}
+.house-mode-indicator ha-icon {display:block;width:20px;height:20px;--mdc-icon-size:20px;margin:0}
+.house-mode-indicator strong {font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.house-mode-indicator[data-mode=guests],.house-mode-indicator[data-mode=evening] {color:var(--hv-text,inherit);background:#ffffff12}
+.hv-house-mode-confirm p {line-height:1.6;white-space:pre-line;overflow-wrap:anywhere}
+.hv-house-mode-confirm h2 {font-size:24px;line-height:1.2}
+.hv-house-mode-confirm button:focus-visible {outline:3px solid currentColor;outline-offset:-5px}

@@ -1,3 +1,7 @@
+import {lineAlertMixin} from './line-alert.js';
+import {controlIdleMixin} from './control-idle.js';
+import {houseRoutinesMixin} from './house-routines.js';
+import {houseModesMixin} from './house-modes.js';
 // HouseViewCard: the carousel controller (`<houseview-card>`).
 //
 // ONE class. Its body holds only the constructor, setConfig, the hass setter, the lifecycle callbacks and the
@@ -29,6 +33,7 @@ import {stateMixin} from './state.js';
 import {stylesMixin} from './styles.js';
 import {tabletChromeMixin} from './tablet-chrome.js';
 import {tapActionsMixin} from './tap-actions.js';
+import {quickActionsMixin} from './quick-actions.js';
 
 export class HouseViewCard extends HTMLElement {
   constructor() {
@@ -51,6 +56,9 @@ export class HouseViewCard extends HTMLElement {
    */
   setConfig(config) {
     const validated = validateConfig(config);
+    this._clearNavHold?.();
+    this._disposeQuickActions();
+    this._disposeHouseModes();
     this._disposeGestures();
     this._config = validated;
     // 'lite' or 'full' for the life of this config (the device does not change under a card)
@@ -85,6 +93,9 @@ export class HouseViewCard extends HTMLElement {
 
   disconnectedCallback() {
     this._screensaverDisconnect();
+    this._clearNavHold?.();
+    this._disposeQuickActions();
+    this._disposeHouseModes();
     window.removeEventListener(EDITOR_PREVIEW_EVENT, this._onEditorPreview);
     this._dropPagePrefetch();
     this._clearPageTransition();
@@ -168,10 +179,15 @@ mixin(
   nativeCardMixin,
   dimMixin,
   dashboardHeaderMixin,
+  lineAlertMixin,
   editorPreviewMixin,
   stylesMixin,
   tapActionsMixin,
-  screensaverMixin
+  quickActionsMixin,
+  houseModesMixin,
+  houseRoutinesMixin,
+  screensaverMixin,
+  controlIdleMixin
 );
 
 // Private names that live in widget extensions (_galleryOpen, _alarm...) are accessors on the prototype,

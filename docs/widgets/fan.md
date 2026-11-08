@@ -5,7 +5,8 @@
 Card type `custom:houseview-fan-card`, or `type: fan` in the `cards` list of `custom:houseview-card`. Available since 1.0.
 
 Shows a `fan.*` entity as an icon widget with its name and state. The widget is highlighted while the fan is `on`.
-A tap calls `homeassistant.toggle`. An unavailable or unknown fan is shown disabled.
+A tap calls `homeassistant.toggle`. The icon is a details key that opens Home Assistant's dialog (holding the tile
+does the same). An unavailable or unknown fan is shown disabled.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

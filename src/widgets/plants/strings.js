@@ -3,7 +3,8 @@ export default {
   en: {
     'plants.label': 'Plants',
     'plants.description':
-      'A ring gauge per plant with its humidity and temperature; hold for the full-screen plants view.',
+      'A ring gauge per plant with its humidity and temperature; the heading opens the full-screen plants view.',
+    'plants.open_view': 'Open plants view',
     'plants.summary_ok': 'All happy',
     'plants.summary_one': '1 needs care',
     'plants.summary_many': '{n} need care',

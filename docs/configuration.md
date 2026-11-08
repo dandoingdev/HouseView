@@ -43,12 +43,18 @@ screensaver:
 | `performance` | `auto` | How much decoration is painted: `full`, `lite` or `auto`. See [performance](performance.md) |
 | `home_overview` | `false` | `true` adds a home button at the bottom left that opens the [home summary](overviews/home.md) full screen. It adds no page. A switch in the card editor's Home summary section |
 | `home_swipe` | follows `home_overview` | `true` opens the home summary with a downward swipe from the top of the display, without the footer button. On a short panel that top band is taller. `false` turns the swipe off even when the button is showing. Leave it out and a carousel with `home_overview: true` still swipes |
+| `quick_actions` | none | Up to six ordered shortcuts on one fixed swipe-up screen. Configure in **Quick actions · Swipe up** in the native editor; see [quick actions](actions.md#swipe-up-quick-actions) |
+| `quick_actions_swipe` | `true` when actions are configured | Swipe upward from the bottom edge of any dashboard page to open the screen. Swipe downward, press its down key or Escape to return. `false` disables the gesture. Standalone widget cards omit it |
+| `quick_actions_title` | `Quick actions` | Heading for the swipe-up screen |
 | `home_bins` | none | A [waste_collection_schedule](overviews/home.md) sensor (`sensor.bins`): the home summary shows an icon chip for the bins going out in the next 7 days |
 | `home_transport` | none | A list of departure sensors (`sensor.id` or `{entity, label, icon}`): the home summary shows a chip per entry with the next departure time, amber when nothing is running |
 | `home_title` | `Home` | The title shown on the home summary when `home_overview` is on |
 | `editor_preview` | `landscape` | How the live preview in Home Assistant's card editor is drawn: as a `landscape` tablet (1280 x 800), a `portrait` tablet (800 x 1280), or `auto` (the narrow box as it is). The card is laid out at that size and scaled to fit the preview, so the preview shows the real page arrangement. It has no effect anywhere else |
 | `camera_gallery` | none | A grid of up to four cameras, opened by pressing the camera widget. See [cameras](cameras.md) |
 | `screensaver` | none | One overview, or a list of them, shown after a while without a touch. See [overviews and screensavers](screensavers.md) |
+| `line_alert_entity` | none | London Underground status sensor for a disruption-only toolbar/footer alert. Choose it in the card editor; see [line alerts](line-alerts.md) |
+| `line_alert_name` | sensor name | Optional short label for the line alert |
+| `control_timeout` | `30` | Seconds without interaction before a manually opened control or overview screen, House modes or Quick actions returns to the dashboard. `0` keeps it open. Touches, keyboard input and scrolling restart the countdown; held pointers, pending commands and running/verifying house routines defer it. Editor previews and automatic event displays are excluded. Edited in the Screensaver section |
 | `return_timeout` | `120` | Seconds before the carousel returns to the first page. When an idle screensaver is set, it returns as that screensaver appears. With no screensaver, it returns after this many seconds without a touch. `0` turns it off. The same field is in the editor's Screensaver section |
 | `timer_display` | `true` | The timer display appears while a timer runs: `true` (every `timer` widget), `false`, or a list of `timer.*` entities. See [automatic displays](screensavers.md#automatic-displays) |
 | `music_screensaver` | `true` | The cover art appears at screensaver time while a speaker plays: `true` (every `media_player` widget), `false`, or a list of `media_player.*` entities |
@@ -198,6 +204,7 @@ A broken configuration shows a red error card with one of these messages:
 | `timer_display must be true, false or a list of timer entities.` | A bad `timer_display` (`music_screensaver` likewise) |
 | `Tap action must be one of more-info, toggle, ...` | A bad action in `tap_action` (`Hold action`, `Double tap action` likewise) |
 | `Screensaver ...`, `<type> screensaver needs ...` | See [overviews and screensavers](screensavers.md#errors) |
+| `control_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `control_timeout` |
 | `return_timeout must be 0 or a number of seconds from 5 to 86400.` | A bad `return_timeout` |
 
 ### Holding widgets
@@ -209,3 +216,10 @@ screen first. Speaker settings are a hold on that title once the full player is 
 volume, playback, Browse and temperature arrows still work with a tap. Moving your finger cancels a hold so swiping
 continues to turn pages. A configured `hold_action` takes precedence, including `action: none`.
 Keyboard users can focus a widget or settings key and press Shift+F10 or the context-menu key.
+
+### House modes
+
+Configure **House modes · Swipe from left → Set up house modes** to create or choose a selector, connect scripts and explain the changes.
+`house_mode_entity` accepts an `input_select` or `select`; `house_modes` holds up to five `{mode, option?, description?, script?}`
+entries. Away and Sleeping can additionally configure `checks: [{entity, kind, name?, expected_state?}]` for guided review and verification. IDs are `home`, `away`, `guests`, `evening` and `sleeping`; option names default to their capitalised labels.
+See [House modes setup and examples](house-modes.md).

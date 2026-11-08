@@ -2,8 +2,10 @@
 export default async function ({mount, check, variants}) {
   let t = await mount(variants.ok);
   check(
-    'a default light has one toggle tile with no separate icon action',
-    !!t.q('[data-action="light"]') && !t.q('[data-action="light-view"]') && !t.q('button button')
+    'a default light has a toggle tile and a brightness key',
+    !!t.q('[data-action="light"]') &&
+      !!t.q('[data-action="light-view"].control-icon') &&
+      !!t.q('.control-split')
   );
   check('an on light is marked active', !!t.q('.control.active'));
 
@@ -13,7 +15,13 @@ export default async function ({mount, check, variants}) {
     t.calls[0]?.s === 'toggle' && !t.q('.hv-screensaver')
   );
   t = await mount(variants.ok);
-  await t.hold();
+  await t.click('light-view');
+  check(
+    'the brightness key opens the light view without toggling',
+    !!t.q('.ov-light-scene') && t.calls.length === 0
+  );
+  t = await mount(variants.ok);
+  await t.hold('[data-action="light"]');
   check(
     'holding the tile opens brightness without toggling',
     !!t.q('.ov-light-scene') && t.calls.length === 0
@@ -28,7 +36,7 @@ export default async function ({mount, check, variants}) {
     'configured tap actions still apply to the main tile',
     t.infos.includes('light.test') && t.calls.length === 0
   );
-  await t.hold();
+  await t.hold('[data-action="light"]');
   check(
     'holding still opens brightness with a configured tap action',
     !!t.q('.ov-light-scene') && t.calls.length === 0
@@ -43,7 +51,9 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.actionOff);
   check(
     'action off renders the light-off tile only',
-    !!t.q('[data-action="light-off"]') && !t.q('[data-action="light"]')
+    !!t.q('[data-action="light-off"]') &&
+      !t.q('[data-action="light"]') &&
+      !t.q('[data-action="light-view"]')
   );
   await t.click('light-off');
   check(
@@ -53,15 +63,23 @@ export default async function ({mount, check, variants}) {
       t.calls[0].s === 'turn_off' &&
       t.calls[0].data.entity_id === 'light.test'
   );
+  t = await mount(variants.actionOff);
+  await t.hold();
+  check('action off has no brightness hold', !t.q('.ov-light-scene') && t.calls.length === 0);
 
   t = await mount(variants.actionToggle);
   check(
-    'action toggle renders the light tile',
-    !!t.q('[data-action="light"]') && !t.q('[data-action="light-off"]')
+    'action toggle renders the light tile without a brightness key',
+    !!t.q('[data-action="light"]') &&
+      !t.q('[data-action="light-off"]') &&
+      !t.q('[data-action="light-view"]')
   );
 
   await t.click('light');
   check('explicit toggle preserves the direct service action', t.calls[0]?.s === 'toggle');
+  t = await mount(variants.actionToggle);
+  await t.hold();
+  check('action toggle has no brightness hold', !t.q('.ov-light-scene') && t.calls.length === 0);
 
   t = await mount(variants.yamlFalse);
   check(
@@ -85,13 +103,13 @@ export default async function ({mount, check, variants}) {
   t = await mount(variants.hostileName);
   check(
     'name is escaped, not parsed as markup',
-    !t.q('[data-action="light"] b') && t.text('.control > span') === '<b>"Lamp" & co</b>'
+    !t.q('.control b') && t.text('.control > span') === '<b>"Lamp" & co</b>'
   );
 
   t = await mount(variants.unavailable);
   check(
     'unavailable light is disabled and labelled',
-    t.q('[data-action="light"]').disabled && t.text('[data-action="light"]').includes('Unavailable')
+    t.q('[data-action="light"]').disabled && t.text('.control').includes('Unavailable')
   );
   await t.act('light', 'light.test');
   check('unavailable light issues no service call', t.calls.length === 0);

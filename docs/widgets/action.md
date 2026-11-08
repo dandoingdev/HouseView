@@ -6,10 +6,11 @@ Card type `custom:houseview-action-card`, or `type: action` in the `cards` list 
 
 Runs a `scene.*`, `script.*`, `button.*` or `input_button.*` entity from an icon widget. A tap calls `scene.turn_on`,
 `script.turn_on` or `button.press` / `input_button.press`. The caption under the name reads `Scene`, `Run` or
-`Press`. A script that is already running shows `Running`, is highlighted and cannot be started again until it is
-`off`. Scenes, buttons and input buttons stay pressable while their state is `unknown` (they never report anything
-else before first use). In a `widgets:` list the types `scene`, `script`, `button` and `input_button` are accepted as
-aliases of `action`.
+`Press`. A scene tile also shows a Scenes key that opens the other scenes on the dashboard (holding the tile does the
+same; with no other scene it opens the entity dialog). A script that is already running shows `Running`, is
+highlighted and cannot be started again until it is `off`. Scenes, buttons and input buttons stay pressable while
+their state is `unknown` (they never report anything else before first use). In a `widgets:` list the types `scene`,
+`script`, `button` and `input_button` are accepted as aliases of `action`.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

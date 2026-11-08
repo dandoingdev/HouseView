@@ -13,7 +13,7 @@ panel advertises) and Disarm. Arming starts from disarmed, and disarming asks to
 tile is opened. HouseView has no keypad: when the panel wants a code, those keys stay disabled and the view points to
 Home Assistant's own dialog, which a hold on the tile opens.
 
-`alarm_view: false` on the carousel leaves the tile on Home Assistant's dialog, opened with a hold, the same way as the other widgets.
+`alarm_view: false` on the carousel leaves the tile on Home Assistant's dialog, opened with a tap.
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |

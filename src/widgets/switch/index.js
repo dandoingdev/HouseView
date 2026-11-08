@@ -15,5 +15,11 @@ export default defineWidget({
     icon: {type: 'icon'}
   },
 
-  render: (ctx) => controlTile(ctx, {action: 'toggle', icon: 'power'})
+  render: (ctx) =>
+    controlTile(ctx, {
+      action: 'toggle',
+      icon: 'power',
+      iconAction: 'info',
+      iconLabel: ctx.t('common.more_info', {name: ctx.rawName})
+    })
 });

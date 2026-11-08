@@ -107,6 +107,7 @@ export const extensionsMixin = {
 
   /** True while an extension owns the screen and page navigation must not happen (gallery open). */
   _navigationBlocked() {
+    if (this._quickActions?.open || this._houseModes?.open) return true;
     this._ensureExtensionState();
     return extensions().some(({type, extension}) =>
       guarded(extension, 'blocksNavigation', `${type}.extension.blocksNavigation`, this._ext[type])
@@ -120,6 +121,23 @@ export const extensionsMixin = {
       ({type, extension}) =>
         guarded(extension, 'shellClasses', `${type}.extension.shellClasses`, this) || []
     );
+  },
+
+  /** First active extension shortcut. Widget-specific selection stays in its owning extension. */
+  _dashboardControl() {
+    if (this._config?.single_widget) return null;
+    this._ensureExtensionState();
+    for (const {type, extension} of extensions()) {
+      if (!extension.dashboardControl) continue;
+      const control = guarded(
+        extension,
+        'dashboardControl',
+        `${type}.extension.dashboardControl`,
+        this._extensionContext(type)
+      );
+      if (control) return control;
+    }
+    return null;
   },
 
   /**
@@ -138,8 +156,7 @@ export const extensionsMixin = {
       if (!extension.overlay) continue;
       let current = nodes.get(type) || [];
       const connected =
-        current.length > 0 &&
-        current.every((node) => node.isConnected && shell.contains(node));
+        current.length > 0 && current.every((node) => node.isConnected && shell.contains(node));
       if (!rebuild && connected && extension.retain) {
         const keep = guarded(
           extension,

@@ -1,4 +1,4 @@
-/* @owns switch */
+/* @owns switch control-split control-unavailable */
 /*
  * switch widget styles.
  * Sections are cascade phases (src/styles/phases.json) and stay in phase order; a pin only reorders

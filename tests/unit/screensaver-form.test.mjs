@@ -30,11 +30,16 @@ const hass = {locale: {language: 'en'}};
 const names = (schema) => schema.map((field) => field.name);
 
 test('schema: type and the return timeout until one is chosen, then framework fields, options, advanced fields', () => {
-  assert.deepEqual(names(screensaverSchema(hass, {})), ['type', 'return_timeout']);
+  assert.deepEqual(names(screensaverSchema(hass, {})), [
+    'type',
+    'return_timeout',
+    'control_timeout'
+  ]);
   const schema = screensaverSchema(hass, {type: 'demo'});
   assert.deepEqual(names(schema), [
     'type',
     'return_timeout',
+    'control_timeout',
     'enabled',
     'entity',
     'idle_timeout',
@@ -96,9 +101,10 @@ test('round trip keeps YAML minimal and preserves other entries', () => {
     enabled: true,
     type: 'demo',
     entity: 'sensor.x',
-    return_timeout: 120
+    return_timeout: 120,
+    control_timeout: 30
   });
-  assert.deepEqual(screensaverData({}), {return_timeout: 120});
+  assert.deepEqual(screensaverData({}), {return_timeout: 120, control_timeout: 30});
   assert.equal(screensaverData({return_timeout: 45}).return_timeout, 45);
   assert.deepEqual(
     applyScreensaver(config, {enabled: true, type: 'demo', entity: 'sensor.x', idle_timeout: 60}),
@@ -201,5 +207,21 @@ test('clock native colour selectors preserve old hex overrides and round-trip RG
       (f) => f.name === 'background_color'
     ).selector,
     {color_rgb: {}}
+  );
+});
+
+test('control timeout round trip stays at card level and preserves unrelated settings', () => {
+  const base = {pages: [], return_timeout: 45, screensaver: {type: 'demo', entity: 'sensor.x'}};
+  const changed = applyScreensaver(base, {...screensaverData(base), control_timeout: 60});
+  assert.equal(changed.control_timeout, 60);
+  assert.equal(changed.screensaver.control_timeout, undefined);
+  assert.equal(changed.return_timeout, 45);
+  assert.equal(
+    applyScreensaver(changed, {...screensaverData(changed), control_timeout: 30}).control_timeout,
+    undefined
+  );
+  assert.equal(
+    applyScreensaver(base, {...screensaverData(base), control_timeout: 0}).control_timeout,
+    0
   );
 });

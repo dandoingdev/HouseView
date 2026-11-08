@@ -6,18 +6,18 @@ Card type `custom:houseview-media_player-card`, or `type: media_player` in the `
 
 A now-playing panel for a `media_player.*` entity: a large rounded album cover with the title and artist over its
 lower edge, a progress bar with elapsed and remaining time, shuffle / previous / play-pause / next / repeat, a volume
-button showing the current volume. Hold the cover, title or artist to open the more-info dialog.
+button showing the current volume. Tap the title or artist, or hold the cover, to open the more-info dialog.
 
 * Previous and next are enabled when the entity advertises the `supported_features` bits 16 and 32; the volume
   keys when it advertises bit 4; shuffle and repeat with bits 32768 and 262144. Play / pause is enabled whenever the
   speaker is available.
 * Play / pause sends `media_play_pause` while playing or paused. An idle player advertising PLAY (bit 512) resumes
-  its queue with `media_play`. Other inactive players open more-info. Hold the cover, the track title or the
-  artist to open speaker controls. On a small panel tile (about 225 × 178, when four controls share a 480 × 480
-  screen), a tap or a long press on the track title opens this same player full screen first, with the cover,
-  progress, shuffle, repeat and larger keys. Play, volume and Browse on the tile keep working, as plain icons set in
-  from the tile edge. Close with X or Escape. The three-dot button at the top right opens the Home Assistant
-  more-info dialog, and a hold on the title still opens speaker settings.
+  its queue with `media_play`. Other inactive players open more-info. Tap the track title or artist to open speaker
+  controls; hold the cover for the same dialog. On a small panel tile (about 225 × 178, when four controls share a
+  480 × 480 screen), a tap on the track title opens this same player full screen first, with the cover, progress,
+  shuffle, repeat and larger keys. Play, volume and Browse on the tile keep working, as plain icons set in from the
+  tile edge. Close with X or Escape. The three-dot button at the top right of the full player opens the Home Assistant
+  more-info dialog.
 * The volume button opens the [full-screen volume view](../overviews/volume.md). Drag vertically to choose 0–100%;
   release sends one `media_player.volume_set` command. Zero stays silent without stopping playback. Mute/unmute
   appears when supported. Opening the view never starts or pauses music. Shuffle calls `shuffle_set`; repeat steps
@@ -45,9 +45,19 @@ type: custom:houseview-media_player-card
 entity: media_player.living_room
 ```
 
+## Dashboard playback shortcut
+
+While a configured player is playing or paused, a play/pause shortcut stays available across dashboard pages. On larger screens it sits beside the dim button in the footer; below 700 pixels wide it moves to the right of a 56-pixel header. If the date/time header is disabled, only the playback shortcut appears in that compact toolbar. Standalone widget cards keep their own transport controls.
+
+Pausing keeps the shortcut available to resume. With multiple players, it keeps the same speaker until that player stops, becomes unavailable or is removed from the dashboard, then chooses another playing player before a paused one. Its accessible label and tooltip name the speaker. A pending playback request disables the shortcut to prevent duplicate commands.
+
 ## Playlists and favourites
 
 Browse appears when the speaker supports Home Assistant media browsing. It opens a teal glass library with artwork and six large tiles per page; swipe left/right or use the arrows to move through the list without scrolling. Back or Escape returns to the player. Opening, refreshing and editing this library never starts playback. Press a playlist tile to play it on that card’s speaker. The playlist view closes as soon as the tile is pressed. A failed request is reported on the player. Artwork fills the width of each rounded glass tile, with its name below.
+
+After selecting a playlist, tap the list icon on the album cover to choose an individual track. The teal track view shows numbered songs and artists, highlights the current song and scrolls vertically with large touch targets. Back or Escape returns focus to the list icon. On a tiny tile, tap the track title to open the full player first; short wide cards show the list icon beside the title.
+
+Sonos uses its live queue and jumps to the chosen position, preserving the remaining playlist, shuffle and repeat. Opening and refreshing the list only reads the queue. Before a jump, HouseView checks that the chosen position still contains the same track; if another app changed it, Refresh loads the new list. This requires Home Assistant’s `sonos.get_queue` and `sonos.play_queue` actions. Other speakers can show tracks from the expandable playlist selected through this card during the current connection; they play the track using their normal `play_media` action, whose queue behaviour depends on the integration. Radio and services that do not share tracks show an explanatory empty state. Track data is discarded on close, configuration changes or disconnect; playlist selections are not saved in dashboard configuration.
 
 In the native card editor, set **Shown playlists** to **Selected favourites**, then choose items under **Choose and order playlists**. Drag the selected chips to set their order. Each media card saves its own selection. **All favourites** is the default; an empty selected list deliberately shows none. Saved missing items remain visible in settings and disabled in the browser until removed or restored.
 

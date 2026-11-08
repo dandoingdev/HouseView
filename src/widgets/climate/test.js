@@ -75,13 +75,19 @@ export default async function ({mount, check, variants}) {
 
   t = await mount(variants.ok);
   check('rendering never sends a command', t.calls.length === 0);
+  await t.click('climate-view');
+  check(
+    'tapping the temperature opens the thermostat view, no service, no dialog',
+    !!t.q('.ov-climate-scene') && t.calls.length === 0 && t.infos.length === 0
+  );
+  t = await mount(variants.ok);
   await t.hold('.cs-number');
   check(
-    'holding the temperature opens the thermostat view, no service, no dialog',
-    t.calls.length === 0 && t.infos.length === 0
+    'holding the temperature opens more-info when the view is already on tap',
+    t.infos.includes('climate.test') && t.calls.length === 0 && !t.q('.ov-climate-scene')
   );
   t = await mount(variants.climateViewOff, {as: 'card'}); // a carousel: the card option applies
-  await t.hold('.cs-number');
+  await t.click('info');
   check(
     'with climate_view: false the temperature opens more-info instead',
     t.infos.includes('climate.test') && t.calls.length === 0

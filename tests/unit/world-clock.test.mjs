@@ -92,3 +92,25 @@ it('registry subscriptions refresh discovery and unsubscribe cleanly', async () 
   close();
   assert.equal(removed, 2);
 });
+
+it('bounds invalid timezone validation and keeps recent failures cached', async () => {
+  const {ZONE_CACHE_LIMIT} = await import('../../src/overviews/world_clock/model.js');
+  const original = Intl.DateTimeFormat;
+  let calls = 0;
+  Intl.DateTimeFormat = function (...args) {
+    calls++;
+    return new original(...args);
+  };
+  try {
+    for (let i = 0; i < ZONE_CACHE_LIMIT; i++) validZone(`Invalid/Audit${i}`);
+    assert.equal(calls, ZONE_CACHE_LIMIT);
+    validZone('Invalid/Audit0');
+    validZone('Invalid/New');
+    validZone('Invalid/Audit0');
+    assert.equal(calls, ZONE_CACHE_LIMIT + 1);
+    validZone('Invalid/Audit1');
+    assert.equal(calls, ZONE_CACHE_LIMIT + 2);
+  } finally {
+    Intl.DateTimeFormat = original;
+  }
+});
