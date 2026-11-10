@@ -6,6 +6,11 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+### Changed
+
+- Update installation, migration, caching and uninstall guidance for the built-in Marketplace in Home Assistant 2026.11, while retaining HACS instructions for older versions.
+- Simplify house-mode selection and routine review screens by removing secondary information controls and excess copy.
+
 ## [1.10.0] - 2026-11-08
 
 ### Added

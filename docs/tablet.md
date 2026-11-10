@@ -32,7 +32,7 @@ with `?tablet=1`. The preview stays inside the editor dialog.
 > frontend that are not a public API. HouseView detects what it needs, does nothing if something is not where it expects,
 > and undoes its changes on failure, but a future Home Assistant release may stop tablet mode from working. Nothing else in
 > HouseView depends on this. If it breaks, use a kiosk approach instead: a browser in kiosk or fullscreen mode (for
-> example Fully Kiosk Browser), or the Kiosk Mode HACS plugin, pointed at a panel view. Please report it with your Home
+> example Fully Kiosk Browser), or the Kiosk Mode plugin from Marketplace (HACS on older Home Assistant versions), pointed at a panel view. Please report it with your Home
 > Assistant version.
 
 Use the address of the tablet's own Home Assistant session (for example the same host name you logged in with) so that it

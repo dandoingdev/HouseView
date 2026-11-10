@@ -4,7 +4,34 @@ HouseView is a Home Assistant dashboard plugin: one JavaScript file that you reg
 Home Assistant 2024.8.0 or newer and a browser based on Chrome 105 or later (this includes the Home Assistant companion app
 and the Android WebView on wall tablets). There is nothing to install on the server side and no integration to configure.
 
-## Install with HACS
+## Install with Marketplace (Home Assistant 2026.11+)
+
+Marketplace is built into Home Assistant; do not install HACS separately on these versions.
+
+1. Open **Settings > Marketplace** as an administrator and accept the community-content warning on first use.
+2. Select **Add from link** in the upper-right corner and enter `https://github.com/dandoingdev/HouseView`.
+   Connect GitHub when prompted; custom repositories need this connection for installation and updates.
+3. Select **Add**. If Marketplace asks for a content type, choose **Dashboard** and select **Add** again.
+4. Open **HouseView** and select **Install**.
+5. Marketplace normally adds a **JavaScript module** resource at
+   `/local/community/<repository name>/houseview.js` with a version query. Check it under
+   **Settings > Dashboards > three-dot menu > Resources**. If you manage resources in YAML, copy the resource shown
+   in the install dialog into your YAML instead; Marketplace cannot register it automatically there.
+6. Reload the browser or restart the companion app to load HouseView.
+
+### Upgrading from HACS
+
+Home Assistant migrates existing HACS installations automatically on the first start after upgrading to 2026.11.
+HouseView stays installed, and its custom repository and update entity carry over. There is no need to reinstall it.
+
+Dashboard resources now use `/local/community/`. Existing `/hacsfiles/` URLs keep working, but if you manage resources
+in YAML, follow the repair prompt to replace that prefix with `/local/community/`, keeping the repository folder and
+filename. Keep only one resource entry for HouseView.
+
+See the official [Marketplace documentation](https://www.home-assistant.io/integrations/marketplace/) for installation,
+GitHub connection and migration details.
+
+## Install with HACS (Home Assistant 2026.10 and earlier)
 
 1. In HACS open the three-dot menu, choose **Custom repositories**, paste the repository address
    `https://github.com/dandoingdev/HouseView` and pick the category
@@ -34,7 +61,10 @@ Files in `www` are served to anyone who can reach your Home Assistant without lo
 
 ### Caching
 
-Browsers, the companion app and kiosk browsers keep the old file. When you replace the file with a newer version:
+Marketplace changes the version query on its managed resource automatically with every update. Reload the browser after
+installing an update. For YAML-managed resources, keep the URL in sync with the one shown by Marketplace.
+
+For manual installations, browsers, the companion app and kiosk browsers can keep the old file. When you replace it:
 
 * Append a version to the resource URL (`/local/houseview/houseview.js?v=1.0.0`) and change it on every update. Edit the
   resource under **Settings > Dashboards > Resources**.
@@ -42,7 +72,7 @@ Browsers, the companion app and kiosk browsers keep the old file. When you repla
 * In the Home Assistant companion app use its troubleshooting option to reset the frontend cache; in a kiosk browser such as
   Fully Kiosk Browser clear the web cache.
 
-A HACS update changes the file but not the URL, so a wall tablet may need the same cache reset after an update.
+If a wall tablet still shows an older version after a Marketplace or HACS update, reset its frontend or web cache too.
 
 ## Check that it works
 
@@ -107,15 +137,19 @@ adding a second one. See [theming](theming.md).
 
 ## Update
 
-* **HACS:** update from the HACS page, then reload the browser (and reset the cache on wall tablets).
+* **Marketplace (2026.11+):** install the offered update from Marketplace or its update entity, then reload the browser.
+  Marketplace updates its managed resource URL; update YAML-managed resources yourself using the URL it shows.
+* **HACS (older versions):** update from the HACS page, then reload the browser (and reset the cache on wall tablets).
 * **Manual:** replace `houseview.js`, change the `?v=` of the resource URL, hard-refresh.
 
-Loading the plugin twice (for example once from HACS and once from `/local/`) does not break anything, but it is wasteful;
+Loading the plugin twice (for example once from Marketplace or HACS and once from a manual installation) does not break anything, but it is wasteful;
 keep one resource.
 
 ## Uninstall
 
-Remove the resource from **Settings > Dashboards > Resources** and delete `houseview.js` (or remove the repository in HACS).
+In Marketplace, open HouseView and choose **three-dot menu > Uninstall**. This removes the installed files and the managed
+resource. If resources are managed in YAML, remove the entry yourself. On older versions, remove HouseView through HACS.
+For a manual installation, remove the resource from **Settings > Dashboards > Resources** and delete `houseview.js`.
 Cards that use `custom:houseview-*` types will then show "Custom element doesn't exist" until you remove them.
 
 ## Troubleshooting
