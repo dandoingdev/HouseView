@@ -70,7 +70,7 @@ export const houseRoutinesMixin = {
     if (!panel) {
       panel = document.createElement('section');
       panel.className = 'hr-panel';
-      panel.innerHTML = `<div class="hr-summary" role="status" aria-live="polite"><h3 class="hr-headline"></h3><p class="hr-counts"></p><button type="button" class="hm-info" data-action="house-mode-info" data-entity="routine" aria-controls="hr-description" aria-expanded="false">${iconHTML('information-outline')}</button></div><p class="hr-description" id="hr-description" hidden></p><p class="hr-mode-state"></p><p class="hr-message" role="status" aria-live="polite"></p><div class="hr-checks"></div><p class="hr-empty"></p>`;
+      panel.innerHTML = `<div class="hr-summary" role="status" aria-live="polite"><h3 class="hr-headline"></h3><p class="hr-counts"></p></div><p class="hr-mode-state"></p><p class="hr-message" role="status" aria-live="polite"></p><div class="hr-checks"></div><p class="hr-empty"></p>`;
       const list = panel.querySelector('.hr-checks');
       // These references belong to this routine panel and disappear with the view.
       routine.nodes = [];
@@ -108,11 +108,6 @@ export const houseRoutinesMixin = {
     if (root.getAttribute('aria-label') !== headingTitle)
       root.setAttribute('aria-label', headingTitle);
 
-    const info = panel.querySelector('.hm-info');
-    const infoLabel = t(this._hass, 'house_modes.info', {name: headingTitle});
-    if (info.getAttribute('aria-label') !== infoLabel) info.setAttribute('aria-label', infoLabel);
-    if (info.disabled !== !!view.preview) info.disabled = !!view.preview;
-    set('.hr-description', mode.description || t(this._hass, 'house_modes.setup'));
     const busy = ['running', 'verifying'].includes(routine.stage);
     const close = root.querySelector('.hm-close');
     const closeAction = busy ? 'house-modes-close' : 'house-routine-back';

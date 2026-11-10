@@ -33,7 +33,8 @@ on). It is most often used with **[Alarmo](https://github.com/nielsfaber/alarmo)
 Assistant. HouseView does not include or depend on Alarmo's code: Alarmo has to be installed and set up on its own, and
 HouseView only shows the entity it creates, and arms or disarms it when you press a key.
 
-1. Install Alarmo through HACS (search for **Alarmo**, category Integration) and restart Home Assistant.
+1. Install **Alarmo** from **Settings > Marketplace** on Home Assistant 2026.11+, or through HACS (category Integration)
+   on older versions. Restart Home Assistant if the installer requests it.
 2. Go to **Settings > Devices & services > Add integration**, add **Alarmo**, then open the **Alarmo** panel in the
    sidebar and configure your areas, sensors, modes (home, away, night, vacation) and the users and codes that may arm
    and disarm. Everything about how the alarm behaves is configured there, not in HouseView.

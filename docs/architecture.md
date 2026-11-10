@@ -159,7 +159,7 @@ below, without `!important`; `npm run check:widgets` and `npm run check:overview
 The version comes from `package.json` (esbuild define `__HV_VERSION__`) and is printed once in the browser console as a
 banner. `npm run size` warns when the bundle outgrows its budget. `tools/release.mjs` checks that the tag equals the
 package version, that `CHANGELOG.md` has a section for it and that `dist/` is a production build; the release workflow
-(`.github/workflows/release.yml`) runs the whole test suite, builds and attaches the allow-listed files. HACS installs
+(`.github/workflows/release.yml`) runs the whole test suite, builds and attaches the allow-listed files. Marketplace (HACS on older Home Assistant versions) installs
 `houseview.js` from the release (`hacs.json`).
 
 ## Where Home Assistant's internals are touched

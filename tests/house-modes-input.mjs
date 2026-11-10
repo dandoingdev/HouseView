@@ -308,43 +308,17 @@ try {
       `FAIL header geometry at ${width}×${height}: ${JSON.stringify(header)}`
     );
     await open();
-    const beforeInfo = await page.evaluate(() => window.modeCalls.length);
     assert.equal(
-      await page.evaluate(() =>
-        [...window.card.shadowRoot.querySelectorAll('.hm-description')].every((node) => node.hidden)
-      ),
+      await page.evaluate(() => {
+        const root = window.card.shadowRoot;
+        return (
+          root.querySelectorAll('.hm-info, .hm-description').length === 0 &&
+          root.querySelector('.hm-heading small').textContent === '' &&
+          root.querySelector('.hm-footer').textContent === ''
+        );
+      }),
       true
     );
-    await tap('.hm-info[data-entity="guests"]');
-    assert.equal(
-      await page.evaluate(
-        () => window.card.shadowRoot.querySelector('#hm-description-guests').hidden
-      ),
-      false
-    );
-    if (width === 480 || width === 240)
-      await page.screenshot({path: `/tmp/houseview-mode-info-${width}.png`});
-    await tap('.hm-info[data-entity="evening"]');
-    assert.deepEqual(
-      await page.evaluate(() =>
-        [...window.card.shadowRoot.querySelectorAll('.hm-info[aria-expanded="true"]')].map(
-          (node) => node.dataset.entity
-        )
-      ),
-      ['evening']
-    );
-    await page.evaluate(() =>
-      window.card.shadowRoot.querySelector('.hm-info[data-entity="evening"]').focus()
-    );
-    await page.keyboard.press('Escape');
-    assert.equal(await page.evaluate(() => !!window.card._houseModes?.open), true);
-    assert.equal(
-      await page.evaluate(
-        () => window.card.shadowRoot.querySelector('#hm-description-evening').hidden
-      ),
-      true
-    );
-    assert.equal(await page.evaluate(() => window.modeCalls.length), beforeInfo);
     if (width === 320) {
       await page.evaluate(() => {
         window.card.shadowRoot.querySelector('.hm-scroll').scrollTop = 0;
@@ -365,10 +339,10 @@ try {
     }
     const geometry = await page.evaluate(() => {
       const root = window.card.shadowRoot;
-      return [...root.querySelectorAll('.hm-mode,.hm-end,.hm-info')].map((b) => {
+      return [...root.querySelectorAll('.hm-mode,.hm-end')].map((b) => {
         b.scrollIntoView({block: 'center'});
         const r = b.getBoundingClientRect();
-        const i = b.matches('.hm-info') ? b : b.querySelector('.hm-icon');
+        const i = b.querySelector('.hm-icon');
         const glyph = i?.querySelector('ha-icon');
         const ir = i?.getBoundingClientRect();
         const gr = glyph?.getBoundingClientRect();

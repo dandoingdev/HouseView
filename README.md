@@ -2,7 +2,7 @@
 
 The [Home Assistant](https://www.home-assistant.io/) dashboard for the screen on the wall.
 
-[![HACS custom repository](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories)
+[![Marketplace custom repository](https://img.shields.io/badge/Marketplace-Custom-orange.svg)](https://www.home-assistant.io/integrations/marketplace/#custom-repositories)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![CI](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml/badge.svg)](https://github.com/dandoingdev/HouseView/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/dandoingdev/HouseView)](https://github.com/dandoingdev/HouseView/releases/latest)
@@ -68,7 +68,7 @@ anything that needs a glance. It works in landscape and portrait:
 ## Features
 
 * **Leave home and say good night with confidence.** Review configured doors, windows, lights, heating and alarm checks, resolve exceptions and run your routine. Results verify reported device states and the house mode separately. Available from Away, Sleeping and Quick actions. [Setup](docs/house-modes.md#leaving-home-and-good-night).
-* **House modes with shared context.** Home, Away, Guests, Evening and Sleeping on their own screen: swipe right from the left edge to open, then left to return, with explanations before switching and a visible mode indicator on every page. Create the helper and connect your routines in the editor. [Setup](docs/house-modes.md).
+* **House modes with shared context.** Home, Away, Guests, Evening and Sleeping on their own screen: swipe right from the left edge to open, then left to return. A mode indicator stays on every page. Home, Guests and Evening confirm with the explanation you wrote; Away and Sleeping open a guided review. Create the helper and connect your routines in the editor. [Setup](docs/house-modes.md).
 * **Quick actions from any page.** Swipe up from the bottom for up to six configurable lights, helpers, scenes or routines; swipe down to return. Set them in **Quick actions · Swipe up** in the card editor. [Configuration and examples](docs/actions.md#swipe-up-quick-actions).
 * **Pages you move through with a swipe.** Tap the dots, or use the arrow keys. Each page fits the screen, landscape
   or portrait. After a quiet spell the carousel goes back to the first page, so the next person starts where you
@@ -116,9 +116,21 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
 * For an NSPanel Pro 86: the panel's 480 × 480 screen and a browser based on Chrome 105 or newer. See
   [NSPanel Pro](docs/nspanel.md).
 
+<!-- ha-marketplace:exclude-start -->
 ## Installation
 
-### With HACS
+### With Marketplace (Home Assistant 2026.11+)
+
+1. Open **Settings > Marketplace**, accept the community-content warning, and select **Add from link**.
+2. Enter `https://github.com/dandoingdev/HouseView`, connect GitHub if prompted, and select **Add**. If asked for a type,
+   choose **Dashboard**. Open **HouseView** and select **Install**.
+3. Marketplace adds a **JavaScript module** resource at `/local/community/<repository name>/houseview.js` with a version
+   query. If you manage resources in YAML, copy the resource shown in the install dialog instead. Reload your browser.
+
+Already using HACS? Home Assistant migrates installed repositories and updates automatically. Existing `/hacsfiles/` URLs
+keep working; update YAML-managed resources to `/local/community/` when prompted. See [migration details](docs/installation.md#upgrading-from-hacs).
+
+### With HACS (Home Assistant 2026.10 and earlier)
 
 1. In HACS open the menu, choose **Custom repositories**, add `https://github.com/dandoingdev/HouseView` with category
    **Dashboard**.
@@ -134,14 +146,16 @@ In configuration the literal names are used: `type: custom:houseview-<kind>-card
    `/local/houseview/houseview.js` as a **JavaScript module**.
 3. Hard-refresh your browser.
 
-**Caching.** Browsers and wall tablets keep the old file. After an update append a version to the resource URL
-(`/local/houseview/houseview.js?v=1.10.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
+**Caching.** Marketplace changes its resource version query automatically on updates; reload the browser afterwards.
+For manual installations, append a version to the resource URL
+(`/local/houseview/houseview.js?v=1.11.0`), hard-refresh, and reset the frontend cache in the companion app or kiosk browser.
 
 **Kiosk mode.** Add `?tablet=1` to the dashboard address (or set `tablet_mode: true`) and HouseView hides Home Assistant's
 sidebar and header so the carousel uses the whole screen. This relies on Home Assistant internals that are not a public API,
 so it can stop working after a Home Assistant update; see [tablet mode](docs/tablet.md) for kiosk alternatives.
 
 Details and troubleshooting: [Installation](docs/installation.md).
+<!-- ha-marketplace:exclude-end -->
 
 ## Quick start
 
@@ -270,7 +284,8 @@ It works well with **[Alarmo](https://github.com/nielsfaber/alarmo)**. Alarmo is
 and set up the sensors, modes and codes yourself. HouseView does not include it, and it only arms or disarms when
 someone presses a key.
 
-1. Install Alarmo through HACS (category Integration) and restart Home Assistant.
+1. Install **Alarmo** from **Settings > Marketplace** on Home Assistant 2026.11+, or through HACS (category Integration)
+   on older versions. Restart Home Assistant if the installer requests it.
 2. Add the **Alarmo** integration under **Settings > Devices & services**, then use the **Alarmo** sidebar panel to set up areas,
    sensors, modes and the users and codes that may arm and disarm.
 3. Find the entity Alarmo created (by default `alarm_control_panel.alarmo`) under **Settings > Devices & services > Entities**.
@@ -379,7 +394,7 @@ To add a widget or an overview read [CONTRIBUTING.md](CONTRIBUTING.md), the [wid
 
 | | |
 | --- | --- |
-| [Installation](docs/installation.md) | HACS, manual, caching, kiosk, troubleshooting |
+| [Installation](docs/installation.md) | Marketplace, HACS, manual, caching, kiosk, troubleshooting |
 | [Configuration](docs/configuration.md) | Every option of the carousel, pages and widgets |
 | [Widgets](docs/widgets/index.md) | One page per widget |
 | [Overviews and screensavers](docs/screensavers.md) | Overviews, screensavers, automatic displays |

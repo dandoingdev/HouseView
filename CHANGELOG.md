@@ -6,6 +6,17 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-11-10
+
+### Changed
+
+- Update installation, migration, caching and uninstall guidance for the built-in Marketplace in Home Assistant 2026.11, while retaining HACS instructions for older versions.
+- Simplify house-mode selection and routine review screens by removing secondary information controls and excess copy.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.11.0`.
+
 ## [1.10.0] - 2026-11-08
 
 ### Added
