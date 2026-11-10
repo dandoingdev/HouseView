@@ -146,7 +146,7 @@ export const houseModesMixin = {
     };
     const title = t(this._hass, 'house_modes.screen_title');
     if (root.getAttribute('aria-label') !== title) root.setAttribute('aria-label', title);
-    set('.hm-heading small', t(this._hass, 'house_modes.eyebrow'));
+    set('.hm-heading small', '');
     set('.hm-heading h2', title);
     set('.hm-caption', t(this._hass, 'house_modes.current'));
     set(
@@ -165,7 +165,6 @@ export const houseModesMixin = {
     const hideEnd = !model.current || model.current.id === 'home';
     if (end.hidden !== hideEnd) end.hidden = hideEnd;
     set('.hm-end', t(this._hass, 'house_modes.return'));
-    set('.hm-footer', t(this._hass, 'house_modes.swipe_hint'));
     const close = root.querySelector('.hm-close');
     if (close.dataset.action !== 'house-modes-close') close.dataset.action = 'house-modes-close';
     if (close.disabled !== view.preview) close.disabled = view.preview;
@@ -181,14 +180,6 @@ export const houseModesMixin = {
       const label = button.querySelector('.hm-name');
       const text = t(this._hass, `house_modes.${mode.id}`);
       if (label.textContent !== text) label.textContent = text;
-      const item = button.closest('.hm-item');
-      const info = item.querySelector('.hm-info');
-      if (info.disabled !== !!view.preview) info.disabled = !!view.preview;
-      const infoLabel = t(this._hass, 'house_modes.info', {name: text});
-      if (info.getAttribute('aria-label') !== infoLabel) info.setAttribute('aria-label', infoLabel);
-      const description = item.querySelector('.hm-description');
-      const detail = mode.description || t(this._hass, 'house_modes.setup');
-      if (description.textContent !== detail) description.textContent = detail;
       const mark = button.querySelector('.hm-mark');
       const glyph = active ? 'check-circle' : 'chevron-right';
       if (mark.dataset.icon !== glyph) {
@@ -198,22 +189,6 @@ export const houseModesMixin = {
     }
     this._syncHouseModeStatus();
     this._syncHouseRoutine();
-  },
-
-  _toggleHouseModeInfo(id) {
-    const view = this._houseModes;
-    if (!view?.open || view.preview || view.closing || inCardPreview(this)) return;
-    const root = this.shadowRoot.querySelector('.house-modes');
-    const button = [...root.querySelectorAll('.hm-info')].find(
-      (node) => node.dataset.entity === id
-    );
-    if (!button || button.disabled) return;
-    const expanded = button.getAttribute('aria-expanded') !== 'true';
-    for (const info of root.querySelectorAll('.hm-info')) {
-      const show = info === button && expanded;
-      info.setAttribute('aria-expanded', String(show));
-      root.querySelector(`#${info.getAttribute('aria-controls')}`).hidden = !show;
-    }
   },
 
   _bindHouseModes(root) {
@@ -263,11 +238,7 @@ export const houseModesMixin = {
     }
     if (event.key === 'Escape') {
       event.preventDefault();
-      const info = this.shadowRoot.querySelector('.house-modes .hm-info[aria-expanded="true"]');
-      if (info && info.getClientRects().length) {
-        this._toggleHouseModeInfo(info.dataset.entity);
-        info.focus({preventScroll: true});
-      } else if (view.routine && !['running', 'verifying'].includes(view.routine.stage))
+      if (view.routine && !['running', 'verifying'].includes(view.routine.stage))
         this._backHouseRoutine();
       else this._closeHouseModes();
     } else if (event.key === 'Tab') {

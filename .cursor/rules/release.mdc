@@ -1,0 +1,17 @@
+---
+description: Run the full local test gate before tagging or publishing a HouseView release
+alwaysApply: true
+---
+
+# Release only after tests are green
+
+When the user asks to release, ship, tag, or publish HouseView:
+
+1. Finish the feature/version commits per `AGENTS.md`.
+2. From `repo/`, run **`npm run lint`** and **`npm run test:release`** on the exact commit you intend to tag.
+3. **Stop** if either fails. Fix the failures, keep the worktree/tests aligned (including overview/widget browser checks and `tests/EXPECTED_CHECKS`), and re-run until both pass.
+4. Only then create the annotated tag and push it. Do not push a release tag, open a “ship it” PR, or rely on the release workflow to discover breakage that `test:release` would have caught locally.
+
+`npm run lint` alone is not a release gate. v1.10.0’s first release attempt failed CI on overview and panel suites after a short-press interaction change that lint and unit tests did not cover. The release workflow runs the same class of suites; running them locally first avoids a broken tag push.
+
+Do not run `gh release create`; the tag’s release workflow publishes the GitHub release.

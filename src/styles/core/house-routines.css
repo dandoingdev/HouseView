@@ -1,9 +1,8 @@
-/* @owns is-routine hr-panel hr-description hr-summary hr-headline hr-counts hr-mode-state hr-message hr-checks hr-check hr-icon hr-copy hr-name hr-detail hr-expected hr-fix-error hr-fix hr-empty hr-actions hr-start hr-back */
+/* @owns is-routine hr-panel hr-summary hr-headline hr-counts hr-mode-state hr-message hr-checks hr-check hr-icon hr-copy hr-name hr-detail hr-expected hr-fix-error hr-fix hr-empty hr-actions hr-start hr-back */
 /* @phase nav-compact */
-.is-routine .hm-current,.is-routine .hm-hint,.is-routine .hm-grid,.is-routine .hm-status {display:none}
+.is-routine .hm-current,.is-routine .hm-grid,.is-routine .hm-status {display:none}
 .hr-panel {max-width:900px;margin:0 auto;padding-bottom:4px}
-.house-modes .hr-description {margin:12px 0 16px;font-size:15px;line-height:1.6;color:#d4e9e3;white-space:pre-line;overflow-wrap:anywhere}
-.hr-summary {position:relative;padding:18px;padding-right:calc(var(--ov-panel-key-size) + 12px);min-height:var(--ov-panel-key-size);box-sizing:border-box;border:1px solid #ffffff35;border-radius:22px;background:#ffffff12}
+.hr-summary {padding:18px;box-sizing:border-box;border:1px solid #ffffff35;border-radius:22px;background:#ffffff12}
 .house-modes .hr-headline {font-size:22px;line-height:1.3;margin:0;font-weight:600;letter-spacing:-.02em}
 .house-modes .hr-counts {margin:8px 0 0;font-size:13px;line-height:1.5;color:#d4e9e3}
 .house-modes .hr-mode-state {font-size:13px;line-height:1.5;margin:12px 2px;color:#d4e9e3}
@@ -39,8 +38,7 @@
 @supports not (container-type:size) {@media (min-width:840px) {.hr-checks {display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}}
 
 @container house-modes (max-height:700px) {
-.house-modes .hr-description {font-size:13px;line-height:1.4;margin-bottom:10px}
-.hr-summary {padding:12px;padding-right:calc(var(--ov-panel-key-size) + 12px);border-radius:18px}
+.hr-summary {padding:12px;border-radius:18px}
 .house-modes .hr-headline {font-size:18px}
 .house-modes .hr-counts {font-size:12px;line-height:1.4;margin-top:5px}
 .is-routine[data-routine-stage=review]:not([data-routine-checks="0"]) .hr-headline {display:none}
@@ -54,8 +52,7 @@
 }
 @media (max-height:740px) {
 .house-modes.is-routine {padding:16px;gap:12px}
-.house-modes .hr-description {font-size:13px;line-height:1.4;margin-bottom:10px}
-.hr-summary {padding:12px;padding-right:calc(var(--ov-panel-key-size) + 12px);border-radius:18px}
+.hr-summary {padding:12px;border-radius:18px}
 .house-modes .hr-headline {font-size:18px}
 .house-modes .hr-counts {font-size:12px;line-height:1.4;margin-top:5px}
 .is-routine[data-routine-stage=review]:not([data-routine-checks="0"]) .hr-headline {display:none}
@@ -67,5 +64,3 @@
 .house-modes .hr-detail {font-size:12px}
 .hr-copy {gap:3px}
 }
-
-.house-modes .hr-summary > .hm-info {position:absolute;right:0;top:0;border-radius:0 18px 18px 0}

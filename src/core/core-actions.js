@@ -190,10 +190,6 @@ export const featureActions = freeze({
   'house-routine-back': freeze({immediate: true, run: (ctx) => ctx.card._backHouseRoutine?.()}),
   'house-routine-review': freeze({immediate: true, run: (ctx) => ctx.card._reviewHouseRoutine?.()}),
   'house-routine-fix': freeze({immediate: true, run: (ctx, id) => ctx.card._fixHouseRoutine?.(id)}),
-  'house-mode-info': freeze({
-    immediate: true,
-    run: (ctx, id) => ctx.card._toggleHouseModeInfo?.(id)
-  }),
   'house-mode': freeze({immediate: true, run: (ctx, id) => ctx.card._setHouseMode?.(id)}),
   'home-view': freeze({
     immediate: true,

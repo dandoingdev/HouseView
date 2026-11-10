@@ -414,19 +414,10 @@ try {
     await open();
     const callsBeforeInfo = await count();
     assert.equal(
-      await page.evaluate(() => window.card.shadowRoot.querySelector('.hr-description').hidden),
-      true
-    );
-    await tap('.hr-summary .hm-info');
-    assert.equal(
-      await page.evaluate(() => window.card.shadowRoot.querySelector('.hr-description').hidden),
-      false
-    );
-    await page.evaluate(() => window.card.shadowRoot.querySelector('.hr-summary .hm-info').focus());
-    await page.keyboard.press('Escape');
-    assert.equal(
-      await page.evaluate(() => window.card.shadowRoot.querySelector('.hr-description').hidden),
-      true
+      await page.evaluate(
+        () => window.card.shadowRoot.querySelectorAll('.hm-info, .hr-description').length
+      ),
+      0
     );
     assert.equal(await page.evaluate(() => window.card._houseModes.routine.stage), 'review');
     assert.equal(await count(), callsBeforeInfo);
@@ -475,13 +466,6 @@ try {
     if (width === 480 || width === 1024)
       await page.screenshot({path: `/tmp/houseview-leaving-home-${width}.png`});
     await page.evaluate(() => window.card.shadowRoot.querySelector('.hm-close').focus());
-    await page.keyboard.press('Tab');
-    assert.equal(
-      await page.evaluate(() =>
-        window.card.shadowRoot.activeElement?.classList.contains('hm-info')
-      ),
-      true
-    );
     await page.keyboard.press('Tab');
     assert.equal(
       await page.evaluate(() => window.card.shadowRoot.activeElement?.classList.contains('hr-fix')),

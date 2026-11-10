@@ -30,7 +30,6 @@ export const FEATURE_ACTIONS = [
   'calendar-view',
   'home-view',
   'house-mode',
-  'house-mode-info',
   'house-routine-start',
   'house-routine-back',
   'house-routine-review',

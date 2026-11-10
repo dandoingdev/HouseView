@@ -1,8 +1,9 @@
 # House modes
 
 Home, Away, Guests, Evening and Sleeping share one Home Assistant selector. A dedicated screen shows the reported mode,
-an aligned info button beside each choice to reveal its full explanation, and **Return to Home** when another mode is active. A small mode indicator remains
-in the dashboard header on every page; press it to open House modes. Swipe right from anywhere along the leftmost 64 pixels (48 pixels on a narrow 240px card) to open it from any dashboard page, and swipe left across the screen to dismiss. Vertical swipes scroll longer mode lists. Escape collapses an open explanation first, then closes the screen, and Alt+Right opens it when the dashboard has focus. When modes are enabled the indicator takes
+the five choices, and **Return to Home** when another mode is active. Explanations stay in the confirmation and in this guide.
+A small mode indicator remains
+in the dashboard header on every page; press it to open House modes. Swipe right from anywhere along the leftmost 64 pixels (48 pixels on a narrow 240px card) to open it from any dashboard page, and swipe left across the screen to dismiss. Vertical swipes scroll longer mode lists. Escape closes the screen. From Leaving home or Good night, Escape returns to the mode list unless the routine is running or being verified, in which case it closes the screen. Alt+Right opens House modes when the dashboard has focus. When modes are enabled the indicator takes
 the date's place, while the time and playback shortcut keep their positions.
 
 In **Edit card → House modes · Swipe from left**, use **Create house mode helper** as a Home Assistant administrator. This explicitly
@@ -15,7 +16,7 @@ might keep the hallway lit and pause bedroom motion routines. Configure Home too
 behaviour, including anything the other routines changed. The helper alone does not change devices. If you already
 have automations that react to the selector, leave the scripts empty to avoid running routines twice.
 
-Home, Guests and Evening open an in-card confirmation with the explanation, even when ordinary confirmations use native dialogs. Away and Sleeping open the guided review described below.
+The mode list itself does not repeat those explanations. Home, Guests and Evening open an in-card confirmation that shows the explanation, even when ordinary confirmations use native dialogs. Away and Sleeping still need an explanation before they can run, and they open the guided review described below instead of that confirmation. The review shows the checklist, not the explanation.
 A configured script runs first; if it fails, HouseView shows the error without selecting the new mode. After a successful
 request, the display waits for Home Assistant to report the mode. The indicator represents the selector's state; it does
 not certify the resulting state of every device. Changes from another dashboard or an automation update this view too.
@@ -55,8 +56,7 @@ for arbitrary automations. Removing `house_mode_entity` hides the feature withou
 
 ## Leaving home and Good night
 
-Choosing **Away** or **Sleeping** opens a guided review instead of immediately changing the mode. The screen keeps
-your configured routine description behind its info button and shows the currently reported mode, and a checklist with exceptions first. **Leave home**
+Choosing **Away** or **Sleeping** opens a guided review instead of immediately changing the mode. The screen shows the currently reported mode and a checklist with exceptions first. **Leave home**
 or **Good night** stays visible while the checks scroll. Opening either flow, including from Quick actions, never
 runs a device service. Back returns to House modes; a leftward swipe dismisses the whole screen.
 
