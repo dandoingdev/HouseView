@@ -172,7 +172,11 @@ try {
         await mount(state, [{type: 'switch', entity: 'switch.test'}]);
         const {during, after} = await hold(input, await centre(selector), 900);
         const label = `switch ${state}: ${input} hold on ${selector}`;
-        assert.deepEqual(during.infos, ['switch.test'], `${label} opens more-info before the release`);
+        assert.deepEqual(
+          during.infos,
+          ['switch.test'],
+          `${label} opens more-info before the release`
+        );
         assert.deepEqual(after.infos, ['switch.test'], `${label} opens more-info once`);
         assert.deepEqual(after.calls, [], `${label} does not toggle`);
       }

@@ -426,7 +426,9 @@ try {
   });
   await page.waitForFunction(() => !!window.lineEditor._view?.appearance);
   await page.evaluate(() => {
-    const form = window.lineEditor._view.appearance;
+    const form = [...window.lineEditor.shadowRoot.querySelectorAll('ha-form')].find((item) =>
+      item.schema.some((field) => field.name === 'line_alert_entity')
+    );
     form.dispatchEvent(
       new CustomEvent('value-changed', {
         detail: {
@@ -442,7 +444,9 @@ try {
   assert.equal(await page.evaluate(() => window.lineEdited.line_alert_entity), 'sensor.demo_line');
   assert.equal(await page.evaluate(() => window.lineEdited.line_alert_name), 'Test label');
   await page.evaluate(() => {
-    const form = window.lineEditor._view.appearance;
+    const form = [...window.lineEditor.shadowRoot.querySelectorAll('ha-form')].find((item) =>
+      item.schema.some((field) => field.name === 'line_alert_entity')
+    );
     form.dispatchEvent(
       new CustomEvent('value-changed', {detail: {value: {...form.data, line_alert_entity: ''}}})
     );
