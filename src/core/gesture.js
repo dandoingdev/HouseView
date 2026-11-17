@@ -1,5 +1,6 @@
-// Tap / hold / double-tap detection for a widget that configures hold_action or double_tap_action
-// (opt-in HA tranche, docs/architecture.md). Pure logic fed with pointer events: no DOM access, timers
+// Tap / hold / double-tap detection for a widget with a hold screen, a hold_action or a double_tap_action
+// (docs/architecture.md). The hold fires after HOLD_MS while the pointer is still down; the release that follows
+// is not a tap. Pure logic fed with pointer events: no DOM access, timers
 // and the clock are injectable, so it runs in plain Node tests.
 //
 //   const gesture = createGestureDetector({
@@ -19,7 +20,7 @@ const CLICK_SUPPRESS_MS = 400;
 
 /**
  * @param {Object} options
- * @param {boolean} [options.hold]        a hold action is configured
+ * @param {boolean | ( => boolean)} [options.hold]   a hold action is configured; a function is asked at every press
  * @param {boolean} [options.doubleTap]   a double tap action is configured
  * @param { => void} [options.onTap]
  * @param { => void} [options.onHold]
@@ -44,6 +45,7 @@ export function createGestureDetector({
   let holdTimer = null;
   let tapTimer = null; // a tap waiting to learn whether a second one follows
   let consumed = false; // the press in progress already produced a hold
+  const holds = typeof hold === 'function' ? hold : () => hold;
 
   const suppress = () => suppressClick?.(now() + CLICK_SUPPRESS_MS);
 
@@ -62,7 +64,7 @@ export function createGestureDetector({
     start = {x: event.clientX, y: event.clientY};
     consumed = false;
     stopHold();
-    if (hold) {
+    if (holds()) {
       holdTimer = setTimer(() => {
         holdTimer = null;
         if (!start) return;

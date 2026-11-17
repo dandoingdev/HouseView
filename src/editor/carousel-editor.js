@@ -120,6 +120,21 @@ export const appearanceSchema = (hass) => [
   field('editor_preview', select(hass, ['landscape', 'portrait', 'auto']))
 ];
 
+/** Each native form owns one group, so editing it cannot overwrite another group's values. */
+export const appearanceGroups = (hass) => {
+  const schema = appearanceSchema(hass);
+  return [
+    ['appearance', ['appearance', 'wallpaper', 'palette', 'high_contrast']],
+    ['display_controls', ['show_header', 'tablet_mode', 'bedtime']],
+    ['line_alerts', ['line_alert_entity', 'line_alert_name']],
+    ['performance_preview', ['performance', 'editor_preview']]
+  ].map(([name, keys]) => ({name, schema: schema.filter((item) => keys.includes(item.name))}));
+};
+const settingsData = (config, schema) => {
+  const data = appearanceData(config);
+  return Object.fromEntries(schema.map(({name}) => [name, data[name]]));
+};
+
 /** Helper text under a field of the appearance form: only the fields that have one (`editor.helper.<name>`). */
 export const appearanceHelper = (hass) => (item) => textOrNone(hass, `editor.helper.${item.name}`);
 
@@ -216,7 +231,9 @@ export class HouseViewEditor extends HTMLElement {
     if (!hasForm()) return this._renderDegraded(parent);
     const view = {key: structureKey(this._config), cameras: [], pages: []};
     this._view = view;
-    view.appearance = this._renderAppearance(parent);
+    view.appearance = this._renderAppearance(parent, view);
+    this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
+    this._renderAddPage(parent);
     if (showHome(this._config)) this._renderHome(parent, view);
     this._renderHouseModes(parent, view);
     this._renderQuickActions(parent, view);
@@ -224,8 +241,6 @@ export class HouseViewEditor extends HTMLElement {
     if (showScreensaver(this._config)) this._renderScreensaver(parent, view);
     if (showAutomatic(this._config)) this._renderAutomatic(parent, view);
     if (showDoorbell(this._config)) this._renderDoorbell(parent, view);
-    this._config.pages.forEach((_, index) => this._renderPage(parent, view, index));
-    this._renderAddPage(parent);
     if (!hasStackEditor()) this._upgradeWhenReady();
   }
 
@@ -246,27 +261,38 @@ export class HouseViewEditor extends HTMLElement {
     });
   }
 
-  _renderAppearance(parent) {
-    const form = this._form(parent, {
-      data: appearanceData(this._config),
-      schema: appearanceSchema(this._hass),
-      computeHelper: appearanceHelper(this._hass),
-      changed: (value) => {
-        this._config = {...this._config, ...value};
-        this._emit();
-      }
-    });
-    const select = () => {
-      this._previewPanel = null;
-      this._previewTarget = () => ({
-        kind: 'page',
-        name: this._lastPreviewPage || this._config.pages[0].name
+  _renderAppearance(parent, view) {
+    view.settings = [];
+    for (const group of appearanceGroups(this._hass)) {
+      const {el, section} = panel(parent, text(this._hass, `editor.${group.name}`));
+      const form = this._form(section, {
+        data: settingsData(this._config, group.schema),
+        schema: group.schema,
+        computeHelper: appearanceHelper(this._hass),
+        changed: (value) => {
+          const changes = Object.fromEntries(
+            group.schema.filter(({name}) => name in value).map(({name}) => [name, value[name]])
+          );
+          this._config = {...this._config, ...changes};
+          this._emit();
+        }
       });
-      this._refreshPreview();
-    };
-    form.addEventListener('focusin', select);
-    form.addEventListener('pointerdown', select);
-    return form;
+      const select = () => {
+        this._previewPanel = null;
+        this._previewTarget = () => ({
+          kind: 'page',
+          name: this._lastPreviewPage || this._config.pages[0].name
+        });
+        this._refreshPreview();
+      };
+      form.addEventListener('focusin', select);
+      form.addEventListener('pointerdown', select);
+      el.addEventListener('expanded-changed', () => {
+        if (el.expanded) select();
+      });
+      view.settings.push(form);
+    }
+    return view.settings[0];
   }
 
   _renderCameras(parent, view) {
@@ -673,7 +699,7 @@ export class HouseViewEditor extends HTMLElement {
   _sync() {
     const view = this._view;
     const config = this._config;
-    view.appearance.data = appearanceData(config);
+    for (const form of view.settings) form.data = settingsData(config, form.schema);
     view.cameras.forEach((form, slot) => {
       form.data = slotData(config.camera_gallery, slot);
     });

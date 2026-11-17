@@ -173,8 +173,9 @@ music widget never takes over the screen with an automatic display.
 ## The visual editor
 
 The carousel and every widget card have a visual editor (**Edit dashboard**, then **Edit** on the card). The
-carousel editor has an **Appearance** section (the date and time header, tablet mode, appearance, wallpaper,
-palette, bedtime, high contrast, performance) and one section per page. A page section uses Home Assistant's own
+carousel editor groups global settings into **Appearance** (appearance, wallpaper, palette and contrast),
+**Display and controls** (date/time header, tablet mode and dim button), **Line alerts**, and **Performance and preview**.
+Page sections follow these settings, ahead of optional home, routine, camera and screensaver features. A page section uses Home Assistant's own
 card editor for the widgets on it (add, reorder, delete, change a widget's settings in a form) and shows
 **Remove page** when more than one page exists. Removing a page deletes the cards on it; the last page stays.
 The editor also has a **Screensaver** section, an **Automatic displays** section and a **Camera grid** section. Anything

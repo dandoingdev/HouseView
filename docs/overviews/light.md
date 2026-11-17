@@ -40,6 +40,6 @@ For colour-capable lights, the palette key beside power opens a full-screen colo
 for hue and saturation, with white at the centre. The marker follows your finger and changes apply as you move, with no confirmation key.
 The X or Escape returns to brightness and keeps the selected colour. Opening or closing the picker sends no change. Lights supporting colour temperature
 also offer a thermometer key to switch to a warm-to-cool white field, limited to the entity's supported Kelvin range.
-Temperature-only lights open that field directly. Keyboard users can tab to the native hue, saturation and temperature
+Temperature-only lights open that field directly. A visible temperature slider shows the selected Kelvin value; the minus (warmer) and plus (cooler) keys adjust by 100 K, clamped to the light's supported range. The slider's arrow keys adjust by 1 K, and Home/End reach the exact limits. Keyboard users can tab to the native hue, saturation and temperature
 sliders. Selection stays under your finger through Home Assistant updates; unavailable lights cannot change. Rapid changes are coalesced and the final selection is retained.
 

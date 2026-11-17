@@ -1,7 +1,11 @@
-// A short press runs the control that was touched. A hold opens a different next screen when there is one.
+// A short press runs the control that was touched. A hold opens the widget's next screen: a different one when
+// there is one, otherwise the screen the pressed key opens anyway. The hold fires while the finger is still down.
 import {actionConfigFor, hasActionConfig, runActionConfig} from '../core/action-config.js';
 import {settingsAction} from '../core/widget-settings.js';
 import {createGestureDetector} from '../core/gesture.js';
+
+/** How long after a release the browser may still deliver that press's click. */
+const RELEASE_CLICK_MS = 450;
 
 /** `{widget, index}` when `button` is the primary button of a widget with configured gestures, else null. */
 export function configuredWidgetOf(card, button) {
@@ -41,15 +45,20 @@ function expandPress(button) {
   return {action, entity: details.dataset.entity};
 }
 
-/** Hold target when it differs from the short-press action on `button`. */
+/**
+ * What a hold on `button` opens. A next screen that differs from the short press comes first. A key that opens a
+ * screen itself (the brightness key, a details key, a sensor tile) opens that screen on a hold too: a long press
+ * must not wait for the release, and a touch browser sends no click at all after one.
+ */
 function holdTarget(card, widget, button) {
   if (widget.hold_action != null) return {kind: 'config'};
+  const own = button?.dataset?.action;
   const expand = expandPress(button);
-  if (expand && expand.action !== button?.dataset?.action)
+  if (expand && expand.action !== own)
     return {kind: 'act', action: expand.action, entity: expand.entity};
   const action = settingsAction(card, widget);
-  if (action && action !== button?.dataset?.action)
-    return {kind: 'act', action, entity: widget.entity};
+  if (action && action !== own) return {kind: 'act', action, entity: widget.entity};
+  if (holdable(own)) return {kind: 'act', action: own, entity: button.dataset.entity};
   return null;
 }
 
@@ -102,7 +111,11 @@ export const tapActionsMixin = {
       entry = {
         button,
         detector: createGestureDetector({
-          hold: widget.hold_action != null || !!settingsAction(this, widget),
+          // Asked at every press: the key under the finger decides whether there is a screen to open.
+          hold: () => {
+            const current = widgetNow();
+            return !!current && !!holdTarget(this, current, entry.button);
+          },
           doubleTap: widget.double_tap_action != null,
           onTap: () => {
             const current = widgetNow();
@@ -123,6 +136,9 @@ export const tapActionsMixin = {
             if (!target?.isConnected || target.disabled || !current) return;
             const hold = holdTarget(this, current, target);
             if (!hold) return;
+            // The press is spent: it cannot turn into a page swipe, and its release belongs to nobody.
+            this._gestureHeld = true;
+            this._swipeCancel?.();
             if (hold.kind === 'config') run('hold_action');
             else this._act(hold.action, hold.entity);
           },
@@ -145,7 +161,53 @@ export const tapActionsMixin = {
     const pressed = pressTarget(this, event.target);
     if (!pressed) return;
     this._activeGesture = this._gestureEntryFor(pressed.index, pressed.button).detector;
+    this._gestureHeld = false;
+    this._guardGestureClick(event.pointerId);
     this._activeGesture.down(event);
+  },
+
+  /**
+   * The detector runs this press from pointer events, so the click the browser adds after the release is surplus.
+   * The card's own click listener already drops it. This drops it everywhere else: a hold opens its screen under
+   * the finger, and the release would otherwise press whatever appeared there (the close key of the light view, a
+   * switch in Home Assistant's dialog). A view that covers the card also keeps the release to itself, so the
+   * release is heard here, on the window. The guard goes with the next press or shortly after the release.
+   */
+  _guardGestureClick(pointerId) {
+    this._gestureClickGuard?.();
+    let timer = null;
+    const swallow = (event) => {
+      if (Date.now() >= (this._suppressClickUntil || 0)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    };
+    const drop = () => {
+      clearTimeout(timer);
+      window.removeEventListener('click', swallow, true);
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', release, true);
+      window.removeEventListener('pointerdown', next, true);
+      if (this._gestureClickGuard === drop) this._gestureClickGuard = null;
+    };
+    const release = (event) => {
+      if (event.pointerId !== pointerId || timer !== null) return;
+      if (event.type === 'pointerup' && this._gestureHeld) {
+        this._suppressClickUntil = Math.max(
+          this._suppressClickUntil || 0,
+          Date.now() + RELEASE_CLICK_MS
+        );
+      }
+      timer = setTimeout(drop, RELEASE_CLICK_MS);
+    };
+    // A new press owns its own click.
+    const next = (event) => {
+      if (event.isPrimary !== false) drop();
+    };
+    window.addEventListener('click', swallow, true);
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', release, true);
+    window.addEventListener('pointerdown', next, true);
+    this._gestureClickGuard = drop;
   },
 
   /** Keyboard equivalent for holding; also prevents the browser's native touch context menu. */
@@ -153,7 +215,8 @@ export const tapActionsMixin = {
     const pressed = pressTarget(this, event.target);
     if (!pressed) return false;
     event.preventDefault();
-    if (this._activeGesture) return true;
+    // A touch browser reports its own long press here, during or right after a press the detector is handling.
+    if (this._activeGesture || Date.now() < (this._suppressClickUntil || 0)) return true;
     const hold = pressed.hold;
     if (!hold) return true;
     if (hold.kind === 'config') {
@@ -184,5 +247,6 @@ export const tapActionsMixin = {
     for (const {detector} of this._gestureEntries?.values() || []) detector.dispose();
     this._gestureEntries?.clear();
     this._activeGesture = null;
+    this._gestureClickGuard?.();
   }
 };

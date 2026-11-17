@@ -1,4 +1,4 @@
-/* @owns quick-actions qa-header qa-heading qa-close qa-grid qa-action qa-icon qa-copy qa-state qa-footer qa-status qa-hint qa-empty is-active */
+/* @owns quick-actions qa-header qa-heading qa-close qa-grid qa-action qa-icon qa-copy qa-state qa-footer qa-status qa-empty is-active */
 /* @phase nav-compact */
 .quick-actions {
   position: absolute;
@@ -6,7 +6,7 @@
   z-index: 25;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 16px;
   box-sizing: border-box;
   padding: 20px;
   overflow: hidden;
@@ -30,13 +30,8 @@
 .qa-heading {
   min-width: 0;
 }
-.qa-heading small {
-  color: #bfe1d8;
-  font-size: 11px;
-  letter-spacing: .18em;
-}
 .qa-heading h2 {
-  margin: 6px 0 0;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -65,10 +60,10 @@
   min-height: 64px;
   overflow: hidden;
   margin: 0;
-  padding: 16px;
+  padding: 20px;
   border: 1px solid #ffffff38;
-  border-radius: 24px;
-  background: linear-gradient(135deg, #ffffff1c, #ffffff09);
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff20, #ffffff0b);
   box-shadow: inset 0 1px #ffffff19;
   color: inherit;
   text-align: left;
@@ -81,8 +76,8 @@
   display: grid;
   place-items: center;
   justify-self: start;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 14px;
   background: #b9f4d315;
   color: #c5f8da;
@@ -129,15 +124,15 @@
   padding: 5px 8px;
   border-radius: 20px;
   color: #bfe1d8;
-  font-size: 11px;
+  font-size: 12px;
 }
 .qa-action.is-active {
   border-color: #c5f8da88;
   background: linear-gradient(135deg, #c5f8da26, #ffffff0a);
 }
 .qa-action.is-active .qa-state {
-  background: #c5f8da22;
-  color: #dbffe8;
+  background: #c5f8da;
+  color: #123f36;
 }
 .qa-action:disabled {
   opacity: .4;
@@ -166,10 +161,6 @@
 }
 .qa-status:empty {
   display: none;
-}
-.qa-hint {
-  color: #bfe1d8;
-  letter-spacing: .04em;
 }
 @supports (width: 1cqmin) {
   .quick-actions {

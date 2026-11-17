@@ -40,6 +40,7 @@ const BROWSER_JOBS = [
   node('timer input', 'tests/overviews/timer-input.mjs'),
   node('automatic input', 'tests/overviews/automatic-input.mjs'),
   node('light input', 'tests/overviews/light-input.mjs'),
+  alone(node('hold input', 'tests/hold-input.mjs')),
   node('clock input', 'tests/overviews/clock-input.mjs'),
   node('volume input', 'tests/overviews/volume-input.mjs'),
   node('media seek', 'tests/media-seek-input.mjs'),

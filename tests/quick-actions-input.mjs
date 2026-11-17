@@ -385,6 +385,12 @@ try {
     );
     await open();
     const value = await probe();
+    assert.equal(
+      await page.evaluate(
+        () => !!window.card.shadowRoot.querySelector('.qa-heading small,.qa-hint')
+      ),
+      false
+    );
     assert.ok(
       value.scrollW <= width &&
         value.scrollH <= height &&

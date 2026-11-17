@@ -18,6 +18,12 @@ export default async function ({mount, check, variants}) {
     'a tap opens more-info and calls no service',
     t.infos.includes('sensor.test') && t.calls.length === 0
   );
+  t = await mount(variants.ok);
+  await t.hold('[data-action="info"]');
+  check(
+    'a hold opens more-info once, without waiting for the release',
+    t.infos.length === 1 && t.infos[0] === 'sensor.test' && t.calls.length === 0
+  );
 
   t = await mount(variants.noUnit);
   check('no unit leaves an empty sup', t.text('.widget-value sup') === '');
