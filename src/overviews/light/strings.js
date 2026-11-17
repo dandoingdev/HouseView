@@ -2,6 +2,8 @@ export default {
   en: {
     'light_overview.colour': 'Choose light colour',
     'light_overview.temperature': 'White temperature',
+    'light_overview.warmer': 'Warmer by 100 K',
+    'light_overview.cooler': 'Cooler by 100 K',
     'light_overview.hue': 'Hue',
     'light_overview.saturation': 'Saturation',
     'light_overview.close_colour': 'Close colour picker',

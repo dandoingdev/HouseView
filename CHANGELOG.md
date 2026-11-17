@@ -6,6 +6,23 @@ The release workflow publishes the section of the tagged version as the release 
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-11-17
+
+### Fixed
+
+- A long press now opens a tile's next screen from anywhere on the tile, including its icon key, while the finger is still down and whatever the device's state. Lifting the finger no longer presses a key of the screen that just opened (closing it, toggling the light or opening Home Assistant's dialog).
+- Hide the dashboard pause shortcut when no configured speaker is playing; paused speakers no longer keep it visible.
+- Make light colour temperature easier to adjust with a visible slider, Kelvin readout and 100 K warmer/cooler keys, and preserve supported values above 10000 K.
+
+### Changed
+
+- Group native editor settings into Appearance, Display and controls, Line alerts, and Performance and preview, and put page editing ahead of optional feature sections.
+- Simplify Quick actions with a cleaner heading, more space for action tiles and clearer active states; remove the introductory and swipe-hint text.
+
+### Updating
+
+Install the release through HACS or replace the manual installation files, then refresh the Home Assistant frontend and any kiosk or companion-app cache. If the browser retains an older bundle, update the resource cache-busting version to `/local/houseview/houseview.js?v=1.12.0`.
+
 ## [1.11.0] - 2026-11-10
 
 ### Changed

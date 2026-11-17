@@ -164,11 +164,11 @@ try {
   await page.waitForFunction(
     () => !window.card.shadowRoot.querySelector('.dashboard-control').disabled
   );
-  assert.equal((await probe()).label, 'Play music on Kitchen');
+  assert.equal((await probe()).label, 'Pause music on Studio');
   assert.equal(
     (await probe()).entity,
-    'media_player.a',
-    'pausing does not switch to another playing speaker'
+    'media_player.b',
+    'pausing switches to another playing speaker'
   );
   assert.equal(
     await page.evaluate(
@@ -176,6 +176,19 @@ try {
     ),
     true
   );
+  await page.evaluate(() => window.quickState('media_player.b', 'paused'));
+  assert.equal(
+    await page.evaluate(() => !!window.card.shadowRoot.querySelector('.dashboard-control')),
+    false,
+    'paused speakers do not show a dashboard shortcut'
+  );
+  await page.evaluate(() => window.card._act('media-player-quick-toggle', 'media_player.a'));
+  assert.equal(await page.evaluate(() => window.quickCalls.length), 1);
+  await page.evaluate(() => {
+    window.quickState('media_player.a', 'playing');
+    window.quickState('media_player.b', 'playing');
+    window.quickButton = window.card.shadowRoot.querySelector('.dashboard-control');
+  });
   await page.focus('houseview-card >>> .dashboard-control');
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.quickCalls.length === 2);
@@ -192,7 +205,7 @@ try {
     true
   );
   console.log(
-    'PASS real touch and keyboard pause/resume the same speaker across pages; pending requests prevent duplicate calls'
+    'PASS real touch and keyboard pause playing speakers across pages; paused speakers hide and pending requests prevent duplicate calls'
   );
 
   for (const [width, height] of [
@@ -223,10 +236,22 @@ try {
         path: '/tmp/houseview-chip-toolbar-playing.png',
         clip: {x: 0, y: 0, width: 480, height: 112}
       });
-      await page.evaluate(() => window.quickState('media_player.a', 'paused'));
+      await page.evaluate(() => {
+        window.quickState('media_player.a', 'paused');
+        window.quickState('media_player.b', 'paused');
+      });
+      assert.equal(
+        await page.evaluate(() => !!window.card.shadowRoot.querySelector('.dashboard-control')),
+        false
+      );
       await page.screenshot({
         path: '/tmp/houseview-chip-toolbar-paused.png',
         clip: {x: 0, y: 0, width: 480, height: 112}
+      });
+      await page.evaluate(() => {
+        window.quickState('media_player.a', 'playing');
+        window.quickState('media_player.b', 'playing');
+        window.quickButton = window.card.shadowRoot.querySelector('.dashboard-control');
       });
     }
     console.log(

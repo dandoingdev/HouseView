@@ -26,6 +26,14 @@ export default async function ({mount, check, variants}) {
     'holding the tile opens brightness without toggling',
     !!t.q('.ov-light-scene') && t.calls.length === 0
   );
+  for (const variant of [variants.ok, variants.off]) {
+    t = await mount(variant);
+    await t.hold('[data-action="light-view"]');
+    check(
+      `holding the brightness key opens brightness (light ${variant.states['light.test'].state})`,
+      !!t.q('.ov-light-scene') && t.calls.length === 0
+    );
+  }
 
   t = await mount({
     ...variants.ok,

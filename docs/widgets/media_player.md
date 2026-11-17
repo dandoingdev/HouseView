@@ -47,9 +47,9 @@ entity: media_player.living_room
 
 ## Dashboard playback shortcut
 
-While a configured player is playing or paused, a play/pause shortcut stays available across dashboard pages. On larger screens it sits beside the dim button in the footer; below 700 pixels wide it moves to the right of a 56-pixel header. If the date/time header is disabled, only the playback shortcut appears in that compact toolbar. Standalone widget cards keep their own transport controls.
+While a configured player is playing, a pause shortcut stays available across dashboard pages. On larger screens it sits beside the dim button in the footer; below 700 pixels wide it moves to the right of a 56-pixel header. If the date/time header is disabled, only the playback shortcut appears in that compact toolbar. Standalone widget cards keep their own transport controls.
 
-Pausing keeps the shortcut available to resume. With multiple players, it keeps the same speaker until that player stops, becomes unavailable or is removed from the dashboard, then chooses another playing player before a paused one. Its accessible label and tooltip name the speaker. A pending playback request disables the shortcut to prevent duplicate commands.
+Pausing removes the shortcut unless another configured speaker is playing. With multiple players, it keeps the same speaker while it plays, then chooses another playing player. Resume playback from the music widget. Its accessible label and tooltip name the speaker. A pending playback request disables the shortcut to prevent duplicate commands.
 
 ## Playlists and favourites
 

@@ -106,14 +106,14 @@ export const quickActionsMixin = {
       root.setAttribute('role', view.preview ? 'region' : 'dialog');
       if (!view.preview) root.setAttribute('aria-modal', 'true');
       root.innerHTML =
-        `<header class="qa-header"><div class="qa-heading"><small></small><h2></h2></div><button type="button" class="ov-panel-key qa-close" data-action="quick-actions-close">${iconHTML('chevron-down')}</button></header>` +
+        `<header class="qa-header"><div class="qa-heading"><h2></h2></div><button type="button" class="ov-panel-key qa-close" data-action="quick-actions-close">${iconHTML('chevron-down')}</button></header>` +
         `<div class="qa-grid">${(this._config.quick_actions || [])
           .map(
             (_, i) =>
               `<button type="button" class="qa-action" data-action="quick-actions-run-${i}" data-quick-index="${i}"><span class="qa-icon"></span><span class="qa-copy"><strong></strong><small></small></span><span class="qa-state"></span></button>`
           )
           .join('')}</div>` +
-        '<footer class="qa-footer"><span class="qa-status" role="status" aria-live="polite"></span><span class="qa-hint"></span></footer>';
+        '<footer class="qa-footer"><span class="qa-status" role="status" aria-live="polite"></span></footer>';
       shell.append(root);
       const count = this._config.quick_actions?.length || 0;
       const grid = root.querySelector('.qa-grid');
@@ -129,9 +129,7 @@ export const quickActionsMixin = {
     };
     const title = this._config.quick_actions_title || t(this._hass, 'quick_actions.title');
     if (root.getAttribute('aria-label') !== title) root.setAttribute('aria-label', title);
-    text('.qa-heading small', t(this._hass, 'quick_actions.eyebrow'));
     text('.qa-heading h2', title);
-    text('.qa-hint', t(this._hass, 'quick_actions.hint'));
     text('.qa-status', this._message || '');
     if (root.querySelector('.qa-empty')) text('.qa-empty', t(this._hass, 'quick_actions.empty'));
     const close = root.querySelector('.qa-close');

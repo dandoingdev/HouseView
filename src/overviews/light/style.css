@@ -1,5 +1,5 @@
 /* @phase overviews */
-/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-light-icon ov-light-dimmer ov-light-colour ov-light-mode ov-light-spectrum ov-light-swatch ov-light-colour-head ov-light-colour-foot ov-light-kelvin-value ov-light-colour-inputs ov-light-hue ov-light-saturation ov-light-kelvin */
+/* @owns ov-light-scene ov-light-head ov-light-control ov-light-fill ov-light-readout ov-light-value ov-light-percent ov-light-input ov-light-foot ov-light-icon ov-light-dimmer ov-light-colour ov-light-mode ov-light-spectrum ov-light-swatch ov-light-colour-head ov-light-temperature ov-light-kelvin-value ov-light-colour-inputs ov-light-hue ov-light-saturation ov-light-kelvin */
 
 .ov-light-fill {
   height: var(--brightness);
@@ -18,6 +18,7 @@
 }
 
 .ov-light-foot {
+  padding: 12px;
   padding: 3cqmin;
 }
 .ov-light-dimmer {
@@ -55,6 +56,7 @@
   position: absolute;
   left: var(--colour-x, 50%);
   top: var(--colour-y, 50%);
+  width: 48px;
   width: clamp(32px, 11cqmin, 64px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
@@ -64,32 +66,30 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
   pointer-events: none;
 }
-.ov-light-colour-head,
-.ov-light-colour-foot {
+.ov-light-colour-head {
   position: absolute;
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 12px;
   padding: 3cqmin;
   pointer-events: none;
 }
 .ov-light-colour-head {
   top: 0;
 }
-.ov-light-colour-foot {
-  bottom: 0;
-  justify-content: flex-end;
-  gap: 3cqmin;
-}
 .ov-light-kelvin-value {
   display: none;
   color: #17282d;
+  font-size: 20px;
   font-size: clamp(16px, 5cqmin, 24px);
 }
 .ov-light-colour[data-mode='temperature'] .ov-light-kelvin-value {
   display: block;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 /* Native keyboard and assistive controls appear on focus, without covering the touch field at rest. */
 .ov-light-colour-inputs {
@@ -117,4 +117,71 @@
 }
 .ov-light-colour[data-mode='temperature'] .ov-light-kelvin {
   display: block;
+}
+
+.ov-light-temperature {
+  display: none;
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-colour-inputs {
+  left: 3%;
+  right: 3%;
+  bottom: 3%;
+  opacity: 1;
+  pointer-events: auto;
+  gap: 8px;
+  direction: ltr;
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-temperature {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ov-light-colour[data-mode='temperature'] .ov-light-kelvin {
+  box-sizing: border-box;
+  min-width: 0;
+  height: 56px;
+  margin: 0;
+  accent-color: #17282d;
+  touch-action: pan-y;
+}
+.ov-light-colour[data-mode='temperature'] {
+  color: #17282d;
+  --ov-panel-key-bg: rgba(23, 40, 45, 0.12);
+}
+.ov-light-kelvin {
+  appearance: none;
+  background: transparent;
+}
+.ov-light-kelvin::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 8px;
+  background: rgba(23, 40, 45, 0.3);
+}
+.ov-light-kelvin::-webkit-slider-thumb {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -10px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #17282d;
+}
+.ov-light-kelvin::-moz-range-track {
+  height: 8px;
+  border-radius: 8px;
+  background: rgba(23, 40, 45, 0.3);
+}
+.ov-light-kelvin::-moz-range-thumb {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: #17282d;
+}
+.ov-light-kelvin:focus-visible {
+  outline: var(--hv-focus-ring);
+  outline-offset: 2px;
+  border-radius: 8px;
 }

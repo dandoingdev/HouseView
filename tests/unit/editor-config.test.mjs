@@ -11,6 +11,7 @@ const {
   withoutPage,
   appearanceData,
   appearanceSchema,
+  appearanceGroups,
   appearanceHelper,
   pageData,
   pageSchema
@@ -248,4 +249,29 @@ test('line alert editor exposes a sensor picker and optional name without invent
     'sensor.demo_line'
   );
   assert.equal(appearanceData({}).line_alert_entity, '');
+});
+
+test('native settings groups retain every global field exactly once and separate appearance from behaviour', () => {
+  const groups = appearanceGroups({});
+  const fields = groups.flatMap((group) => group.schema.map((item) => item.name));
+  assert.equal(new Set(fields).size, fields.length);
+  assert.deepEqual(
+    [...fields].sort(),
+    appearanceSchema({})
+      .map((item) => item.name)
+      .sort()
+  );
+  assert.ok(
+    groups
+      .find((group) => group.name === 'appearance')
+      .schema.every(
+        (item) =>
+          !['tablet_mode', 'performance', 'editor_preview', 'line_alert_entity'].includes(item.name)
+      )
+  );
+  assert.ok(
+    groups
+      .find((group) => group.name === 'display_controls')
+      .schema.some((item) => item.name === 'tablet_mode')
+  );
 });

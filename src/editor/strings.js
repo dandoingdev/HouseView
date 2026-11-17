@@ -18,6 +18,9 @@ export default {
     'editor.helper.tablet_mode':
       'Hide Home Assistant’s sidebar and header on a touch panel. A desktop with a mouse keeps them so you can still edit.',
     'editor.appearance': 'Appearance',
+    'editor.display_controls': 'Display and controls',
+    'editor.line_alerts': 'Line alerts',
+    'editor.performance_preview': 'Performance and preview',
     'editor.palette': 'Palette',
     'editor.wallpaper': 'Background',
     'editor.bedtime': 'Night mode and dim button',

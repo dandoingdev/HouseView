@@ -5,14 +5,14 @@ export function colourMarkup(ctx) {
     `<button type="button" class="ov-panel-key ${cls}" aria-label="${ctx.esc(ctx.t(`light_overview.${label}`))}"${action} data-entity="${ctx.esc(ctx.entityId)}">${ctx.icon(icon).replace('<ha-icon', '<ha-icon class="ov-panel-icon"')}</button>`;
   return `<div class="ov-light-colour" hidden>
     <div class="ov-light-spectrum"><span class="ov-light-swatch" aria-hidden="true"></span></div>
-    <div class="ov-light-colour-head">${button('ov-light-cancel', 'close', 'close_colour')}</div>
+    <div class="ov-light-colour-head">${button('ov-light-cancel', 'close', 'close_colour')}${button('ov-light-mode', 'thermometer', 'temperature')}</div>
     <input type="range" class="ov-light-colour-value" min="0" max="10000" hidden tabindex="-1" aria-hidden="true" data-value-action="light-colour-" data-entity="${ctx.esc(ctx.entityId)}">
     <div class="ov-light-colour-inputs">
       <input type="range" class="ov-light-hue" min="0" max="360" aria-label="${ctx.esc(ctx.t('light_overview.hue'))}">
       <input type="range" class="ov-light-saturation" min="0" max="100" aria-label="${ctx.esc(ctx.t('light_overview.saturation'))}">
-      <input type="range" class="ov-light-kelvin" aria-label="${ctx.esc(ctx.t('light_overview.temperature'))}">
+      <div class="ov-light-temperature">${button('ov-light-warmer', 'minus', 'warmer')}<output class="ov-light-kelvin-value" aria-live="polite"></output>${button('ov-light-cooler', 'plus', 'cooler')}</div>
+      <input type="range" class="ov-light-kelvin" step="1" aria-label="${ctx.esc(ctx.t('light_overview.temperature'))}">
     </div>
-    <footer class="ov-light-colour-foot"><output class="ov-light-kelvin-value"></output>${button('ov-light-mode', 'thermometer', 'temperature')}</footer>
   </div>`;
 }
 
@@ -62,9 +62,12 @@ export function bindColour(ctx) {
       const c = local.ctx;
       const modes = colourModes(c.attrs);
       const [min, max] = kelvinRange(c.attrs);
+      local.kelvin = Math.max(min, Math.min(max, local.kelvin));
       pane.hidden = !local.open;
       c.el.querySelector('.ov-light-dimmer').hidden = local.open;
       pane.dataset.mode = local.mode;
+      value.min = local.mode === 'temperature' ? min : 0;
+      value.max = local.mode === 'temperature' ? max : 100;
       value.disabled = !c.ok || !(local.mode === 'temperature' ? modes.temperature : modes.colour);
       for (const input of [hue, saturation, kelvin]) input.disabled = value.disabled;
       if (value.disabled) {
@@ -101,6 +104,9 @@ export function bindColour(ctx) {
       kelvin.min = min;
       kelvin.max = max;
       kelvin.value = local.kelvin;
+      kelvin.setAttribute('aria-valuetext', `${local.kelvin} K`);
+      q('.ov-light-warmer').disabled = value.disabled || local.kelvin <= min;
+      q('.ov-light-cooler').disabled = value.disabled || local.kelvin >= max;
       q('.ov-light-kelvin-value').textContent = `${local.kelvin} K`;
     };
     local.paint = paint;
@@ -152,6 +158,19 @@ export function bindColour(ctx) {
       local.selected = action();
       paint();
     });
+    for (const [selector, delta] of [
+      ['.ov-light-warmer', -100],
+      ['.ov-light-cooler', 100]
+    ]) {
+      listen(q(selector), () => {
+        if (!local.open || value.disabled || local.mode !== 'temperature') return;
+        const [min, max] = kelvinRange(local.ctx.attrs);
+        local.kelvin = Math.max(min, Math.min(max, local.kelvin + delta));
+        paint();
+        changed();
+        flush();
+      });
+    }
     pane.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();

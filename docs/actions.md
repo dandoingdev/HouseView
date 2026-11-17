@@ -5,9 +5,11 @@ This page covers what each widget does when you touch it, and the optional Home 
 
 ## What widgets do by default
 
-A short press runs the action on the control you touched. A half-second hold opens a different next screen only when
-there is one (brightness, other scenes, Home Assistant's dialog, and so on). Where that second screen matters every day,
-a visible key does the same thing without holding. Nested keys such as temperature steps, blinds, timer presets and
+A short press runs the action on the control you touched. A half-second hold opens the widget's next screen
+(brightness, other scenes, Home Assistant's dialog, and so on): it opens while the finger is still down, from anywhere
+on the tile and whether the device is on or off, and lifting the finger presses nothing on the screen that opened.
+Where that second screen matters every day, a visible key does the same thing without holding; holding that key
+opens the same screen. Nested keys such as temperature steps, blinds, timer presets and
 transport stay immediate and never start a hold. Configured `tap_action`, `hold_action` and `double_tap_action` still
 override the defaults below.
 

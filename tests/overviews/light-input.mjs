@@ -322,6 +322,119 @@ try {
   await page.mouse.click(479, 240);
   await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin >= 5990);
   assert.ok((await colour()).calls.at(-1).data.color_temp_kelvin <= 6000);
+  const temperatureValue = () =>
+    page.evaluate(() => Number(window.card.shadowRoot.querySelector('.ov-light-kelvin').value));
+  await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-kelvin').focus());
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 2200);
+  assert.equal(
+    await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-warmer').disabled),
+    true
+  );
+  await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 2201);
+  await page.keyboard.press('Home');
+  await click('.ov-light-cooler');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 2300);
+  // Focus the slider again: a button tap changes keyboard focus.
+  await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-kelvin').focus());
+  await page.keyboard.press('End');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 6000);
+  assert.equal(
+    await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-cooler').disabled),
+    true
+  );
+  await click('.ov-light-warmer');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 5900);
+  for (const [width, height] of [
+    [480, 480],
+    [320, 568],
+    [240, 640],
+    [640, 360],
+    [768, 1024],
+    [1024, 768]
+  ]) {
+    await page.setViewport({width, height, hasTouch: true});
+    await new Promise((resolve) => setTimeout(resolve, 180));
+    const geometry = await page.evaluate(() => {
+      const root = window.card.shadowRoot;
+      const rect = (selector) => {
+        const r = root.querySelector(selector).getBoundingClientRect();
+        return {x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom};
+      };
+      return {
+        slider: rect('.ov-light-kelvin'),
+        warmer: rect('.ov-light-warmer'),
+        cooler: rect('.ov-light-cooler'),
+        close: rect('.ov-light-cancel'),
+        mode: rect('.ov-light-mode')
+      };
+    });
+    assert.ok(
+      Object.entries(geometry).every(
+        ([key, r]) =>
+          r.x >= 0 &&
+          r.y >= 0 &&
+          r.right <= width &&
+          r.bottom <= height &&
+          r.h >= (key === 'slider' ? 56 : 64) &&
+          r.w >= 64
+      ) &&
+        geometry.warmer.bottom <= geometry.slider.y &&
+        geometry.close.bottom <= geometry.warmer.y &&
+        geometry.warmer.right <= geometry.cooler.x,
+      `FAIL temperature geometry ${width}×${height}: ${JSON.stringify(geometry)}`
+    );
+    await assertIconCentred('.ov-light-warmer');
+    await assertIconCentred('.ov-light-cooler');
+    const slider = geometry.slider;
+    await page.touchscreen.tap(slider.x + slider.w / 2, slider.y + slider.h / 2);
+    assert.ok(
+      Math.abs((await temperatureValue()) - 4100) <= 1,
+      `FAIL temperature midpoint ${width}×${height}: ${await temperatureValue()}`
+    );
+    if (width === 480 || width === 768)
+      await page.screenshot({path: `/tmp/houseview-light-temperature-${width}.png`});
+    if (width === 480) {
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchStart',
+        touchPoints: [{x: slider.x + slider.w / 2, y: slider.y + slider.h / 2}]
+      });
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{x: slider.right - 1, y: slider.y + slider.h / 2}]
+      });
+      await cdp.send('Input.dispatchTouchEvent', {type: 'touchEnd', touchPoints: []});
+      await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 6000);
+      assert.equal((await colour()).open, true);
+    }
+  }
+  console.log(
+    'PASS real touch temperature midpoint, exact Kelvin limits, 100 K fine adjustment and reachable controls at panel, phone and tablet sizes'
+  );
+  await page.evaluate(() => {
+    const state = window.lightHass.states['light.test'];
+    window.lightHass.states['light.test'] = {
+      ...state,
+      attributes: {...state.attributes, max_color_temp_kelvin: 12000}
+    };
+    window.card.hass = window.lightHass;
+    window.card.shadowRoot.querySelector('.ov-light-kelvin').focus();
+  });
+  await page.keyboard.press('End');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 12000);
+  await page.evaluate(() => {
+    const state = window.lightHass.states['light.test'];
+    window.lightHass.states['light.test'] = {
+      ...state,
+      attributes: {...state.attributes, max_color_temp_kelvin: 6000}
+    };
+    window.card.hass = window.lightHass;
+  });
+  await page.keyboard.press('Home');
+  await page.waitForFunction(() => window.lightCalls.at(-1)?.data.color_temp_kelvin === 2200);
+  console.log('PASS temperature command retains the full supported range above 10000 K');
+  await page.setViewport({width: 480, height: 480, hasTouch: true});
   await click('.ov-light-mode');
   await page.evaluate(() => window.card.shadowRoot.querySelector('.ov-light-hue').focus());
   await page.keyboard.press('Home');

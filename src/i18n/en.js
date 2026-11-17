@@ -112,8 +112,6 @@ export default {
   'dim.dim_screen': 'Dim screen',
   'home.open': 'Home summary',
   'quick_actions.title': 'Quick actions',
-  'quick_actions.eyebrow': 'AT YOUR FINGERTIPS',
-  'quick_actions.hint': 'Swipe down to return',
   'quick_actions.close': 'Close quick actions',
   'quick_actions.working': 'Working…',
   'quick_actions.running': 'Running',
